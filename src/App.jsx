@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Heart, Activity, Wind, Droplets, Zap, Thermometer, Timer, Eye, Syringe, Stethoscope, Shield, Gauge, Pin, Brain, ChevronRight, ChevronDown, ChevronLeft, X, Check, AlertTriangle, Flag, Star, Trophy, FlaskConical, Pill, Beaker, Clock, Search, Plus, Minus, ArrowRight, CircleCheck, CircleX, Sparkles, BookOpen, Users, Play, Settings, Share2, Trash2, RotateCcw, Info, Volume2 } from "lucide-react";
-import { loadS, saveS } from "./lib/storage.js";
 import { TOOLS, MEDS, SC1, SC2, SC3 } from "./lib/scenarios/builtIn.js";
 import { computeAssessScore, computeActionScore } from "./lib/scenarios/scoring.js";
+import { useScenariosStore } from "./stores/scenariosStore.js";
 function TextBlock(props){
   var text=props.text||"";var style=props.style||{};
   var lines=text.split("\n").filter(function(l){return l.trim();});
@@ -906,9 +906,15 @@ function Builder(props){
 export default function App(){
   var _view=useState("dash");var view=_view[0];var setView=_view[1];
   var _act=useState(null);var act=_act[0];var setAct=_act[1];
-  var _cust=useState([]);var cust=_cust[0];var setCust=_cust[1];
-  var _prog=useState({});var prog=_prog[0];var setProg=_prog[1];
-  var _ok=useState(false);var ok=_ok[0];var setOk=_ok[1];
+  var cust=useScenariosStore(function(s){return s.custom;});
+  var prog=useScenariosStore(function(s){return s.progress;});
+  var ok=useScenariosStore(function(s){return s.hydrated;});
+  var hydrate=useScenariosStore(function(s){return s.hydrate;});
+  var addCustom=useScenariosStore(function(s){return s.addCustom;});
+  var addCustomIfNew=useScenariosStore(function(s){return s.addCustomIfNew;});
+  var deleteCustom=useScenariosStore(function(s){return s.deleteCustom;});
+  var recordCompletion=useScenariosStore(function(s){return s.recordCompletion;});
+  var clearAllScenarios=useScenariosStore(function(s){return s.clearAll;});
   var _shareMsg=useState(null);var shareMsg=_shareMsg[0];var setShareMsg=_shareMsg[1];
   var _sidebar=useState(false);var sidebar=_sidebar[0];var setSidebar=_sidebar[1];
   var _sideTab=useState("ref");var sideTab=_sideTab[0];var setSideTab=_sideTab[1];
@@ -942,34 +948,26 @@ export default function App(){
     }
   }
   useEffect(function(){
-    var existing=loadS("bw-custom",[]);
-    setCust(existing);
-    setProg(loadS("bw-prog",{}));
+    hydrate();
     var params=new URLSearchParams(window.location.search);
     var shared=params.get("shared");
     if(shared){
       var sc=decodeScenario(decodeURIComponent(shared));
       if(!sc)sc=decodeScenario(shared);
       if(sc&&sc.id&&sc.phases){
-        var already=existing.some(function(c){return c.id===sc.id;});
-        if(!already){
-          var updated=existing.concat([sc]);
-          setCust(updated);
-          saveS("bw-custom",updated);
-        }
+        addCustomIfNew(sc);
         window.history.replaceState({},"",window.location.pathname);
         setShareMsg("Imported: "+sc.title);
         setTimeout(function(){setShareMsg(null);},3000);
       }
     }
-    setOk(true);
   },[]);
   var built=[SC1,SC2,SC3];
   var play=function(s){setAct(s);setView("play");};
-  var done=function(score){if(!act)return;var b=score.c/(score.t||1);var prev=prog[act.id];var p=Object.assign({},prog);p[act.id]={done:true,best:Math.max(b,prev?prev.best||0:0),n:(prev?prev.n||0:0)+1};setProg(p);saveS("bw-prog",p);};
-  var addC=function(s){var u=cust.concat([s]);setCust(u);saveS("bw-custom",u);setView("dash");};
-  var delC=function(id){var u=cust.filter(function(s){return s.id!==id;});setCust(u);saveS("bw-custom",u);var p=Object.assign({},prog);delete p[id];setProg(p);saveS("bw-prog",p);setDelConfirm(null);};
-  var clearAll=function(){setCust([]);setProg({});saveS("bw-custom",[]);saveS("bw-prog",{});setShareMsg("All data cleared");setTimeout(function(){setShareMsg(null);},2000);};
+  var done=function(score){if(!act)return;recordCompletion(act.id,score);};
+  var addC=function(s){addCustom(s);setView("dash");};
+  var delC=function(id){deleteCustom(id);setDelConfirm(null);};
+  var clearAll=function(){clearAllScenarios();setShareMsg("All data cleared");setTimeout(function(){setShareMsg(null);},2000);};
   // Stats
   var allScenarios=built.concat(cust);
   var totalAttempts=0;var totalCorrect=0;var totalQ=0;

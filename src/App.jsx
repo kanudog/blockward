@@ -1344,6 +1344,7 @@ export default function App(){
   var _sidebar=useState(false);var sidebar=_sidebar[0];var setSidebar=_sidebar[1];
   var _sideTab=useState("ref");var sideTab=_sideTab[0];var setSideTab=_sideTab[1];
   var _delConfirm=useState(null);var delConfirm=_delConfirm[0];var setDelConfirm=_delConfirm[1];
+  var _clearConfirm=useState(false);var clearConfirm=_clearConfirm[0];var setClearConfirm=_clearConfirm[1];
   function minifyScenario(sc){
     function trimFb(obj){if(!obj)return obj;var o={};Object.keys(obj).forEach(function(k){if(typeof obj[k]==="object"&&obj[k]&&obj[k].fb){o[k]={ok:obj[k].ok,pri:obj[k].pri,fb:obj[k].fb.substring(0,120)};}else{o[k]=obj[k];}});return o;}
     function trimPhase(p){return{id:p.id,name:p.name,narrative:p.narrative?p.narrative.substring(0,300):p.narrative,vitals:p.vitals,signs:p.signs?p.signs.map(function(s){return{label:s.label,detail:s.detail,pos:s.pos,sys:s.sys};}):p.signs,assessItems:p.assessItems,labs:p.labs?p.labs.map(function(l){return{name:l.name,value:l.value,unit:l.unit,ref:l.ref,critical:l.critical};}):p.labs,tools:p.tools,meds:p.meds,actions:p.actions?{tools:trimFb(p.actions.tools),meds:trimFb(p.actions.meds)}:p.actions};}
@@ -1436,6 +1437,18 @@ export default function App(){
         </div>
       </div>
     </div>}
+    {/* Clear all data confirmation modal */}
+    {clearConfirm&&<div style={{position:"fixed",top:0,left:0,right:0,bottom:0,background:"rgba(0,0,0,0.7)",zIndex:998,display:"flex",alignItems:"center",justifyContent:"center",padding:24}} onClick={function(){setClearConfirm(false);}}>
+      <div style={{background:"#1a1a3e",borderRadius:16,padding:24,maxWidth:340,width:"100%",border:"2px solid rgba(255,71,87,0.3)"}} onClick={function(e){e.stopPropagation();}}>
+        <h3 style={{fontSize:18,fontWeight:700,marginBottom:8}}>Clear All Data?</h3>
+        <p style={{fontSize:13,color:"#999",marginBottom:4}}>All progress and custom scenarios will be removed.</p>
+        <p style={{fontSize:12,color:"#FF6B81",marginBottom:20}}>This cannot be undone.</p>
+        <div style={{display:"flex",gap:8}}>
+          <button onClick={function(){setClearConfirm(false);}} style={{flex:1,padding:"10px 0",borderRadius:10,fontWeight:700,fontSize:14,background:"rgba(255,255,255,0.1)",color:"#999",border:"none",cursor:"pointer"}}>Cancel</button>
+          <button onClick={function(){clearAll();setClearConfirm(false);setSidebar(false);}} style={{flex:1,padding:"10px 0",borderRadius:10,fontWeight:700,fontSize:14,background:"rgba(255,71,87,0.3)",color:"#FF6B81",border:"none",cursor:"pointer"}}>Clear</button>
+        </div>
+      </div>
+    </div>}
     {/* Sidebar overlay */}
     {sidebar&&<div style={{position:"fixed",top:0,left:0,right:0,bottom:0,zIndex:997,display:"flex"}}>
       <div style={{position:"absolute",top:0,left:0,right:0,bottom:0,background:"rgba(0,0,0,0.6)"}} onClick={function(){setSidebar(false);}}></div>
@@ -1502,7 +1515,7 @@ export default function App(){
         {/* Settings */}
         {sideTab==="settings"&&<div>
           <h3 style={{fontSize:14,fontWeight:700,color:"#4ECDC4",marginBottom:10}}>Settings</h3>
-          <button onClick={function(){if(confirm("Clear all progress and custom scenarios? This cannot be undone.")){clearAll();setSidebar(false);}}} style={{width:"100%",padding:"10px 0",borderRadius:10,fontWeight:700,fontSize:13,background:"rgba(255,71,87,0.15)",color:"#FF6B81",border:"none",cursor:"pointer",marginBottom:12}}>Clear All Data</button>
+          <button onClick={function(){setClearConfirm(true);}} style={{width:"100%",padding:"10px 0",borderRadius:10,fontWeight:700,fontSize:13,background:"rgba(255,71,87,0.15)",color:"#FF6B81",border:"none",cursor:"pointer",marginBottom:12}}>Clear All Data</button>
           <div style={{fontSize:11,color:"#666",lineHeight:1.6}}>
             <p>Block Ward v1.6</p>
             <p style={{marginTop:4}}>Created by Sebastian J. Heredia</p>

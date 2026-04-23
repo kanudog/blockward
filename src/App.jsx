@@ -916,6 +916,10 @@ function ActionPanel(props){
   var total=(tools?tools.length:0)+(meds?meds.length:0);
   var pick=function(id,ty){var src=ty==="t"?(actions&&actions.tools):(actions&&actions.meds);var info=src?src[id]:null;if(!info)return;
     setSel(function(p){var n=Object.assign({},p);n[id]=info;return n;});setPop({id:id,ty:ty,info:info});};
+  var finish=function(){var c=0;var t=0;
+    if(tools)tools.forEach(function(id){t++;var info=actions&&actions.tools?actions.tools[id]:null;var shouldPick=info?!!info.ok:false;if(!!sel[id]===shouldPick)c++;});
+    if(meds)meds.forEach(function(id){t++;var info=actions&&actions.meds?actions.meds[id]:null;var shouldPick=info?!!info.ok:false;if(!!sel[id]===shouldPick)c++;});
+    onDone({c:c,t:t});};
   function tbg(u,o){if(!u)return"rgba(255,255,255,0.05)";return o?"rgba(0,184,148,0.12)":"rgba(255,165,0,0.1)";}
   function tbd(u,o){if(!u)return"2px solid rgba(255,255,255,0.08)";return o?"2px solid rgba(0,184,148,0.35)":"2px solid rgba(255,165,0,0.25)";}
   return(
@@ -945,7 +949,7 @@ function ActionPanel(props){
         </div></div>)}
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginTop:12}}>
         <div style={{fontSize:11,color:"#666"}}>{explored+"/"+total+" explored"}</div>
-        {allF&&<button onClick={onDone} style={{padding:"8px 20px",borderRadius:12,fontWeight:700,color:"white",fontSize:13,background:"linear-gradient(135deg,#4ECDC4,#44B09E)",border:"none",cursor:"pointer"}}>Continue</button>}</div>
+        {allF&&<button onClick={finish} style={{padding:"8px 20px",borderRadius:12,fontWeight:700,color:"white",fontSize:13,background:"linear-gradient(135deg,#4ECDC4,#44B09E)",border:"none",cursor:"pointer"}}>Continue</button>}</div>
       {!allF&&explored>0&&<p style={{fontSize:11,color:"#4ECDC4",marginTop:8,opacity:0.7}}>Find all appropriate actions to continue.</p>}
     </div>);
 }
@@ -983,7 +987,7 @@ function ScenarioPlayer(props){
   var flag=function(id){if(!showFb)setFlags(function(p){var n=Object.assign({},p);n[id]=!n[id];return n;});};
   var submit=function(){var c=0;ph.assessItems.forEach(function(it){if(!!flags[it.id]===it.bad)c++;});setScore(function(p){return{c:p.c+c,t:p.t+ph.assessItems.length};});setShowFb(true);};
   var afterA=function(){setFlags({});setShowFb(false);if(pi<sc.phases.length-1){var n=pi+1;setPi(n);setVit(sc.phases[n].vitals);setStage("phase");}else setStage("debrief");};
-  var afterAct=function(){if(!cbDone&&sc.curveball)trigCb();else setStage("recovery");};
+  var afterAct=function(s){if(s&&s.t)setScore(function(p){return{c:p.c+s.c,t:p.t+s.t};});if(!cbDone&&sc.curveball)trigCb();else setStage("recovery");};
   var phaseHasIntervention=ph&&(ph.tools||ph.meds);;
   var BS={width:"100%",marginTop:12,padding:"12px 0",borderRadius:12,fontWeight:700,color:"white",fontSize:16,border:"none",cursor:"pointer"};
   var GR="linear-gradient(135deg,#4ECDC4,#44B09E)";var RD="linear-gradient(135deg,#FF4757,#c0392b)";var PP="linear-gradient(135deg,#a55eea,#8854d0)";
@@ -1215,7 +1219,7 @@ function ScenarioPlayer(props){
               <div style={{borderTop:"1px solid rgba(255,71,87,0.15)",paddingTop:8,marginTop:8}}>
                 <p style={{fontSize:14,fontWeight:700,color:"#FF6B81",marginBottom:4}}>Critical Intervention</p>
                 <p style={{fontSize:11,color:"#bbb"}}>Find all correct actions.</p></div></div>
-            <ActionPanel tools={sc.curveball.tools} meds={sc.curveball.meds} actions={sc.curveball.actions} onDone={function(){setStage("recovery");}}/>
+            <ActionPanel tools={sc.curveball.tools} meds={sc.curveball.meds} actions={sc.curveball.actions} onDone={function(s){if(s&&s.t)setScore(function(p){return{c:p.c+s.c,t:p.t+s.t};});setStage("recovery");}}/>
           </div>
         </div></div>)}
       {stage==="recovery"&&(function(){

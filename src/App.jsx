@@ -3,6 +3,7 @@ import { Heart, Activity, Wind, Droplets, Zap, Thermometer, Timer, Eye, Syringe,
 import { TOOLS, MEDS, SC1, SC2, SC3 } from "./lib/scenarios/builtIn.js";
 import { computeAssessScore, computeActionScore } from "./lib/scenarios/scoring.js";
 import { useScenariosStore } from "./stores/scenariosStore.js";
+import { usePlayerStore } from "./stores/playerStore.js";
 function TextBlock(props){
   var text=props.text||"";var style=props.style||{};
   var lines=text.split("\n").filter(function(l){return l.trim();});
@@ -521,17 +522,11 @@ function ActionPanel(props){
 function ScenarioPlayer(props){
   var sc=props.sc;var onExit=props.onExit;var onDone=props.onDone;
   var ageG=guessAge(sc);var sexG=guessSex(sc);var scVisuals=sc.visuals||[];
-  var _stage=useState("intro");var stage=_stage[0];var setStage=_stage[1];
-  var _pi=useState(0);var pi=_pi[0];var setPi=_pi[1];
-  var _flags=useState({});var flags=_flags[0];var setFlags=_flags[1];
-  var _showFb=useState(false);var showFb=_showFb[0];var setShowFb=_showFb[1];
-  var _cbDone=useState(false);var cbDone=_cbDone[0];var setCbDone=_cbDone[1];
-  var _score=useState({c:0,t:0});var score=_score[0];var setScore=_score[1];
+  var stage=usePlayerStore(function(s){return s.stage;});var pi=usePlayerStore(function(s){return s.phaseIndex;});var flags=usePlayerStore(function(s){return s.flags;});var showFb=usePlayerStore(function(s){return s.showFb;});var cbDone=usePlayerStore(function(s){return s.cbDone;});var score=usePlayerStore(function(s){return s.score;});var shake=usePlayerStore(function(s){return s.shake;});var vit=usePlayerStore(function(s){return s.vitals;});
+  var _ps=usePlayerStore.getState();var setStage=_ps.setStage;var setPi=_ps.setPhaseIndex;var setFlags=_ps.setFlags;var toggleFlag=_ps.toggleFlag;var setShowFb=_ps.setShowFb;var setCbDone=_ps.setCbDone;var setShake=_ps.setShake;var setVit=_ps.setVitals;var addScore=_ps.addScore;
   var _expI=useState(null);var expI=_expI[0];var setExpI=_expI[1];
   var _tldrOpen=useState({});var tldrOpen=_tldrOpen[0];var setTldrOpen=_tldrOpen[1];
   var toggleTldr=function(key){setTldrOpen(function(p){var n=Object.assign({},p);n[key]=!n[key];return n;});};
-  var _shake=useState(false);var shake=_shake[0];var setShake=_shake[1];
-  var _vit=useState(sc.phases[0].vitals);var vit=_vit[0];var setVit=_vit[1];
   var _recStep=useState(0);var recStep=_recStep[0];var setRecStep=_recStep[1];
   var ph=sc.phases[pi];
   /* Build correct actions list for recovery screen (must be at top level for hook rules) */
@@ -549,10 +544,10 @@ function ScenarioPlayer(props){
   useEffect(function(){if(stage!=="recovery")return;setRecStep(0);var iv=setInterval(function(){setRecStep(function(p){if(p>=correctActions.length)return p;return p+1;});},1200);return function(){clearInterval(iv);};},[stage]);
   var pSt=function(){if(stage.startsWith("cb"))return"critical";if(pi>=1||stage==="act")return"declining";return"stable";};
   var trigCb=useCallback(function(){setShake(true);setTimeout(function(){setShake(false);},800);setVit(sc.curveball.vitals);setStage("cb-alert");setCbDone(true);},[sc]);
-  var flag=function(id){if(!showFb)setFlags(function(p){var n=Object.assign({},p);n[id]=!n[id];return n;});};
-  var submit=function(){var r=computeAssessScore(ph.assessItems,flags);setScore(function(p){return{c:p.c+r.c,t:p.t+r.t};});setShowFb(true);};
+  var flag=function(id){if(!showFb)toggleFlag(id);};
+  var submit=function(){var r=computeAssessScore(ph.assessItems,flags);addScore({c:r.c,t:r.t});setShowFb(true);};
   var afterA=function(){setFlags({});setShowFb(false);if(pi<sc.phases.length-1){var n=pi+1;setPi(n);setVit(sc.phases[n].vitals);setStage("phase");}else setStage("debrief");};
-  var afterAct=function(s){if(s&&s.t)setScore(function(p){return{c:p.c+s.c,t:p.t+s.t};});if(!cbDone&&sc.curveball)trigCb();else setStage("recovery");};
+  var afterAct=function(s){if(s&&s.t)addScore({c:s.c,t:s.t});if(!cbDone&&sc.curveball)trigCb();else setStage("recovery");};
   var phaseHasIntervention=ph&&(ph.tools||ph.meds);;
   var BS={width:"100%",marginTop:12,padding:"12px 0",borderRadius:12,fontWeight:700,color:"white",fontSize:16,border:"none",cursor:"pointer"};
   var GR="linear-gradient(135deg,#4ECDC4,#44B09E)";var RD="linear-gradient(135deg,#FF4757,#c0392b)";var PP="linear-gradient(135deg,#a55eea,#8854d0)";
@@ -784,7 +779,7 @@ function ScenarioPlayer(props){
               <div style={{borderTop:"1px solid rgba(255,71,87,0.15)",paddingTop:8,marginTop:8}}>
                 <p style={{fontSize:14,fontWeight:700,color:"#FF6B81",marginBottom:4}}>Critical Intervention</p>
                 <p style={{fontSize:11,color:"#bbb"}}>Find all correct actions.</p></div></div>
-            <ActionPanel tools={sc.curveball.tools} meds={sc.curveball.meds} actions={sc.curveball.actions} onDone={function(s){if(s&&s.t)setScore(function(p){return{c:p.c+s.c,t:p.t+s.t};});setStage("recovery");}}/>
+            <ActionPanel tools={sc.curveball.tools} meds={sc.curveball.meds} actions={sc.curveball.actions} onDone={function(s){if(s&&s.t)addScore({c:s.c,t:s.t});setStage("recovery");}}/>
           </div>
         </div></div>)}
       {stage==="recovery"&&(function(){
@@ -905,7 +900,9 @@ function Builder(props){
 }
 export default function App(){
   var _view=useState("dash");var view=_view[0];var setView=_view[1];
-  var _act=useState(null);var act=_act[0];var setAct=_act[1];
+  var act=usePlayerStore(function(s){return s.activeScenario;});
+  var startPlayer=usePlayerStore(function(s){return s.start;});
+  var resetPlayer=usePlayerStore(function(s){return s.reset;});
   var cust=useScenariosStore(function(s){return s.custom;});
   var prog=useScenariosStore(function(s){return s.progress;});
   var ok=useScenariosStore(function(s){return s.hydrated;});
@@ -963,7 +960,7 @@ export default function App(){
     }
   },[]);
   var built=[SC1,SC2,SC3];
-  var play=function(s){setAct(s);setView("play");};
+  var play=function(s){startPlayer(s);setView("play");};
   var done=function(score){if(!act)return;recordCompletion(act.id,score);};
   var addC=function(s){addCustom(s);setView("dash");};
   var delC=function(id){deleteCustom(id);setDelConfirm(null);};
@@ -986,7 +983,7 @@ export default function App(){
     {age:"Teen (13-17y)",hr:"55-100",rr:"12-20",sbp:"100-130",dbp:"60-80"},
   ];
   if(!ok)return(<div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"#0a0e1a"}}><div style={{color:"#4ECDC4",fontSize:20}}>Loading Block Ward...</div></div>);
-  if(view==="play"&&act)return <ScenarioPlayer sc={act} onExit={function(){setView("dash");setAct(null);}} onDone={done}/>;
+  if(view==="play"&&act)return <ScenarioPlayer sc={act} onExit={function(){setView("dash");resetPlayer();}} onDone={done}/>;
   if(view==="build")return <Builder onDone={addC} onBack={function(){setView("dash");}}/>;
   return(<div style={{minHeight:"100dvh",padding:16,background:"linear-gradient(135deg,#0a0e1a,#1a1a3e)",color:"#fff",fontFamily:"'Nunito',sans-serif"}}>
     <style>{"@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;700;800&display=swap');@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}.flt{animation:float 3s ease-in-out infinite}@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}.fi{animation:fadeIn .5s ease-out both}button{transition:all .15s ease;min-height:44px;min-width:44px}::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:#1a1a3e}::-webkit-scrollbar-thumb{background:#4ECDC4;border-radius:3px}@keyframes scaleIn{from{transform:scale(0.8);opacity:0}to{transform:scale(1);opacity:1}}.si{animation:scaleIn .4s ease-out both}.bw-glass{background:rgba(255,255,255,0.04);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.08);box-shadow:0 4px 24px rgba(0,0,0,0.12)}.bw-tap{transition:transform .12s ease,box-shadow .12s ease}.bw-tap:active{transform:scale(0.96)}"}</style>

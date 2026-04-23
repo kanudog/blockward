@@ -32,7 +32,7 @@ export default async function handler(req, res) {
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: body.model || "claude-sonnet-4-20250514",
+        model: body.model || "claude-sonnet-4-6",
         max_tokens: body.max_tokens || 16000,
         system: body.system || "",
         messages: body.messages || [],
@@ -44,6 +44,7 @@ export default async function handler(req, res) {
     const duration = ((Date.now() - startTime) / 1000).toFixed(1) + 's';
     const inputTokens = data.usage ? data.usage.input_tokens : 0;
     const outputTokens = data.usage ? data.usage.output_tokens : 0;
+    // Sonnet 4.6 pricing as of April 2026: $3/M input, $15/M output
     const estCost = '$' + ((inputTokens * 3 / 1000000) + (outputTokens * 15 / 1000000)).toFixed(4);
     const status = response.ok ? 'success' : 'error: ' + (data.error ? data.error.message : response.status);
 

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { SC1, SC2, SC3 } from "./lib/scenarios/builtIn.js";
-import { useScenariosStore } from "./stores/scenariosStore.js";
 import { usePlayerStore } from "./stores/playerStore.js";
+import { useScenarios, decodeScenario } from "./hooks/useScenarios.js";
+import { useProgress } from "./hooks/useProgress.js";
 import { ScenarioPlayer } from "./components/player/ScenarioPlayer.jsx";
 import { ScenarioList } from "./components/scenarios/ScenarioList.jsx";
 import { BuilderForm } from "./components/builder/BuilderForm.jsx";
@@ -12,47 +12,16 @@ export default function App(){
   var act=usePlayerStore(function(s){return s.activeScenario;});
   var startPlayer=usePlayerStore(function(s){return s.start;});
   var resetPlayer=usePlayerStore(function(s){return s.reset;});
-  var cust=useScenariosStore(function(s){return s.custom;});
-  var prog=useScenariosStore(function(s){return s.progress;});
-  var ok=useScenariosStore(function(s){return s.hydrated;});
-  var hydrate=useScenariosStore(function(s){return s.hydrate;});
-  var addCustom=useScenariosStore(function(s){return s.addCustom;});
-  var addCustomIfNew=useScenariosStore(function(s){return s.addCustomIfNew;});
-  var deleteCustom=useScenariosStore(function(s){return s.deleteCustom;});
-  var recordCompletion=useScenariosStore(function(s){return s.recordCompletion;});
-  var clearAllScenarios=useScenariosStore(function(s){return s.clearAll;});
+  var scn=useScenarios();
+  var built=scn.built;var cust=scn.custom;var allScenarios=scn.allScenarios;var ok=scn.hydrated;
+  var hydrate=scn.hydrate;var addCustom=scn.addCustom;var addCustomIfNew=scn.addCustomIfNew;var deleteCustom=scn.deleteCustom;var clearAllScenarios=scn.clearAll;
+  var pr=useProgress();
+  var prog=pr.prog;var recordCompletion=pr.recordCompletion;var totalAttempts=pr.totalAttempts;var nd=pr.completed;var avgScore=pr.avgScore;
   var _shareMsg=useState(null);var shareMsg=_shareMsg[0];var setShareMsg=_shareMsg[1];
   var _sidebar=useState(false);var sidebar=_sidebar[0];var setSidebar=_sidebar[1];
   var _sideTab=useState("ref");var sideTab=_sideTab[0];var setSideTab=_sideTab[1];
   var _delConfirm=useState(null);var delConfirm=_delConfirm[0];var setDelConfirm=_delConfirm[1];
   var _clearConfirm=useState(false);var clearConfirm=_clearConfirm[0];var setClearConfirm=_clearConfirm[1];
-  function minifyScenario(sc){
-    function trimFb(obj){if(!obj)return obj;var o={};Object.keys(obj).forEach(function(k){if(typeof obj[k]==="object"&&obj[k]&&obj[k].fb){o[k]={ok:obj[k].ok,pri:obj[k].pri,fb:obj[k].fb.substring(0,120)};}else{o[k]=obj[k];}});return o;}
-    function trimPhase(p){return{id:p.id,name:p.name,narrative:p.narrative?p.narrative.substring(0,300):p.narrative,vitals:p.vitals,signs:p.signs?p.signs.map(function(s){return{label:s.label,detail:s.detail,pos:s.pos,sys:s.sys};}):p.signs,assessItems:p.assessItems,labs:p.labs?p.labs.map(function(l){return{name:l.name,value:l.value,unit:l.unit,ref:l.ref,critical:l.critical};}):p.labs,tools:p.tools,meds:p.meds,actions:p.actions?{tools:trimFb(p.actions.tools),meds:trimFb(p.actions.meds)}:p.actions};}
-    var m={id:sc.id,title:sc.title,tier:sc.tier,icon:sc.icon,tagline:sc.tagline,description:sc.description,patient:sc.patient,norms:sc.norms,visuals:sc.visuals,phases:sc.phases?sc.phases.map(trimPhase):[],debrief:sc.debrief?{summary:sc.debrief.summary,explainers:sc.debrief.explainers?sc.debrief.explainers.map(function(e){return{title:e.title,content:e.content?e.content.substring(0,200):"",tldr:e.tldr};}):[]}: sc.debrief};
-    if(sc.curveball){m.curveball={name:sc.curveball.name,narrative:sc.curveball.narrative?sc.curveball.narrative.substring(0,300):"",vitals:sc.curveball.vitals,signs:sc.curveball.signs,labs:sc.curveball.labs?sc.curveball.labs.map(function(l){return{name:l.name,value:l.value,unit:l.unit,ref:l.ref,critical:l.critical};}):sc.curveball.labs,tools:sc.curveball.tools,meds:sc.curveball.meds,actions:sc.curveball.actions?{tools:trimFb(sc.curveball.actions.tools),meds:trimFb(sc.curveball.actions.meds)}:sc.curveball.actions,teaches:sc.curveball.teaches?sc.curveball.teaches.map(function(t){return{title:t.title,content:t.content?t.content.substring(0,200):"",tldr:t.tldr};}):[]};} else{m.curveball=null;}
-    return m;
-  }
-  function encodeScenario(sc){try{return btoa(unescape(encodeURIComponent(JSON.stringify(sc))));}catch(e){return null;}}
-  function decodeScenario(str){try{return JSON.parse(decodeURIComponent(escape(atob(str))));}catch(e){return null;}}
-  function shareScenario(sc){
-    var mini=minifyScenario(sc);
-    var encoded=encodeScenario(mini);
-    if(!encoded){setShareMsg("Failed to encode scenario");return;}
-    var url=window.location.origin+"/?shared="+encodeURIComponent(encoded);
-    if(url.length>4000){
-      setShareMsg("Scenario too large to share via link. Try a simpler scenario.");
-      setTimeout(function(){setShareMsg(null);},3000);
-      return;
-    }
-    if(navigator.share){
-      navigator.share({title:"Block Ward: "+sc.title,url:url}).catch(function(){});
-    }else if(navigator.clipboard){
-      navigator.clipboard.writeText(url).then(function(){setShareMsg("Link copied!");setTimeout(function(){setShareMsg(null);},2500);});
-    }else{
-      prompt("Copy this link to share:",url);
-    }
-  }
   useEffect(function(){
     hydrate();
     var params=new URLSearchParams(window.location.search);
@@ -68,20 +37,11 @@ export default function App(){
       }
     }
   },[]);
-  var built=[SC1,SC2,SC3];
   var play=function(s){startPlayer(s);setView("play");};
   var done=function(score){if(!act)return;recordCompletion(act.id,score);};
   var addC=function(s){addCustom(s);setView("dash");};
   var delC=function(id){deleteCustom(id);setDelConfirm(null);};
   var clearAll=function(){clearAllScenarios();setShareMsg("All data cleared");setTimeout(function(){setShareMsg(null);},2000);};
-  // Stats
-  var allScenarios=built.concat(cust);
-  var totalAttempts=0;var totalCorrect=0;var totalQ=0;
-  Object.values(prog).forEach(function(p){if(p.n)totalAttempts+=p.n;});
-  var nd=Object.values(prog).filter(function(p){return p.done;}).length;
-  var avgScore=0;var scoreCount=0;
-  Object.values(prog).forEach(function(p){if(p.best>0){avgScore+=p.best;scoreCount++;}});
-  if(scoreCount>0)avgScore=Math.round(avgScore/scoreCount*100);
   // Peds vital sign reference data
   var vitalRef=[
     {age:"Neonate (0-28d)",hr:"120-160",rr:"30-60",sbp:"60-80",dbp:"30-50"},

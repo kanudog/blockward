@@ -16,6 +16,10 @@ export function AssessPanel(props){
   var vitItems=ph.assessItems.filter(function(it){return !it.cat||it.cat==="vital";});
   var labItems=ph.assessItems.filter(function(it){return it.cat==="lab";});
   var clinItems=ph.assessItems.filter(function(it){return it.cat==="clinical";});
+  var flaggedCount=Object.keys(flags).filter(function(k){return flags[k];}).length;
+  function SectionHeader(p){return(<div style={{display:"flex",alignItems:"center",gap:6,marginBottom:6}}>
+    <span style={{padding:"2px 8px",borderRadius:999,fontSize:10,fontWeight:800,letterSpacing:0.5,textTransform:"uppercase",background:p.bg,color:p.fg,border:"1px solid "+p.fg+"55"}}>{p.label}</span>
+  </div>);}
   function renderItem(it){var f=!!flags[it.id];var ok=showFb&&(f===it.bad);
     var bg=showFb?(ok?"rgba(0,184,148,0.1)":"rgba(255,71,87,0.1)"):(f?"rgba(254,202,87,0.12)":"rgba(255,255,255,0.04)");
     var brd=showFb?(ok?"2px solid rgba(0,184,148,0.25)":"2px solid rgba(255,71,87,0.25)"):(f?"2px solid rgba(254,202,87,0.25)":"2px solid rgba(255,255,255,0.07)");
@@ -54,16 +58,20 @@ export function AssessPanel(props){
         </div>
       </div>
       <div className="bw-split-right">
+        {!showFb&&<div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10,padding:"8px 12px",borderRadius:10,background:"rgba(78,205,196,0.08)",border:"1px solid rgba(78,205,196,0.2)"}}>
+          <span style={{fontSize:12,fontWeight:700,color:"#4ECDC4"}}>Tap items you think are abnormal</span>
+          <span style={{fontSize:11,color:"#ccc",fontWeight:600}}>{flaggedCount+" flagged"}</span>
+        </div>}
         {vitItems.length>0&&<div style={{marginBottom:12}}>
-          <h3 style={{fontSize:14,fontWeight:700,color:"#4ECDC4",marginBottom:8}}>Flag Abnormal Vital Signs:</h3>
+          <SectionHeader label="Vital Signs" bg="rgba(78,205,196,0.12)" fg="#4ECDC4"/>
           <div style={{display:"flex",flexDirection:"column",gap:6}}>{vitItems.map(renderItem)}</div>
         </div>}
         {labItems.length>0&&<div style={{marginBottom:12}}>
-          <h3 style={{fontSize:14,fontWeight:700,color:"#ff7675",marginBottom:8}}>Flag Abnormal Lab Values:</h3>
+          <SectionHeader label="Lab Values" bg="rgba(255,118,117,0.12)" fg="#ff7675"/>
           <div style={{display:"flex",flexDirection:"column",gap:6}}>{labItems.map(renderItem)}</div>
         </div>}
         {clinItems.length>0&&<div style={{marginBottom:12}}>
-          <h3 style={{fontSize:14,fontWeight:700,color:"#FECA57",marginBottom:8}}>Flag Concerning Clinical Findings:</h3>
+          <SectionHeader label="Clinical Findings" bg="rgba(254,202,87,0.12)" fg="#FECA57"/>
           <div style={{display:"flex",flexDirection:"column",gap:6}}>{clinItems.map(renderItem)}</div>
         </div>}
         {!showFb?<button onClick={submit} style={Object.assign({},BS,{background:PP})}>Submit Assessment</button>

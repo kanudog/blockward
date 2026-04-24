@@ -18,7 +18,8 @@ export function LabPanel(props) {
         </svg>
         <div style={{fontSize:12,fontWeight:700,color:"#ff7675"}}>Lab Results</div>
       </div>
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+      <style>{"@media (max-width: 400px){.bw-lab-grid{grid-template-columns:1fr !important}}"}</style>
+      <div className="bw-lab-grid" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
         {labs.map(function(lab,i) {
           var isCrit = lab.critical === true;
           var bg = isCrit ? "rgba(255,71,87,0.12)" : "rgba(255,255,255,0.04)";

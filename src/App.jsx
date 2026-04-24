@@ -5,6 +5,8 @@ import { usePlayerStore } from "./stores/playerStore.js";
 import { ScenarioPlayer } from "./components/player/ScenarioPlayer.jsx";
 import { ScenarioList } from "./components/scenarios/ScenarioList.jsx";
 import { BuilderForm } from "./components/builder/BuilderForm.jsx";
+import { Toast } from "./components/shared/Toast.jsx";
+import { ConfirmModal } from "./components/shared/ConfirmModal.jsx";
 export default function App(){
   var _view=useState("dash");var view=_view[0];var setView=_view[1];
   var act=usePlayerStore(function(s){return s.activeScenario;});
@@ -94,32 +96,9 @@ export default function App(){
   if(view==="build")return <BuilderForm onDone={addC} onBack={function(){setView("dash");}}/>;
   return(<div style={{minHeight:"100dvh",padding:16,background:"linear-gradient(135deg,#0a0e1a,#1a1a3e)",color:"#fff",fontFamily:"'Nunito',sans-serif"}}>
     <style>{"@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;700;800&display=swap');@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}.flt{animation:float 3s ease-in-out infinite}@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}.fi{animation:fadeIn .5s ease-out both}button{transition:all .15s ease;min-height:44px;min-width:44px}::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:#1a1a3e}::-webkit-scrollbar-thumb{background:#4ECDC4;border-radius:3px}@keyframes scaleIn{from{transform:scale(0.8);opacity:0}to{transform:scale(1);opacity:1}}.si{animation:scaleIn .4s ease-out both}.bw-glass{background:rgba(255,255,255,0.04);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.08);box-shadow:0 4px 24px rgba(0,0,0,0.12)}.bw-tap{transition:transform .12s ease,box-shadow .12s ease}.bw-tap:active{transform:scale(0.96)}"}</style>
-    {/* Toast */}
-    {shareMsg&&<div style={{position:"fixed",top:16,left:"50%",transform:"translateX(-50%)",zIndex:999,padding:"10px 20px",borderRadius:12,background:"rgba(78,205,196,0.95)",color:"#0a0e1a",fontWeight:700,fontSize:13,boxShadow:"0 4px 20px rgba(0,0,0,0.3)"}}>{shareMsg}</div>}
-    {/* Delete confirmation modal */}
-    {delConfirm&&<div style={{position:"fixed",top:0,left:0,right:0,bottom:0,background:"rgba(0,0,0,0.7)",zIndex:998,display:"flex",alignItems:"center",justifyContent:"center",padding:24}} onClick={function(){setDelConfirm(null);}}>
-      <div style={{background:"#1a1a3e",borderRadius:16,padding:24,maxWidth:340,width:"100%",border:"2px solid rgba(255,71,87,0.3)"}} onClick={function(e){e.stopPropagation();}}>
-        <h3 style={{fontSize:18,fontWeight:700,marginBottom:8}}>Delete Scenario?</h3>
-        <p style={{fontSize:13,color:"#999",marginBottom:4}}>{delConfirm.title}</p>
-        <p style={{fontSize:12,color:"#FF6B81",marginBottom:20}}>This cannot be undone.</p>
-        <div style={{display:"flex",gap:8}}>
-          <button onClick={function(){setDelConfirm(null);}} style={{flex:1,padding:"10px 0",borderRadius:10,fontWeight:700,fontSize:14,background:"rgba(255,255,255,0.1)",color:"#999",border:"none",cursor:"pointer"}}>Cancel</button>
-          <button onClick={function(){delC(delConfirm.id);}} style={{flex:1,padding:"10px 0",borderRadius:10,fontWeight:700,fontSize:14,background:"rgba(255,71,87,0.3)",color:"#FF6B81",border:"none",cursor:"pointer"}}>Delete</button>
-        </div>
-      </div>
-    </div>}
-    {/* Clear all data confirmation modal */}
-    {clearConfirm&&<div style={{position:"fixed",top:0,left:0,right:0,bottom:0,background:"rgba(0,0,0,0.7)",zIndex:998,display:"flex",alignItems:"center",justifyContent:"center",padding:24}} onClick={function(){setClearConfirm(false);}}>
-      <div style={{background:"#1a1a3e",borderRadius:16,padding:24,maxWidth:340,width:"100%",border:"2px solid rgba(255,71,87,0.3)"}} onClick={function(e){e.stopPropagation();}}>
-        <h3 style={{fontSize:18,fontWeight:700,marginBottom:8}}>Clear All Data?</h3>
-        <p style={{fontSize:13,color:"#999",marginBottom:4}}>All progress and custom scenarios will be removed.</p>
-        <p style={{fontSize:12,color:"#FF6B81",marginBottom:20}}>This cannot be undone.</p>
-        <div style={{display:"flex",gap:8}}>
-          <button onClick={function(){setClearConfirm(false);}} style={{flex:1,padding:"10px 0",borderRadius:10,fontWeight:700,fontSize:14,background:"rgba(255,255,255,0.1)",color:"#999",border:"none",cursor:"pointer"}}>Cancel</button>
-          <button onClick={function(){clearAll();setClearConfirm(false);setSidebar(false);}} style={{flex:1,padding:"10px 0",borderRadius:10,fontWeight:700,fontSize:14,background:"rgba(255,71,87,0.3)",color:"#FF6B81",border:"none",cursor:"pointer"}}>Clear</button>
-        </div>
-      </div>
-    </div>}
+    <Toast message={shareMsg}/>
+    <ConfirmModal open={!!delConfirm} title="Delete Scenario?" subtitle={delConfirm?delConfirm.title:null} confirmLabel="Delete" onConfirm={function(){delC(delConfirm.id);}} onCancel={function(){setDelConfirm(null);}}/>
+    <ConfirmModal open={clearConfirm} title="Clear All Data?" subtitle="All progress and custom scenarios will be removed." confirmLabel="Clear" onConfirm={function(){clearAll();setClearConfirm(false);setSidebar(false);}} onCancel={function(){setClearConfirm(false);}}/>
     {/* Sidebar overlay */}
     {sidebar&&<div style={{position:"fixed",top:0,left:0,right:0,bottom:0,zIndex:997,display:"flex"}}>
       <div style={{position:"absolute",top:0,left:0,right:0,bottom:0,background:"rgba(0,0,0,0.6)"}} onClick={function(){setSidebar(false);}}></div>

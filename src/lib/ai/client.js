@@ -1,12 +1,19 @@
 import { buildSystemPrompt, MODEL_ID, MAX_TOKENS } from "./prompt.js";
 import { validateSchema, validateConsistency } from "./validate.js";
 
+var NAME_HINT_LETTERS="ABCDEFGHIJKLMNOPRSTUVWYZ"; // skip Q and X — rare initial sounds
+function randomNameHint(){
+  var letter=NAME_HINT_LETTERS.charAt(Math.floor(Math.random()*NAME_HINT_LETTERS.length));
+  return "\n\nName hint: choose a patient name starting with the letter "+letter+". Vary across cultures and genders. Do NOT use Marcus, Sarah, or John.";
+}
+
 export async function generateScenario(txt, cbMode, signal){
+  var userContent="Create pediatric scenario:\n\n"+txt+randomNameHint();
   var r=await fetch("/api/generate",{method:"POST",headers:{"Content-Type":"application/json"},signal:signal,
     body:JSON.stringify({model:MODEL_ID,max_tokens:MAX_TOKENS,
       tools:[{type:"web_search_20250305",name:"web_search"}],
       system:buildSystemPrompt(cbMode),
-      messages:[{role:"user",content:"Create pediatric scenario:\n\n"+txt}]})});
+      messages:[{role:"user",content:userContent}]})});
   var raw=await r.text();var d;
   try{d=JSON.parse(raw);}catch(je){throw new Error("Server returned invalid response (status "+r.status+"). The request may have timed out — try again.");}
   if(d.error)throw new Error(d.error.message||"API error");

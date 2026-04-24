@@ -16,13 +16,13 @@ export function ActionPanel(props){
   var total=(tools?tools.length:0)+(meds?meds.length:0);
   var pick=function(id,ty){var src=ty==="t"?(actions&&actions.tools):(actions&&actions.meds);var info=src?src[id]:null;if(!info)return;
     setSel(function(p){var n=Object.assign({},p);n[id]=info;return n;});setPop({id:id,ty:ty,info:info});};
-  var finish=function(){onDone(computeActionScore(tools,meds,actions,sel));};
+  var finish=function(){onDone(computeActionScore(tools,meds,actions,sel),sel);};
   var skip=function(){
     var missed=[];
     rT.forEach(function(id){if(!sel[id]){var t=TOOLS[id];missed.push({id:id,label:t?t.label:id,type:"tool"});}});
     rM.forEach(function(id){if(!sel[id]){var m=MEDS[id];missed.push({id:id,label:m?m.label:id,type:"med"});}});
     var score=computeActionScore(tools,meds,actions,sel);
-    if(onSkip)onSkip(score,missed);else onDone(score);
+    if(onSkip)onSkip(score,missed,sel);else onDone(score,sel);
   };
   function tbg(u,o){if(!u)return"rgba(255,255,255,0.05)";return o?"rgba(0,184,148,0.12)":"rgba(255,165,0,0.1)";}
   function tbd(u,o){if(!u)return"2px solid rgba(255,255,255,0.08)";return o?"2px solid rgba(0,184,148,0.35)":"2px solid rgba(255,165,0,0.25)";}

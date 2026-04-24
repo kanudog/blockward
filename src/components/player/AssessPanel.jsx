@@ -4,6 +4,7 @@ import { VitalsDisplay } from "./VitalsDisplay.jsx";
 import { BodySystemsView } from "./BodySystemsView.jsx";
 import { LabPanel } from "./LabPanel.jsx";
 import { WhyModal, WhyButton } from "../shared/WhyModal.jsx";
+import { TextBlock } from "../shared/TextBlock.jsx";
 
 var BS={width:"100%",marginTop:12,padding:"12px 0",borderRadius:12,fontWeight:700,color:"white",fontSize:16,border:"none",cursor:"pointer"};
 var GR="linear-gradient(135deg,#4ECDC4,#44B09E)";

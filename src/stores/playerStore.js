@@ -16,7 +16,8 @@ var initialState = {
   cbDone: false,
   score: { c: 0, t: 0 },
   vitals: null,
-  shake: false
+  shake: false,
+  skippedActions: []
 };
 
 export var usePlayerStore = create(function(set) {
@@ -31,7 +32,8 @@ export var usePlayerStore = create(function(set) {
         cbDone: false,
         score: { c: 0, t: 0 },
         vitals: sc && sc.phases && sc.phases[0] ? sc.phases[0].vitals : null,
-        shake: false
+        shake: false,
+        skippedActions: []
       });
     },
     reset: function() {
@@ -54,6 +56,11 @@ export var usePlayerStore = create(function(set) {
     addScore: function(delta) {
       set(function(s) {
         return { score: { c: s.score.c + delta.c, t: s.score.t + delta.t } };
+      });
+    },
+    addSkipped: function(items) {
+      set(function(s) {
+        return { skippedActions: s.skippedActions.concat(items) };
       });
     }
   });

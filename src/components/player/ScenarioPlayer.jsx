@@ -20,7 +20,10 @@ export function ScenarioPlayer(props){
   var sc=props.sc;var onExit=props.onExit;var onDone=props.onDone;
   var ageG=guessAge(sc);var sexG=guessSex(sc);var scVisuals=sc.visuals||[];
   var stage=usePlayerStore(function(s){return s.stage;});var pi=usePlayerStore(function(s){return s.phaseIndex;});var flags=usePlayerStore(function(s){return s.flags;});var showFb=usePlayerStore(function(s){return s.showFb;});var cbDone=usePlayerStore(function(s){return s.cbDone;});var score=usePlayerStore(function(s){return s.score;});var shake=usePlayerStore(function(s){return s.shake;});var vit=usePlayerStore(function(s){return s.vitals;});
-  var _ps=usePlayerStore.getState();var setStage=_ps.setStage;var setPi=_ps.setPhaseIndex;var setFlags=_ps.setFlags;var toggleFlag=_ps.toggleFlag;var setShowFb=_ps.setShowFb;var setCbDone=_ps.setCbDone;var setShake=_ps.setShake;var setVit=_ps.setVitals;var addScore=_ps.addScore;
+  var _ps=usePlayerStore.getState();var setStage=_ps.setStage;var setPi=_ps.setPhaseIndex;var setFlags=_ps.setFlags;var toggleFlag=_ps.toggleFlag;var setShowFb=_ps.setShowFb;var setCbDone=_ps.setCbDone;var setShake=_ps.setShake;var setVit=_ps.setVitals;var addScore=_ps.addScore;var addSkipped=_ps.addSkipped;
+  function prevStageFor(s){if(s==="phase")return"intro";if(s==="assess")return"intro";if(s==="act")return"phase";if(s==="cb-alert")return"act";if(s==="cb-act")return"cb-alert";return null;}
+  var prev=prevStageFor(stage);
+  var goBack=function(){if(prev)setStage(prev);};
   var _recStep=useState(0);var recStep=_recStep[0];var setRecStep=_recStep[1];
   var _learnOpen=useState(false);var learnOpen=_learnOpen[0];var setLearnOpen=_learnOpen[1];
   var ph=sc.phases[pi];
@@ -53,8 +56,11 @@ export function ScenarioPlayer(props){
   return(<div className={shake?"bw-shake":""} style={{minHeight:"100dvh",padding:16,background:"linear-gradient(135deg,#0a0e1a,#1a1a3e)",color:"#fff"}}>
     <style>{"@keyframes bwShake{0%,100%{transform:translateX(0)}10%{transform:translateX(-8px)}20%{transform:translateX(8px)}30%{transform:translateX(-6px)}40%{transform:translateX(6px)}}.bw-shake{animation:bwShake .6s ease-in-out}@keyframes slideU{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}.slu{animation:slideU .4s ease-out}@keyframes alertP{0%,100%{box-shadow:0 0 0 0 rgba(255,71,87,.4)}50%{box-shadow:0 0 0 12px rgba(255,71,87,0)}}.alp{animation:alertP 1.5s infinite}@keyframes fadeCard{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}.bw-split{display:flex;flex-direction:column;gap:12px}.bw-split-left,.bw-split-right{width:100%}@media(min-width:768px){.bw-container{max-width:900px!important}.bw-split{flex-direction:row;gap:20px;align-items:flex-start}.bw-split-left{width:42%;position:sticky;top:16px;max-height:calc(100dvh - 80px);overflow-y:auto}.bw-split-right{width:58%;min-height:0}}"}</style>
     <div className="bw-container" style={{maxWidth:480,margin:"0 auto"}}>
-      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
-        <button onClick={onExit} style={{color:"#888",fontSize:13,background:"none",border:"none",cursor:"pointer"}}>X Exit</button>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12,gap:8}}>
+        <div style={{display:"flex",alignItems:"center",gap:8}}>
+          <button onClick={onExit} style={{color:"#888",fontSize:13,background:"none",border:"none",cursor:"pointer"}}>X Exit</button>
+          {prev&&<button onClick={goBack} style={{color:"#888",fontSize:12,background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:8,padding:"4px 10px",cursor:"pointer"}}>&lt; Back</button>}
+        </div>
         <div style={{padding:"4px 12px",borderRadius:20,fontSize:11,fontWeight:700,background:isCb?"rgba(255,71,87,0.2)":"rgba(78,205,196,0.15)",color:isCb?"#FF6B81":"#4ECDC4"}}>{isCb?"CURVEBALL":"Phase "+(pi+1)+"/"+sc.phases.length}</div>
         <div style={{fontSize:11,color:"#888"}}>{score.c+"/"+score.t}</div></div>
       {stage==="intro"&&(<div className="slu" style={{textAlign:"center"}}>
@@ -105,7 +111,7 @@ export function ScenarioPlayer(props){
               <div style={{borderTop:"1px solid rgba(255,255,255,0.08)",paddingTop:8,marginTop:8}}>
                 <p style={{fontSize:14,fontWeight:700,color:"#4ECDC4",marginBottom:4}}>Intervention Time</p>
                 <p style={{fontSize:11,color:"#bbb"}}>Tap each tool and med. Find all correct actions to continue.</p></div></div>
-            <ActionPanel tools={ph.tools} meds={ph.meds} actions={ph.actions} onDone={afterAct}/>
+            <ActionPanel tools={ph.tools} meds={ph.meds} actions={ph.actions} onDone={afterAct} onSkip={function(s,m){if(m&&m.length>0)addSkipped(m.map(function(x){return Object.assign({},x,{phase:ph.name||ph.id});}));afterAct(s);}}/>
           </div>
         </div></div>)}
       {stage==="cb-alert"&&(<div className="slu">
@@ -135,7 +141,7 @@ export function ScenarioPlayer(props){
               <div style={{borderTop:"1px solid rgba(255,71,87,0.15)",paddingTop:8,marginTop:8}}>
                 <p style={{fontSize:14,fontWeight:700,color:"#FF6B81",marginBottom:4}}>Critical Intervention</p>
                 <p style={{fontSize:11,color:"#bbb"}}>Find all correct actions.</p></div></div>
-            <ActionPanel tools={sc.curveball.tools} meds={sc.curveball.meds} actions={sc.curveball.actions} onDone={function(s){if(s&&s.t)addScore({c:s.c,t:s.t});setStage("recovery");}}/>
+            <ActionPanel tools={sc.curveball.tools} meds={sc.curveball.meds} actions={sc.curveball.actions} onDone={function(s){if(s&&s.t)addScore({c:s.c,t:s.t});setStage("recovery");}} onSkip={function(s,m){if(m&&m.length>0)addSkipped(m.map(function(x){return Object.assign({},x,{phase:"Curveball: "+(sc.curveball.name||"")});}));if(s&&s.t)addScore({c:s.c,t:s.t});setStage("recovery");}}/>
           </div>
         </div></div>)}
       {stage==="recovery"&&(function(){

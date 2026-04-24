@@ -5,7 +5,7 @@ import { computeActionScore } from "../../lib/scenarios/scoring.js";
 import { ToolIcon, MedIcon } from "./icons.jsx";
 import { TextBlock } from "../shared/TextBlock.jsx";
 export function ActionPanel(props){
-  var tools=props.tools;var meds=props.meds;var actions=props.actions;var onDone=props.onDone;
+  var tools=props.tools;var meds=props.meds;var actions=props.actions;var onDone=props.onDone;var onSkip=props.onSkip;
   var _sel=useState({});var sel=_sel[0];var setSel=_sel[1];
   var _pop=useState(null);var pop=_pop[0];var setPop=_pop[1];
   var rT=Object.entries(actions&&actions.tools?actions.tools:{}).filter(function(e){return e[1].ok;}).map(function(e){return e[0];});
@@ -17,6 +17,13 @@ export function ActionPanel(props){
   var pick=function(id,ty){var src=ty==="t"?(actions&&actions.tools):(actions&&actions.meds);var info=src?src[id]:null;if(!info)return;
     setSel(function(p){var n=Object.assign({},p);n[id]=info;return n;});setPop({id:id,ty:ty,info:info});};
   var finish=function(){onDone(computeActionScore(tools,meds,actions,sel));};
+  var skip=function(){
+    var missed=[];
+    rT.forEach(function(id){if(!sel[id]){var t=TOOLS[id];missed.push({id:id,label:t?t.label:id,type:"tool"});}});
+    rM.forEach(function(id){if(!sel[id]){var m=MEDS[id];missed.push({id:id,label:m?m.label:id,type:"med"});}});
+    var score=computeActionScore(tools,meds,actions,sel);
+    if(onSkip)onSkip(score,missed);else onDone(score);
+  };
   function tbg(u,o){if(!u)return"rgba(255,255,255,0.05)";return o?"rgba(0,184,148,0.12)":"rgba(255,165,0,0.1)";}
   function tbd(u,o){if(!u)return"2px solid rgba(255,255,255,0.08)";return o?"2px solid rgba(0,184,148,0.35)":"2px solid rgba(255,165,0,0.25)";}
   return(
@@ -44,9 +51,13 @@ export function ActionPanel(props){
           <TextBlock text={pop.info.fb} style={{fontSize:13,color:"#ddd",lineHeight:1.5}}/>
           <button onClick={function(){setPop(null);}} style={{width:"100%",marginTop:16,padding:"12px 0",borderRadius:12,fontWeight:700,color:"white",fontSize:13,background:pop.info.ok?"rgba(0,184,148,0.3)":"rgba(255,165,2,0.2)",border:"none",cursor:"pointer"}}>Got It</button>
         </div></div>)}
-      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginTop:12}}>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:8,marginTop:12,flexWrap:"wrap"}}>
         <div style={{fontSize:11,color:"#666"}}>{explored+"/"+total+" explored"}</div>
-        {allF&&<button onClick={finish} style={{padding:"8px 20px",borderRadius:12,fontWeight:700,color:"white",fontSize:13,background:"linear-gradient(135deg,#4ECDC4,#44B09E)",border:"none",cursor:"pointer"}}>Continue</button>}</div>
-      {!allF&&explored>0&&<p style={{fontSize:11,color:"#4ECDC4",marginTop:8,opacity:0.7}}>Find all appropriate actions to continue.</p>}
+        <div style={{display:"flex",gap:8}}>
+          {!allF&&<button onClick={skip} style={{padding:"8px 16px",borderRadius:12,fontWeight:700,color:"#ccc",fontSize:12,background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.12)",cursor:"pointer"}}>Skip to Next</button>}
+          {allF&&<button onClick={finish} style={{padding:"8px 20px",borderRadius:12,fontWeight:700,color:"white",fontSize:13,background:"linear-gradient(135deg,#4ECDC4,#44B09E)",border:"none",cursor:"pointer"}}>Continue</button>}
+        </div>
+      </div>
+      {!allF&&explored>0&&<p style={{fontSize:11,color:"#4ECDC4",marginTop:8,opacity:0.7}}>Find all appropriate actions to continue, or Skip to move on.</p>}
     </div>);
 }

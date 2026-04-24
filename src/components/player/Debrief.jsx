@@ -3,12 +3,14 @@ import { Star, Trophy, BookOpen, Plus, Minus, Search, Check, Zap, Droplets } fro
 import { PatientSVG } from "./PatientSVG.jsx";
 import { TextBlock } from "../shared/TextBlock.jsx";
 import { TOOLS, MEDS } from "../../lib/scenarios/builtIn.js";
+import { usePlayerStore } from "../../stores/playerStore.js";
 
 var BS={width:"100%",marginTop:12,padding:"12px 0",borderRadius:12,fontWeight:700,color:"white",fontSize:16,border:"none",cursor:"pointer"};
 var GR="linear-gradient(135deg,#4ECDC4,#44B09E)";
 
 export function Debrief(props){
   var sc=props.sc;var score=props.score;var ageG=props.ageG;var sexG=props.sexG;var onDone=props.onDone;var onExit=props.onExit;
+  var skippedActions=usePlayerStore(function(s){return s.skippedActions;});
   var _expI=useState(null);var expI=_expI[0];var setExpI=_expI[1];
   var _tldrOpen=useState({});var tldrOpen=_tldrOpen[0];var setTldrOpen=_tldrOpen[1];
   var toggleTldr=function(key){setTldrOpen(function(p){var n=Object.assign({},p);n[key]=!n[key];return n;});};
@@ -104,5 +106,11 @@ export function Debrief(props){
             {tldrOpen[k]&&<p style={{fontSize:12,color:"#FECA57",marginTop:6,lineHeight:1.5,fontWeight:600}}>{t.tldr}</p>}
           </div>}
         </div>}</div>);})}</div>)}
+    {skippedActions&&skippedActions.length>0&&<div style={{marginBottom:16,borderRadius:12,padding:12,background:"rgba(254,202,87,0.08)",border:"1px solid rgba(254,202,87,0.25)"}}>
+      <div style={{fontSize:12,fontWeight:700,color:"#FECA57",marginBottom:6}}>You skipped these interventions:</div>
+      <ul style={{margin:0,paddingLeft:18,fontSize:12,color:"#ddd",lineHeight:1.5}}>
+        {skippedActions.map(function(a,i){return <li key={i}>{a.label}{a.phase?" ("+a.phase+")":""}</li>;})}
+      </ul>
+    </div>}
     <button onClick={function(){onDone(score);onExit();}} style={Object.assign({},BS,{background:GR})}>Back to Dashboard</button></div></div>);
 }

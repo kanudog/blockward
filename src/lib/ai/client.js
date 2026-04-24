@@ -1,4 +1,5 @@
 import { buildSystemPrompt, MODEL_ID, MAX_TOKENS } from "./prompt.js";
+import { validateSchema, validateConsistency } from "./validate.js";
 
 export async function generateScenario(txt, cbMode, signal){
   var r=await fetch("/api/generate",{method:"POST",headers:{"Content-Type":"application/json"},signal:signal,
@@ -34,5 +35,12 @@ export async function generateScenario(txt, cbMode, signal){
   if(!scenario.id||!scenario.phases)throw new Error("AI generated an incomplete scenario. Try being more specific about the patient age, condition, and setting.");
   if(!cbMode)scenario.curveball=null;
   if(!scenario.debrief)scenario.debrief={summary:"Complete.",explainers:[]};
+  var schemaErrs=validateSchema(scenario);
+  if(schemaErrs.length>0)throw new Error("AI generated scenario is missing required fields: "+schemaErrs.slice(0,3).join("; ")+(schemaErrs.length>3?" (and "+(schemaErrs.length-3)+" more)":""));
+  var warnings=validateConsistency(scenario);
+  if(warnings.length>0){
+    scenario._warnings=warnings;
+    warnings.forEach(function(w){console.warn("Scenario consistency warning ["+w.phase+"]:",w.message,"— item:",w.label);});
+  }
   return scenario;
 }

@@ -13,6 +13,7 @@ import { ActionPanel } from "./ActionPanel.jsx";
 import { AssessPanel } from "./AssessPanel.jsx";
 import { Debrief } from "./Debrief.jsx";
 import { TextBlock } from "../shared/TextBlock.jsx";
+import { Modal } from "../shared/Modal.jsx";
 import { ToolIcon, MedIcon } from "./icons.jsx";
 
 export function ScenarioPlayer(props){
@@ -21,6 +22,7 @@ export function ScenarioPlayer(props){
   var stage=usePlayerStore(function(s){return s.stage;});var pi=usePlayerStore(function(s){return s.phaseIndex;});var flags=usePlayerStore(function(s){return s.flags;});var showFb=usePlayerStore(function(s){return s.showFb;});var cbDone=usePlayerStore(function(s){return s.cbDone;});var score=usePlayerStore(function(s){return s.score;});var shake=usePlayerStore(function(s){return s.shake;});var vit=usePlayerStore(function(s){return s.vitals;});
   var _ps=usePlayerStore.getState();var setStage=_ps.setStage;var setPi=_ps.setPhaseIndex;var setFlags=_ps.setFlags;var toggleFlag=_ps.toggleFlag;var setShowFb=_ps.setShowFb;var setCbDone=_ps.setCbDone;var setShake=_ps.setShake;var setVit=_ps.setVitals;var addScore=_ps.addScore;
   var _recStep=useState(0);var recStep=_recStep[0];var setRecStep=_recStep[1];
+  var _learnOpen=useState(false);var learnOpen=_learnOpen[0];var setLearnOpen=_learnOpen[1];
   var ph=sc.phases[pi];
   /* Build correct actions list for recovery screen (must be at top level for hook rules) */
   var correctActions=[];
@@ -58,29 +60,35 @@ export function ScenarioPlayer(props){
       {stage==="intro"&&(<div className="slu" style={{textAlign:"center"}}>
         <PatientView status="stable" rr={30} signs={[]} ageGroup={ageG} sex={sexG} visuals={scVisuals} emotion="sad"/>
         <h2 style={{fontSize:24,fontWeight:900,marginTop:12,marginBottom:8}}>{sc.title}</h2>
-        <div className="bw-glass" style={{borderRadius:16,padding:16,marginBottom:16,textAlign:"left"}}>
+        <div className="bw-glass" style={{borderRadius:16,padding:16,marginBottom:12,textAlign:"left"}}>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:12,fontSize:13}}>
             <div><span style={{color:"#999"}}>Age: </span><strong>{sc.patient.ageLabel}</strong></div>
             <div><span style={{color:"#999"}}>Weight: </span><strong>{sc.patient.weightKg+" kg"}</strong></div>
             <div><span style={{color:"#999"}}>Sex: </span><strong>{sc.patient.sex}</strong></div></div>
           <div style={{fontSize:13,marginBottom:8}}><span style={{color:"#999"}}>CC: </span><strong>{sc.patient.cc}</strong></div>
-          <TextBlock text={sc.patient.history} style={{fontSize:13,color:"#ccc",lineHeight:1.5}}/></div>
-        <button onClick={function(){setStage("phase");}} style={Object.assign({},BS,{background:GR})}>Begin Assessment</button></div>)}
+          <div style={{fontSize:10,textTransform:"uppercase",letterSpacing:1.5,color:"#4ECDC4",fontWeight:700,marginTop:10,marginBottom:6}}>EMS Report</div>
+          <TextBlock text={sc.emsReport||sc.patient.history} style={{fontSize:13,color:"#ddd",lineHeight:1.6}}/>
+        </div>
+        {sc.learnMore&&<button onClick={function(){setLearnOpen(true);}} style={{marginBottom:12,padding:"8px 16px",borderRadius:10,fontWeight:700,color:"#74b9ff",fontSize:12,background:"rgba(116,185,255,0.1)",border:"1px solid rgba(116,185,255,0.3)",cursor:"pointer"}}>Learn More</button>}
+        <button onClick={function(){var hasAssess=ph&&ph.assessItems&&ph.assessItems.length>0;setStage(hasAssess?"assess":(phaseHasIntervention?"act":"phase"));}} style={Object.assign({},BS,{background:GR})}>{ph&&ph.assessItems&&ph.assessItems.length>0?"Assess":"Begin Intervention"}</button>
+        <Modal open={learnOpen} onClose={function(){setLearnOpen(false);}} title="Background" accent="#74b9ff">
+          <TextBlock text={sc.learnMore||""} style={{fontSize:13,color:"#ddd",lineHeight:1.6}}/>
+        </Modal>
+      </div>)}
       {stage==="phase"&&(<div className="slu">
         <div className="bw-split">
           <div className="bw-split-left">
-            <PatientView status={pSt()} rr={vit.rr} signs={ph?ph.signs:[]} ageGroup={ageG} sex={sexG} visuals={scVisuals} emotion="sad"/>
+            <PatientView status={pSt()} rr={vit.rr} signs={[]} ageGroup={ageG} sex={sexG} visuals={scVisuals} emotion="sad"/>
             <div style={{marginTop:12}}><VitalsDisplay vitals={vit}/></div>
-            <BodySystemsView signs={ph?ph.signs:[]}/>
-            <LabPanel labs={curLabs}/>
           </div>
           <div className="bw-split-right">
             <div className="bw-glass" style={{borderRadius:16,padding:12}}>
+              <div style={{fontSize:10,textTransform:"uppercase",letterSpacing:1.5,color:"#4ECDC4",fontWeight:700,marginBottom:6}}>Update</div>
               <TextBlock text={ph?ph.narrative:""} style={{fontSize:13,color:"#ddd",lineHeight:1.6}}/></div>
             {phaseHasIntervention?(
               <button onClick={function(){setStage("act");}} style={Object.assign({},BS,{background:GR})}>Begin Intervention</button>
             ):(
-              <button onClick={function(){setStage("assess");}} style={Object.assign({},BS,{background:GR})}>Assess Vitals</button>
+              <button onClick={function(){setStage("assess");}} style={Object.assign({},BS,{background:GR})}>Assess</button>
             )}
           </div>
         </div></div>)}

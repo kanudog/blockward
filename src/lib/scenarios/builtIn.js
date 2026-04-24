@@ -41,6 +41,8 @@ export var SC1 = {
   description:"A 6-month-old male brought in for increasing fussiness and fever.",
   patient:{ageLabel:"6 months",weightKg:7.5,sex:"Male",cc:"Fussiness and fever x 12 hours",
     history:"Previously healthy. Decreased oral intake, fewer wet diapers today. No sick contacts. Immunizations up to date. Born full-term, no NICU stay."},
+  emsReport:"EMS brought in a 6-month-old male for a 12-hour history of fever and fussiness. Mother reports two episodes of non-bloody emesis and decreased wet diapers. Acetaminophen was given approximately one hour ago. Field vitals showed HR 175 and rectal temp 39.1C. EMS established a 22g IV in the left hand with NS KVO.",
+  learnMore:"Fever in infants under 3 months is treated urgently because of the risk of occult bacteremia and serious bacterial illness. Between 3-6 months, fever workup is guided by clinical appearance, immunization status, and focal findings. At 6 months, a well-appearing infant with a clear viral source may not need a full septic workup, but fussiness, feeding changes, and dehydration are red flags for deeper investigation.",
   norms:{hr:[100,160],rr:[25,40],sbp:[70,90],dbp:[40,60],spo2:[95,100],temp:[36.5,37.5]},
   phases:[
     {id:"triage",name:"Triage",
@@ -178,6 +180,8 @@ export var SC2 = {
   description:"A 2-year-old with 3 days of vomiting and diarrhea, increasingly lethargic.",
   patient:{ageLabel:"2 years",weightKg:12,sex:"Male",cc:"Vomiting/diarrhea x 3 days, lethargy",
     history:"Marcus has been sick for three days. Started with watery diarrhea, then vomiting everything including Pedialyte. His mom says he had one wet diaper in the last 12 hours and is sleeping way more than usual. No fever. Previously healthy, no medications."},
+  emsReport:"Private vehicle arrival. 2-year-old male with 3 days of vomiting and watery diarrhea, unable to tolerate oral rehydration. Mother reports one wet diaper in the past 24 hours (normally 6-7). No fever, no blood in stool, no sick contacts. Arrived limp and lethargic in mother's arms. No prehospital interventions.",
+  learnMore:"Pediatric dehydration severity is classified by percent volume loss: mild (3-5%), moderate (6-9%), and severe (>10%). Each category corresponds to a cluster of clinical findings - tachycardia and dry mucous membranes appear early, sunken fontanelle and skin tenting indicate moderate loss, and delayed cap refill with altered mental status signals severe depletion. Treatment is guided by this severity classification: oral rehydration for mild, IV bolus for moderate, and aggressive resuscitation for severe.",
   norms:{hr:[80,130],rr:[20,30],sbp:[80,100],dbp:[50,65],spo2:[95,100],temp:[36.5,37.5]},
   phases:[
     {id:"triage",name:"Triage",
@@ -311,6 +315,8 @@ export var SC3 = {
   description:"An 8-year-old known asthmatic with worsening wheeze unresponsive to home treatment.",
   patient:{ageLabel:"8 years",weightKg:25,sex:"Female",cc:"Worsening wheeze x 2 days, albuterol not helping",
     history:"Sophia is a known asthmatic who uses an albuterol inhaler PRN. Her mom says she has been wheezing for two days after a cold. She has used her inhaler 8 times today with no improvement. No prior ICU admissions but two ED visits in the past year. Takes no controller medications. Family history of asthma. Allergic to dust mites."},
+  emsReport:"Walk-in triage. 8-year-old female with known asthma, wheezing progressively for 2 days after a cold. Mother reports 8 doses of home albuterol MDI today without relief. Arrived tripoding at the doorway with audible expiratory wheeze and speaking in 2-3 word phrases. No controller medications. Prior ED visits twice in the past year, no ICU history.",
+  learnMore:"Pediatric status asthmaticus is acute severe asthma that does not respond adequately to standard bronchodilator therapy. Clinical severity correlates with air movement rather than wheeze loudness: a quiet chest in severe asthma is more concerning than loud wheeze. Key decision points are whether to continue inhaled therapy alone, add IV magnesium or terbutaline, initiate non-invasive ventilation, or proceed to intubation. Rising pCO2 in the face of treatment is the most reliable indicator that respiratory failure is imminent.",
   norms:{hr:[70,110],rr:[18,25],sbp:[90,115],dbp:[55,70],spo2:[95,100],temp:[36.5,37.5]},
   phases:[
     {id:"triage",name:"Triage",

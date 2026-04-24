@@ -125,6 +125,9 @@
 
 /**
  * @typedef {Object} Scenario
+ * Phase-2.5 issue 2 added `emsReport` (clinical handoff prose shown on the
+ * pre-assess screen, 2-4 sentences) and `learnMore` (optional deeper context
+ * behind a Learn More modal on the same screen).
  * @property {string} id
  * @property {string} title
  * @property {1|2|3} tier
@@ -137,6 +140,8 @@
  * @property {Phase[]} phases
  * @property {Curveball|null} curveball
  * @property {Debrief} debrief
+ * @property {string} [emsReport]
+ * @property {string} [learnMore]
  */
 
 export {};

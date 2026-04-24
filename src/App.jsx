@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import { Check } from "lucide-react";
 import { SC1, SC2, SC3 } from "./lib/scenarios/builtIn.js";
 import { useScenariosStore } from "./stores/scenariosStore.js";
 import { usePlayerStore } from "./stores/playerStore.js";
 import { ScenarioPlayer } from "./components/player/ScenarioPlayer.jsx";
+import { ScenarioList } from "./components/scenarios/ScenarioList.jsx";
 function Builder(props){
   var onDone=props.onDone;var onBack=props.onBack;
   var _txt=useState("");var txt=_txt[0];var setTxt=_txt[1];
@@ -284,21 +284,7 @@ export default function App(){
         <div style={{flex:1,borderRadius:12,padding:12,textAlign:"center",background:"linear-gradient(135deg,rgba(78,205,196,0.15),rgba(78,205,196,0.05))",border:"1px solid rgba(78,205,196,0.3)"}}><div style={{fontSize:28,fontWeight:900,color:"#4ECDC4"}}>{nd}</div><div style={{fontSize:11,color:"#999"}}>Completed</div></div>
         <div style={{flex:1,borderRadius:12,padding:12,textAlign:"center",background:"linear-gradient(135deg,rgba(165,94,234,0.15),rgba(165,94,234,0.05))",border:"1px solid rgba(165,94,234,0.3)"}}><div style={{fontSize:28,fontWeight:900,color:"#c4b5fd"}}>{built.length+cust.length}</div><div style={{fontSize:11,color:"#999"}}>Scenarios</div></div>
         <div style={{flex:1,borderRadius:12,padding:12,textAlign:"center",background:"linear-gradient(135deg,rgba(255,107,129,0.15),rgba(255,107,129,0.05))",border:"1px solid rgba(255,107,129,0.3)"}}><div style={{fontSize:28,fontWeight:900,color:"#fda4af"}}>{cust.length}</div><div style={{fontSize:11,color:"#999"}}>Custom</div></div></div>
-      <h2 className="fi" style={{fontSize:17,fontWeight:700,fontFamily:"'Fredoka',sans-serif",marginBottom:12,animationDelay:".2s"}}>Core Scenarios</h2>
-      {built.map(function(s,i){var p=prog[s.id];var isBuiltIn=["fussy-infant","vomiting-toddler","asthma-crisis"].indexOf(s.id)>=0;return(
-        <button key={s.id} onClick={function(){play(s);}} className="fi bw-tap bw-glass" style={{width:"100%",textAlign:"left",borderRadius:16,padding:20,marginBottom:12,border:"2px solid rgba(78,205,196,0.2)",cursor:"pointer",color:"white",animationDelay:(0.25+i*0.05)+"s"}}>
-          <div style={{display:"flex",alignItems:"flex-start",gap:12}}><div style={{fontSize:32,flexShrink:0}}>{s.icon}</div><div style={{flex:1}}>
-            <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}><h3 style={{fontWeight:700,margin:0}}>{s.title}</h3><span style={{padding:"4px 10px",borderRadius:20,fontSize:11,fontWeight:700,background:"rgba(78,205,196,0.15)",color:"#4ECDC4"}}>{"Tier "+s.tier}</span>{isBuiltIn&&<span style={{padding:"2px 8px",borderRadius:20,fontSize:10,fontWeight:700,background:"rgba(0,200,100,0.15)",color:"#00c864"}}>Clinically Reviewed</span>}{p&&p.done&&<span style={{color:"#00b894"}}><Check size={18}/></span>}</div>
-            <p style={{fontSize:13,color:"#999",marginTop:2}}>{s.tagline}</p>{p&&<div style={{fontSize:11,color:"#666",marginTop:4}}>{"Best: "+Math.round(p.best*100)+"% | "+p.n+" attempt"+(p.n!==1?"s":"")}</div>}</div></div></button>);})}
-      {cust.length>0&&(<div><h2 className="fi" style={{fontSize:17,fontWeight:700,fontFamily:"'Fredoka',sans-serif",marginTop:24,marginBottom:12}}>Custom Scenarios</h2>
-        {cust.map(function(s,i){var p=prog[s.id];return(
-          <div key={s.id||i} className="fi bw-glass bw-tap" style={{borderRadius:16,padding:16,marginBottom:12,border:"2px solid rgba(165,94,234,0.2)",cursor:"pointer"}}>
-            <div style={{display:"flex",alignItems:"flex-start",gap:12}}><div style={{fontSize:28,flexShrink:0}}>{s.icon||"\u{1F3E5}"}</div><div style={{flex:1}}>
-              <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}><h3 style={{fontWeight:700,margin:0}}>{s.title}</h3><span style={{padding:"2px 8px",borderRadius:20,fontSize:10,fontWeight:700,background:"rgba(165,94,234,0.3)",color:"#c4b5fd"}}>AI Generated</span>{p&&p.done&&<span style={{color:"#00b894"}}><Check size={18}/></span>}</div>
-              <p style={{fontSize:13,color:"#999",marginTop:2}}>{s.tagline||s.description}</p>{p&&<div style={{fontSize:11,color:"#666",marginTop:4}}>{"Best: "+Math.round(p.best*100)+"% | "+p.n+" attempt"+(p.n!==1?"s":"")}</div>}</div></div>
-            <div style={{display:"flex",gap:8,marginTop:12}}>
-              <button onClick={function(){play(s);}} style={{flex:1,padding:"10px 0",borderRadius:10,fontWeight:700,color:"white",fontSize:13,background:"rgba(165,94,234,0.3)",border:"none",cursor:"pointer"}}>Play</button>
-              <button onClick={function(){setDelConfirm(s);}} style={{padding:"10px 16px",borderRadius:10,fontWeight:700,fontSize:13,background:"rgba(255,71,87,0.15)",color:"#FF6B81",border:"none",cursor:"pointer"}}>X</button></div></div>);})}</div>)}
+      <ScenarioList built={built} cust={cust} prog={prog} onPlay={play} onDelete={setDelConfirm}/>
       <button onClick={function(){setView("build");}} className="fi" style={{width:"100%",marginTop:24,padding:"16px 0",borderRadius:16,fontWeight:700,color:"white",fontSize:18,background:"linear-gradient(135deg,#a55eea,#8854d0)",boxShadow:"0 4px 20px rgba(165,94,234,0.3)",fontFamily:"'Fredoka',sans-serif",border:"none",cursor:"pointer",animationDelay:".3s"}}>Build Custom Scenario</button>
       <p style={{textAlign:"center",marginTop:24,paddingBottom:8,fontSize:11,color:"#444"}}>Block Ward v1.6</p>
       <p style={{textAlign:"center",paddingBottom:16,fontSize:10,color:"#555",letterSpacing:0.5}}>Experience created by: Sebastian J. Heredia</p>

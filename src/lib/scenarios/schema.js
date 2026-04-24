@@ -142,6 +142,18 @@
  * @property {Debrief} debrief
  * @property {string} [emsReport]
  * @property {string} [learnMore]
+ * @property {Reassessment} [reassessment]
+ * @property {string} [stabilizationSummary]
+ */
+
+/**
+ * @typedef {Object} Reassessment
+ * Phase-2.5 issue 7: a short post-intervention snapshot shown between the
+ * last action stage and the recovery/debrief screens. Gives the user a
+ * clinical closing picture rather than jumping straight to "stabilized."
+ * @property {string} narrative
+ * @property {Vitals} vitals
+ * @property {Sign[]} [signs]
  */
 
 export {};

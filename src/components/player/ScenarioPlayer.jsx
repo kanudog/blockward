@@ -21,7 +21,7 @@ export function ScenarioPlayer(props){
   var ageG=guessAge(sc);var sexG=guessSex(sc);var scVisuals=sc.visuals||[];
   var stage=usePlayerStore(function(s){return s.stage;});var pi=usePlayerStore(function(s){return s.phaseIndex;});var flags=usePlayerStore(function(s){return s.flags;});var showFb=usePlayerStore(function(s){return s.showFb;});var cbDone=usePlayerStore(function(s){return s.cbDone;});var score=usePlayerStore(function(s){return s.score;});var shake=usePlayerStore(function(s){return s.shake;});var vit=usePlayerStore(function(s){return s.vitals;});
   var _ps=usePlayerStore.getState();var setStage=_ps.setStage;var setPi=_ps.setPhaseIndex;var setFlags=_ps.setFlags;var toggleFlag=_ps.toggleFlag;var setShowFb=_ps.setShowFb;var setCbDone=_ps.setCbDone;var setShake=_ps.setShake;var setVit=_ps.setVitals;var addScore=_ps.addScore;var addSkipped=_ps.addSkipped;
-  function prevStageFor(s){if(s==="phase")return"intro";if(s==="assess")return"intro";if(s==="act")return"phase";if(s==="cb-alert")return"act";if(s==="cb-act")return"cb-alert";return null;}
+  function prevStageFor(s){if(s==="phase")return"intro";if(s==="assess")return"intro";if(s==="act")return"phase";if(s==="cb-alert")return"act";if(s==="cb-act")return"cb-alert";if(s==="reassess")return null;return null;}
   var prev=prevStageFor(stage);
   var goBack=function(){if(prev)setStage(prev);};
   var _recStep=useState(0);var recStep=_recStep[0];var setRecStep=_recStep[1];
@@ -45,7 +45,7 @@ export function ScenarioPlayer(props){
   var flag=function(id){if(!showFb)toggleFlag(id);};
   var submit=function(){var r=computeAssessScore(ph.assessItems,flags);addScore({c:r.c,t:r.t});setShowFb(true);};
   var afterA=function(){setFlags({});setShowFb(false);if(pi<sc.phases.length-1){var n=pi+1;setPi(n);setVit(sc.phases[n].vitals);setStage("phase");}else setStage("debrief");};
-  var afterAct=function(s){if(s&&s.t)addScore({c:s.c,t:s.t});if(!cbDone&&sc.curveball)trigCb();else setStage("recovery");};
+  var afterAct=function(s){if(s&&s.t)addScore({c:s.c,t:s.t});if(!cbDone&&sc.curveball)trigCb();else setStage("reassess");};
   var phaseHasIntervention=ph&&(ph.tools||ph.meds);;
   var BS={width:"100%",marginTop:12,padding:"12px 0",borderRadius:12,fontWeight:700,color:"white",fontSize:16,border:"none",cursor:"pointer"};
   var GR="linear-gradient(135deg,#4ECDC4,#44B09E)";var RD="linear-gradient(135deg,#FF4757,#c0392b)";var PP="linear-gradient(135deg,#a55eea,#8854d0)";
@@ -141,9 +141,32 @@ export function ScenarioPlayer(props){
               <div style={{borderTop:"1px solid rgba(255,71,87,0.15)",paddingTop:8,marginTop:8}}>
                 <p style={{fontSize:14,fontWeight:700,color:"#FF6B81",marginBottom:4}}>Critical Intervention</p>
                 <p style={{fontSize:11,color:"#bbb"}}>Find all correct actions.</p></div></div>
-            <ActionPanel tools={sc.curveball.tools} meds={sc.curveball.meds} actions={sc.curveball.actions} onDone={function(s){if(s&&s.t)addScore({c:s.c,t:s.t});setStage("recovery");}} onSkip={function(s,m){if(m&&m.length>0)addSkipped(m.map(function(x){return Object.assign({},x,{phase:"Curveball: "+(sc.curveball.name||"")});}));if(s&&s.t)addScore({c:s.c,t:s.t});setStage("recovery");}}/>
+            <ActionPanel tools={sc.curveball.tools} meds={sc.curveball.meds} actions={sc.curveball.actions} onDone={function(s){if(s&&s.t)addScore({c:s.c,t:s.t});setStage("reassess");}} onSkip={function(s,m){if(m&&m.length>0)addSkipped(m.map(function(x){return Object.assign({},x,{phase:"Curveball: "+(sc.curveball.name||"")});}));if(s&&s.t)addScore({c:s.c,t:s.t});setStage("reassess");}}/>
           </div>
         </div></div>)}
+      {stage==="reassess"&&(function(){
+        var re=sc.reassessment;
+        var reVitals=re&&re.vitals?re.vitals:vit;
+        var reSigns=re&&re.signs?re.signs:[];
+        var reNarrative=re&&re.narrative?re.narrative:"The patient has stabilized following your interventions. Vital signs are trending toward age-appropriate ranges and end-organ perfusion has been restored.";
+        return(<div className="slu">
+          <div style={{textAlign:"center",marginBottom:12}}>
+            <div style={{display:"inline-block",padding:"4px 14px",borderRadius:20,fontSize:11,fontWeight:800,letterSpacing:1,textTransform:"uppercase",background:"rgba(85,239,196,0.12)",color:"#55efc4",border:"1px solid rgba(85,239,196,0.3)"}}>Reassessment</div>
+          </div>
+          <div className="bw-split">
+            <div className="bw-split-left">
+              <VitalsDisplay vitals={reVitals}/>
+              {reSigns.length>0&&<BodySystemsView signs={reSigns}/>}
+            </div>
+            <div className="bw-split-right">
+              <div className="bw-glass" style={{borderRadius:16,padding:12}}>
+                <TextBlock text={reNarrative} style={{fontSize:13,color:"#ddd",lineHeight:1.6}}/>
+              </div>
+              <button onClick={function(){setStage("recovery");}} style={Object.assign({},BS,{background:GR})}>Continue</button>
+            </div>
+          </div>
+        </div>);
+      })()}
       {stage==="recovery"&&(function(){
         var allRevealed=recStep>=correctActions.length;
         return(<div className="slu" style={{textAlign:"center"}}>
@@ -157,12 +180,19 @@ export function ScenarioPlayer(props){
           </div>
           <h2 style={{fontSize:26,fontWeight:900,color:"#55efc4",marginBottom:4}}>Patient Stabilized!</h2>
           <p style={{fontSize:14,color:"#ccc",marginBottom:20}}>Your interventions worked. Here's how the patient responded:</p>
-          {/* Normalized vitals */}
+          {/* Post-intervention vitals: use reassessment.vitals when available, fallback to norm midpoints */}
           <div className="bw-vn" style={{display:"inline-flex",gap:12,flexWrap:"wrap",justifyContent:"center",marginBottom:20}}>
-            {[{l:"HR",v:sc.norms?Math.round((sc.norms.hr[0]+sc.norms.hr[1])/2):"--",c:"#55efc4"},{l:"SpO₂",v:sc.norms?"99%":"--",c:"#fdcb6e"},{l:"BP",v:sc.norms?Math.round((sc.norms.sbp[0]+sc.norms.sbp[1])/2)+"/"+Math.round((sc.norms.dbp[0]+sc.norms.dbp[1])/2):"--",c:"#74b9ff"},{l:"Temp",v:"37.0°C",c:"#fab1a0"}].map(function(vi,i){return(<div key={i} className="bw-vn" style={{animationDelay:(0.2+i*0.15)+"s",padding:"8px 14px",borderRadius:12,background:"rgba(85,239,196,0.08)",border:"1px solid rgba(85,239,196,0.15)"}}>
-              <div style={{fontSize:10,color:"#999",fontWeight:700,textTransform:"uppercase"}}>{vi.l}</div>
-              <div style={{fontSize:18,fontWeight:900,color:vi.c}}>{vi.v}</div>
-            </div>);})}
+            {(function(){
+              var re=sc.reassessment&&sc.reassessment.vitals;
+              var hrV=re?re.hr:(sc.norms?Math.round((sc.norms.hr[0]+sc.norms.hr[1])/2):"--");
+              var spV=re?re.spo2+"%":(sc.norms?"99%":"--");
+              var bpV=re?(re.sbp+"/"+re.dbp):(sc.norms?Math.round((sc.norms.sbp[0]+sc.norms.sbp[1])/2)+"/"+Math.round((sc.norms.dbp[0]+sc.norms.dbp[1])/2):"--");
+              var tempV=re?(typeof re.temp==="number"?re.temp.toFixed(1)+"°C":re.temp+"°C"):"37.0°C";
+              return [{l:"HR",v:hrV,c:"#55efc4"},{l:"SpO₂",v:spV,c:"#fdcb6e"},{l:"BP",v:bpV,c:"#74b9ff"},{l:"Temp",v:tempV,c:"#fab1a0"}].map(function(vi,i){return(<div key={i} className="bw-vn" style={{animationDelay:(0.2+i*0.15)+"s",padding:"8px 14px",borderRadius:12,background:"rgba(85,239,196,0.08)",border:"1px solid rgba(85,239,196,0.15)"}}>
+                <div style={{fontSize:10,color:"#999",fontWeight:700,textTransform:"uppercase"}}>{vi.l}</div>
+                <div style={{fontSize:18,fontWeight:900,color:vi.c}}>{vi.v}</div>
+              </div>);});
+            })()}
           </div>
           {/* Intervention timeline - reveals one at a time */}
           <div style={{textAlign:"left",maxWidth:400,margin:"0 auto",marginBottom:20}}>
@@ -180,7 +210,9 @@ export function ScenarioPlayer(props){
             })}
           </div>
           {allRevealed&&<div className="bw-vn" style={{marginBottom:16}}>
-            <p style={{fontSize:13,color:"#55efc4",fontWeight:700,marginBottom:12}}>All interventions complete. Patient is resting comfortably.</p>
+            {sc.stabilizationSummary?<div style={{maxWidth:440,margin:"0 auto 12px",padding:12,borderRadius:12,background:"rgba(85,239,196,0.06)",border:"1px solid rgba(85,239,196,0.2)",textAlign:"left"}}>
+              <TextBlock text={sc.stabilizationSummary} style={{fontSize:13,color:"#ddd",lineHeight:1.6}}/>
+            </div>:<p style={{fontSize:13,color:"#55efc4",fontWeight:700,marginBottom:12}}>All interventions complete. Patient is resting comfortably.</p>}
             <button onClick={function(){setStage("debrief");}} style={Object.assign({},BS,{background:GR,maxWidth:300,margin:"0 auto"})}>Continue to Debrief</button>
           </div>}
         </div>);

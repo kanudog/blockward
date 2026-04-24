@@ -165,6 +165,16 @@ export var SC1 = {
       {title:"Parallel Crisis Management",content:"The PICU frequently presents overlapping emergencies that require simultaneous management. The key principle is ABC prioritization with parallel task execution through team delegation. In this scenario, the infant has two concurrent life-threatening problems: septic shock requiring fluid resuscitation and antibiotics, and a generalized seizure requiring airway protection and antiepileptic therapy. Stopping the fluid bolus to manage the seizure would worsen the shock. Ignoring the seizure to continue the bolus would allow ongoing hypoxia and potential brain injury. The solution is parallel processing: one team member manages the airway (positioning, suction, oxygen delivery), another draws up and administers lorazepam, a third continues the fluid bolus and monitors the infusion pump, and the physician directs the overall resuscitation and makes prioritization decisions. Time-based protocols run simultaneously: the seizure protocol (benzodiazepine at time zero, repeat at 5 minutes, second-line agent at 10 minutes if refractory) and the sepsis bundle (blood cultures, antibiotics within 60 minutes, fluid resuscitation to perfusion targets). Effective communication tools include closed-loop communication (repeat-back of orders), time calls (announcing elapsed time since seizure onset), and designated role assignments at the start of the resuscitation.",tldr:"When two emergencies happen at once, do not stop treating one to treat the other. Delegate tasks across the team and run both protocols in parallel."},
     ],
   },
+  reassessment:{
+    narrative:"Forty minutes after the first fluid bolus and the initiation of antibiotics, the infant's clinical trajectory has reversed. Heart rate has come down from 192 to 150, capillary refill is now less than 2 seconds, and the mottling on the lower extremities has resolved. He is tracking faces again and reaching for his pacifier. The mother, who was holding his hand during the resuscitation, notices him squeeze back.",
+    vitals:{hr:150,rr:36,sbp:84,dbp:52,spo2:99,temp:38.1,cap:2},
+    signs:[
+      {label:"Perfusion",finding:"Warm pink extremities, cap refill <2s",pos:"body",sys:"Cardiovascular"},
+      {label:"Mental status",finding:"Tracking faces, reaching for pacifier",pos:"head",sys:"Neuro"},
+      {label:"Skin",finding:"Mottling resolved, no new rash",pos:"body",sys:"Integumentary"},
+    ]
+  },
+  stabilizationSummary:"Aggressive isotonic fluid resuscitation restored circulating volume and tissue perfusion. Broad-spectrum antibiotics targeted the underlying bacterial source before cultures returned. Dextrose corrected hypoglycemia and protected cortical function while the metabolic acidosis resolved.",
   debrief:{
     summary:"You identified septic shock by recognizing HR-temperature dissociation, initiated resuscitation, and managed an unexpected seizure.",
     explainers:[
@@ -300,6 +310,16 @@ export var SC2 = {
       {title:"Root Cause Thinking",content:"Don't just chase the rhythm on the monitor. Ask WHY the rhythm changed. This child had 3 days of vomiting causing hypokalemia. The arrhythmia is a SYMPTOM of the electrolyte problem, not the primary disease. Cardioversion may convert the rhythm temporarily, but it will recur unless you fix the potassium. Always look for and treat the root cause: check a BMP/electrolytes, replace K+ aggressively (0.5-1 mEq/kg IV over 1 hour with cardiac monitoring), and give magnesium (which stabilizes the cardiac membrane).",tldr:"The arrhythmia is a symptom, not the disease. Fix the potassium that caused it or the rhythm will keep coming back no matter how many times you shock."},
     ],
   },
+  reassessment:{
+    narrative:"After two 20 mL/kg boluses and potassium replacement, the child's perfusion and mental status have returned. Heart rate is down to 130, cap refill is 2 seconds, and his hands are warm to the touch. He has produced a small amount of concentrated urine, signaling that renal blood flow is recovering. He opens his eyes to voice and reaches for his mother's necklace.",
+    vitals:{hr:130,rr:26,sbp:94,dbp:60,spo2:99,temp:36.9,cap:2},
+    signs:[
+      {label:"Perfusion",finding:"Warm extremities, cap refill 2s",pos:"body",sys:"Cardiovascular"},
+      {label:"Urine",finding:"Small concentrated void noted",pos:"body",sys:"Renal"},
+      {label:"Mental status",finding:"Alert, reaching for mother",pos:"head",sys:"Neuro"},
+    ]
+  },
+  stabilizationSummary:"Repeated normal saline boluses restored circulating volume and reversed compensated hypovolemic shock. Potassium and magnesium replacement corrected the electrolyte derangement that triggered the arrhythmia, eliminating recurrence risk. Early recognition of the vomiting-hypokalemia-VT chain prevented the scenario from becoming a cardiac arrest.",
   debrief:{
     summary:"You recognized compensated hypovolemic shock in a dehydrated toddler, initiated fluid resuscitation, and identified a wide-complex tachycardia caused by electrolyte derangement from prolonged vomiting. Root cause thinking - connecting the vomiting to hypokalemia to arrhythmia - was the critical skill tested.",
     explainers:[
@@ -431,6 +451,16 @@ export var SC3 = {
       {title:"Decompress Before Intubation",content:"Critical sequencing: ALWAYS decompress a tension pneumothorax BEFORE positive pressure ventilation. Intubating and bagging a patient with unrelieved tension pushes more air through the ruptured bleb into the pleural space with each breath. The positive pressure accelerates the tension cascade and can cause PEA arrest within minutes. Needle decompression takes 30 seconds and converts tension to simple pneumothorax. Then you can safely intubate if needed. Sequence: recognize, decompress, oxygenate, then manage the airway.",tldr:"Bagging a tension pneumo forces more air into the chest and kills faster. Decompress first (30 seconds), then intubate."},
     ],
   },
+  reassessment:{
+    narrative:"Following needle decompression and continued bronchodilator therapy, Sophia's respiratory mechanics have improved. She is speaking in full sentences again, work of breathing has decreased, and the tracheal shift has resolved. Breath sounds are audible bilaterally with residual scattered wheeze. She asks if she can have her inhaler back.",
+    vitals:{hr:118,rr:26,sbp:106,dbp:68,spo2:96,temp:37.4,cap:2},
+    signs:[
+      {label:"Work of breathing",finding:"Mild retractions only, no accessory muscle use",pos:"body",sys:"Respiratory"},
+      {label:"Breath sounds",finding:"Bilateral, scattered expiratory wheeze",pos:"body",sys:"Respiratory"},
+      {label:"Mental status",finding:"Alert, speaking in full sentences",pos:"head",sys:"Neuro"},
+    ]
+  },
+  stabilizationSummary:"Needle decompression immediately reversed the tension pneumothorax, restoring venous return and cardiac output. Continuous albuterol plus IV methylprednisolone broke the underlying bronchospasm and inflammation. Early recognition of the unilateral breath sounds prevented progression to PEA arrest from obstructive shock.",
   debrief:{
     summary:"You managed escalating status asthmaticus, recognized the transition from compensating to failing respiratory mechanics, and identified a tension pneumothorax when the clinical picture suddenly changed. The critical skill was pattern interruption - recognizing that unilateral absent breath sounds + sudden desat + hypotension represented a NEW diagnosis superimposed on asthma.",
     explainers:[

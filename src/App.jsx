@@ -7,19 +7,18 @@ import { ScenarioList } from "./components/scenarios/ScenarioList.jsx";
 import { BuilderForm } from "./components/builder/BuilderForm.jsx";
 import { Toast } from "./components/shared/Toast.jsx";
 import { ConfirmModal } from "./components/shared/ConfirmModal.jsx";
+import { Sidebar } from "./components/shell/Sidebar.jsx";
 export default function App(){
   var _view=useState("dash");var view=_view[0];var setView=_view[1];
   var act=usePlayerStore(function(s){return s.activeScenario;});
   var startPlayer=usePlayerStore(function(s){return s.start;});
   var resetPlayer=usePlayerStore(function(s){return s.reset;});
   var scn=useScenarios();
-  var built=scn.built;var cust=scn.custom;var allScenarios=scn.allScenarios;var ok=scn.hydrated;
+  var built=scn.built;var cust=scn.custom;var ok=scn.hydrated;
   var hydrate=scn.hydrate;var addCustom=scn.addCustom;var addCustomIfNew=scn.addCustomIfNew;var deleteCustom=scn.deleteCustom;var clearAllScenarios=scn.clearAll;
-  var pr=useProgress();
-  var prog=pr.prog;var recordCompletion=pr.recordCompletion;var totalAttempts=pr.totalAttempts;var nd=pr.completed;var avgScore=pr.avgScore;
+  var pr=useProgress();var prog=pr.prog;var recordCompletion=pr.recordCompletion;var nd=pr.completed;
   var _shareMsg=useState(null);var shareMsg=_shareMsg[0];var setShareMsg=_shareMsg[1];
   var _sidebar=useState(false);var sidebar=_sidebar[0];var setSidebar=_sidebar[1];
-  var _sideTab=useState("ref");var sideTab=_sideTab[0];var setSideTab=_sideTab[1];
   var _delConfirm=useState(null);var delConfirm=_delConfirm[0];var setDelConfirm=_delConfirm[1];
   var _clearConfirm=useState(false);var clearConfirm=_clearConfirm[0];var setClearConfirm=_clearConfirm[1];
   useEffect(function(){
@@ -42,15 +41,6 @@ export default function App(){
   var addC=function(s){addCustom(s);setView("dash");};
   var delC=function(id){deleteCustom(id);setDelConfirm(null);};
   var clearAll=function(){clearAllScenarios();setShareMsg("All data cleared");setTimeout(function(){setShareMsg(null);},2000);};
-  // Peds vital sign reference data
-  var vitalRef=[
-    {age:"Neonate (0-28d)",hr:"120-160",rr:"30-60",sbp:"60-80",dbp:"30-50"},
-    {age:"Infant (1-12m)",hr:"100-160",rr:"25-40",sbp:"70-90",dbp:"40-60"},
-    {age:"Toddler (1-3y)",hr:"80-130",rr:"20-30",sbp:"80-100",dbp:"50-65"},
-    {age:"Child (4-8y)",hr:"70-110",rr:"18-25",sbp:"85-110",dbp:"50-70"},
-    {age:"School Age (9-12y)",hr:"65-110",rr:"16-22",sbp:"90-120",dbp:"55-75"},
-    {age:"Teen (13-17y)",hr:"55-100",rr:"12-20",sbp:"100-130",dbp:"60-80"},
-  ];
   if(!ok)return(<div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"#0a0e1a"}}><div style={{color:"#4ECDC4",fontSize:20}}>Loading Block Ward...</div></div>);
   if(view==="play"&&act)return <ScenarioPlayer sc={act} onExit={function(){setView("dash");resetPlayer();}} onDone={done}/>;
   if(view==="build")return <BuilderForm onDone={addC} onBack={function(){setView("dash");}}/>;
@@ -59,81 +49,7 @@ export default function App(){
     <Toast message={shareMsg}/>
     <ConfirmModal open={!!delConfirm} title="Delete Scenario?" subtitle={delConfirm?delConfirm.title:null} confirmLabel="Delete" onConfirm={function(){delC(delConfirm.id);}} onCancel={function(){setDelConfirm(null);}}/>
     <ConfirmModal open={clearConfirm} title="Clear All Data?" subtitle="All progress and custom scenarios will be removed." confirmLabel="Clear" onConfirm={function(){clearAll();setClearConfirm(false);setSidebar(false);}} onCancel={function(){setClearConfirm(false);}}/>
-    {/* Sidebar overlay */}
-    {sidebar&&<div style={{position:"fixed",top:0,left:0,right:0,bottom:0,zIndex:997,display:"flex"}}>
-      <div style={{position:"absolute",top:0,left:0,right:0,bottom:0,background:"rgba(0,0,0,0.6)"}} onClick={function(){setSidebar(false);}}></div>
-      <div style={{position:"relative",width:320,maxWidth:"85vw",height:"100%",background:"#12152a",borderRight:"1px solid rgba(78,205,196,0.15)",overflowY:"auto",padding:20}}>
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
-          <h2 style={{fontSize:20,fontWeight:900,fontFamily:"'Fredoka',sans-serif"}}>Menu</h2>
-          <button onClick={function(){setSidebar(false);}} style={{background:"none",border:"none",color:"#888",fontSize:20,cursor:"pointer"}}>X</button>
-        </div>
-        {/* Sidebar tabs */}
-        <div style={{display:"flex",gap:4,marginBottom:16}}>
-          {[{k:"ref",l:"Reference"},{k:"stats",l:"My Stats"},{k:"settings",l:"Settings"}].map(function(t){return(
-            <button key={t.k} onClick={function(){setSideTab(t.k);}} style={{flex:1,padding:"6px 0",borderRadius:8,fontSize:11,fontWeight:700,border:"none",cursor:"pointer",background:sideTab===t.k?"rgba(78,205,196,0.2)":"rgba(255,255,255,0.05)",color:sideTab===t.k?"#4ECDC4":"#888"}}>{t.l}</button>
-          );})}
-        </div>
-        {/* Quick Reference */}
-        {sideTab==="ref"&&<div>
-          <h3 style={{fontSize:14,fontWeight:700,color:"#4ECDC4",marginBottom:10}}>Peds Vital Sign Ranges</h3>
-          <div style={{display:"flex",flexDirection:"column",gap:6}}>
-            {vitalRef.map(function(r,i){return(
-              <div key={i} style={{borderRadius:10,padding:10,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.06)"}}>
-                <div style={{fontSize:12,fontWeight:700,color:"#ddd",marginBottom:4}}>{r.age}</div>
-                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:3,fontSize:10,color:"#999"}}>
-                  <span>{"HR: "+r.hr}</span><span>{"RR: "+r.rr}</span>
-                  <span>{"SBP: "+r.sbp}</span><span>{"DBP: "+r.dbp}</span>
-                </div>
-              </div>
-            );})}
-          </div>
-          <div style={{marginTop:16,borderRadius:10,padding:10,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.06)"}}>
-            <div style={{fontSize:12,fontWeight:700,color:"#ddd",marginBottom:6}}>Key Thresholds</div>
-            <div style={{fontSize:10,color:"#999",lineHeight:1.6}}>
-              <div>Cap Refill: normal &lt; 2-3 sec</div>
-              <div>Hypoglycemia: &lt; 45 mg/dL (infant), &lt; 60 mg/dL (child)</div>
-              <div>Lactate: normal 0.5-2.0 mmol/L, critical &gt; 4.0</div>
-              <div>Hypotension (SBP): &lt; 70 + (age in years x 2)</div>
-            </div>
-          </div>
-        </div>}
-        {/* My Stats */}
-        {sideTab==="stats"&&<div>
-          <h3 style={{fontSize:14,fontWeight:700,color:"#4ECDC4",marginBottom:10}}>Your Progress</h3>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:16}}>
-            <div style={{borderRadius:10,padding:12,textAlign:"center",background:"rgba(78,205,196,0.1)"}}>
-              <div style={{fontSize:28,fontWeight:900,color:"#4ECDC4"}}>{nd}</div>
-              <div style={{fontSize:10,color:"#999"}}>Completed</div>
-            </div>
-            <div style={{borderRadius:10,padding:12,textAlign:"center",background:"rgba(165,94,234,0.1)"}}>
-              <div style={{fontSize:28,fontWeight:900,color:"#c4b5fd"}}>{totalAttempts}</div>
-              <div style={{fontSize:10,color:"#999"}}>Total Attempts</div>
-            </div>
-            <div style={{borderRadius:10,padding:12,textAlign:"center",background:"rgba(0,184,148,0.1)",gridColumn:"1 / -1"}}>
-              <div style={{fontSize:28,fontWeight:900,color:"#00b894"}}>{avgScore>0?avgScore+"%":"--"}</div>
-              <div style={{fontSize:10,color:"#999"}}>Average Best Score</div>
-            </div>
-          </div>
-          <h4 style={{fontSize:12,fontWeight:700,color:"#ddd",marginBottom:8}}>Per Scenario</h4>
-          {allScenarios.map(function(s){var p=prog[s.id];if(!p)return null;return(
-            <div key={s.id} style={{borderRadius:8,padding:8,marginBottom:4,background:"rgba(255,255,255,0.04)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-              <span style={{fontSize:11,color:"#ccc"}}>{s.icon+" "+s.title}</span>
-              <span style={{fontSize:11,fontWeight:700,color:p.best>=0.8?"#00b894":p.best>=0.5?"#FECA57":"#FF6B81"}}>{Math.round(p.best*100)+"%"}</span>
-            </div>
-          );})}
-        </div>}
-        {/* Settings */}
-        {sideTab==="settings"&&<div>
-          <h3 style={{fontSize:14,fontWeight:700,color:"#4ECDC4",marginBottom:10}}>Settings</h3>
-          <button onClick={function(){setClearConfirm(true);}} style={{width:"100%",padding:"10px 0",borderRadius:10,fontWeight:700,fontSize:13,background:"rgba(255,71,87,0.15)",color:"#FF6B81",border:"none",cursor:"pointer",marginBottom:12}}>Clear All Data</button>
-          <div style={{fontSize:11,color:"#666",lineHeight:1.6}}>
-            <p>Block Ward v1.6</p>
-            <p style={{marginTop:4}}>Created by Sebastian J. Heredia</p>
-            <p style={{marginTop:4}}>Powered by Claude (Anthropic)</p>
-          </div>
-        </div>}
-      </div>
-    </div>}
+    <Sidebar open={sidebar} onClose={function(){setSidebar(false);}} onRequestClearAll={function(){setClearConfirm(true);}}/>
     <div className="bw-container" style={{maxWidth:480,margin:"0 auto"}}>
       {/* Header with hamburger */}
       <div className="fi" style={{display:"flex",justifyContent:"space-between",alignItems:"center",paddingTop:16,marginBottom:20}}>

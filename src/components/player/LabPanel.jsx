@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { WhyModal, WhyButton } from "../shared/WhyModal.jsx";
+
 export function LabPanel(props) {
   var labs = props.labs || [];
-  var _openLab = useState(null);var openLab=_openLab[0];var setOpenLab=_openLab[1];
+  var _why=useState(null);var whyTarget=_why[0];var setWhyTarget=_why[1];
   if (labs.length === 0) return null;
   return (
     <div style={{marginTop:8,marginBottom:8}}>
@@ -15,28 +17,29 @@ export function LabPanel(props) {
           </rect>
         </svg>
         <div style={{fontSize:12,fontWeight:700,color:"#ff7675"}}>Lab Results</div>
-        {labs.some(function(l){return l.explain;})&&<div style={{fontSize:9,color:"#666"}}>Tap critical values for details</div>}
       </div>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
         {labs.map(function(lab,i) {
           var isCrit = lab.critical === true;
           var bg = isCrit ? "rgba(255,71,87,0.12)" : "rgba(255,255,255,0.04)";
           var brd = isCrit ? "1px solid rgba(255,71,87,0.25)" : "1px solid rgba(255,255,255,0.06)";
-          var isOpen = openLab === i;
-          var tappable = isCrit && lab.explain;
+          var hasWhy = !!lab.why;
           return (
-            <div key={i} onClick={tappable?function(){setOpenLab(isOpen?null:i);}:undefined} style={{borderRadius:8,padding:"8px 12px",background:bg,border:brd,cursor:tappable?"pointer":"default",gridColumn:isOpen?"1 / -1":"auto"}}>
-              <div style={{fontSize:10,color:"#999",fontWeight:600}}>{lab.name}{tappable&&!isOpen?" \u24D8":""}</div>
+            <div key={i} style={{borderRadius:8,padding:"8px 12px",background:bg,border:brd}}>
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:6}}>
+                <div style={{fontSize:10,color:"#999",fontWeight:600}}>{lab.name}</div>
+                {hasWhy&&<WhyButton onClick={function(){setWhyTarget(lab);}} compact={true} accent={isCrit?"#ff7675":"#4ECDC4"}/>}
+              </div>
               <div style={{display:"flex",alignItems:"baseline",gap:4}}>
                 <span style={{fontSize:16,fontWeight:800,color:isCrit?"#ff7675":"#c8d6e5"}}>{lab.value}</span>
                 <span style={{fontSize:9,color:"#666"}}>{lab.unit}</span>
               </div>
               <div style={{fontSize:9,color:"#555"}}>{"Ref: "+lab.ref}</div>
-              {isOpen&&lab.explain&&<div style={{marginTop:4,paddingTop:4,borderTop:"1px solid rgba(255,255,255,0.08)",fontSize:11,color:"#ccc",lineHeight:1.5}}>{lab.explain}</div>}
             </div>
           );
         })}
       </div>
+      <WhyModal open={!!whyTarget} onClose={function(){setWhyTarget(null);}} title={whyTarget?whyTarget.name+": "+whyTarget.value+" "+(whyTarget.unit||""):""} body={whyTarget?whyTarget.why:""} accent={whyTarget&&whyTarget.critical?"#ff7675":"#4ECDC4"}/>
     </div>
   );
 }

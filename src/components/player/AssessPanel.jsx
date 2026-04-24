@@ -1,8 +1,9 @@
+import { useState } from "react";
 import { Flag, Check, X } from "lucide-react";
 import { VitalsDisplay } from "./VitalsDisplay.jsx";
 import { BodySystemsView } from "./BodySystemsView.jsx";
 import { LabPanel } from "./LabPanel.jsx";
-import { TextBlock } from "../shared/TextBlock.jsx";
+import { WhyModal, WhyButton } from "../shared/WhyModal.jsx";
 
 var BS={width:"100%",marginTop:12,padding:"12px 0",borderRadius:12,fontWeight:700,color:"white",fontSize:16,border:"none",cursor:"pointer"};
 var GR="linear-gradient(135deg,#4ECDC4,#44B09E)";
@@ -11,6 +12,7 @@ var PP="linear-gradient(135deg,#a55eea,#8854d0)";
 export function AssessPanel(props){
   var ph=props.ph;var vit=props.vit;var curSigns=props.curSigns;var curLabs=props.curLabs;
   var flags=props.flags;var showFb=props.showFb;var submit=props.submit;var afterA=props.afterA;var flag=props.flag;
+  var _why=useState(null);var whyTarget=_why[0];var setWhyTarget=_why[1];
   var vitItems=ph.assessItems.filter(function(it){return !it.cat||it.cat==="vital";});
   var labItems=ph.assessItems.filter(function(it){return it.cat==="lab";});
   var clinItems=ph.assessItems.filter(function(it){return it.cat==="clinical";});
@@ -26,15 +28,21 @@ export function AssessPanel(props){
     if(ilabel.indexOf("cool")>=0||ilabel.indexOf("pale")>=0||ilabel.indexOf("ashen")>=0)miniSVG=function(){return(<svg viewBox="0 0 40 40" style={{width:36,height:36,borderRadius:"50%",border:"2px solid rgba(78,205,196,0.3)"}}><rect width="40" height="40" rx="20" fill="#ddd"/><rect x="5" y="20" width="12" height="16" rx="4" fill="#c8c8d8"/><rect x="23" y="20" width="12" height="16" rx="4" fill="#c8c8d8"/></svg>);};
     if(ilabel.indexOf("retract")>=0||ilabel.indexOf("accessory")>=0||ilabel.indexOf("tripod")>=0||ilabel.indexOf("work of breath")>=0)miniSVG=function(){return(<svg viewBox="0 0 40 40" style={{width:36,height:36,borderRadius:"50%",border:"2px solid rgba(78,205,196,0.3)"}}><rect width="40" height="40" rx="20" fill="#f0ccb0"/><rect x="10" y="12" width="20" height="18" rx="6" fill="#E8F0FE" opacity="0.4"/><line x1="15" y1="16" x2="15" y2="26" stroke="#cc8866" strokeWidth="1" strokeDasharray="2,1"/><line x1="25" y1="16" x2="25" y2="26" stroke="#cc8866" strokeWidth="1" strokeDasharray="2,1"/><line x1="20" y1="14" x2="20" y2="28" stroke="#cc8866" strokeWidth="1" strokeDasharray="2,1"/></svg>);};
     if(ilabel.indexOf("jvd")>=0||ilabel.indexOf("neck vein")>=0||ilabel.indexOf("jugular")>=0)miniSVG=function(){return(<svg viewBox="0 0 40 40" style={{width:36,height:36,borderRadius:"50%",border:"2px solid rgba(78,205,196,0.3)"}}><rect width="40" height="40" rx="20" fill="#f0ccb0"/><rect x="14" y="5" width="12" height="30" rx="6" fill="#e8c8a8"/><line x1="17" y1="10" x2="17" y2="30" stroke="#70a0d0" strokeWidth="2"/><line x1="23" y1="10" x2="23" y2="30" stroke="#70a0d0" strokeWidth="2"/></svg>);};
-    return(<button key={it.id} onClick={function(){flag(it.id);}} className="bw-tap" style={{width:"100%",textAlign:"left",borderRadius:12,padding:14,background:bg,border:brd,cursor:"pointer",color:"white"}}>
+    var accent=showFb?(ok?"#00b894":"#FF6B81"):"#4ECDC4";
+    return(<div key={it.id} style={{borderRadius:12,padding:14,background:bg,border:brd,color:"white"}}>
       <div style={{display:"flex",alignItems:"center",gap:10}}>
         {miniSVG&&<div style={{flexShrink:0}}>{miniSVG()}</div>}
-        <div style={{flex:1}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}><span style={{fontWeight:700,fontSize:15,display:"flex",alignItems:"center",gap:6}}>{f&&!showFb&&<Flag size={14} color="#FECA57"/>}{it.label}</span>
-            {showFb&&<span style={{fontSize:15,fontWeight:700}}>{ok?<Check size={16}/>:<X size={16}/>}</span>}</div>
-          {showFb&&<TextBlock text={it.why} style={{fontSize:12,color:"#ccc",marginTop:6,lineHeight:1.6}}/>}
-        </div>
-      </div></button>);}
+        <button onClick={function(){flag(it.id);}} className="bw-tap" style={{flex:1,minWidth:0,background:"none",border:"none",cursor:showFb?"default":"pointer",color:"white",textAlign:"left",padding:0}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
+            <span style={{fontWeight:700,fontSize:15,display:"flex",alignItems:"center",gap:6}}>{f&&!showFb&&<Flag size={14} color="#FECA57"/>}{it.label}</span>
+            <div style={{display:"flex",alignItems:"center",gap:6}}>
+              {showFb&&<span style={{fontSize:15,fontWeight:700}}>{ok?<Check size={16}/>:<X size={16}/>}</span>}
+            </div>
+          </div>
+        </button>
+      </div>
+      {showFb&&it.why&&<div style={{marginTop:8,display:"flex",justifyContent:"flex-end"}}><WhyButton onClick={function(){setWhyTarget(it);}} accent={accent}/></div>}
+    </div>);}
   return(<div className="slu">
     <div className="bw-split">
       <div className="bw-split-left">
@@ -61,5 +69,7 @@ export function AssessPanel(props){
         {!showFb?<button onClick={submit} style={Object.assign({},BS,{background:PP})}>Submit Assessment</button>
           :<button onClick={afterA} style={Object.assign({},BS,{background:GR})}>{ph.tools?"Open Tool Belt":"Continue"}</button>}
       </div>
-    </div></div>);
+    </div>
+    <WhyModal open={!!whyTarget} onClose={function(){setWhyTarget(null);}} title={whyTarget?whyTarget.label:""} body={whyTarget?whyTarget.why:""} accent={whyTarget?(whyTarget.bad===!!flags[whyTarget.id]?"#00b894":"#FF6B81"):"#4ECDC4"}/>
+  </div>);
 }

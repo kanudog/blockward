@@ -14,29 +14,40 @@
 
 /**
  * @typedef {Object} Sign
+ * Split-objective-from-pathophys (phase-2.5 issue 1): `finding` is what the
+ * nurse sees; `why` is optional pathophysiology shown only when the user
+ * clicks a "Why?" button. Prior schema used `detail` for the same slot as
+ * `finding` but mixed in rationale; the rename reinforces the contract.
  * @property {string} label
- * @property {string} detail
+ * @property {string} finding
  * @property {"head"|"face"|"body"} pos
  * @property {string} [sys]
+ * @property {string} [why]
  */
 
 /**
  * @typedef {Object} AssessItem
+ * `label` is the objective finding (e.g. "HR 178"). `why` is pathophysiology
+ * shown on demand after the user submits — never before. Phase-2.5 issue 1
+ * reinforces this by hiding `why` behind a "Why?" button in AssessPanel.
  * @property {string} id
  * @property {string} label
  * @property {"vital"|"lab"|"clinical"} cat
  * @property {boolean} bad
- * @property {string} why
+ * @property {string} [why]
  */
 
 /**
  * @typedef {Object} Lab
+ * Phase-2.5 issue 1 renamed `explain` → `why` for consistency across signs,
+ * labs, and assess items. Critical labs should still carry `why`;
+ * non-critical labs may omit it.
  * @property {string} name
  * @property {string} value
  * @property {string} unit
  * @property {string} ref
  * @property {boolean} critical
- * @property {string} [explain]
+ * @property {string} [why]
  */
 
 /**

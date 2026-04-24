@@ -59,8 +59,8 @@ export function Debrief(props){
     {/* Lab Review */}
     {(function(){
       var allLabs=[];
-      sc.phases.forEach(function(p,pi){if(p.labs){p.labs.forEach(function(l){if(l.critical&&l.explain)allLabs.push({lab:l,phase:p.name});});}});
-      if(sc.curveball&&sc.curveball.labs){sc.curveball.labs.forEach(function(l){if(l.critical&&l.explain)allLabs.push({lab:l,phase:"Curveball: "+sc.curveball.name});});}
+      sc.phases.forEach(function(p,pi){if(p.labs){p.labs.forEach(function(l){if(l.critical&&l.why)allLabs.push({lab:l,phase:p.name});});}});
+      if(sc.curveball&&sc.curveball.labs){sc.curveball.labs.forEach(function(l){if(l.critical&&l.why)allLabs.push({lab:l,phase:"Curveball: "+sc.curveball.name});});}
       if(allLabs.length===0)return null;
       return(<div style={{marginBottom:12}}>
         <div style={{marginBottom:12,borderRadius:12,overflow:"hidden",background:"rgba(255,71,87,0.06)",border:"1px solid rgba(255,71,87,0.12)"}}>
@@ -73,7 +73,7 @@ export function Debrief(props){
                   <span style={{fontSize:13,fontWeight:700,color:"#ff7675"}}>{entry.lab.name+": "+entry.lab.value+" "+entry.lab.unit}</span>
                   <span style={{fontSize:9,color:"#666"}}>{"Ref: "+entry.lab.ref+" | "+entry.phase}</span>
                 </div>
-                <TextBlock text={entry.lab.explain} style={{fontSize:12,color:"#ccc",lineHeight:1.5}}/>
+                <TextBlock text={entry.lab.why} style={{fontSize:12,color:"#ccc",lineHeight:1.5}}/>
               </div>
             );})}
           </div>}

@@ -1,0 +1,65 @@
+import { Flag, Check, X } from "lucide-react";
+import { VitalsDisplay } from "./VitalsDisplay.jsx";
+import { BodySystemsView } from "./BodySystemsView.jsx";
+import { LabPanel } from "./LabPanel.jsx";
+import { TextBlock } from "../shared/TextBlock.jsx";
+
+var BS={width:"100%",marginTop:12,padding:"12px 0",borderRadius:12,fontWeight:700,color:"white",fontSize:16,border:"none",cursor:"pointer"};
+var GR="linear-gradient(135deg,#4ECDC4,#44B09E)";
+var PP="linear-gradient(135deg,#a55eea,#8854d0)";
+
+export function AssessPanel(props){
+  var ph=props.ph;var vit=props.vit;var curSigns=props.curSigns;var curLabs=props.curLabs;
+  var flags=props.flags;var showFb=props.showFb;var submit=props.submit;var afterA=props.afterA;var flag=props.flag;
+  var vitItems=ph.assessItems.filter(function(it){return !it.cat||it.cat==="vital";});
+  var labItems=ph.assessItems.filter(function(it){return it.cat==="lab";});
+  var clinItems=ph.assessItems.filter(function(it){return it.cat==="clinical";});
+  function renderItem(it){var f=!!flags[it.id];var ok=showFb&&(f===it.bad);
+    var bg=showFb?(ok?"rgba(0,184,148,0.1)":"rgba(255,71,87,0.1)"):(f?"rgba(254,202,87,0.12)":"rgba(255,255,255,0.04)");
+    var brd=showFb?(ok?"2px solid rgba(0,184,148,0.25)":"2px solid rgba(255,71,87,0.25)"):(f?"2px solid rgba(254,202,87,0.25)":"2px solid rgba(255,255,255,0.07)");
+    var ilabel=it.label.toLowerCase();
+    var miniSVG=null;
+    if(ilabel.indexOf("mottl")>=0)miniSVG=function(){return(<svg viewBox="0 0 40 40" style={{width:36,height:36,borderRadius:"50%",border:"2px solid rgba(78,205,196,0.3)"}}><rect width="40" height="40" rx="20" fill="#f0ccb0"/><circle cx="10" cy="15" r="4" fill="#9080a0" opacity="0.6"/><circle cx="25" cy="12" r="3" fill="#9080a0" opacity="0.5"/><circle cx="18" cy="28" r="3.5" fill="#9080a0" opacity="0.6"/><circle cx="32" cy="25" r="2.5" fill="#9080a0" opacity="0.5"/><circle cx="8" cy="32" r="3" fill="#9080a0" opacity="0.4"/></svg>);};
+    if(ilabel.indexOf("eye")>=0||ilabel.indexOf("deviat")>=0||ilabel.indexOf("pupil")>=0)miniSVG=function(){return(<svg viewBox="0 0 40 40" style={{width:36,height:36,borderRadius:"50%",border:"2px solid rgba(78,205,196,0.3)"}}><rect width="40" height="40" rx="20" fill="#f0ccb0"/><circle cx="14" cy="20" r="7" fill="white"/><circle cx="26" cy="20" r="7" fill="white"/><circle cx="14" cy="16" r="3.5" fill="#2d3436"/><circle cx="26" cy="16" r="3.5" fill="#2d3436"/></svg>);};
+    if(ilabel.indexOf("cyan")>=0||ilabel.indexOf("blue")>=0||ilabel.indexOf("lip")>=0)miniSVG=function(){return(<svg viewBox="0 0 40 40" style={{width:36,height:36,borderRadius:"50%",border:"2px solid rgba(78,205,196,0.3)"}}><rect width="40" height="40" rx="20" fill="#f0ccb0"/><circle cx="14" cy="16" r="3" fill="#2d3436"/><circle cx="26" cy="16" r="3" fill="#2d3436"/><ellipse cx="20" cy="28" rx="8" ry="4" fill="#8888bb"/></svg>);};
+    if(ilabel.indexOf("flush")>=0||ilabel.indexOf("hive")>=0||ilabel.indexOf("rash")>=0)miniSVG=function(){return(<svg viewBox="0 0 40 40" style={{width:36,height:36,borderRadius:"50%",border:"2px solid rgba(78,205,196,0.3)"}}><rect width="40" height="40" rx="20" fill="#f0ccb0"/><circle cx="10" cy="12" r="3" fill="#ff6b6b" opacity="0.7"/><circle cx="25" cy="10" r="2.5" fill="#ff6b6b" opacity="0.6"/><circle cx="15" cy="28" r="3.5" fill="#ff6b6b" opacity="0.7"/><circle cx="30" cy="22" r="2" fill="#ff6b6b" opacity="0.5"/><circle cx="8" cy="22" r="2.5" fill="#ff6b6b" opacity="0.6"/></svg>);};
+    if(ilabel.indexOf("cool")>=0||ilabel.indexOf("pale")>=0||ilabel.indexOf("ashen")>=0)miniSVG=function(){return(<svg viewBox="0 0 40 40" style={{width:36,height:36,borderRadius:"50%",border:"2px solid rgba(78,205,196,0.3)"}}><rect width="40" height="40" rx="20" fill="#ddd"/><rect x="5" y="20" width="12" height="16" rx="4" fill="#c8c8d8"/><rect x="23" y="20" width="12" height="16" rx="4" fill="#c8c8d8"/></svg>);};
+    if(ilabel.indexOf("retract")>=0||ilabel.indexOf("accessory")>=0||ilabel.indexOf("tripod")>=0||ilabel.indexOf("work of breath")>=0)miniSVG=function(){return(<svg viewBox="0 0 40 40" style={{width:36,height:36,borderRadius:"50%",border:"2px solid rgba(78,205,196,0.3)"}}><rect width="40" height="40" rx="20" fill="#f0ccb0"/><rect x="10" y="12" width="20" height="18" rx="6" fill="#E8F0FE" opacity="0.4"/><line x1="15" y1="16" x2="15" y2="26" stroke="#cc8866" strokeWidth="1" strokeDasharray="2,1"/><line x1="25" y1="16" x2="25" y2="26" stroke="#cc8866" strokeWidth="1" strokeDasharray="2,1"/><line x1="20" y1="14" x2="20" y2="28" stroke="#cc8866" strokeWidth="1" strokeDasharray="2,1"/></svg>);};
+    if(ilabel.indexOf("jvd")>=0||ilabel.indexOf("neck vein")>=0||ilabel.indexOf("jugular")>=0)miniSVG=function(){return(<svg viewBox="0 0 40 40" style={{width:36,height:36,borderRadius:"50%",border:"2px solid rgba(78,205,196,0.3)"}}><rect width="40" height="40" rx="20" fill="#f0ccb0"/><rect x="14" y="5" width="12" height="30" rx="6" fill="#e8c8a8"/><line x1="17" y1="10" x2="17" y2="30" stroke="#70a0d0" strokeWidth="2"/><line x1="23" y1="10" x2="23" y2="30" stroke="#70a0d0" strokeWidth="2"/></svg>);};
+    return(<button key={it.id} onClick={function(){flag(it.id);}} className="bw-tap" style={{width:"100%",textAlign:"left",borderRadius:12,padding:14,background:bg,border:brd,cursor:"pointer",color:"white"}}>
+      <div style={{display:"flex",alignItems:"center",gap:10}}>
+        {miniSVG&&<div style={{flexShrink:0}}>{miniSVG()}</div>}
+        <div style={{flex:1}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}><span style={{fontWeight:700,fontSize:15,display:"flex",alignItems:"center",gap:6}}>{f&&!showFb&&<Flag size={14} color="#FECA57"/>}{it.label}</span>
+            {showFb&&<span style={{fontSize:15,fontWeight:700}}>{ok?<Check size={16}/>:<X size={16}/>}</span>}</div>
+          {showFb&&<TextBlock text={it.why} style={{fontSize:12,color:"#ccc",marginTop:6,lineHeight:1.6}}/>}
+        </div>
+      </div></button>);}
+  return(<div className="slu">
+    <div className="bw-split">
+      <div className="bw-split-left">
+        <VitalsDisplay vitals={vit}/>
+        <BodySystemsView signs={curSigns}/>
+        <LabPanel labs={curLabs}/>
+        <div style={{borderRadius:12,padding:10,marginTop:8,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.06)"}}>
+          <TextBlock text={ph?ph.narrative:""} style={{fontSize:12,color:"#999",lineHeight:1.5}}/>
+        </div>
+      </div>
+      <div className="bw-split-right">
+        {vitItems.length>0&&<div style={{marginBottom:12}}>
+          <h3 style={{fontSize:14,fontWeight:700,color:"#4ECDC4",marginBottom:8}}>Flag Abnormal Vital Signs:</h3>
+          <div style={{display:"flex",flexDirection:"column",gap:6}}>{vitItems.map(renderItem)}</div>
+        </div>}
+        {labItems.length>0&&<div style={{marginBottom:12}}>
+          <h3 style={{fontSize:14,fontWeight:700,color:"#ff7675",marginBottom:8}}>Flag Abnormal Lab Values:</h3>
+          <div style={{display:"flex",flexDirection:"column",gap:6}}>{labItems.map(renderItem)}</div>
+        </div>}
+        {clinItems.length>0&&<div style={{marginBottom:12}}>
+          <h3 style={{fontSize:14,fontWeight:700,color:"#FECA57",marginBottom:8}}>Flag Concerning Clinical Findings:</h3>
+          <div style={{display:"flex",flexDirection:"column",gap:6}}>{clinItems.map(renderItem)}</div>
+        </div>}
+        {!showFb?<button onClick={submit} style={Object.assign({},BS,{background:PP})}>Submit Assessment</button>
+          :<button onClick={afterA} style={Object.assign({},BS,{background:GR})}>{ph.tools?"Open Tool Belt":"Continue"}</button>}
+      </div>
+    </div></div>);
+}

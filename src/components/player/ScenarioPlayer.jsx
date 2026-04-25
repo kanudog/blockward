@@ -64,7 +64,13 @@ export function ScenarioPlayer(props){
           {prev&&<button onClick={goBack} style={{color:"#888",fontSize:12,background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:8,padding:"4px 10px",cursor:"pointer"}}>&lt; Back</button>}
         </div>
         <div style={{padding:"4px 12px",borderRadius:20,fontSize:11,fontWeight:700,background:isCb?"rgba(255,71,87,0.2)":"rgba(78,205,196,0.15)",color:isCb?"#FF6B81":"#4ECDC4"}}>{isCb?"CURVEBALL":"Phase "+(pi+1)+"/"+sc.phases.length}</div>
-        <div style={{fontSize:11,color:"#888"}}>{score.c+"/"+score.t}</div></div>
+        {/* phase-2.6 group G: in-play counter removed. It was a running
+            correct/total tally that confused users and leaked partial-correct
+            answers as the user tapped (e.g. 24/32 → 23/32 after a wrong
+            pick). The final score is shown in the debrief. If a per-stage
+            indicator becomes desired later, it should be a stage badge
+            (e.g. "Triage 2 of 3") rather than a score number. */}
+        <div style={{width:1}}></div></div>
       {stage==="intro"&&(<div className="slu" style={{textAlign:"center"}}>
         <PatientView status="stable" rr={30} signs={[]} ageGroup={ageG} sex={sexG} visuals={scVisuals} emotion="sad"/>
         <h2 style={{fontSize:24,fontWeight:900,marginTop:12,marginBottom:8}}>{sc.title}</h2>

@@ -46,30 +46,15 @@ export function AssessPanel(props){
   </div>);}
   function renderItem(it){var f=!!flags[it.id];var ok=showFb&&(f===it.bad);
     var bg=showFb?(ok?"rgba(0,184,148,0.1)":"rgba(255,71,87,0.1)"):(f?"rgba(254,202,87,0.12)":"rgba(255,255,255,0.04)");
-    var brd=showFb?(ok?"2px solid rgba(0,184,148,0.25)":"2px solid rgba(255,71,87,0.25)"):(f?"2px solid rgba(254,202,87,0.25)":"2px solid rgba(255,255,255,0.07)");
-    var ilabel=it.label.toLowerCase();
-    var miniSVG=null;
-    if(ilabel.indexOf("mottl")>=0)miniSVG=function(){return(<svg viewBox="0 0 40 40" style={{width:36,height:36,borderRadius:"50%",border:"2px solid rgba(78,205,196,0.3)"}}><rect width="40" height="40" rx="20" fill="#f0ccb0"/><circle cx="10" cy="15" r="4" fill="#9080a0" opacity="0.6"/><circle cx="25" cy="12" r="3" fill="#9080a0" opacity="0.5"/><circle cx="18" cy="28" r="3.5" fill="#9080a0" opacity="0.6"/><circle cx="32" cy="25" r="2.5" fill="#9080a0" opacity="0.5"/><circle cx="8" cy="32" r="3" fill="#9080a0" opacity="0.4"/></svg>);};
-    if(ilabel.indexOf("eye")>=0||ilabel.indexOf("deviat")>=0||ilabel.indexOf("pupil")>=0)miniSVG=function(){return(<svg viewBox="0 0 40 40" style={{width:36,height:36,borderRadius:"50%",border:"2px solid rgba(78,205,196,0.3)"}}><rect width="40" height="40" rx="20" fill="#f0ccb0"/><circle cx="14" cy="20" r="7" fill="white"/><circle cx="26" cy="20" r="7" fill="white"/><circle cx="14" cy="16" r="3.5" fill="#2d3436"/><circle cx="26" cy="16" r="3.5" fill="#2d3436"/></svg>);};
-    if(ilabel.indexOf("cyan")>=0||ilabel.indexOf("blue")>=0||ilabel.indexOf("lip")>=0)miniSVG=function(){return(<svg viewBox="0 0 40 40" style={{width:36,height:36,borderRadius:"50%",border:"2px solid rgba(78,205,196,0.3)"}}><rect width="40" height="40" rx="20" fill="#f0ccb0"/><circle cx="14" cy="16" r="3" fill="#2d3436"/><circle cx="26" cy="16" r="3" fill="#2d3436"/><ellipse cx="20" cy="28" rx="8" ry="4" fill="#8888bb"/></svg>);};
-    if(ilabel.indexOf("flush")>=0||ilabel.indexOf("hive")>=0||ilabel.indexOf("rash")>=0)miniSVG=function(){return(<svg viewBox="0 0 40 40" style={{width:36,height:36,borderRadius:"50%",border:"2px solid rgba(78,205,196,0.3)"}}><rect width="40" height="40" rx="20" fill="#f0ccb0"/><circle cx="10" cy="12" r="3" fill="#ff6b6b" opacity="0.7"/><circle cx="25" cy="10" r="2.5" fill="#ff6b6b" opacity="0.6"/><circle cx="15" cy="28" r="3.5" fill="#ff6b6b" opacity="0.7"/><circle cx="30" cy="22" r="2" fill="#ff6b6b" opacity="0.5"/><circle cx="8" cy="22" r="2.5" fill="#ff6b6b" opacity="0.6"/></svg>);};
-    if(ilabel.indexOf("cool")>=0||ilabel.indexOf("pale")>=0||ilabel.indexOf("ashen")>=0)miniSVG=function(){return(<svg viewBox="0 0 40 40" style={{width:36,height:36,borderRadius:"50%",border:"2px solid rgba(78,205,196,0.3)"}}><rect width="40" height="40" rx="20" fill="#ddd"/><rect x="5" y="20" width="12" height="16" rx="4" fill="#c8c8d8"/><rect x="23" y="20" width="12" height="16" rx="4" fill="#c8c8d8"/></svg>);};
-    if(ilabel.indexOf("retract")>=0||ilabel.indexOf("accessory")>=0||ilabel.indexOf("tripod")>=0||ilabel.indexOf("work of breath")>=0)miniSVG=function(){return(<svg viewBox="0 0 40 40" style={{width:36,height:36,borderRadius:"50%",border:"2px solid rgba(78,205,196,0.3)"}}><rect width="40" height="40" rx="20" fill="#f0ccb0"/><rect x="10" y="12" width="20" height="18" rx="6" fill="#E8F0FE" opacity="0.4"/><line x1="15" y1="16" x2="15" y2="26" stroke="#cc8866" strokeWidth="1" strokeDasharray="2,1"/><line x1="25" y1="16" x2="25" y2="26" stroke="#cc8866" strokeWidth="1" strokeDasharray="2,1"/><line x1="20" y1="14" x2="20" y2="28" stroke="#cc8866" strokeWidth="1" strokeDasharray="2,1"/></svg>);};
-    if(ilabel.indexOf("jvd")>=0||ilabel.indexOf("neck vein")>=0||ilabel.indexOf("jugular")>=0)miniSVG=function(){return(<svg viewBox="0 0 40 40" style={{width:36,height:36,borderRadius:"50%",border:"2px solid rgba(78,205,196,0.3)"}}><rect width="40" height="40" rx="20" fill="#f0ccb0"/><rect x="14" y="5" width="12" height="30" rx="6" fill="#e8c8a8"/><line x1="17" y1="10" x2="17" y2="30" stroke="#70a0d0" strokeWidth="2"/><line x1="23" y1="10" x2="23" y2="30" stroke="#70a0d0" strokeWidth="2"/></svg>);};
+    var brd=showFb?(ok?"2px solid rgba(0,184,148,0.4)":"2px solid rgba(255,71,87,0.4)"):(f?"2px solid rgba(254,202,87,0.4)":"2px solid rgba(255,255,255,0.1)");
     var accent=showFb?(ok?"#00b894":"#FF6B81"):"#4ECDC4";
-    return(<div key={it.id} style={{borderRadius:12,padding:14,background:bg,border:brd,color:"white"}}>
-      <div style={{display:"flex",alignItems:"center",gap:10}}>
-        {miniSVG&&<div style={{flexShrink:0}}>{miniSVG()}</div>}
-        <button onClick={function(){flag(it.id);}} className="bw-tap" style={{flex:1,minWidth:0,background:"none",border:"none",cursor:showFb?"default":"pointer",color:"white",textAlign:"left",padding:0}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
-            <span style={{fontWeight:700,fontSize:15,display:"flex",alignItems:"center",gap:6}}>{f&&!showFb&&<Flag size={14} color="#FECA57"/>}{it.label}</span>
-            <div style={{display:"flex",alignItems:"center",gap:6}}>
-              {showFb&&<span style={{fontSize:15,fontWeight:700}}>{ok?<Check size={16}/>:<X size={16}/>}</span>}
-            </div>
-          </div>
-        </button>
-      </div>
-      {showFb&&it.why&&<div style={{marginTop:8,display:"flex",justifyContent:"flex-end"}}><WhyButton onClick={function(){setWhyTarget(it);}} accent={accent}/></div>}
+    return(<div key={it.id} style={{position:"relative",borderRadius:12,padding:10,background:bg,border:brd,color:"white",minHeight:78,display:"flex",flexDirection:"column"}}>
+      {showFb&&<div style={{position:"absolute",top:6,right:6,fontSize:14}}>{ok?<Check size={14} color="#00b894"/>:<X size={14} color="#FF6B81"/>}</div>}
+      {showFb&&it.why&&<button onClick={function(){setWhyTarget(it);}} style={{position:"absolute",bottom:6,right:6,padding:"2px 6px",borderRadius:999,fontSize:9,fontWeight:700,background:accent+"22",border:"1px solid "+accent+"66",color:accent,cursor:"pointer"}}>Why?</button>}
+      {f&&!showFb&&<div style={{position:"absolute",top:6,right:6}}><Flag size={12} color="#FECA57"/></div>}
+      <button onClick={function(){flag(it.id);}} className="bw-tap" style={{flex:1,minWidth:0,background:"none",border:"none",cursor:showFb?"default":"pointer",color:"white",textAlign:"left",padding:0,display:"flex",alignItems:"flex-start"}}>
+        <span style={{fontWeight:700,fontSize:13,lineHeight:1.3,paddingRight:24}}>{it.label}</span>
+      </button>
     </div>);}
   return(<div className="slu">
     <div className="bw-split">
@@ -86,17 +71,18 @@ export function AssessPanel(props){
           <span style={{fontSize:12,fontWeight:700,color:"#4ECDC4"}}>Tap abnormal findings</span>
           <span style={{fontSize:11,color:"#ccc",fontWeight:600}}>{flaggedCount+" flagged"}</span>
         </div>}
+        <style>{"@media(min-width:768px){.bw-assess-grid{grid-template-columns:repeat(3,1fr) !important}}@media(min-width:1024px){.bw-assess-grid{grid-template-columns:repeat(4,1fr) !important}}"}</style>
         {vitItems.length>0&&<div style={{marginBottom:12}}>
           <SectionHeader label="Vital Signs" bg="rgba(78,205,196,0.12)" fg="#4ECDC4"/>
-          <div style={{display:"flex",flexDirection:"column",gap:6}}>{vitItems.map(renderItem)}</div>
+          <div className="bw-assess-grid" style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:6}}>{vitItems.map(renderItem)}</div>
         </div>}
         {labItems.length>0&&<div style={{marginBottom:12}}>
           <SectionHeader label="Lab Values" bg="rgba(255,118,117,0.12)" fg="#ff7675"/>
-          <div style={{display:"flex",flexDirection:"column",gap:6}}>{labItems.map(renderItem)}</div>
+          <div className="bw-assess-grid" style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:6}}>{labItems.map(renderItem)}</div>
         </div>}
         {clinItems.length>0&&<div style={{marginBottom:12}}>
           <SectionHeader label="Clinical Findings" bg="rgba(254,202,87,0.12)" fg="#FECA57"/>
-          <div style={{display:"flex",flexDirection:"column",gap:6}}>{clinItems.map(renderItem)}</div>
+          <div className="bw-assess-grid" style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:6}}>{clinItems.map(renderItem)}</div>
         </div>}
         {!showFb?<button onClick={submit} style={Object.assign({},BS,{background:PP})}>Submit Assessment</button>
           :<button onClick={afterA} style={Object.assign({},BS,{background:GR})}>{ph.tools?"Open Tool Belt":"Continue"}</button>}

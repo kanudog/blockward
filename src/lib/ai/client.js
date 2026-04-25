@@ -1,5 +1,5 @@
 import { buildSystemPrompt, MODEL_ID, MAX_TOKENS } from "./prompt.js";
-import { validateSchema, validateConsistency } from "./validate.js";
+import { validateSchema, validateConsistency, validateCounts, applyAutocorrections } from "./validate.js";
 
 var NAME_HINT_LETTERS="ABCDEFGHIJKLMNOPRSTUVWYZ"; // skip Q and X — rare initial sounds
 function randomNameHint(){
@@ -44,10 +44,14 @@ export async function generateScenario(txt, cbMode, signal){
   if(!scenario.debrief)scenario.debrief={summary:"Complete.",explainers:[]};
   var schemaErrs=validateSchema(scenario);
   if(schemaErrs.length>0)throw new Error("AI generated scenario is missing required fields: "+schemaErrs.slice(0,3).join("; ")+(schemaErrs.length>3?" (and "+(schemaErrs.length-3)+" more)":""));
-  var warnings=validateConsistency(scenario);
-  if(warnings.length>0){
-    scenario._warnings=warnings;
-    warnings.forEach(function(w){console.warn("Scenario consistency warning ["+w.phase+"]:",w.message,"— item:",w.label);});
+  var decisions=validateConsistency(scenario);
+  var corrected=applyAutocorrections(scenario,decisions);
+  var countWarnings=validateCounts(scenario);
+  var surfaceable=decisions.filter(function(d){return d.kind!=="autocorrect";}).concat(countWarnings.map(function(w){return{kind:"count",phase:w.phase,message:w.message};}));
+  if(corrected>0)console.info("Validator auto-corrected "+corrected+" assessItem flag(s) where value was within stated normal range.");
+  if(surfaceable.length>0){
+    scenario._validatorWarnings=surfaceable;
+    surfaceable.forEach(function(w){console.warn("Validator ["+(w.phase||"?")+", "+w.kind+"]:",w.message,w.label?"— item: "+w.label:"");});
   }
   return scenario;
 }

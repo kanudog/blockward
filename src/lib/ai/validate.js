@@ -1,10 +1,22 @@
 // Post-generation validators for AI scenario responses.
+//
 // Phase-2.5 issue 4: catch contradictions (flagged-abnormal items whose
-// stated value does not actually violate the stated threshold) without
-// rewriting the scenario. Also hard-enforce required fields so a
-// malformed scenario fails loud instead of crashing mid-render.
+// stated value does not actually violate the stated threshold) and
+// hard-enforce required schema fields.
+//
+// Phase-2.6 group C: validator now classifies each contradiction as one
+// of three kinds and the caller can apply auto-corrections:
+//   - autocorrect: value verifiably within stated normal range → set
+//     bad:false on the item.
+//   - warning: threshold parse is single-sided AND value magnitude
+//     strongly suggests the threshold direction was misinterpreted.
+//     Keep the flag, surface a warning.
+//   - ambiguous: contradiction exists but neither side is confidently
+//     correct. Surface to the UI banner, do not mutate.
+//
+// Also added validateCounts() which warns when an AI scenario falls
+// short of the per-category counts the prompt asked for.
 
-// Schema validation - returns array of error strings. Empty = valid.
 export function validateSchema(sc){
   var errs=[];
   if(!sc||typeof sc!=="object")return["Scenario is not an object"];
@@ -37,71 +49,101 @@ export function validateSchema(sc){
   return errs;
 }
 
-// Extract a numeric value from an assess item label.
-// Returns {value, unit, lo, hi} or null if not parseable.
-// Handles: "HR 178", "SBP 82", "BP 82/45", "SpO2 97%", "Lactate 5.8 mmol/L",
-// "Cap Refill 4s", "Temp 39.2C", "Glucose 48 mg/dL".
 function parseValue(label){
   if(!label||typeof label!=="string")return null;
   var l=label.trim();
-  // BP pattern: first number before slash is SBP
   var bpMatch=l.match(/^(?:BP\s+)?(\d{2,3})\/(\d{2,3})/i);
   if(bpMatch)return{primary:Number(bpMatch[1]),secondary:Number(bpMatch[2]),kind:"bp"};
-  // Generic number — pick the first standalone number
   var m=l.match(/([-+]?\d+(?:\.\d+)?)/);
   if(!m)return null;
   return{primary:Number(m[1]),kind:"number"};
 }
 
-// Extract a threshold range from a why text.
-// Returns {lo, hi} or null.
-// Examples:
-//   "normal 100-160" => {lo:100, hi:160}
-//   "normal 0.5-2.0" => {lo:0.5, hi:2}
-//   "below normal threshold of 80" => {lo:80}
-//   "above 4" => {hi:4}
-//   "critical <45" => {lo:45}
-//   "minimum acceptable threshold of 80" => {lo:80}
+// parseThreshold: returns {lo, hi} or null. Handles:
+//   "normal 100-160", "normal range 100-160", "normal: 100-160"
+//   "normal range is 100-160", "(normal 100-160)"
+//   "below normal threshold of 80", "minimum acceptable threshold of 80"
+//   "above 4", ">4", "exceeds 2"
+//   "below 45", "<45", "under 45"
 function parseThreshold(why){
   if(!why||typeof why!=="string")return null;
   var t=why.toLowerCase();
-  // normal A-B or normal A to B
-  var rangeMatch=t.match(/normal\s+(\d+(?:\.\d+)?)\s*[-to]+\s*(\d+(?:\.\d+)?)/);
+  // Range patterns first (most specific): "normal [range|:|is]? A-B"
+  var rangeMatch=t.match(/normal(?:\s+(?:range|range\s+is|is))?[\s:]*\(?(\d+(?:\.\d+)?)\s*(?:-|to|–)\s*(\d+(?:\.\d+)?)/);
   if(rangeMatch)return{lo:Number(rangeMatch[1]),hi:Number(rangeMatch[2])};
-  // threshold of N (minimum)
-  var minThreshold=t.match(/(?:below|minimum|lower).*?threshold\s+(?:of\s+)?(\d+(?:\.\d+)?)/);
-  if(minThreshold)return{lo:Number(minThreshold[1])};
-  // above N
-  var above=t.match(/(?:above|>\s*|over)\s*(\d+(?:\.\d+)?)/);
+  // Reverse range: "between A and B"
+  var betweenMatch=t.match(/between\s+(\d+(?:\.\d+)?)\s+and\s+(\d+(?:\.\d+)?)/);
+  if(betweenMatch)return{lo:Number(betweenMatch[1]),hi:Number(betweenMatch[2])};
+  // "above N", ">N", "exceeds N", "over N"
+  var above=t.match(/(?:above|>\s*=?\s*|exceeds?|over)\s*(\d+(?:\.\d+)?)/);
   if(above)return{hi:Number(above[1])};
-  // below N / < N
-  var below=t.match(/(?:below|<\s*|under)\s*(\d+(?:\.\d+)?)/);
+  // "below|<|under N", or "minimum threshold of N"
+  var minThreshold=t.match(/(?:below|minimum|lower|less\s+than).*?(?:threshold\s+(?:of\s+)?)?(\d+(?:\.\d+)?)/);
+  if(minThreshold)return{lo:Number(minThreshold[1])};
+  var below=t.match(/(?:<\s*|under)\s*(\d+(?:\.\d+)?)/);
   if(below)return{lo:Number(below[1])};
   return null;
 }
 
-// Consistency validation: for each bad:true assessItem that states a
-// threshold in its why, confirm the label's value actually violates it.
-// Returns array of warning objects {itemId, label, message}.
+// validateConsistency: walks every assessItem and classifies any
+// contradiction. Returns array of decisions:
+//   {itemId, label, phase, kind, message, suggestedBad}
+// Kinds: "autocorrect" (caller may set bad to suggestedBad),
+//        "warning" (threshold direction looks wrong, keep flag),
+//        "ambiguous" (surface to UI but do not mutate).
 export function validateConsistency(sc){
-  var warnings=[];
-  if(!sc||!Array.isArray(sc.phases))return warnings;
+  var decisions=[];
+  if(!sc||!Array.isArray(sc.phases))return decisions;
   function checkItem(it,phaseName){
-    if(!it||!it.bad||!it.label||!it.why)return;
+    if(!it||!it.label||!it.why)return;
     var val=parseValue(it.label);
     if(!val)return;
     var thr=parseThreshold(it.why);
     if(!thr)return;
     var v=val.primary;
-    var violatesLo=thr.lo!==undefined&&v<thr.lo;
-    var violatesHi=thr.hi!==undefined&&v>thr.hi;
-    var stateBad=it.bad===true;
-    if(stateBad&&!violatesLo&&!violatesHi){
-      warnings.push({
-        itemId:it.id,
-        label:it.label,
-        phase:phaseName,
-        message:"Flagged abnormal but value "+v+" does not violate stated threshold "+(thr.lo!==undefined?"lo="+thr.lo:"")+(thr.hi!==undefined?" hi="+thr.hi:"")
+    var hasLo=thr.lo!==undefined;
+    var hasHi=thr.hi!==undefined;
+    var violatesLo=hasLo&&v<thr.lo;
+    var violatesHi=hasHi&&v>thr.hi;
+    var withinRange=hasLo&&hasHi&&v>=thr.lo&&v<=thr.hi;
+    if(it.bad&&!violatesLo&&!violatesHi){
+      // Contradiction: marked abnormal, no violation found.
+      if(withinRange){
+        // C1: auto-correct — verifiably within stated normal range.
+        decisions.push({
+          itemId:it.id,label:it.label,phase:phaseName,
+          kind:"autocorrect",suggestedBad:false,
+          message:"Value "+v+" lies within stated normal ["+thr.lo+"-"+thr.hi+"]; auto-unflagging."
+        });
+        return;
+      }
+      // Single-sided threshold. Two sub-cases:
+      if(hasLo&&!hasHi){
+        // Parser found "lo=N" but value is >= N. If value is far above N,
+        // the AI likely meant a hi threshold ("above N is bad") and the
+        // parser misread the wording. Keep the flag, log a warning.
+        if(v>=thr.lo*1.5){
+          decisions.push({
+            itemId:it.id,label:it.label,phase:phaseName,
+            kind:"warning",
+            message:"Value "+v+" is well above "+thr.lo+"; threshold wording likely misparsed but flag stands."
+          });
+          return;
+        }
+      }
+      if(hasHi&&!hasLo&&v<=thr.hi*0.5){
+        decisions.push({
+          itemId:it.id,label:it.label,phase:phaseName,
+          kind:"warning",
+          message:"Value "+v+" is well below "+thr.hi+"; threshold wording likely misparsed but flag stands."
+        });
+        return;
+      }
+      // Anything else: ambiguous — surface to UI but do not mutate.
+      decisions.push({
+        itemId:it.id,label:it.label,phase:phaseName,
+        kind:"ambiguous",
+        message:"Flagged abnormal but value "+v+" does not violate stated threshold"+(hasLo?" lo="+thr.lo:"")+(hasHi?" hi="+thr.hi:"")+"."
       });
     }
   }
@@ -112,5 +154,48 @@ export function validateConsistency(sc){
   if(sc.curveball&&Array.isArray(sc.curveball.assessItems)){
     sc.curveball.assessItems.forEach(function(it){checkItem(it,"Curveball: "+(sc.curveball.name||""));});
   }
+  return decisions;
+}
+
+// applyAutocorrections: mutates scenario in-place to apply autocorrect
+// decisions. Returns count applied.
+export function applyAutocorrections(sc,decisions){
+  var applied=0;
+  if(!sc||!Array.isArray(sc.phases))return 0;
+  decisions.forEach(function(d){
+    if(d.kind!=="autocorrect")return;
+    var found=false;
+    sc.phases.forEach(function(p){
+      if(!Array.isArray(p.assessItems))return;
+      p.assessItems.forEach(function(it){
+        if(it.id===d.itemId){it.bad=d.suggestedBad;found=true;}
+      });
+    });
+    if(!found&&sc.curveball&&Array.isArray(sc.curveball.assessItems)){
+      sc.curveball.assessItems.forEach(function(it){
+        if(it.id===d.itemId){it.bad=d.suggestedBad;found=true;}
+      });
+    }
+    if(found)applied++;
+  });
+  return applied;
+}
+
+// validateCounts: warn if AI returned fewer per-category items than
+// the prompt asked for. Phase-2.6 C2.
+export function validateCounts(sc){
+  var warnings=[];
+  if(!sc||!Array.isArray(sc.phases))return warnings;
+  sc.phases.forEach(function(p,idx){
+    if(!Array.isArray(p.assessItems))return;
+    var byCat={vital:0,lab:0,clinical:0};
+    p.assessItems.forEach(function(it){if(byCat[it.cat]!==undefined)byCat[it.cat]++;});
+    if(idx===0){
+      if(p.assessItems.length<6)warnings.push({phase:p.name||p.id,message:"Only "+p.assessItems.length+" assess items in triage phase; prompt asked for 6-8."});
+      ["vital","lab","clinical"].forEach(function(cat){
+        if(byCat[cat]<3)warnings.push({phase:p.name||p.id,message:"Only "+byCat[cat]+" "+cat+" items; prompt asked for 3+ each category."});
+      });
+    }
+  });
   return warnings;
 }

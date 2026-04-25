@@ -1,5 +1,13 @@
 export var MODEL_ID="claude-sonnet-4-6";
-export var MAX_TOKENS=16000;
+// Phase-2.6.1 part 2B: raised from 16000 to 24000. Sonnet 4.6 supports
+// up to 64k output tokens. The phase-2.5/2.6 prompt now requires more
+// content per scenario (reassessment, stabilizationSummary, emsReport,
+// learnMore, 8-10 interventions per phase, 3+ items per assess
+// category, why-content as overview+bullets+bold). Combined with
+// web_search tool turns counting against the same budget, complex
+// trauma scenarios were hitting 16k. 24k provides headroom; fix the
+// prompt later if it stays an issue.
+export var MAX_TOKENS=24000;
 export var GENERATE_TIMEOUT_MS=300000;
 
 // Phase-2.6 group D: system prompt for the expand_marked_items mode.

@@ -40,7 +40,7 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: body.model || "claude-sonnet-4-6",
-        max_tokens: body.max_tokens || 16000,
+        max_tokens: body.max_tokens || 24000,
         system: body.system || "",
         messages: body.messages || [],
         tools: body.tools || undefined,

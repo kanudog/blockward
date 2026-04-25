@@ -158,21 +158,22 @@ export function ScenarioPlayer(props){
         var reSigns=re&&re.signs?re.signs:[];
         var reNarrative=re&&re.narrative?re.narrative:"The patient has stabilized following your interventions. Vital signs are trending toward age-appropriate ranges and end-organ perfusion has been restored.";
         return(<div className="slu">
+          {/* phase-2.6 group H: stack vertically — reassess pill, recovered
+              avatar, narrative on top, then vitals, then systems list. */}
           <div style={{textAlign:"center",marginBottom:12}}>
             <div style={{display:"inline-block",padding:"4px 14px",borderRadius:20,fontSize:11,fontWeight:800,letterSpacing:1,textTransform:"uppercase",background:"rgba(85,239,196,0.12)",color:"#55efc4",border:"1px solid rgba(85,239,196,0.3)"}}>Reassessment</div>
           </div>
-          <div className="bw-split">
-            <div className="bw-split-left">
-              <VitalsDisplay vitals={reVitals}/>
-              {reSigns.length>0&&<BodySystemsView signs={reSigns}/>}
-            </div>
-            <div className="bw-split-right">
-              <div className="bw-glass" style={{borderRadius:16,padding:12}}>
-                <TextBlock text={reNarrative} style={{fontSize:13,color:"#ddd",lineHeight:1.6}}/>
-              </div>
-              <button onClick={function(){setStage("recovery");}} style={Object.assign({},BS,{background:GR})}>Continue</button>
-            </div>
+          <div style={{maxWidth:200,margin:"0 auto 16px"}}>
+            <PatientSVG status="stable" rr={reVitals.rr||20} ageGroup={ageG} sex={sexG} emotion="happy"/>
           </div>
+          <div className="bw-glass" style={{borderRadius:16,padding:12,marginBottom:12}}>
+            <TextBlock text={reNarrative} style={{fontSize:13,color:"#ddd",lineHeight:1.6}}/>
+          </div>
+          <div style={{marginBottom:12}}>
+            <VitalsDisplay vitals={reVitals}/>
+          </div>
+          {reSigns.length>0&&<BodySystemsView signs={reSigns}/>}
+          <button onClick={function(){setStage("recovery");}} style={Object.assign({},BS,{background:GR})}>Continue</button>
         </div>);
       })()}
       {stage==="recovery"&&(function(){

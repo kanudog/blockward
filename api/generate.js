@@ -51,6 +51,29 @@ export default async function handler(req, res) {
     const duration = ((Date.now() - startTime) / 1000).toFixed(1) + 's';
     const inputTokens = data.usage ? data.usage.input_tokens : 0;
     const outputTokens = data.usage ? data.usage.output_tokens : 0;
+    // PHASE 2.6.1 PART 1 DIAGNOSTIC — temporary; remove once root cause is fixed.
+    // Surfaces stop_reason and token usage in Vercel function logs so Sebastian
+    // can see exactly what the API is doing on a failure.
+    let firstContent = '';
+    try {
+      const blocks = data.content || [];
+      for (let i = 0; i < blocks.length && firstContent.length < 200; i++) {
+        if (blocks[i] && blocks[i].type === 'text' && blocks[i].text) firstContent += blocks[i].text;
+      }
+      firstContent = firstContent.slice(0, 200);
+    } catch (e) {}
+    console.log('[generate diagnostic]', JSON.stringify({
+      mode: mode,
+      http_status: response.status,
+      stop_reason: data.stop_reason || null,
+      input_tokens: inputTokens,
+      output_tokens: outputTokens,
+      duration_s: duration,
+      content_blocks: (data.content || []).length,
+      content_block_types: (data.content || []).map(function (b) { return b && b.type; }),
+      first_200_chars: firstContent,
+      api_error: data.error ? data.error.message : null
+    }));
     // Sonnet 4.6 pricing as of April 2026: $3/M input, $15/M output
     const estCost = '$' + ((inputTokens * 3 / 1000000) + (outputTokens * 15 / 1000000)).toFixed(4);
     const status = response.ok ? 'success' : 'error: ' + (data.error ? data.error.message : response.status);

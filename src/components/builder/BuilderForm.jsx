@@ -2,6 +2,7 @@ import { useState } from "react";
 import { generateScenario } from "../../lib/ai/client.js";
 import { GENERATE_TIMEOUT_MS } from "../../lib/ai/prompt.js";
 import { BuilderPreview } from "./BuilderPreview.jsx";
+import { Modal } from "../shared/Modal.jsx";
 
 export function BuilderForm(props){
   var onDone=props.onDone;var onBack=props.onBack;
@@ -9,13 +10,14 @@ export function BuilderForm(props){
   var _busy=useState(false);var busy=_busy[0];var setBusy=_busy[1];
   var _err=useState(null);var err=_err[0];var setErr=_err[1];
   var _cbMode=useState(true);var cbMode=_cbMode[0];var setCbMode=_cbMode[1];
+  var _built=useState(null);var built=_built[0];var setBuilt=_built[1];
   var go=async function(){if(!txt.trim())return;setBusy(true);setErr(null);
     try{var controller=new AbortController();var tid=setTimeout(function(){controller.abort();},GENERATE_TIMEOUT_MS);
       var scenario=await generateScenario(txt,cbMode,controller.signal);
       clearTimeout(tid);
-      onDone(scenario);
+      setBuilt(scenario);
     }catch(e){console.error("Build error:",e);var em=e.name==="AbortError"?"Request timed out. Try a simpler description or turn off Curveball Mode.":e.message||"Build failed. Try again with more detail.";setErr(em);}finally{setBusy(false);}};
-  if(busy)return <BuilderPreview/>;
+  if(busy)return <BuilderPreview cbMode={cbMode}/>;
   return(<div style={{minHeight:"100dvh",padding:16,background:"linear-gradient(135deg,#0a0e1a,#1a1a3e)",color:"#fff"}}><div className="bw-container" style={{maxWidth:480,margin:"0 auto"}}>
     <button onClick={onBack} style={{color:"#888",fontSize:13,background:"none",border:"none",cursor:"pointer",marginBottom:16}}>Back</button>
     <h2 style={{fontSize:24,fontWeight:900,marginBottom:8}}>Build a Scenario</h2>
@@ -34,5 +36,14 @@ export function BuilderForm(props){
     </div>
     {err&&<div style={{marginTop:12,padding:12,borderRadius:12,fontSize:12,background:"rgba(255,71,87,0.15)",color:"#FF6B81",lineHeight:1.4}}>{err}</div>}
     <button onClick={go} disabled={!txt.trim()} style={{width:"100%",marginTop:16,padding:"12px 0",borderRadius:12,fontWeight:700,color:"white",fontSize:16,background:txt.trim()?"linear-gradient(135deg,#a55eea,#8854d0)":"rgba(255,255,255,0.1)",opacity:txt.trim()?1:0.5,border:"none",cursor:txt.trim()?"pointer":"default"}}>Build Scenario</button>
+    {/* phase-2.6 group J2: post-build modal */}
+    <Modal open={!!built} onClose={function(){if(built){onDone(built,{play:false});setBuilt(null);}}} title="Scenario Built" accent="#a55eea">
+      <p style={{fontSize:13,color:"#ddd",lineHeight:1.6,marginBottom:6}}>{built?built.title:""}</p>
+      <p style={{fontSize:11,color:"#888",lineHeight:1.5,marginBottom:14}}>{built?built.tagline||built.description||"":""}</p>
+      <div style={{display:"flex",gap:8}}>
+        <button onClick={function(){var b=built;setBuilt(null);onDone(b,{play:false});}} style={{flex:1,padding:"10px 0",borderRadius:10,fontWeight:700,fontSize:13,background:"rgba(255,255,255,0.08)",color:"#ddd",border:"1px solid rgba(255,255,255,0.18)",cursor:"pointer"}}>Return to Dashboard</button>
+        <button onClick={function(){var b=built;setBuilt(null);onDone(b,{play:true});}} style={{flex:1,padding:"10px 0",borderRadius:10,fontWeight:700,fontSize:13,background:"linear-gradient(135deg,#a55eea,#8854d0)",color:"white",border:"none",cursor:"pointer"}}>Play Now</button>
+      </div>
+    </Modal>
   </div></div>);
 }

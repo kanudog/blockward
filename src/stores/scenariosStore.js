@@ -19,7 +19,9 @@ export var useScenariosStore = create(function(set, get) {
       });
     },
     addCustom: function(sc) {
-      var u = get().custom.concat([sc]);
+      // Phase-2.6 group J3: prepend so the freshly-built scenario shows
+      // at the top of the dashboard list instead of getting buried.
+      var u = [sc].concat(get().custom);
       set({ custom: u });
       saveS("bw-custom", u);
     },
@@ -27,7 +29,7 @@ export var useScenariosStore = create(function(set, get) {
       var existing = get().custom;
       var already = existing.some(function(c) { return c.id === sc.id; });
       if (already) return false;
-      var u = existing.concat([sc]);
+      var u = [sc].concat(existing);
       set({ custom: u });
       saveS("bw-custom", u);
       return true;

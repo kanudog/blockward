@@ -8,7 +8,11 @@ export var MODEL_ID="claude-sonnet-4-6";
 // trauma scenarios were hitting 16k. 24k provides headroom; fix the
 // prompt later if it stays an issue.
 export var MAX_TOKENS=24000;
-export var GENERATE_TIMEOUT_MS=300000;
+// Phase-2.6.2 change 1: raised from 5 → 10 minutes. Accommodates 0-2
+// web_search rounds (~15s each silent SSE pause) plus generation.
+// Server-side completion is the source of truth; client should not
+// abort first. Used only as the AbortController fuse in BuilderForm.
+export var GENERATE_TIMEOUT_MS=600000;
 
 // Phase-2.6 group D: system prompt for the expand_marked_items mode.
 // Used by client.expandMarkedItems() to request deep-dive content for

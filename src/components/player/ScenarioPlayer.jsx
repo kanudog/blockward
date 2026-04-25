@@ -74,7 +74,7 @@ export function ScenarioPlayer(props){
             <div><span style={{color:"#999"}}>Weight: </span><strong>{sc.patient.weightKg+" kg"}</strong></div>
             <div><span style={{color:"#999"}}>Sex: </span><strong>{sc.patient.sex}</strong></div></div>
           <div style={{fontSize:13,marginBottom:8}}><span style={{color:"#999"}}>CC: </span><strong>{sc.patient.cc}</strong></div>
-          <div style={{fontSize:10,textTransform:"uppercase",letterSpacing:1.5,color:"#4ECDC4",fontWeight:700,marginTop:10,marginBottom:6}}>EMS Report</div>
+          <div style={{fontSize:10,textTransform:"uppercase",letterSpacing:1.5,color:"#4ECDC4",fontWeight:700,marginTop:10,marginBottom:6}}>Report</div>
           <TextBlock text={sc.emsReport||sc.patient.history} style={{fontSize:13,color:"#ddd",lineHeight:1.6}}/>
         </div>
         {sc.learnMore&&<button onClick={function(){setLearnOpen(true);}} style={{marginBottom:12,padding:"8px 16px",borderRadius:10,fontWeight:700,color:"#74b9ff",fontSize:12,background:"rgba(116,185,255,0.1)",border:"1px solid rgba(116,185,255,0.3)",cursor:"pointer"}}>Learn More</button>}

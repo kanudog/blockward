@@ -60,7 +60,7 @@ export function AssessPanel(props){
       </div>
       <div className="bw-split-right">
         {!showFb&&<div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10,padding:"8px 12px",borderRadius:10,background:"rgba(78,205,196,0.08)",border:"1px solid rgba(78,205,196,0.2)"}}>
-          <span style={{fontSize:12,fontWeight:700,color:"#4ECDC4"}}>Tap items you think are abnormal</span>
+          <span style={{fontSize:12,fontWeight:700,color:"#4ECDC4"}}>Tap abnormal findings</span>
           <span style={{fontSize:11,color:"#ccc",fontWeight:600}}>{flaggedCount+" flagged"}</span>
         </div>}
         {vitItems.length>0&&<div style={{marginBottom:12}}>

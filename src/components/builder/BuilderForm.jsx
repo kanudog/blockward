@@ -16,7 +16,7 @@ export function BuilderForm(props){
       var scenario=await generateScenario(txt,cbMode,controller.signal);
       clearTimeout(tid);
       setBuilt(scenario);
-    }catch(e){console.error("Build error:",e);var em=e.name==="AbortError"?"Request timed out. Try a simpler description or turn off Curveball Mode.":e.message||"Build failed. Try again with more detail.";setErr(em);}finally{setBusy(false);}};
+    }catch(e){console.error("Build error:",e);var em=e.name==="AbortError"?"Connection issue — please check your network and retry.":e.message||"Build failed. Try again with more detail.";setErr(em);}finally{setBusy(false);}};
   if(busy)return <BuilderPreview cbMode={cbMode}/>;
   return(<div style={{minHeight:"100dvh",padding:16,background:"linear-gradient(135deg,#0a0e1a,#1a1a3e)",color:"#fff"}}><div className="bw-container" style={{maxWidth:480,margin:"0 auto"}}>
     <button onClick={onBack} style={{color:"#888",fontSize:13,background:"none",border:"none",cursor:"pointer",marginBottom:16}}>Back</button>

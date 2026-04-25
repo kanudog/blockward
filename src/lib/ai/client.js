@@ -15,9 +15,9 @@ export async function generateScenario(txt, cbMode, signal){
       system:buildSystemPrompt(cbMode),
       messages:[{role:"user",content:userContent}]})});
   var raw=await r.text();var d;
-  try{d=JSON.parse(raw);}catch(je){throw new Error("Server returned invalid response (status "+r.status+"). The request may have timed out — try again.");}
+  try{d=JSON.parse(raw);}catch(je){throw new Error("Connection issue — please check your network and retry.");}
   if(d.error)throw new Error(d.error.message||"API error");
-  if(d.stop_reason==="max_tokens")throw new Error("Scenario was too complex and got cut off. Try a simpler description or turn off Curveball Mode.");
+  if(d.stop_reason==="max_tokens")throw new Error("Response was cut off — please try a simpler description.");
   var tb="";
   (d.content||[]).forEach(function(b){if(b.type==="text"&&b.text)tb+=b.text;});
   if(!tb.trim()){
@@ -28,7 +28,7 @@ export async function generateScenario(txt, cbMode, signal){
   cl=cl.replace(/&amp;/g,"&").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&quot;/g,"\"").replace(/&#39;/g,"'").replace(/&nbsp;/g," ");
   var candidates=[];var depth=0;var cStart=-1;
   for(var ci=0;ci<cl.length;ci++){if(cl[ci]==="{"){if(depth===0)cStart=ci;depth++;}else if(cl[ci]==="}"){depth--;if(depth===0&&cStart>=0){candidates.push({s:cStart,e:ci,len:ci-cStart});cStart=-1;}}}
-  if(candidates.length===0)throw new Error("AI did not return valid JSON. Try rephrasing or simplifying your description.");
+  if(candidates.length===0)throw new Error("Generated scenario was malformed — please try again.");
   candidates.sort(function(a,b){return b.len-a.len;});
   cl=cl.substring(candidates[0].s,candidates[0].e+1);
   function stripTags(s){if(typeof s!=="string")return s;return s.replace(/<[^>]+>/g,"").trim();}
@@ -37,13 +37,13 @@ export async function generateScenario(txt, cbMode, signal){
   try{scenario=deepClean(JSON.parse(cl));}catch(pe){
     try{var fixed=cl.replace(/,\s*}/g,"}").replace(/,\s*]/g,"]").replace(/[\x00-\x1f]/g,function(c){return c==="\n"?"\\n":c==="\r"?"\\r":c==="\t"?"\\t":"";});
       scenario=deepClean(JSON.parse(fixed));
-    }catch(pe2){throw new Error("AI response had invalid JSON. Try again — simpler prompts work more reliably.");}
+    }catch(pe2){throw new Error("Generated scenario was malformed — please try again.");}
   }
-  if(!scenario.id||!scenario.phases)throw new Error("AI generated an incomplete scenario. Try being more specific about the patient age, condition, and setting.");
+  if(!scenario.id||!scenario.phases)throw new Error("Generated scenario was incomplete — please try again.");
   if(!cbMode)scenario.curveball=null;
   if(!scenario.debrief)scenario.debrief={summary:"Complete.",explainers:[]};
   var schemaErrs=validateSchema(scenario);
-  if(schemaErrs.length>0)throw new Error("AI generated scenario is missing required fields: "+schemaErrs.slice(0,3).join("; ")+(schemaErrs.length>3?" (and "+(schemaErrs.length-3)+" more)":""));
+  if(schemaErrs.length>0)throw new Error("Generated scenario was incomplete — missing: "+schemaErrs.slice(0,3).join("; ")+(schemaErrs.length>3?" (and "+(schemaErrs.length-3)+" more)":""));
   var decisions=validateConsistency(scenario);
   var corrected=applyAutocorrections(scenario,decisions);
   var countWarnings=validateCounts(scenario);

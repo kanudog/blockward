@@ -17,6 +17,7 @@ export default async function handler(req, res) {
   //   "scenario" (default) — full scenario generation
   //   "expand_marked_items" — deep-dive expansion of items the user marked
   const mode = (req.body && req.body.mode) || 'scenario';
+  const isStreaming = !!(req.body && req.body.stream);
 
   let userPrompt = '';
   try {
@@ -28,9 +29,94 @@ export default async function handler(req, res) {
   } catch (e) {}
 
   const startTime = Date.now();
+  const body = req.body;
+  const upstreamBody = {
+    model: body.model || "claude-sonnet-4-6",
+    max_tokens: body.max_tokens || 24000,
+    system: body.system || "",
+    messages: body.messages || [],
+    tools: body.tools || undefined,
+  };
+  if (isStreaming) upstreamBody.stream = true;
 
+  // -----------------------------------------------------------------
+  // Streaming path — phase-2.6.1 part 2D. Anthropic returns SSE events
+  // when stream=true. We pipe them straight through to the client and
+  // best-effort sniff stop_reason / usage for the diagnostic log.
+  // -----------------------------------------------------------------
+  if (isStreaming) {
+    try {
+      const apiResp = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": apiKey,
+          "anthropic-version": "2023-06-01",
+        },
+        body: JSON.stringify(upstreamBody),
+      });
+
+      if (!apiResp.ok) {
+        const errBody = await apiResp.text();
+        const duration = ((Date.now() - startTime) / 1000).toFixed(1) + 's';
+        console.log('[generate diagnostic]', JSON.stringify({
+          mode: mode, streaming: true, http_status: apiResp.status,
+          duration_s: duration, error_body_preview: errBody.slice(0, 200)
+        }));
+        logToGoogleForm('[' + mode + ' stream] ' + userPrompt, 'error: http ' + apiResp.status, duration, 0, 0, '$0').catch(function () {});
+        res.status(apiResp.status).setHeader('Content-Type', 'application/json').end(errBody);
+        return;
+      }
+
+      res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
+      res.setHeader('Cache-Control', 'no-cache, no-transform');
+      res.setHeader('Connection', 'keep-alive');
+      res.setHeader('X-Accel-Buffering', 'no');
+      if (typeof res.flushHeaders === 'function') res.flushHeaders();
+
+      const reader = apiResp.body.getReader();
+      const decoder = new TextDecoder();
+      let totalIn = 0, totalOut = 0, finalStopReason = null, snippet = '';
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        res.write(value);
+        const chunkText = decoder.decode(value, { stream: true });
+        const usageMatch = chunkText.match(/"input_tokens":(\d+)/);
+        if (usageMatch) totalIn = Math.max(totalIn, Number(usageMatch[1]));
+        const outMatch = chunkText.match(/"output_tokens":(\d+)/);
+        if (outMatch) totalOut = Math.max(totalOut, Number(outMatch[1]));
+        const stopMatch = chunkText.match(/"stop_reason":"([a-z_]+)"/);
+        if (stopMatch && stopMatch[1] !== 'null') finalStopReason = stopMatch[1];
+        if (snippet.length < 200) {
+          const m = chunkText.match(/"text_delta","text":"([^"\\]{1,200})/);
+          if (m) snippet = (snippet + m[1]).slice(0, 200);
+        }
+      }
+      res.end();
+
+      const duration = ((Date.now() - startTime) / 1000).toFixed(1) + 's';
+      const estCost = '$' + ((totalIn * 3 / 1000000) + (totalOut * 15 / 1000000)).toFixed(4);
+      console.log('[generate diagnostic]', JSON.stringify({
+        mode: mode, streaming: true, http_status: apiResp.status,
+        stop_reason: finalStopReason, input_tokens: totalIn, output_tokens: totalOut,
+        duration_s: duration, first_200_chars: snippet
+      }));
+      logToGoogleForm('[' + mode + ' stream] ' + userPrompt, finalStopReason || 'success', duration, totalIn, totalOut, estCost).catch(function () {});
+    } catch (err) {
+      const errDuration = ((Date.now() - startTime) / 1000).toFixed(1) + 's';
+      console.error("Generate streaming error:", err);
+      logToGoogleForm('[' + mode + ' stream] ' + userPrompt, 'error: ' + err.message, errDuration, 0, 0, '$0').catch(function () {});
+      try { res.status(500).end(JSON.stringify({ error: { message: "Server error: " + err.message } })); } catch (e) {}
+    }
+    return;
+  }
+
+  // -----------------------------------------------------------------
+  // Non-streaming path (deepDive expansion + legacy callers).
+  // -----------------------------------------------------------------
   try {
-    const body = req.body;
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -38,13 +124,7 @@ export default async function handler(req, res) {
         "x-api-key": apiKey,
         "anthropic-version": "2023-06-01",
       },
-      body: JSON.stringify({
-        model: body.model || "claude-sonnet-4-6",
-        max_tokens: body.max_tokens || 24000,
-        system: body.system || "",
-        messages: body.messages || [],
-        tools: body.tools || undefined,
-      }),
+      body: JSON.stringify(upstreamBody),
     });
 
     const data = await response.json();
@@ -52,8 +132,6 @@ export default async function handler(req, res) {
     const inputTokens = data.usage ? data.usage.input_tokens : 0;
     const outputTokens = data.usage ? data.usage.output_tokens : 0;
     // PHASE 2.6.1 PART 1 DIAGNOSTIC — temporary; remove once root cause is fixed.
-    // Surfaces stop_reason and token usage in Vercel function logs so Sebastian
-    // can see exactly what the API is doing on a failure.
     let firstContent = '';
     try {
       const blocks = data.content || [];
@@ -64,6 +142,7 @@ export default async function handler(req, res) {
     } catch (e) {}
     console.log('[generate diagnostic]', JSON.stringify({
       mode: mode,
+      streaming: false,
       http_status: response.status,
       stop_reason: data.stop_reason || null,
       input_tokens: inputTokens,
@@ -78,12 +157,12 @@ export default async function handler(req, res) {
     const estCost = '$' + ((inputTokens * 3 / 1000000) + (outputTokens * 15 / 1000000)).toFixed(4);
     const status = response.ok ? 'success' : 'error: ' + (data.error ? data.error.message : response.status);
 
-    logToGoogleForm('[' + mode + '] ' + userPrompt, status, duration, inputTokens, outputTokens, estCost).catch(function() {});
+    logToGoogleForm('[' + mode + '] ' + userPrompt, status, duration, inputTokens, outputTokens, estCost).catch(function () {});
 
     return res.status(response.status).json(data);
   } catch (err) {
     const errDuration = ((Date.now() - startTime) / 1000).toFixed(1) + 's';
-    logToGoogleForm('[' + mode + '] ' + userPrompt, 'error: ' + err.message, errDuration, 0, 0, '$0').catch(function() {});
+    logToGoogleForm('[' + mode + '] ' + userPrompt, 'error: ' + err.message, errDuration, 0, 0, '$0').catch(function () {});
     console.error("Generate error:", err);
     return res.status(500).json({ error: { message: "Server error: " + err.message } });
   }

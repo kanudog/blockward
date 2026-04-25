@@ -11,13 +11,19 @@ export function BuilderForm(props){
   var _err=useState(null);var err=_err[0];var setErr=_err[1];
   var _cbMode=useState(true);var cbMode=_cbMode[0];var setCbMode=_cbMode[1];
   var _built=useState(null);var built=_built[0];var setBuilt=_built[1];
-  var go=async function(){if(!txt.trim())return;setBusy(true);setErr(null);
+  // Phase-2.6.1 part 2D/E/F: streaming progress state, fed by client.js
+  var _progress=useState({bytes:0,message:"Researching clinical guidelines..."});var progress=_progress[0];var setProgress=_progress[1];
+  var go=async function(){if(!txt.trim())return;setBusy(true);setErr(null);setProgress({bytes:0,message:"Researching clinical guidelines..."});
     try{var controller=new AbortController();var tid=setTimeout(function(){controller.abort();},GENERATE_TIMEOUT_MS);
-      var scenario=await generateScenario(txt,cbMode,controller.signal);
+      var scenario=await generateScenario(txt,cbMode,controller.signal,function(p){
+        setProgress(function(prev){
+          return{bytes:p.bytes,message:p.message||prev.message};
+        });
+      });
       clearTimeout(tid);
       setBuilt(scenario);
     }catch(e){console.error("Build error:",e);var em=e.name==="AbortError"?"Connection issue — please check your network and retry.":e.message||"Build failed. Try again with more detail.";setErr(em);}finally{setBusy(false);}};
-  if(busy)return <BuilderPreview cbMode={cbMode}/>;
+  if(busy)return <BuilderPreview cbMode={cbMode} bytes={progress.bytes} message={progress.message}/>;
   return(<div style={{minHeight:"100dvh",padding:16,background:"linear-gradient(135deg,#0a0e1a,#1a1a3e)",color:"#fff"}}><div className="bw-container" style={{maxWidth:480,margin:"0 auto"}}>
     <button onClick={onBack} style={{color:"#888",fontSize:13,background:"none",border:"none",cursor:"pointer",marginBottom:16}}>Back</button>
     <h2 style={{fontSize:24,fontWeight:900,marginBottom:8}}>Build a Scenario</h2>

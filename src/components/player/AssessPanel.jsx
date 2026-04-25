@@ -18,6 +18,29 @@ export function AssessPanel(props){
   var labItems=ph.assessItems.filter(function(it){return it.cat==="lab";});
   var clinItems=ph.assessItems.filter(function(it){return it.cat==="clinical";});
   var flaggedCount=Object.keys(flags).filter(function(k){return flags[k];}).length;
+  // Phase-2.6 group E: reveal vital colors only after the user has
+  // either submitted (showFb) or tapped that specific vital's
+  // assess item. Map vital-label keywords → vital store key.
+  function vitalKeyForLabel(label){
+    var l=(label||"").toLowerCase();
+    if(l.indexOf("hr")===0||l.indexOf("heart rate")>=0)return "hr";
+    if(l.indexOf("spo2")===0||l.indexOf("sat")>=0||l.indexOf("o2")===0)return "spo2";
+    if(l.indexOf("rr")===0||l.indexOf("resp")>=0)return "rr";
+    if(l.indexOf("bp")===0||l.indexOf("sbp")===0||l.indexOf("blood pressure")>=0)return "sbp";
+    if(l.indexOf("temp")>=0)return "temp";
+    if(l.indexOf("cap")>=0)return "cap";
+    return null;
+  }
+  var revealMap={};
+  if(showFb){revealMap={hr:true,spo2:true,rr:true,sbp:true,dbp:true,temp:true,cap:true};}
+  else{
+    ph.assessItems.forEach(function(it){
+      if(it.cat!=="vital")return;
+      if(!flags[it.id])return;
+      var k=vitalKeyForLabel(it.label);
+      if(k){revealMap[k]=true;if(k==="sbp")revealMap.dbp=true;}
+    });
+  }
   function SectionHeader(p){return(<div style={{display:"flex",alignItems:"center",gap:6,marginBottom:6}}>
     <span style={{padding:"2px 8px",borderRadius:999,fontSize:10,fontWeight:800,letterSpacing:0.5,textTransform:"uppercase",background:p.bg,color:p.fg,border:"1px solid "+p.fg+"55"}}>{p.label}</span>
   </div>);}
@@ -51,7 +74,7 @@ export function AssessPanel(props){
   return(<div className="slu">
     <div className="bw-split">
       <div className="bw-split-left">
-        <VitalsDisplay vitals={vit}/>
+        <VitalsDisplay vitals={vit} reveal={revealMap}/>
         <BodySystemsView signs={curSigns}/>
         <LabPanel labs={curLabs}/>
         <div style={{borderRadius:12,padding:10,marginTop:8,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.06)"}}>

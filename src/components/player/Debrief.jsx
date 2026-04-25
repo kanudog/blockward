@@ -16,6 +16,8 @@ export function Debrief(props){
   var actionHistory=usePlayerStore(function(s){return s.actionHistory;});
   var markedForReview=usePlayerStore(function(s){return s.markedForReview;});
   var _expI=useState("marked");var expI=_expI[0];var setExpI=_expI[1];
+  var _itemExp=useState({});var itemExp=_itemExp[0];var setItemExp=_itemExp[1];
+  var toggleItem=function(k){setItemExp(function(p){var n=Object.assign({},p);n[k]=!n[k];return n;});};
   var _deepDives=useState({});var deepDives=_deepDives[0];var setDeepDives=_deepDives[1];
   var _deepStatus=useState("idle");var deepStatus=_deepStatus[0];var setDeepStatus=_deepStatus[1];
   var _deepError=useState(null);var deepError=_deepError[0];var setDeepError=_deepError[1];
@@ -98,12 +100,13 @@ export function Debrief(props){
         <span style={{fontWeight:700,fontSize:14,color:"#00b894",display:"flex",alignItems:"center",gap:6}}><Check size={14}/>Findings You Caught ({caught.length})</span>
         <span style={{color:"#00b894"}}>{expI==="caught"?<Minus size={16}/>:<Plus size={16}/>}</span></button>
       {expI==="caught"&&<div style={{padding:"0 12px 12px"}}>
-        {caught.map(function(it,i){return(<div key={i} style={{padding:"8px 10px",marginBottom:6,borderRadius:8,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(0,184,148,0.25)"}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",gap:8}}>
-            <span style={{fontSize:12,fontWeight:700,color:"#ddd"}}>{it.label}</span>
+        {caught.map(function(it,i){var k="caught:"+i;var open=!!itemExp[k];return(<div key={k} style={{marginBottom:6,borderRadius:8,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(0,184,148,0.25)",overflow:"hidden"}}>
+          <button onClick={function(){toggleItem(k);}} style={{width:"100%",textAlign:"left",padding:"8px 10px",background:"none",border:"none",cursor:it.why?"pointer":"default",color:"white",display:"flex",justifyContent:"space-between",alignItems:"baseline",gap:8}}>
+            <span style={{fontSize:12,fontWeight:700,color:"#ddd",flex:1}}>{it.label}</span>
             <span style={{fontSize:9,color:"#666"}}>{it.phase}</span>
-          </div>
-          {it.why&&<TextBlock text={it.why} style={{fontSize:11,color:"#aaa",lineHeight:1.5,marginTop:4}}/>}
+            {it.why&&<span style={{color:"#00b894",marginLeft:4}}>{open?<Minus size={12}/>:<Plus size={12}/>}</span>}
+          </button>
+          {open&&it.why&&<div style={{padding:"0 10px 10px"}}><TextBlock text={it.why} style={{fontSize:11,color:"#aaa",lineHeight:1.5}}/></div>}
         </div>);})}
       </div>}
     </div>}
@@ -112,13 +115,16 @@ export function Debrief(props){
         <span style={{fontWeight:700,fontSize:14,color:"#FF6B81",display:"flex",alignItems:"center",gap:6}}><Search size={14}/>Findings You Missed ({missed.length})</span>
         <span style={{color:"#FF6B81"}}>{expI==="missed"?<Minus size={16}/>:<Plus size={16}/>}</span></button>
       {expI==="missed"&&<div style={{padding:"0 12px 12px"}}>
-        {missed.map(function(it,i){var note=it.bad?"You did not flag this abnormal finding.":"You flagged this, but it was within normal limits.";return(<div key={i} style={{padding:"8px 10px",marginBottom:6,borderRadius:8,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,71,87,0.25)"}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",gap:8}}>
-            <span style={{fontSize:12,fontWeight:700,color:"#ddd"}}>{it.label}</span>
+        {missed.map(function(it,i){var k="missed:"+i;var open=!!itemExp[k];var note=it.bad?"You did not flag this abnormal finding.":"You flagged this, but it was within normal limits.";return(<div key={k} style={{marginBottom:6,borderRadius:8,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,71,87,0.25)",overflow:"hidden"}}>
+          <button onClick={function(){toggleItem(k);}} style={{width:"100%",textAlign:"left",padding:"8px 10px",background:"none",border:"none",cursor:"pointer",color:"white",display:"flex",justifyContent:"space-between",alignItems:"baseline",gap:8}}>
+            <span style={{fontSize:12,fontWeight:700,color:"#ddd",flex:1}}>{it.label}</span>
             <span style={{fontSize:9,color:"#666"}}>{it.phase}</span>
-          </div>
-          <p style={{fontSize:11,color:"#ff9a9f",lineHeight:1.5,marginTop:4,marginBottom:0}}>{note}</p>
-          {it.why&&<TextBlock text={it.why} style={{fontSize:11,color:"#aaa",lineHeight:1.5,marginTop:4}}/>}
+            <span style={{color:"#FF6B81",marginLeft:4}}>{open?<Minus size={12}/>:<Plus size={12}/>}</span>
+          </button>
+          {open&&<div style={{padding:"0 10px 10px"}}>
+            <p style={{fontSize:11,color:"#ff9a9f",lineHeight:1.5,marginTop:0,marginBottom:0}}>{note}</p>
+            {it.why&&<TextBlock text={it.why} style={{fontSize:11,color:"#aaa",lineHeight:1.5,marginTop:4}}/>}
+          </div>}
         </div>);})}
       </div>}
     </div>}
@@ -163,13 +169,17 @@ export function Debrief(props){
           <button onClick={function(){setExpI(expI==="labrev"?null:"labrev");}} style={{width:"100%",textAlign:"left",padding:12,display:"flex",justifyContent:"space-between",background:"none",border:"none",cursor:"pointer",color:"white"}}>
             <span style={{fontWeight:700,fontSize:14,color:"#ff7675",display:"flex",alignItems:"center",gap:6}}><Droplets size={14}/>Lab Review - Critical Values Explained</span><span style={{color:"#ff7675"}}>{expI==="labrev"?<Minus size={16}/>:<Plus size={16}/>}</span></button>
           {expI==="labrev"&&<div style={{padding:"0 12px 12px"}}>
-            {allLabs.map(function(entry,i){return(
-              <div key={i} style={{marginBottom:12,borderRadius:8,padding:8,background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.06)"}}>
-                <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:3}}>
-                  <span style={{fontSize:13,fontWeight:700,color:"#ff7675"}}>{entry.lab.name+": "+entry.lab.value+" "+entry.lab.unit}</span>
-                  <span style={{fontSize:9,color:"#666"}}>{"Ref: "+entry.lab.ref+" | "+entry.phase}</span>
-                </div>
-                <TextBlock text={entry.lab.why} style={{fontSize:12,color:"#ccc",lineHeight:1.5}}/>
+            {allLabs.map(function(entry,i){var k="lab:"+i;var open=!!itemExp[k];return(
+              <div key={k} style={{marginBottom:8,borderRadius:8,background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.06)",overflow:"hidden"}}>
+                <button onClick={function(){toggleItem(k);}} style={{width:"100%",textAlign:"left",padding:"8px 10px",background:"none",border:"none",cursor:"pointer",color:"white",display:"flex",justifyContent:"space-between",alignItems:"baseline",gap:8}}>
+                  <span style={{fontSize:13,fontWeight:700,color:"#ff7675",flex:1}}>{entry.lab.name+": "+entry.lab.value+" "+entry.lab.unit}</span>
+                  <span style={{fontSize:9,color:"#666"}}>{"Ref: "+entry.lab.ref}</span>
+                  <span style={{color:"#ff7675",marginLeft:4}}>{open?<Minus size={12}/>:<Plus size={12}/>}</span>
+                </button>
+                {open&&<div style={{padding:"0 10px 10px"}}>
+                  <div style={{fontSize:9,color:"#666",marginBottom:4}}>{entry.phase}</div>
+                  <TextBlock text={entry.lab.why} style={{fontSize:12,color:"#ccc",lineHeight:1.5}}/>
+                </div>}
               </div>
             );})}
           </div>}

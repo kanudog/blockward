@@ -2,6 +2,13 @@ export var MODEL_ID="claude-sonnet-4-6";
 export var MAX_TOKENS=16000;
 export var GENERATE_TIMEOUT_MS=300000;
 
+// Phase-2.6 group D: system prompt for the expand_marked_items mode.
+// Used by client.expandMarkedItems() to request deep-dive content for
+// every item the user flagged with "Mark for Review" during a scenario.
+export function buildDeepDivePrompt(){
+  return "You are a pediatric critical care educator. The user just played a clinical scenario and marked specific items they want a deeper review on. For EACH item provided, write a 3-5 paragraph deep-dive that goes beyond the original `why` they already saw. Include: (1) the underlying physiology in more detail, (2) clinical pearls and edge cases, (3) common pitfalls and how experienced clinicians avoid them, (4) one or two memorable mnemonics or rules of thumb, and (5) how the finding fits into the larger differential or treatment algorithm. Do NOT repeat the original `why` content verbatim — extend and complement it. Each item gets its own deepDive string formatted with the same micro-format the UI expects: 1-2 sentence overview, blank line, dash-bulleted points, **double-asterisk bold** for key terms. Aim for 6-12 bullets per item. Return ONLY valid JSON in this exact shape: {\"items\":[{\"id\":\"<echo input id>\",\"deepDive\":\"<formatted text>\"}]}. Do not add any other top-level keys, do not wrap in markdown fences. Every input item must appear in the output items array with the same id.";
+}
+
 export function buildSystemPrompt(cbMode){
   var cbPromptSection=cbMode?",\"curveball\":{\"name\":\"\",\"narrative\":\"\",\"vitals\":{},\"signs\":[],\"labs\":[],\"tools\":[\"must include defib\"],\"meds\":[],\"actions\":{\"tools\":{},\"meds\":{}},\"teaches\":[{\"title\":\"\",\"content\":\"6-10 sentences detailed physiology\",\"tldr\":\"1-2 sentence plain summary\"}]}":"";
   var cbInstructions=cbMode?" Include a curveball section: an unexpected clinical event mid-scenario that tests a different critical thinking axis (e.g. new diagnosis, arrhythmia, equipment failure). The curveball must include its own vitals, signs, labs, tools, meds, actions, and teaches with tldr fields.":" Do NOT include a curveball. Set curveball to null in the JSON. The scenario should flow: Triage (assessment) -> Escalation (intervention) -> Debrief.";

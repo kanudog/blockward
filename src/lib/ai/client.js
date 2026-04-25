@@ -1,4 +1,4 @@
-import { buildSystemPrompt, MODEL_ID, MAX_TOKENS } from "./prompt.js";
+import { buildSystemPrompt, buildDeepDivePrompt, MODEL_ID, MAX_TOKENS } from "./prompt.js";
 import { validateSchema, validateConsistency, validateCounts, applyAutocorrections } from "./validate.js";
 
 var NAME_HINT_LETTERS="ABCDEFGHIJKLMNOPRSTUVWYZ"; // skip Q and X — rare initial sounds
@@ -54,4 +54,37 @@ export async function generateScenario(txt, cbMode, signal){
     surfaceable.forEach(function(w){console.warn("Validator ["+(w.phase||"?")+", "+w.kind+"]:",w.message,w.label?"— item: "+w.label:"");});
   }
   return scenario;
+}
+
+// Phase-2.6 group D: request deep-dive expansions for items the user
+// flagged with Mark for Review. Returns a Map of itemId → deepDive
+// string. Throws on any error so the caller can render a fallback.
+export async function expandMarkedItems(scenario, items, signal){
+  if(!Array.isArray(items)||items.length===0)return {};
+  var ctx={
+    title:scenario.title,
+    age:scenario.patient&&scenario.patient.ageLabel,
+    cc:scenario.patient&&scenario.patient.cc,
+    description:scenario.description
+  };
+  var userContent="Patient context: "+JSON.stringify(ctx)+"\n\nItems to expand:\n"+JSON.stringify(items.map(function(i){return{id:i.id,label:i.label,type:i.type,originalWhy:i.originalWhy};}));
+  var r=await fetch("/api/generate",{method:"POST",headers:{"Content-Type":"application/json"},signal:signal,
+    body:JSON.stringify({model:MODEL_ID,max_tokens:6000,mode:"expand_marked_items",
+      system:buildDeepDivePrompt(),
+      messages:[{role:"user",content:userContent}]})});
+  var raw=await r.text();var d;
+  try{d=JSON.parse(raw);}catch(je){throw new Error("Server returned invalid response (status "+r.status+").");}
+  if(d.error)throw new Error(d.error.message||"API error");
+  var tb="";(d.content||[]).forEach(function(b){if(b.type==="text"&&b.text)tb+=b.text;});
+  if(!tb.trim())throw new Error("No text in deep-dive response.");
+  var cl=tb.replace(/```json\s*/gi,"").replace(/```\s*/g,"").trim();
+  var open=cl.indexOf("{");var close=cl.lastIndexOf("}");
+  if(open<0||close<0)throw new Error("Deep-dive response did not contain a JSON object.");
+  cl=cl.substring(open,close+1);
+  var parsed;
+  try{parsed=JSON.parse(cl);}catch(pe){throw new Error("Deep-dive response had invalid JSON.");}
+  if(!parsed||!Array.isArray(parsed.items))throw new Error("Deep-dive response missing items array.");
+  var out={};
+  parsed.items.forEach(function(it){if(it&&it.id&&it.deepDive)out[it.id]=it.deepDive;});
+  return out;
 }

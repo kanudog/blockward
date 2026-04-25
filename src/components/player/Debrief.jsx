@@ -1,9 +1,10 @@
-import { useState } from "react";
-import { Star, Trophy, BookOpen, Plus, Minus, Search, Check, Zap, Droplets } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Star, Trophy, BookOpen, Plus, Minus, Search, Check, Zap, Droplets, Bookmark } from "lucide-react";
 import { PatientSVG } from "./PatientSVG.jsx";
 import { TextBlock } from "../shared/TextBlock.jsx";
 import { TOOLS, MEDS } from "../../lib/scenarios/builtIn.js";
 import { usePlayerStore } from "../../stores/playerStore.js";
+import { expandMarkedItems } from "../../lib/ai/client.js";
 
 var BS={width:"100%",marginTop:12,padding:"12px 0",borderRadius:12,fontWeight:700,color:"white",fontSize:16,border:"none",cursor:"pointer"};
 var GR="linear-gradient(135deg,#4ECDC4,#44B09E)";
@@ -13,7 +14,26 @@ export function Debrief(props){
   var skippedActions=usePlayerStore(function(s){return s.skippedActions;});
   var assessHistory=usePlayerStore(function(s){return s.assessHistory;});
   var actionHistory=usePlayerStore(function(s){return s.actionHistory;});
-  var _expI=useState(null);var expI=_expI[0];var setExpI=_expI[1];
+  var markedForReview=usePlayerStore(function(s){return s.markedForReview;});
+  var _expI=useState("marked");var expI=_expI[0];var setExpI=_expI[1];
+  var _deepDives=useState({});var deepDives=_deepDives[0];var setDeepDives=_deepDives[1];
+  var _deepStatus=useState("idle");var deepStatus=_deepStatus[0];var setDeepStatus=_deepStatus[1];
+  var _deepError=useState(null);var deepError=_deepError[0];var setDeepError=_deepError[1];
+  useEffect(function(){
+    if(markedForReview.length===0)return;
+    if(deepStatus!=="idle")return;
+    setDeepStatus("loading");
+    var controller=new AbortController();
+    expandMarkedItems(sc,markedForReview,controller.signal).then(function(map){
+      setDeepDives(map);setDeepStatus("done");
+    }).catch(function(err){
+      console.error("Deep-dive expansion failed:",err);
+      setDeepError(err.message||"Could not load deep dive");
+      setDeepStatus("error");
+    });
+    return function(){controller.abort();};
+  },[markedForReview.length]);
+  var retryDeepDives=function(){setDeepStatus("idle");setDeepError(null);};
   var _tldrOpen=useState({});var tldrOpen=_tldrOpen[0];var setTldrOpen=_tldrOpen[1];
   var toggleTldr=function(key){setTldrOpen(function(p){var n=Object.assign({},p);n[key]=!n[key];return n;});};
   var pct=score.t>0?Math.round(score.c/score.t*100):0;var emIcon=pct>=80?<Star size={24} color="#FECA57"/>:pct>=50?<Trophy size={24} color="#FECA57"/>:<BookOpen size={24} color="#74b9ff"/>;var sBg=pct>=80?"#00b894":pct>=50?"#fdcb6e":"#e17055";
@@ -50,6 +70,28 @@ export function Debrief(props){
     <div style={{textAlign:"center",marginBottom:24}}><div style={{fontSize:44,display:"flex",justifyContent:"center"}}>{emIcon}</div><h2 style={{fontSize:24,fontWeight:900}}>Scenario Complete</h2>
       <div className="si" style={{marginTop:8,display:"inline-block",padding:"8px 20px",borderRadius:20,fontSize:18,fontWeight:700,background:sBg}}>{score.c+"/"+score.t+" - "+pct+"%"}</div></div>
     <div className="bw-glass" style={{borderRadius:16,padding:16,marginBottom:16}}><TextBlock text={sc.debrief.summary} style={{fontSize:13,color:"#ccc",lineHeight:1.6}}/></div>
+    {/* Marked for Review — top-most section, default expanded (phase-2.6 group D) */}
+    {markedForReview.length>0&&<div style={{marginBottom:8,borderRadius:12,overflow:"hidden",background:"rgba(254,202,87,0.08)",border:"1px solid rgba(254,202,87,0.35)"}}>
+      <button onClick={function(){setExpI(expI==="marked"?null:"marked");}} style={{width:"100%",textAlign:"left",padding:12,display:"flex",justifyContent:"space-between",background:"none",border:"none",cursor:"pointer",color:"white"}}>
+        <span style={{fontWeight:700,fontSize:14,color:"#FECA57",display:"flex",alignItems:"center",gap:6}}><Bookmark size={14}/>Marked for Review ({markedForReview.length})</span>
+        <span style={{color:"#FECA57"}}>{expI==="marked"?<Minus size={16}/>:<Plus size={16}/>}</span></button>
+      {expI==="marked"&&<div style={{padding:"0 12px 12px"}}>
+        {deepStatus==="loading"&&<div style={{padding:12,fontSize:12,color:"#FECA57",textAlign:"center"}}>Generating deep dive…</div>}
+        {deepStatus==="error"&&<div style={{padding:10,marginBottom:8,borderRadius:8,background:"rgba(255,71,87,0.1)",border:"1px solid rgba(255,71,87,0.3)",fontSize:11,color:"#ff9a9f"}}>
+          Deep dive unavailable — showing original notes. <button onClick={retryDeepDives} style={{marginLeft:6,background:"none",border:"none",color:"#74b9ff",textDecoration:"underline",cursor:"pointer",fontSize:11}}>Retry</button>
+        </div>}
+        {markedForReview.map(function(item,i){
+          var deep=deepDives[item.id];
+          var fallback=!deep&&(deepStatus==="error"||deepStatus==="done");
+          return(<div key={i} style={{marginBottom:10,borderRadius:8,padding:10,background:"rgba(255,255,255,0.03)",border:"1px solid rgba(254,202,87,0.25)"}}>
+            <div style={{fontSize:12,fontWeight:700,color:"#FECA57",marginBottom:6}}>{item.label}<span style={{fontSize:9,color:"#888",fontWeight:600,marginLeft:6,textTransform:"uppercase",letterSpacing:0.5}}>{item.type}</span></div>
+            {deep?<TextBlock text={deep} style={{fontSize:12,color:"#ddd",lineHeight:1.6}}/>
+              :fallback?<TextBlock text={item.originalWhy||"No additional content available."} style={{fontSize:12,color:"#aaa",lineHeight:1.5}}/>
+              :null}
+          </div>);
+        })}
+      </div>}
+    </div>}
     {/* Review — four collapsible subsections (phase-2.5 issue 8) */}
     {caught.length>0&&<div style={{marginBottom:8,borderRadius:12,overflow:"hidden",background:"rgba(0,184,148,0.06)",border:"1px solid rgba(0,184,148,0.25)"}}>
       <button onClick={function(){setExpI(expI==="caught"?null:"caught");}} style={{width:"100%",textAlign:"left",padding:12,display:"flex",justifyContent:"space-between",background:"none",border:"none",cursor:"pointer",color:"white"}}>

@@ -11,6 +11,13 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: { message: "ANTHROPIC_API_KEY not configured" } });
   }
 
+  // Phase-2.6 group D: clients may pass a mode parameter to tag the call.
+  // Today this is used purely for logging/observability — the request
+  // body still carries the full system prompt and messages. Known modes:
+  //   "scenario" (default) — full scenario generation
+  //   "expand_marked_items" — deep-dive expansion of items the user marked
+  const mode = (req.body && req.body.mode) || 'scenario';
+
   let userPrompt = '';
   try {
     const msgs = req.body.messages || [];
@@ -48,12 +55,12 @@ export default async function handler(req, res) {
     const estCost = '$' + ((inputTokens * 3 / 1000000) + (outputTokens * 15 / 1000000)).toFixed(4);
     const status = response.ok ? 'success' : 'error: ' + (data.error ? data.error.message : response.status);
 
-    logToGoogleForm(userPrompt, status, duration, inputTokens, outputTokens, estCost).catch(function() {});
+    logToGoogleForm('[' + mode + '] ' + userPrompt, status, duration, inputTokens, outputTokens, estCost).catch(function() {});
 
     return res.status(response.status).json(data);
   } catch (err) {
     const errDuration = ((Date.now() - startTime) / 1000).toFixed(1) + 's';
-    logToGoogleForm(userPrompt, 'error: ' + err.message, errDuration, 0, 0, '$0').catch(function() {});
+    logToGoogleForm('[' + mode + '] ' + userPrompt, 'error: ' + err.message, errDuration, 0, 0, '$0').catch(function() {});
     console.error("Generate error:", err);
     return res.status(500).json({ error: { message: "Server error: " + err.message } });
   }

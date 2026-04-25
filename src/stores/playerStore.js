@@ -19,7 +19,8 @@ var initialState = {
   shake: false,
   skippedActions: [],
   assessHistory: [],
-  actionHistory: []
+  actionHistory: [],
+  markedForReview: []
 };
 
 export var usePlayerStore = create(function(set) {
@@ -37,7 +38,8 @@ export var usePlayerStore = create(function(set) {
         shake: false,
         skippedActions: [],
         assessHistory: [],
-        actionHistory: []
+        actionHistory: [],
+        markedForReview: []
       });
     },
     reset: function() {
@@ -75,6 +77,17 @@ export var usePlayerStore = create(function(set) {
     recordAction: function(snapshot) {
       set(function(s) {
         return { actionHistory: s.actionHistory.concat([snapshot]) };
+      });
+    },
+    toggleMarkForReview: function(item) {
+      set(function(s) {
+        var existing = s.markedForReview.findIndex(function(x) { return x.id === item.id; });
+        if (existing >= 0) {
+          var copy = s.markedForReview.slice();
+          copy.splice(existing, 1);
+          return { markedForReview: copy };
+        }
+        return { markedForReview: s.markedForReview.concat([item]) };
       });
     }
   });

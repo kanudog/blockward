@@ -40,7 +40,7 @@ export function LabPanel(props) {
           );
         })}
       </div>
-      <WhyModal open={!!whyTarget} onClose={function(){setWhyTarget(null);}} title={whyTarget?whyTarget.name+": "+whyTarget.value+" "+(whyTarget.unit||""):""} body={whyTarget?whyTarget.why:""} accent={whyTarget&&whyTarget.critical?"#ff7675":"#4ECDC4"}/>
+      <WhyModal open={!!whyTarget} onClose={function(){setWhyTarget(null);}} title={whyTarget?whyTarget.name+": "+whyTarget.value+" "+(whyTarget.unit||""):""} body={whyTarget?whyTarget.why:""} accent={whyTarget&&whyTarget.critical?"#ff7675":"#4ECDC4"} item={whyTarget?{id:"lab:"+whyTarget.name,label:whyTarget.name+" "+whyTarget.value+(whyTarget.unit?" "+whyTarget.unit:""),type:"lab",originalWhy:whyTarget.why}:null}/>
     </div>
   );
 }

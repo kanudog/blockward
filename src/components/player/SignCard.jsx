@@ -12,6 +12,6 @@ export function SignCard(props){
       </div>
       <div style={{fontSize:11,color:"#bbc",lineHeight:1.4,marginTop:2}}>{s.finding}</div>
     </div>
-    <WhyModal open={open} onClose={function(){setOpen(false);}} title={s.label} body={s.why}/>
+    <WhyModal open={open} onClose={function(){setOpen(false);}} title={s.label} body={s.why} item={{id:"sign:"+s.label,label:s.label,type:"finding",originalWhy:s.why}}/>
   </div>);
 }

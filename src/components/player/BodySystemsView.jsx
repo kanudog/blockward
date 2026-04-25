@@ -45,7 +45,7 @@ export function BodySystemsView(props) {
           );
         })}
       </div>
-      <WhyModal open={!!whyTarget} onClose={function(){setWhyTarget(null);}} title={whyTarget?whyTarget.label:""} body={whyTarget?whyTarget.why:""}/>
+      <WhyModal open={!!whyTarget} onClose={function(){setWhyTarget(null);}} title={whyTarget?whyTarget.label:""} body={whyTarget?whyTarget.why:""} item={whyTarget?{id:"sign:"+whyTarget.label,label:whyTarget.label,type:"finding",originalWhy:whyTarget.why}:null}/>
     </div>
   );
 }

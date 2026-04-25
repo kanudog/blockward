@@ -38,7 +38,7 @@ export default function App(){
   },[]);
   var play=function(s){startPlayer(s);setView("play");};
   var done=function(score){if(!act)return;recordCompletion(act.id,score);};
-  var addC=function(s){addCustom(s);setView("dash");if(s&&s._warnings&&s._warnings.length>0){var n=s._warnings.length;setShareMsg(n+" content warning"+(n===1?"":"s")+" - see console");setTimeout(function(){setShareMsg(null);},5000);}};
+  var addC=function(s){addCustom(s);setView("dash");if(s&&s._validatorWarnings&&s._validatorWarnings.length>0){var n=s._validatorWarnings.length;setShareMsg(n+" content warning"+(n===1?"":"s")+" - see console");setTimeout(function(){setShareMsg(null);},5000);}};
   var delC=function(id){deleteCustom(id);setDelConfirm(null);};
   var clearAll=function(){clearAllScenarios();setShareMsg("All data cleared");setTimeout(function(){setShareMsg(null);},2000);};
   if(!ok)return(<div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"#0a0e1a"}}><div style={{color:"#4ECDC4",fontSize:20}}>Loading Block Ward...</div></div>);

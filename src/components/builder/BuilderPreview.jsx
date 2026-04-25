@@ -10,9 +10,11 @@ import { useState, useEffect, useRef } from "react";
 // time-based 0-30% sweep keeps it from looking frozen.
 export function BuilderPreview(props){
   var cbMode=props.cbMode;
-  var bytes=props.bytes||0;
+  var bytes=props.bytes||0; // accumulated text chars (set by BuilderForm)
   var message=props.message||"Researching clinical guidelines...";
-  var estimateBytes=cbMode?42000:26000;
+  // Phase-2.6.1 part 2F: estimates calibrated to actual JSON char counts
+  // observed in built-ins (~22-27 KB no curveball, ~32-42 KB curveball).
+  var estimateBytes=cbMode?38000:24000;
   var estimateSec=cbMode?60:30;
   var _elapsed=useState(0);var elapsed=_elapsed[0];var setElapsed=_elapsed[1];
   var _displayMsg=useState(message);var displayMsg=_displayMsg[0];var setDisplayMsg=_displayMsg[1];
@@ -28,11 +30,17 @@ export function BuilderPreview(props){
     lastMsgRef.current=message;
     setDisplayMsg(message);
   },[message]);
-  // Hybrid progress: byte ratio if any bytes received, else time-based
-  // pre-stream sweep capped at 30% so it can move during the SSE warm-up.
+  // Phase-2.6.1 part 2F hybrid progress:
+  // - bytes/estimate is the primary signal once content is arriving.
+  // - timeFrac sweeps 0 → 30% over the estimate window as a fallback so
+  //   the bar moves during the pre-stream warm-up (server cold start +
+  //   first-token latency).
+  // - Take the MAX of the two so the bar never moves backward when
+  //   streaming kicks in late (a 200ms 30% time fill won't get
+  //   overwritten by a 4% byte fill on the first chunk).
   var byteFrac=bytes/estimateBytes;
   var timeFrac=Math.min(elapsed/estimateSec*0.3,0.3);
-  var raw=bytes>0?byteFrac:timeFrac;
+  var raw=Math.max(byteFrac,timeFrac);
   var progress=Math.min(raw,0.97);
   var pct=Math.round(progress*100);
   return(<div style={{minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:24,background:"linear-gradient(135deg,#0a0e1a,#1a1a3e)"}}>
@@ -45,7 +53,7 @@ export function BuilderPreview(props){
         <div style={{height:"100%",width:pct+"%",background:"linear-gradient(90deg,#a55eea,#4ECDC4)",transition:"width 0.25s linear"}}></div>
       </div>
       <div style={{display:"flex",justifyContent:"space-between",marginTop:6,fontSize:10,color:"#888"}}>
-        <span>{bytes>0?(Math.round(bytes/1024)+" KB received"):(Math.floor(elapsed)+"s elapsed")}</span>
+        <span>{bytes>0?(Math.round(bytes/1000)+" KB · "+Math.floor(elapsed)+"s"):(Math.floor(elapsed)+"s elapsed · waiting for first chunk")}</span>
         <span>{cbMode?"Curveball mode":"Standard mode"}</span>
       </div>
     </div>

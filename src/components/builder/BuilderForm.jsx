@@ -16,8 +16,13 @@ export function BuilderForm(props){
   var go=async function(){if(!txt.trim())return;setBusy(true);setErr(null);setProgress({bytes:0,message:"Researching clinical guidelines..."});
     try{var controller=new AbortController();var tid=setTimeout(function(){controller.abort();},GENERATE_TIMEOUT_MS);
       var scenario=await generateScenario(txt,cbMode,controller.signal,function(p){
+        // Phase-2.6.1 part 2F: use accumulated text chars (useful content)
+        // rather than raw SSE chunk bytes (which include event-stream
+        // framing overhead). Falls back to chunk bytes if accumulated
+        // somehow isn't reported.
+        var contentChars=p.accumulated?p.accumulated.length:p.bytes;
         setProgress(function(prev){
-          return{bytes:p.bytes,message:p.message||prev.message};
+          return{bytes:Math.max(prev.bytes||0,contentChars),message:p.message||prev.message};
         });
       });
       clearTimeout(tid);

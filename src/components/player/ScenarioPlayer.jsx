@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Heart, Zap, Sparkles, Star, Trophy, Shield, Check } from "lucide-react";
 import { TOOLS, MEDS } from "../../lib/scenarios/builtIn.js";
 import { computeAssessScore } from "../../lib/scenarios/scoring.js";
+import { canonicalizeAssessItem } from "../../lib/scenarios/canonicalize.js";
 import { usePlayerStore } from "../../stores/playerStore.js";
 import { guessAge, guessSex } from "../../lib/scenarios/age.js";
 import { VitalsDisplay } from "./VitalsDisplay.jsx";
@@ -45,8 +46,16 @@ export function ScenarioPlayer(props){
   var pSt=function(){if(stage.startsWith("cb"))return"critical";if(pi>=1||stage==="act")return"declining";return"stable";};
   var trigCb=useCallback(function(){setShake(true);setTimeout(function(){setShake(false);},800);setVit(sc.curveball.vitals);setStage("cb-alert");setCbDone(true);},[sc]);
   var flag=function(id){if(!showFb)toggleFlag(id);};
-  var submit=function(){var r=computeAssessScore(ph.assessItems,flags);addScore({c:r.c,t:r.t});
-    recordAssess({phaseId:ph.id,phaseName:ph.name||ph.id,items:ph.assessItems.map(function(it){return{id:it.id,label:it.label,cat:it.cat,bad:!!it.bad,why:it.why||"",userFlagged:!!flags[it.id]};})});
+  var submit=function(){
+    // Phase-3.0-hotfix: flags are now keyed by canonical display IDs
+    // (lab:Foo, vital:hr, sign:Bar) instead of raw assessItem.id, so
+    // scoring + recordAssess must look each assessItem up by mapping
+    // through canonicalizeAssessItem with the surrounding phase context.
+    var r=computeAssessScore(ph.assessItems,flags,ph);addScore({c:r.c,t:r.t});
+    recordAssess({phaseId:ph.id,phaseName:ph.name||ph.id,items:ph.assessItems.map(function(it){
+      var cid=canonicalizeAssessItem(it,ph);
+      return{id:it.id,label:it.label,cat:it.cat,bad:!!it.bad,why:it.why||"",userFlagged:!!(cid&&flags[cid])};
+    })});
     setShowFb(true);};
   var afterA=function(){setFlags({});setShowFb(false);if(pi<sc.phases.length-1){var n=pi+1;setPi(n);setVit(sc.phases[n].vitals);setStage("phase");}else setStage("debrief");};
   var afterAct=function(s){if(s&&s.t)addScore({c:s.c,t:s.t});if(!cbDone&&sc.curveball)trigCb();else setStage("reassess");};

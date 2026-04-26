@@ -37,6 +37,12 @@ export function Debrief(props){
     expandMarkedItems(sc,markedForReview,controller.signal).then(function(map){
       setDeepDives(map);setDeepStatus("done");
     }).catch(function(err){
+      // Phase-3.0-hotfix change 5: AbortError on this catch is the
+      // StrictMode unmount cleanup firing controller.abort(). It is not
+      // a real failure and must NOT transition to the red error state —
+      // pre-fix the user saw a flash of red on every dev mount cycle.
+      // Real network/parse failures still land in setDeepStatus("error").
+      if (err && err.name === "AbortError") return;
       console.error("Deep-dive expansion failed:",err);
       setDeepError(err.message||"Could not load deep dive");
       setDeepStatus("error");

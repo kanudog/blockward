@@ -1,36 +1,28 @@
 import { useState } from "react";
 import { Flag, Check, X, AlertTriangle } from "lucide-react";
 import { WhyModal, WhyButton } from "../shared/WhyModal.jsx";
+import { labCanonicalId } from "../../lib/scenarios/canonicalize.js";
 
-// Phase-3.0 change 4: lab tiles are directly clickable. No pre-submit
-// abnormal highlighting (the previous red text on `critical:true` is
-// gone). Each lab attempts to match an assessItem (cat:"lab", label
-// containing lab.name) so clicking toggles that assessItem's flag in
-// the parent's state. Why? button hidden pre-submit (revealed by
-// change 7's post-submit state machine).
+// Phase-3.0-hotfix change 1: every lab tile is clickable, period.
+// Selection state is keyed by canonical ID (lab:<name>) so click
+// targets are decoupled from assessItems matching. Pre-hotfix the
+// LabPanel pre-filtered tiles to only those that matched assessItems,
+// which silently dropped clickability when the AI's labels did not
+// align (the DKA-scenario regression). Now scoring/reveal flows use
+// the canonical IDs through the badMap prop.
 //
-// Backward compat: if assessItems / onFlag aren't passed, LabPanel
-// falls back to the previous read-only rendering (used on phase / act
-// / cb-* / reassess where labs are display-only).
-function findAssessForLab(lab,assessItems){
-  if(!lab||!lab.name||!Array.isArray(assessItems))return null;
-  var key=lab.name.toLowerCase();
-  for(var i=0;i<assessItems.length;i++){
-    var it=assessItems[i];
-    if(it.cat!=="lab")continue;
-    if((it.label||"").toLowerCase().indexOf(key)>=0)return it;
-  }
-  return null;
-}
+// Backward compat: read-only callers (phase / act / cb-* / reassess)
+// omit badMap / flags / onFlag and get the legacy display-only
+// rendering plus the lab.critical / lab.why treatment.
 
 export function LabPanel(props) {
   var labs = props.labs || [];
-  var assessItems = props.assessItems || null;
+  var badMap = props.badMap || null;
   var flags = props.flags || null;
   var onFlag = props.onFlag || null;
   var showFb = !!props.showFb;
-  var clickable = !!(assessItems && flags && onFlag);
-  var _why=useState(null);var whyTarget=_why[0];var setWhyTarget=_why[1];
+  var clickable = !!(badMap && flags && onFlag);
+  var _why = useState(null); var whyTarget = _why[0]; var setWhyTarget = _why[1];
   if (labs.length === 0) return null;
   return (
     <div style={{marginTop:8,marginBottom:8}}>
@@ -47,51 +39,48 @@ export function LabPanel(props) {
       </div>
       <style>{"@media (max-width: 400px){.bw-lab-grid{grid-template-columns:1fr !important}}"}</style>
       <div className="bw-lab-grid" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
-        {labs.map(function(lab,i) {
-          var match=clickable?findAssessForLab(lab,assessItems):null;
-          var isFlagged=match&&!!flags[match.id];
-          var hasWhy = !!lab.why;
-          // Phase-3.0 change 7: post-submit reveal drives off the matched
-          // assessItem.bad (interactive mode) or lab.critical (read-only
-          // fallback). Three reveal states: caught (bad+selected, green),
-          // missed (bad+not selected, red), wrong (not bad+selected, amber).
-          var revealBad = match ? !!match.bad : !!lab.critical;
+        {labs.map(function(lab, i) {
+          var cid = labCanonicalId(lab);
+          var match = badMap ? badMap[cid] : null;
+          var isFlagged = !!(flags && flags[cid]);
+          // A lab is "abnormal" if the matched assessItem says bad,
+          // or if the AI marked it critical, or it carries a why.
+          var isAbnormal = (match && !!match.bad) || !!lab.critical || !!lab.why;
           var revealState = null;
-          if(clickable&&showFb){
-            if(revealBad&&isFlagged)revealState="caught";
-            else if(revealBad&&!isFlagged)revealState="missed";
-            else if(!revealBad&&isFlagged)revealState="wrong";
+          if (clickable && showFb) {
+            var revealBad = (match && !!match.bad) || !!lab.critical;
+            if (revealBad && isFlagged) revealState = "caught";
+            else if (revealBad && !isFlagged) revealState = "missed";
+            else if (!revealBad && isFlagged) revealState = "wrong";
           }
           var bg, brd;
-          if(clickable&&!showFb){
-            // Pre-submit: neutral OR teal-selected. No red regardless of
-            // lab.critical — pedagogy fix per brief.
-            bg=isFlagged?"rgba(78,205,196,0.12)":"rgba(255,255,255,0.04)";
-            brd=isFlagged?"2px solid rgba(78,205,196,0.55)":"1px solid rgba(255,255,255,0.08)";
-          }else if(clickable&&showFb){
-            if(revealState==="caught"){bg="rgba(0,184,148,0.12)";brd="2px solid rgba(0,184,148,0.5)";}
-            else if(revealState==="missed"){bg="rgba(255,71,87,0.12)";brd="2px solid rgba(255,71,87,0.5)";}
-            else if(revealState==="wrong"){bg="rgba(254,202,87,0.12)";brd="2px solid rgba(254,202,87,0.5)";}
-            else{bg="rgba(255,255,255,0.04)";brd="1px solid rgba(255,255,255,0.06)";}
-          }else{
-            // Read-only callers (phase / act / cb-* / reassess): keep
-            // the legacy critical-red treatment so display screens
-            // remain informative when the user isn't deciding.
-            bg=lab.critical?"rgba(255,71,87,0.12)":"rgba(255,255,255,0.04)";
-            brd=lab.critical?"1px solid rgba(255,71,87,0.25)":"1px solid rgba(255,255,255,0.06)";
+          if (clickable && !showFb) {
+            bg = isFlagged ? "rgba(78,205,196,0.12)" : "rgba(255,255,255,0.04)";
+            brd = isFlagged ? "2px solid rgba(78,205,196,0.55)" : "1px solid rgba(255,255,255,0.08)";
+          } else if (clickable && showFb) {
+            if (revealState === "caught") { bg = "rgba(0,184,148,0.12)"; brd = "2px solid rgba(0,184,148,0.5)"; }
+            else if (revealState === "missed") { bg = "rgba(255,71,87,0.12)"; brd = "2px solid rgba(255,71,87,0.5)"; }
+            else if (revealState === "wrong") { bg = "rgba(254,202,87,0.12)"; brd = "2px solid rgba(254,202,87,0.5)"; }
+            else { bg = "rgba(255,255,255,0.04)"; brd = "1px solid rgba(255,255,255,0.06)"; }
+          } else {
+            bg = lab.critical ? "rgba(255,71,87,0.12)" : "rgba(255,255,255,0.04)";
+            brd = lab.critical ? "1px solid rgba(255,71,87,0.25)" : "1px solid rgba(255,255,255,0.06)";
           }
-          var valueColor=showFb&&revealBad?"#ff7675":"#fff";
-          // Why? button: post-submit, on every truly-abnormal item (bad)
-          // in interactive mode, regardless of whether the user caught it.
-          // Read-only mode keeps the legacy lab.why trigger.
-          var showWhyBtn = clickable ? (showFb && match && match.bad) : (showFb && hasWhy);
-          var whyAccent = revealBad?"#ff7675":"#4ECDC4";
-          function openWhy(e){
-            if(e&&e.stopPropagation)e.stopPropagation();
-            var why = lab.why || (match && match.why) || "";
-            setWhyTarget(Object.assign({}, lab, {why: why, _matchBad: revealBad}));
+          var valueColor = showFb && isAbnormal ? "#ff7675" : "#fff";
+          // Phase-3.0-hotfix change 2: Why? appears post-submit on every
+          // truly-abnormal item, not only on those that matched
+          // assessItems. Content priority: assessItem.why > lab.why >
+          // safety-net placeholder.
+          var showWhyBtn;
+          if (clickable) showWhyBtn = showFb && isAbnormal;
+          else showWhyBtn = showFb && !!lab.why;
+          var whyAccent = isAbnormal ? "#ff7675" : "#4ECDC4";
+          function openWhy(e) {
+            if (e && e.stopPropagation) e.stopPropagation();
+            var why = (match && match.why) || lab.why || "No additional explanation available for this finding.";
+            setWhyTarget(Object.assign({}, lab, {why: why, _abnormal: isAbnormal}));
           }
-          var inner=(<div style={{borderRadius:8,padding:"8px 12px",background:bg,border:brd,position:"relative",cursor:clickable&&!showFb?"pointer":"default",color:"white",textAlign:"left",width:"100%"}}>
+          var inner = (<div style={{borderRadius:8,padding:"8px 12px",background:bg,border:brd,position:"relative",cursor:clickable&&!showFb?"pointer":"default",color:"white",textAlign:"left",width:"100%"}}>
             {clickable&&!showFb&&isFlagged&&<div style={{position:"absolute",top:6,right:6}}><Flag size={11} color="#4ECDC4"/></div>}
             {revealState==="caught"&&<div style={{position:"absolute",top:6,right:6}}><Check size={13} color="#00b894"/></div>}
             {revealState==="missed"&&<div style={{position:"absolute",top:6,right:6}}><X size={13} color="#FF6B81"/></div>}
@@ -106,13 +95,13 @@ export function LabPanel(props) {
             </div>
             <div style={{fontSize:9,color:"#888"}}>{"Ref: "+lab.ref}</div>
           </div>);
-          if(clickable&&!showFb){
-            return(<button key={i} onClick={function(){if(match)onFlag(match.id);}} className="bw-tap" style={{padding:0,background:"none",border:"none",display:"block",width:"100%",cursor:match?"pointer":"default",opacity:match?1:0.6}}>{inner}</button>);
+          if (clickable && !showFb) {
+            return (<button key={i} onClick={function(){onFlag(cid);}} className="bw-tap" style={{padding:0,background:"none",border:"none",display:"block",width:"100%",cursor:"pointer"}}>{inner}</button>);
           }
-          return(<div key={i}>{inner}</div>);
+          return (<div key={i}>{inner}</div>);
         })}
       </div>
-      <WhyModal open={!!whyTarget} onClose={function(){setWhyTarget(null);}} title={whyTarget?whyTarget.name+": "+whyTarget.value+" "+(whyTarget.unit||""):""} body={whyTarget?whyTarget.why:""} accent={whyTarget&&(whyTarget._matchBad||whyTarget.critical)?"#ff7675":"#4ECDC4"} item={whyTarget?{id:"lab:"+whyTarget.name,label:whyTarget.name+" "+whyTarget.value+(whyTarget.unit?" "+whyTarget.unit:""),type:"lab",originalWhy:whyTarget.why}:null}/>
+      <WhyModal open={!!whyTarget} onClose={function(){setWhyTarget(null);}} title={whyTarget?whyTarget.name+": "+whyTarget.value+" "+(whyTarget.unit||""):""} body={whyTarget?whyTarget.why:""} accent={whyTarget&&(whyTarget._abnormal||whyTarget.critical)?"#ff7675":"#4ECDC4"} item={whyTarget?{id:labCanonicalId(whyTarget),label:whyTarget.name+" "+whyTarget.value+(whyTarget.unit?" "+whyTarget.unit:""),type:"lab",originalWhy:whyTarget.why}:null}/>
     </div>
   );
 }

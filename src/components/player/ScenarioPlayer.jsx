@@ -15,6 +15,7 @@ import { Debrief } from "./Debrief.jsx";
 import { TextBlock } from "../shared/TextBlock.jsx";
 import { Modal } from "../shared/Modal.jsx";
 import { ToolIcon, MedIcon } from "./icons.jsx";
+import { replaceIdsWithLabels } from "../../lib/scenarios/labels.js";
 
 export function ScenarioPlayer(props){
   var sc=props.sc;var onExit=props.onExit;var onDone=props.onDone;
@@ -173,7 +174,7 @@ export function ScenarioPlayer(props){
             <PatientSVG status="stable" rr={reVitals.rr||20} ageGroup={ageG} sex={sexG} emotion="happy"/>
           </div>
           <div className="bw-glass" style={{borderRadius:16,padding:12,marginBottom:12}}>
-            <TextBlock text={reNarrative} style={{fontSize:13,color:"#ddd",lineHeight:1.6}}/>
+            <TextBlock text={replaceIdsWithLabels(reNarrative)} style={{fontSize:13,color:"#ddd",lineHeight:1.6}}/>
           </div>
           {/* Phase-2.6.3 change 5: cap monitor width to match phase/act
               rendering. Reassess stacks vertically (no bw-split column),
@@ -231,7 +232,7 @@ export function ScenarioPlayer(props){
           </div>
           {allRevealed&&<div className="bw-vn" style={{marginBottom:16}}>
             {sc.stabilizationSummary?<div style={{maxWidth:440,margin:"0 auto 12px",padding:12,borderRadius:12,background:"rgba(85,239,196,0.06)",border:"1px solid rgba(85,239,196,0.2)",textAlign:"left"}}>
-              <TextBlock text={sc.stabilizationSummary} style={{fontSize:13,color:"#ddd",lineHeight:1.6}}/>
+              <TextBlock text={replaceIdsWithLabels(sc.stabilizationSummary)} style={{fontSize:13,color:"#ddd",lineHeight:1.6}}/>
             </div>:<p style={{fontSize:13,color:"#55efc4",fontWeight:700,marginBottom:12}}>All interventions complete. Patient is resting comfortably.</p>}
             <button onClick={function(){setStage("debrief");}} style={Object.assign({},BS,{background:GR,maxWidth:300,margin:"0 auto"})}>Continue to Debrief</button>
           </div>}

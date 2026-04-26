@@ -5,6 +5,7 @@ import { TextBlock } from "../shared/TextBlock.jsx";
 import { TOOLS, MEDS } from "../../lib/scenarios/builtIn.js";
 import { usePlayerStore } from "../../stores/playerStore.js";
 import { expandMarkedItems } from "../../lib/ai/client.js";
+import { replaceIdsWithLabels } from "../../lib/scenarios/labels.js";
 
 var BS={width:"100%",marginTop:12,padding:"12px 0",borderRadius:12,fontWeight:700,color:"white",fontSize:16,border:"none",cursor:"pointer"};
 var GR="linear-gradient(135deg,#4ECDC4,#44B09E)";
@@ -164,7 +165,7 @@ export function Debrief(props){
         <span style={{fontWeight:700,fontSize:14,color:"#FECA57",display:"flex",alignItems:"center",gap:6}}><Trophy size={14}/>Outcome</span>
         <span style={{color:"#FECA57"}}>{expI==="outcome"?<Minus size={16}/>:<Plus size={16}/>}</span></button>
       {expI==="outcome"&&<div style={{padding:"0 12px 12px"}}>
-        <TextBlock text={sc.stabilizationSummary||sc.debrief.summary} style={{fontSize:12,color:"#ddd",lineHeight:1.6}}/>
+        <TextBlock text={replaceIdsWithLabels(sc.stabilizationSummary||sc.debrief.summary)} style={{fontSize:12,color:"#ddd",lineHeight:1.6}}/>
       </div>}
     </div>}
     {/* Lab Review */}

@@ -69,33 +69,18 @@ export function AssessPanel(props){
         <TextBlock text={ph.narrative} style={{fontSize:13,color:"#ddd",lineHeight:1.55}}/>
       </div>}
     </div>
-    <div className="bw-split">
-      <div className="bw-split-left">
-        <VitalsDisplay vitals={vit} reveal={revealMap}/>
-        <BodySystemsView signs={curSigns}/>
-        <LabPanel labs={curLabs}/>
-      </div>
-      <div className="bw-split-right">
-        {!showFb&&<div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10,padding:"8px 12px",borderRadius:10,background:"rgba(78,205,196,0.08)",border:"1px solid rgba(78,205,196,0.2)"}}>
-          <span style={{fontSize:12,fontWeight:700,color:"#4ECDC4"}}>Tap abnormal findings</span>
-          <span style={{fontSize:11,color:"#ccc",fontWeight:600}}>{flaggedCount+" flagged"}</span>
-        </div>}
-        <style>{"@media(min-width:768px){.bw-assess-grid{grid-template-columns:repeat(3,1fr) !important}}@media(min-width:1024px){.bw-assess-grid{grid-template-columns:repeat(4,1fr) !important}}"}</style>
-        {vitItems.length>0&&<div style={{marginBottom:12}}>
-          <SectionHeader label="Vital Signs" bg="rgba(78,205,196,0.12)" fg="#4ECDC4"/>
-          <div className="bw-assess-grid" style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:6}}>{vitItems.map(renderItem)}</div>
-        </div>}
-        {labItems.length>0&&<div style={{marginBottom:12}}>
-          <SectionHeader label="Lab Values" bg="rgba(255,118,117,0.12)" fg="#ff7675"/>
-          <div className="bw-assess-grid" style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:6}}>{labItems.map(renderItem)}</div>
-        </div>}
-        {clinItems.length>0&&<div style={{marginBottom:12}}>
-          <SectionHeader label="Clinical Findings" bg="rgba(254,202,87,0.12)" fg="#FECA57"/>
-          <div className="bw-assess-grid" style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:6}}>{clinItems.map(renderItem)}</div>
-        </div>}
-        {!showFb?<button onClick={submit} style={Object.assign({},BS,{background:PP})}>Submit Assessment</button>
-          :<button onClick={afterA} style={Object.assign({},BS,{background:GR})}>{ph.tools?"Open Tool Belt":"Continue"}</button>}
-      </div>
+    {/* Phase-3.0 change 3: right-side "Tap abnormal findings" panel
+        removed. The display surfaces (vitals monitor, body systems,
+        labs) become the click targets in changes 4-6. Layout is
+        single-column for now; the duplicate tile grid is gone.
+        Submit/Continue button stays here for now and gets repositioned
+        in change 7 once the new state machine lands. */}
+    <div>
+      <VitalsDisplay vitals={vit} reveal={revealMap}/>
+      <BodySystemsView signs={curSigns}/>
+      <LabPanel labs={curLabs}/>
+      {!showFb?<button onClick={submit} style={Object.assign({},BS,{background:PP})}>Submit Assessment</button>
+        :<button onClick={afterA} style={Object.assign({},BS,{background:GR})}>{ph.tools?"Open Tool Belt":"Continue"}</button>}
     </div>
     <WhyModal open={!!whyTarget} onClose={function(){setWhyTarget(null);}} title={whyTarget?whyTarget.label:""} body={whyTarget?whyTarget.why:""} accent={whyTarget?(whyTarget.bad===!!flags[whyTarget.id]?"#00b894":"#FF6B81"):"#4ECDC4"} item={whyTarget?{id:"assess:"+whyTarget.id,label:whyTarget.label,type:whyTarget.cat==="clinical"?"finding":(whyTarget.cat||"vital"),originalWhy:whyTarget.why}:null}/>
   </div>);

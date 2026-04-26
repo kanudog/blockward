@@ -28,18 +28,22 @@ export function ActionPanel(props){
   function tbd(u,o){if(!u)return"2px solid rgba(255,255,255,0.08)";return o?"2px solid rgba(0,184,148,0.35)":"2px solid rgba(255,165,0,0.25)";}
   return(
     <div style={{marginTop:16}}>
-      <style>{"@keyframes popIn{from{opacity:0;transform:scale(.92) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}"}</style>
+      {/* Phase-2.6.3 change 7: action-tile grid mirrors the assess-tile
+          grid (2 cols mobile, 3 at 768px, 4 at 1024px) so Phase 1 and
+          Phase 2 share visual rhythm. Same gap (6), same padding (10),
+          same borderRadius (12), same minHeight (78). */}
+      <style>{"@keyframes popIn{from{opacity:0;transform:scale(.92) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}@media(min-width:768px){.bw-action-grid{grid-template-columns:repeat(3,1fr) !important}}@media(min-width:1024px){.bw-action-grid{grid-template-columns:repeat(4,1fr) !important}}"}</style>
       {tools&&tools.length>0&&(<div style={{marginBottom:16}}><div style={{fontSize:10,textTransform:"uppercase",letterSpacing:2,color:"#999",fontWeight:700,marginBottom:8}}>Tool Belt</div>
-        <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{tools.map(function(id){var t=TOOLS[id];if(!t)return null;var u=!!sel[id];var o=actions&&actions.tools&&actions.tools[id]?actions.tools[id].ok:false;
-          return(<button key={id} onClick={function(){pick(id,"t");}} className="bw-tap" style={{display:"flex",flexDirection:"column",alignItems:"center",gap:4,padding:12,borderRadius:12,minWidth:76,background:tbg(u,o),border:tbd(u,o),cursor:"pointer",color:"white"}}>
-            <ToolIcon name={id} size={28} color={u?(o?"#55efc4":"#FECA57"):"#4ECDC4"}/><span style={{fontSize:11,color:"#ccc",fontWeight:600,textAlign:"center",lineHeight:1.2}}>{t.label}</span>
-            {u&&<span style={{fontSize:9}}>{o?<Check size={12}/>:<Minus size={12}/>}</span>}</button>);})}</div></div>)}
+        <div className="bw-action-grid" style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:6}}>{tools.map(function(id){var t=TOOLS[id];if(!t)return null;var u=!!sel[id];var o=actions&&actions.tools&&actions.tools[id]?actions.tools[id].ok:false;
+          return(<button key={id} onClick={function(){pick(id,"t");}} className="bw-tap" style={{position:"relative",display:"flex",flexDirection:"column",alignItems:"center",gap:6,padding:10,borderRadius:12,minHeight:78,background:tbg(u,o),border:tbd(u,o),cursor:"pointer",color:"white"}}>
+            <ToolIcon name={id} size={26} color={u?(o?"#55efc4":"#FECA57"):"#4ECDC4"}/><span style={{fontSize:11,color:"#ccc",fontWeight:600,textAlign:"center",lineHeight:1.2}}>{t.label}</span>
+            {u&&<span style={{position:"absolute",top:6,right:6}}>{o?<Check size={12} color="#55efc4"/>:<Minus size={12} color="#FECA57"/>}</span>}</button>);})}</div></div>)}
       {meds&&meds.length>0&&(<div style={{marginBottom:16}}><div style={{fontSize:10,textTransform:"uppercase",letterSpacing:2,color:"#999",fontWeight:700,marginBottom:8}}>Med Cart</div>
-        <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{meds.map(function(id){var m=MEDS[id];if(!m)return null;var u=!!sel[id];var o=actions&&actions.meds&&actions.meds[id]?actions.meds[id].ok:false;
-          return(<button key={id} onClick={function(){pick(id,"m");}} className="bw-tap" style={{display:"flex",flexDirection:"column",alignItems:"center",gap:4,padding:12,borderRadius:12,minWidth:76,background:tbg(u,o),border:tbd(u,o),cursor:"pointer",color:"white"}}>
-            <div style={{width:28,height:34,borderRadius:6,display:"flex",alignItems:"center",justifyContent:"center",background:m.color||"#636e72",fontSize:16,color:"white"}}><MedIcon type={m.medType||"iv"} size={20} color="white"/></div>
+        <div className="bw-action-grid" style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:6}}>{meds.map(function(id){var m=MEDS[id];if(!m)return null;var u=!!sel[id];var o=actions&&actions.meds&&actions.meds[id]?actions.meds[id].ok:false;
+          return(<button key={id} onClick={function(){pick(id,"m");}} className="bw-tap" style={{position:"relative",display:"flex",flexDirection:"column",alignItems:"center",gap:6,padding:10,borderRadius:12,minHeight:78,background:tbg(u,o),border:tbd(u,o),cursor:"pointer",color:"white"}}>
+            <div style={{width:26,height:32,borderRadius:6,display:"flex",alignItems:"center",justifyContent:"center",background:m.color||"#636e72",fontSize:16,color:"white"}}><MedIcon type={m.medType||"iv"} size={18} color="white"/></div>
             <span style={{fontSize:11,color:"#ccc",fontWeight:600,textAlign:"center",lineHeight:1.2}}>{m.label}</span>
-            {u&&<span style={{fontSize:9}}>{o?<Check size={12}/>:<Minus size={12}/>}</span>}</button>);})}</div></div>)}
+            {u&&<span style={{position:"absolute",top:6,right:6}}>{o?<Check size={12} color="#55efc4"/>:<Minus size={12} color="#FECA57"/>}</span>}</button>);})}</div></div>)}
       {pop&&(<div onClick={function(){setPop(null);}} style={{position:"fixed",inset:0,zIndex:50,display:"flex",alignItems:"center",justifyContent:"center",padding:16,background:"rgba(0,0,0,0.6)"}}>
         <div onClick={function(e){e.stopPropagation();}} style={{width:"100%",maxWidth:"min(420px, 90vw)",borderRadius:16,padding:20,background:"#1a1a3e",border:"2px solid "+(pop.info.ok?"#00b894":"#ffa502"),animation:"popIn .25s ease-out"}}>
           <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12}}>

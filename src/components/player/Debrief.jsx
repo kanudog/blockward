@@ -79,16 +79,20 @@ export function Debrief(props){
         <span style={{fontWeight:700,fontSize:14,color:"#FECA57",display:"flex",alignItems:"center",gap:6}}><Bookmark size={14}/>Marked for Review ({markedForReview.length})</span>
         <span style={{color:"#FECA57"}}>{expI==="marked"?<Minus size={16}/>:<Plus size={16}/>}</span></button>
       {expI==="marked"&&<div style={{padding:"0 12px 12px"}}>
-        {/* Phase-2.6.4 change 1: loading copy now distinct from error copy.
-            The 30-90s expand_marked_items call was previously surfacing the
-            error banner during normal flight, reading as failure. */}
-        <style>{"@keyframes deepPulse{0%,100%{opacity:0.55}50%{opacity:1}}.bw-deep-loading{animation:deepPulse 1.6s ease-in-out infinite}"}</style>
-        {deepStatus==="loading"&&<div className="bw-deep-loading" style={{padding:12,marginBottom:8,borderRadius:8,background:"rgba(254,202,87,0.08)",border:"1px solid rgba(254,202,87,0.3)",fontSize:12,color:"#FECA57",textAlign:"center",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
-          <span style={{display:"inline-block",width:8,height:8,borderRadius:"50%",background:"#FECA57"}}></span>
-          Gathering deeper insights for your marked items — this can take up to a minute.
+        {/* Phase-2.6.5 change 2: friendlier loading copy that explicitly
+            tells the user the notes they see in expanded items below are
+            valid and the deep-dive enhancement is en route. Red error
+            banner is reserved for genuine failures (parse / network /
+            http >= 400). */}
+        <style>{"@keyframes deepPulse{0%,100%{opacity:0.6}50%{opacity:1}}.bw-deep-loading{animation:deepPulse 1.6s ease-in-out infinite}"}</style>
+        {deepStatus==="loading"&&<div style={{padding:12,marginBottom:8,borderRadius:8,background:"rgba(254,202,87,0.08)",border:"1px solid rgba(254,202,87,0.3)",fontSize:12,color:"#FECA57",lineHeight:1.5}}>
+          <div style={{display:"flex",alignItems:"center",gap:8}}>
+            <span className="bw-deep-loading" style={{display:"inline-block",width:8,height:8,borderRadius:"50%",background:"#FECA57",flexShrink:0}}></span>
+            <span>Original notes shown below. Please wait a few moments while I prepare additional information for the items you marked.</span>
+          </div>
         </div>}
         {deepStatus==="error"&&<div style={{padding:10,marginBottom:8,borderRadius:8,background:"rgba(255,71,87,0.1)",border:"1px solid rgba(255,71,87,0.3)",fontSize:11,color:"#ff9a9f"}}>
-          Deep dive unavailable — showing original notes. <button onClick={retryDeepDives} style={{marginLeft:6,background:"none",border:"none",color:"#74b9ff",textDecoration:"underline",cursor:"pointer",fontSize:11}}>Retry</button>
+          Couldn't generate deeper insights — showing original notes. <button onClick={retryDeepDives} style={{marginLeft:6,background:"none",border:"none",color:"#74b9ff",textDecoration:"underline",cursor:"pointer",fontSize:11}}>Retry</button>
         </div>}
         {/* Phase-2.6.4 change 4: each marked item is its own collapsible
             row. All collapsed by default — overview list of what the user
@@ -99,18 +103,19 @@ export function Debrief(props){
           var k="marked:"+i;
           var open=!!itemExp[k];
           var deep=deepDives[item.id];
-          var fallback=!deep&&deepStatus==="error";
-          var loading=!deep&&deepStatus==="loading";
+          // Phase-2.6.5 change 2: during loading AND on error, expanded
+          // body shows the original notes (user's Phase 1/2 Why? content).
+          // On success it shows the deep dive. The banner above
+          // distinguishes loading vs error visually.
           return(<div key={k} style={{marginBottom:6,borderRadius:8,background:"rgba(255,255,255,0.03)",border:"1px solid rgba(254,202,87,0.25)",overflow:"hidden"}}>
             <button onClick={function(){toggleItem(k);}} style={{width:"100%",textAlign:"left",padding:"8px 10px",background:"none",border:"none",cursor:"pointer",color:"white",display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
               <span style={{fontSize:12,fontWeight:700,color:"#FECA57",flex:1,minWidth:0}}>{item.label}<span style={{fontSize:9,color:"#888",fontWeight:600,marginLeft:6,textTransform:"uppercase",letterSpacing:0.5}}>{item.type}</span></span>
               <span style={{color:"#FECA57",flexShrink:0}}>{open?<Minus size={12}/>:<Plus size={12}/>}</span>
             </button>
             {open&&<div style={{padding:"0 10px 10px"}}>
-              {deep?<TextBlock text={deep} style={{fontSize:12,color:"#ddd",lineHeight:1.6}}/>
-                :loading?<p className="bw-deep-loading" style={{fontSize:11,color:"#888",fontStyle:"italic",margin:0}}>Loading deep dive…</p>
-                :fallback?<TextBlock text={item.originalWhy||"No additional content available."} style={{fontSize:12,color:"#aaa",lineHeight:1.5}}/>
-                :null}
+              {deep
+                ?<TextBlock text={deep} style={{fontSize:12,color:"#ddd",lineHeight:1.6}}/>
+                :<TextBlock text={item.originalWhy||"No additional content available."} style={{fontSize:12,color:"#aaa",lineHeight:1.5}}/>}
             </div>}
           </div>);
         })}

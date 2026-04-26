@@ -1,9 +1,45 @@
 import { useState } from "react";
-import { Brain, Heart, Wind, Droplets, Shield, Gauge, Eye, Search } from "lucide-react";
+import { Brain, Heart, Wind, Droplets, Shield, Gauge, Eye, Search, Flag } from "lucide-react";
 import { WhyModal, WhyButton } from "../shared/WhyModal.jsx";
+
+// Phase-3.0 change 5: each sign row inside a body-system card is now
+// a click target when interactive props are passed (assessItems,
+// flags, onFlag, showFb). The card itself is just visual grouping;
+// the click registers on the sign row.
+//
+// Matching: sign.label exact match against assessItem.cat==="clinical"
+// label (case-insensitive). Why? button hidden pre-submit (revealed
+// by change 7's post-submit state machine).
+//
+// Read-only callers (phase / act / cb-* / reassess) omit the
+// interactive props and get the original rendering with Why?
+// available inline.
+function findAssessForSign(sign,assessItems){
+  if(!sign||!sign.label||!Array.isArray(assessItems))return null;
+  var key=sign.label.toLowerCase().trim();
+  for(var i=0;i<assessItems.length;i++){
+    var it=assessItems[i];
+    if(it.cat!=="clinical")continue;
+    if((it.label||"").toLowerCase().trim()===key)return it;
+  }
+  // Fallback: substring (some scenarios get assessItem labels like
+  // "Mottling, lower extremities" while sign label is just "Mottling").
+  for(var j=0;j<assessItems.length;j++){
+    var it2=assessItems[j];
+    if(it2.cat!=="clinical")continue;
+    var lbl=(it2.label||"").toLowerCase();
+    if(lbl.indexOf(key)>=0||key.indexOf(lbl)>=0)return it2;
+  }
+  return null;
+}
 
 export function BodySystemsView(props) {
   var signs = props.signs || [];
+  var assessItems = props.assessItems || null;
+  var flags = props.flags || null;
+  var onFlag = props.onFlag || null;
+  var showFb = !!props.showFb;
+  var clickable = !!(assessItems && flags && onFlag);
   var _why=useState(null);var whyTarget=_why[0];var setWhyTarget=_why[1];
   function guessSys(s) {
     if (s.sys) return s.sys;
@@ -36,10 +72,20 @@ export function BodySystemsView(props) {
             <div key={sys} style={{borderRadius:8,padding:"6px 10px",background:"rgba(78,205,196,0.08)",border:"1px solid rgba(78,205,196,0.15)"}}>
               <div style={{fontSize:11,fontWeight:700,color:"#4ECDC4",marginBottom:3,display:"flex",alignItems:"center",gap:4}}><IconComp size={14}/>  {sys}</div>
               {grouped[sys].map(function(s,j) {
-                return (<div key={j} style={{fontSize:11,color:"#ccd",lineHeight:1.4,marginBottom:2,display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}>
-                  <span style={{flex:1,minWidth:0}}><span style={{fontWeight:600,color:"#ddd"}}>{s.label}:</span> {s.finding}</span>
-                  {s.why&&<WhyButton onClick={function(){setWhyTarget(s);}} compact={true}/>}
+                var match=clickable?findAssessForSign(s,assessItems):null;
+                var isFlagged=match&&!!flags[match.id];
+                var rowBg=clickable&&!showFb?(isFlagged?"rgba(78,205,196,0.18)":"transparent"):"transparent";
+                var rowBrd=clickable&&!showFb?(isFlagged?"1px solid rgba(78,205,196,0.55)":"1px solid transparent"):"1px solid transparent";
+                var inner=(<div style={{position:"relative",fontSize:11,color:"#ccd",lineHeight:1.4,padding:"4px 8px",borderRadius:6,background:rowBg,border:rowBrd,display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}>
+                  {clickable&&!showFb&&isFlagged&&<Flag size={11} color="#4ECDC4" style={{flexShrink:0}}/>}
+                  <span style={{flex:1,minWidth:0,textAlign:"left"}}><span style={{fontWeight:600,color:"#ddd"}}>{s.label}:</span> {s.finding}</span>
+                  {showFb&&s.why&&<WhyButton onClick={function(e){if(e&&e.stopPropagation)e.stopPropagation();setWhyTarget(s);}} compact={true}/>}
+                  {!clickable&&!showFb&&s.why&&<WhyButton onClick={function(){setWhyTarget(s);}} compact={true}/>}
                 </div>);
+                if(clickable&&!showFb){
+                  return(<button key={j} onClick={function(){if(match)onFlag(match.id);}} className="bw-tap" style={{background:"none",border:"none",padding:0,marginBottom:2,display:"block",width:"100%",cursor:match?"pointer":"default",opacity:match?1:0.6,color:"inherit",textAlign:"left"}}>{inner}</button>);
+                }
+                return(<div key={j} style={{marginBottom:2}}>{inner}</div>);
               })}
             </div>
           );

@@ -77,7 +77,9 @@ export function AssessPanel(props){
         in change 7 once the new state machine lands. */}
     <div>
       <VitalsDisplay vitals={vit} reveal={revealMap}/>
-      <BodySystemsView signs={curSigns}/>
+      {/* Phase-3.0 change 5: signs inside body-system cards are now
+          individually clickable. Same interactive props as LabPanel. */}
+      <BodySystemsView signs={curSigns} assessItems={ph.assessItems} flags={flags} onFlag={flag} showFb={showFb}/>
       {/* Phase-3.0 change 4: labs are now click targets — pass assessItems
           + flags + onFlag so LabPanel can match each lab to an assessItem
           and toggle its flag. showFb gates pre-submit vs post-submit

@@ -34,6 +34,13 @@ export var MEDS = {
   methylpred:{id:"methylpred",label:"Give Solumedrol IV",color:"#a29bfe",medType:"push",desc:"2 mg/kg IV push"},
   famotidine:{id:"famotidine",label:"Give Famotidine IV",color:"#81ecec",medType:"push",desc:"0.25 mg/kg IV over 2 min"},
   racemicEpi:{id:"racemicEpi",label:"Neb Racemic Epi",color:"#e17055",medType:"neb",desc:"0.5 mL of 2.25% via neb"},
+  // Phase-2.6.3 change 2: trauma / massive transfusion meds.
+  prbcWarmed:{id:"prbcWarmed",label:"Give Warmed pRBCs",color:"#c0392b",medType:"iv",desc:"10-15 mL/kg warmed packed red blood cells per MTP protocol"},
+  ffp:{id:"ffp",label:"Give FFP",color:"#e67e22",medType:"iv",desc:"10-15 mL/kg fresh frozen plasma per MTP ratio (1:1:1 with pRBC and platelets)"},
+  platelets:{id:"platelets",label:"Give Platelets",color:"#d35400",medType:"iv",desc:"10 mL/kg platelets per MTP ratio"},
+  calciumChloride:{id:"calciumChloride",label:"Push Calcium Chloride IV",color:"#00cec9",medType:"push",desc:"10-20 mg/kg IV slow push for citrate toxicity in massive transfusion or symptomatic hypocalcemia"},
+  txa:{id:"txa",label:"Give TXA IV",color:"#9b59b6",medType:"iv",desc:"15 mg/kg IV over 10 min within 3 hours of injury"},
+  mtpActivate:{id:"mtpActivate",label:"Activate Pediatric MTP",color:"#e74c3c",medType:"protocol",desc:"Page blood bank, request pediatric massive transfusion protocol pack"},
 };
 
 export var SC1 = {

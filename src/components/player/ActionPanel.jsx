@@ -28,8 +28,23 @@ export function ActionPanel(props){
   var allF=totalCorrect>0&&rT.concat(rM).every(function(id){return sel[id];});
   var explored=Object.keys(sel).length;
   var total=(tools?tools.length:0)+(meds?meds.length:0);
-  var pick=function(id,ty){var src=ty==="t"?(actions&&actions.tools):(actions&&actions.meds);var info=src?src[id]:null;if(!info)return;
-    setSel(function(p){var n=Object.assign({},p);n[id]=info;return n;});setPop({id:id,ty:ty,info:info});};
+  var pick=function(id,ty){
+    var src=ty==="t"?(actions&&actions.tools):(actions&&actions.meds);
+    var info=src?src[id]:null;
+    // Phase-2.6.4 change 2: if the AI generated a tool/med ID but
+    // omitted its corresponding actions.tools[id] / actions.meds[id]
+    // entry, the original handler silently returned — the tile rendered
+    // normally but every click was a no-op, blocking phase completion.
+    // Sebastian saw this on o2mask and the new mtpActivate. Synthesize
+    // a minimal info so the tile is at least clickable; warn for dev
+    // visibility.
+    if(!info||typeof info!=="object"){
+      console.warn("ActionPanel: no actions entry for "+id+" ("+ty+"); synthesizing fallback");
+      info={ok:false,pri:null,fb:"This action's feedback was not generated for this scenario. Selection still counts."};
+    }
+    setSel(function(p){var n=Object.assign({},p);n[id]=info;return n;});
+    setPop({id:id,ty:ty,info:info});
+  };
   var finish=function(){onDone(computeActionScore(tools,meds,actions,sel),sel);};
   var skip=function(){
     var missed=[];

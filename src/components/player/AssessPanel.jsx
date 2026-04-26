@@ -78,7 +78,11 @@ export function AssessPanel(props){
     <div>
       <VitalsDisplay vitals={vit} reveal={revealMap}/>
       <BodySystemsView signs={curSigns}/>
-      <LabPanel labs={curLabs}/>
+      {/* Phase-3.0 change 4: labs are now click targets — pass assessItems
+          + flags + onFlag so LabPanel can match each lab to an assessItem
+          and toggle its flag. showFb gates pre-submit vs post-submit
+          treatment (post-submit reveal lands in change 7). */}
+      <LabPanel labs={curLabs} assessItems={ph.assessItems} flags={flags} onFlag={flag} showFb={showFb}/>
       {!showFb?<button onClick={submit} style={Object.assign({},BS,{background:PP})}>Submit Assessment</button>
         :<button onClick={afterA} style={Object.assign({},BS,{background:GR})}>{ph.tools?"Open Tool Belt":"Continue"}</button>}
     </div>

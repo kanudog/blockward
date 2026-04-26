@@ -22,6 +22,13 @@ export function Debrief(props){
   var _deepDives=useState({});var deepDives=_deepDives[0];var setDeepDives=_deepDives[1];
   var _deepStatus=useState("idle");var deepStatus=_deepStatus[0];var setDeepStatus=_deepStatus[1];
   var _deepError=useState(null);var deepError=_deepError[0];var setDeepError=_deepError[1];
+  // Phase-2.6.5 change 3: smart progress bar tied to ~80s expected
+  // duration. bannerPhase introduces a transient "success" state
+  // between deepStatus="done" and the banner unmounting, so the bar
+  // can complete to 100% and show a brief success indicator.
+  // States: loading → success → gone, OR loading → error.
+  var _bannerPhase=useState("loading");var bannerPhase=_bannerPhase[0];var setBannerPhase=_bannerPhase[1];
+  var _progress=useState(0);var progress=_progress[0];var setProgress=_progress[1];
   useEffect(function(){
     if(markedForReview.length===0)return;
     if(deepStatus!=="idle")return;
@@ -37,6 +44,29 @@ export function Debrief(props){
     return function(){controller.abort();};
   },[markedForReview.length]);
   var retryDeepDives=function(){setDeepStatus("idle");setDeepError(null);};
+  // Phase-2.6.5 change 3: drive bannerPhase from deepStatus transitions.
+  useEffect(function(){
+    if(deepStatus==="loading"){setBannerPhase("loading");setProgress(0);}
+    else if(deepStatus==="done"){
+      setBannerPhase("success");setProgress(1);
+      var t=setTimeout(function(){setBannerPhase("gone");},1100);
+      return function(){clearTimeout(t);};
+    }
+    else if(deepStatus==="error"){setBannerPhase("error");}
+  },[deepStatus]);
+  // Smooth-fill loop while loading. Targets 0.95 over 80s (caps below
+  // 100% so the bar never lies about completion). Cleaned up when the
+  // phase changes (success / error / unmount).
+  useEffect(function(){
+    if(bannerPhase!=="loading")return;
+    var startedAt=Date.now();
+    var iv=setInterval(function(){
+      var elapsed=(Date.now()-startedAt)/1000;
+      var p=Math.min(elapsed/80,0.95);
+      setProgress(p);
+    },250);
+    return function(){clearInterval(iv);};
+  },[bannerPhase]);
   var _tldrOpen=useState({});var tldrOpen=_tldrOpen[0];var setTldrOpen=_tldrOpen[1];
   var toggleTldr=function(key){setTldrOpen(function(p){var n=Object.assign({},p);n[key]=!n[key];return n;});};
   var pct=score.t>0?Math.round(score.c/score.t*100):0;var emIcon=pct>=80?<Star size={24} color="#FECA57"/>:pct>=50?<Trophy size={24} color="#FECA57"/>:<BookOpen size={24} color="#74b9ff"/>;var sBg=pct>=80?"#00b894":pct>=50?"#fdcb6e":"#e17055";
@@ -79,19 +109,31 @@ export function Debrief(props){
         <span style={{fontWeight:700,fontSize:14,color:"#FECA57",display:"flex",alignItems:"center",gap:6}}><Bookmark size={14}/>Marked for Review ({markedForReview.length})</span>
         <span style={{color:"#FECA57"}}>{expI==="marked"?<Minus size={16}/>:<Plus size={16}/>}</span></button>
       {expI==="marked"&&<div style={{padding:"0 12px 12px"}}>
-        {/* Phase-2.6.5 change 2: friendlier loading copy that explicitly
-            tells the user the notes they see in expanded items below are
-            valid and the deep-dive enhancement is en route. Red error
-            banner is reserved for genuine failures (parse / network /
-            http >= 400). */}
-        <style>{"@keyframes deepPulse{0%,100%{opacity:0.6}50%{opacity:1}}.bw-deep-loading{animation:deepPulse 1.6s ease-in-out infinite}"}</style>
-        {deepStatus==="loading"&&<div style={{padding:12,marginBottom:8,borderRadius:8,background:"rgba(254,202,87,0.08)",border:"1px solid rgba(254,202,87,0.3)",fontSize:12,color:"#FECA57",lineHeight:1.5}}>
-          <div style={{display:"flex",alignItems:"center",gap:8}}>
+        {/* Phase-2.6.5 change 2 + 3: friendlier loading copy plus a
+            smart progress bar tied to ~80s expected duration. Bar fills
+            smoothly toward 95% during the wait, snaps to 100% on
+            success with a brief "Ready" state, then the banner unmounts.
+            Red error banner is reserved for genuine failures. */}
+        <style>{"@keyframes deepPulse{0%,100%{opacity:0.6}50%{opacity:1}}.bw-deep-loading{animation:deepPulse 1.6s ease-in-out infinite}@keyframes deepBarShimmer{0%{background-position:-200px 0}100%{background-position:200px 0}}"}</style>
+        {bannerPhase==="loading"&&<div style={{padding:12,marginBottom:8,borderRadius:8,background:"rgba(254,202,87,0.08)",border:"1px solid rgba(254,202,87,0.3)",fontSize:12,color:"#FECA57",lineHeight:1.5}}>
+          <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
             <span className="bw-deep-loading" style={{display:"inline-block",width:8,height:8,borderRadius:"50%",background:"#FECA57",flexShrink:0}}></span>
             <span>Original notes shown below. Please wait a few moments while I prepare additional information for the items you marked.</span>
           </div>
+          <div style={{height:4,borderRadius:2,background:"rgba(254,202,87,0.15)",overflow:"hidden"}}>
+            <div style={{height:"100%",width:Math.round(progress*100)+"%",background:"linear-gradient(90deg,#FECA57,#fdcb6e)",transition:"width 0.25s linear"}}></div>
+          </div>
         </div>}
-        {deepStatus==="error"&&<div style={{padding:10,marginBottom:8,borderRadius:8,background:"rgba(255,71,87,0.1)",border:"1px solid rgba(255,71,87,0.3)",fontSize:11,color:"#ff9a9f"}}>
+        {bannerPhase==="success"&&<div style={{padding:12,marginBottom:8,borderRadius:8,background:"rgba(0,184,148,0.08)",border:"1px solid rgba(0,184,148,0.3)",fontSize:12,color:"#55efc4",lineHeight:1.5}}>
+          <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
+            <Check size={14}/>
+            <span>Deep dives ready.</span>
+          </div>
+          <div style={{height:4,borderRadius:2,background:"rgba(0,184,148,0.15)",overflow:"hidden"}}>
+            <div style={{height:"100%",width:"100%",background:"linear-gradient(90deg,#55efc4,#00b894)",transition:"width 0.3s ease-out"}}></div>
+          </div>
+        </div>}
+        {bannerPhase==="error"&&<div style={{padding:10,marginBottom:8,borderRadius:8,background:"rgba(255,71,87,0.1)",border:"1px solid rgba(255,71,87,0.3)",fontSize:11,color:"#ff9a9f"}}>
           Couldn't generate deeper insights — showing original notes. <button onClick={retryDeepDives} style={{marginLeft:6,background:"none",border:"none",color:"#74b9ff",textDecoration:"underline",cursor:"pointer",fontSize:11}}>Retry</button>
         </div>}
         {/* Phase-2.6.4 change 4: each marked item is its own collapsible

@@ -5,6 +5,22 @@ import { computeActionScore } from "../../lib/scenarios/scoring.js";
 import { ToolIcon, MedIcon } from "./icons.jsx";
 import { TextBlock } from "../shared/TextBlock.jsx";
 import { usePlayerStore } from "../../stores/playerStore.js";
+
+// Phase-2.6.4 change 5: canonical MTP teaching content. Lives on the
+// frontend so it stays consistent across scenarios — the AI gets the
+// scenario-specific *why MTP is indicated for THIS patient* in the
+// fb field, but the WHAT IS MTP body is fixed and well-edited here.
+// Format follows the markdown-lite spec TextBlock parses (overview
+// paragraph, then dash-bullets with **bold** key terms).
+var MTP_CANONICAL=
+"Activates the pediatric massive transfusion protocol — page blood bank now and the team will deliver pRBCs, FFP, and platelets in coordinated rounds.\n\n"+
+"- **When to activate:** sustained hemorrhagic shock not responding to crystalloid, ongoing visible or suspected uncontrolled bleeding, or expected need for >40 mL/kg of products in 24 hours.\n"+
+"- **1:1:1 ratio:** transfuse pRBCs, FFP, and platelets in a 1:1:1 ratio (by unit or by mL/kg) to mimic whole blood and prevent dilutional coagulopathy from imbalanced resuscitation.\n"+
+"- **Pediatric dosing:** **10-15 mL/kg** per round of warmed pRBCs in children under 30 kg; FFP and platelets dosed proportionally. Reassess after each round.\n"+
+"- **Warmed products are mandatory:** cold blood drives the **lethal triad** of hypothermia → coagulopathy → acidosis. Use a fluid warmer; document core temperature.\n"+
+"- **Calcium replacement:** citrate in stored products chelates ionized calcium. Push **calcium chloride 10-20 mg/kg IV** after every 1-2 units of pRBCs; trend ionized Ca with each gas.\n"+
+"- **TXA window:** if within **3 hours of injury**, give tranexamic acid **15 mg/kg IV over 10 min** (max 1 g) — reduces mortality in pediatric trauma.\n"+
+"- **The lethal triad:** hypothermia, acidosis, and coagulopathy reinforce each other. MTP combats all three: warmed products preserve temperature, FFP and platelets restore clotting, pRBCs restore oxygen delivery, calcium maintains contractility.";
 export function ActionPanel(props){
   var tools=props.tools;var meds=props.meds;var actions=props.actions;var onDone=props.onDone;var onSkip=props.onSkip;
   var _sel=useState({});var sel=_sel[0];var setSel=_sel[1];
@@ -19,7 +35,12 @@ export function ActionPanel(props){
     if(!pop)return null;
     var meta=pop.ty==="t"?TOOLS[pop.id]:MEDS[pop.id];
     var label=meta?meta.label:pop.id;
-    return{id:(pop.ty==="t"?"tool:":"med:")+pop.id,label:label,type:"intervention",originalWhy:pop.info.fb||""};
+    // Phase-2.6.4 change 5: for mtpActivate, the originalWhy passed to
+    // the deep-dive expansion should be the canonical MTP content (what
+    // the user actually saw), not the AI's scenario-specific fb.
+    var originalWhy=pop.info.fb||"";
+    if(pop.ty==="m"&&pop.id==="mtpActivate")originalWhy=MTP_CANONICAL+(pop.info.fb?"\n\nWhy for this patient: "+pop.info.fb:"");
+    return{id:(pop.ty==="t"?"tool:":"med:")+pop.id,label:label,type:"intervention",originalWhy:originalWhy};
   }
   var popMarked=(function(){var it=popMarkItem();return it?markedForReview.some(function(x){return x.id===it.id;}):false;})();
   var rT=Object.entries(actions&&actions.tools?actions.tools:{}).filter(function(e){return e[1].ok;}).map(function(e){return e[0];});
@@ -81,7 +102,18 @@ export function ActionPanel(props){
           </div>
           <h4 style={{color:"white",fontWeight:700,marginBottom:4}}>{pop.ty==="t"?(TOOLS[pop.id]?TOOLS[pop.id].label:pop.id):(MEDS[pop.id]?MEDS[pop.id].label:pop.id)}</h4>
           <p style={{fontSize:11,color:"#999",marginBottom:8}}>{pop.ty==="t"?(TOOLS[pop.id]?TOOLS[pop.id].desc:""):(MEDS[pop.id]?MEDS[pop.id].desc:"")}</p>
-          <TextBlock text={pop.info.fb} style={{fontSize:13,color:"#ddd",lineHeight:1.5}}/>
+          {/* Phase-2.6.4 change 5: when the user clicks mtpActivate, swap
+              the AI's per-action fb for the canonical MTP teaching block
+              so the protocol explanation is consistent across scenarios.
+              The AI's scenario-specific rationale (why MTP is indicated
+              for THIS patient) renders below in the smaller note. */}
+          {pop.ty==="m"&&pop.id==="mtpActivate"?(<div>
+            <TextBlock text={MTP_CANONICAL} style={{fontSize:13,color:"#ddd",lineHeight:1.55}}/>
+            {pop.info.fb&&<div style={{marginTop:12,paddingTop:10,borderTop:"1px solid rgba(255,255,255,0.08)"}}>
+              <p style={{fontSize:10,textTransform:"uppercase",letterSpacing:1,color:"#888",fontWeight:700,marginBottom:6}}>Why for this patient</p>
+              <TextBlock text={pop.info.fb} style={{fontSize:12,color:"#bbb",lineHeight:1.5}}/>
+            </div>}
+          </div>):(<TextBlock text={pop.info.fb} style={{fontSize:13,color:"#ddd",lineHeight:1.5}}/>)}
           {/* Phase-2.6.3 change 8: Mark for Review button. Same store as
               the WhyModal version on assess items; the debrief deep-dive
               section will pull marked interventions through the same

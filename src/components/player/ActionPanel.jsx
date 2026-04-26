@@ -4,10 +4,24 @@ import { TOOLS, MEDS } from "../../lib/scenarios/builtIn.js";
 import { computeActionScore } from "../../lib/scenarios/scoring.js";
 import { ToolIcon, MedIcon } from "./icons.jsx";
 import { TextBlock } from "../shared/TextBlock.jsx";
+import { usePlayerStore } from "../../stores/playerStore.js";
 export function ActionPanel(props){
   var tools=props.tools;var meds=props.meds;var actions=props.actions;var onDone=props.onDone;var onSkip=props.onSkip;
   var _sel=useState({});var sel=_sel[0];var setSel=_sel[1];
   var _pop=useState(null);var pop=_pop[0];var setPop=_pop[1];
+  // Phase-2.6.3 change 8: Mark for Review on intervention popup.
+  // Reads/writes the same playerStore.markedForReview list that
+  // WhyModal uses for assess items, so marked interventions show
+  // up alongside marked findings in the debrief deep-dive section.
+  var markedForReview=usePlayerStore(function(s){return s.markedForReview;});
+  var toggleMark=usePlayerStore(function(s){return s.toggleMarkForReview;});
+  function popMarkItem(){
+    if(!pop)return null;
+    var meta=pop.ty==="t"?TOOLS[pop.id]:MEDS[pop.id];
+    var label=meta?meta.label:pop.id;
+    return{id:(pop.ty==="t"?"tool:":"med:")+pop.id,label:label,type:"intervention",originalWhy:pop.info.fb||""};
+  }
+  var popMarked=(function(){var it=popMarkItem();return it?markedForReview.some(function(x){return x.id===it.id;}):false;})();
   var rT=Object.entries(actions&&actions.tools?actions.tools:{}).filter(function(e){return e[1].ok;}).map(function(e){return e[0];});
   var rM=Object.entries(actions&&actions.meds?actions.meds:{}).filter(function(e){return e[1].ok;}).map(function(e){return e[0];});
   var totalCorrect=rT.length+rM.length;
@@ -53,7 +67,15 @@ export function ActionPanel(props){
           <h4 style={{color:"white",fontWeight:700,marginBottom:4}}>{pop.ty==="t"?(TOOLS[pop.id]?TOOLS[pop.id].label:pop.id):(MEDS[pop.id]?MEDS[pop.id].label:pop.id)}</h4>
           <p style={{fontSize:11,color:"#999",marginBottom:8}}>{pop.ty==="t"?(TOOLS[pop.id]?TOOLS[pop.id].desc:""):(MEDS[pop.id]?MEDS[pop.id].desc:"")}</p>
           <TextBlock text={pop.info.fb} style={{fontSize:13,color:"#ddd",lineHeight:1.5}}/>
-          <button onClick={function(){setPop(null);}} style={{width:"100%",marginTop:16,padding:"12px 0",borderRadius:12,fontWeight:700,color:"white",fontSize:13,background:pop.info.ok?"rgba(0,184,148,0.3)":"rgba(255,165,2,0.2)",border:"none",cursor:"pointer"}}>Got It</button>
+          {/* Phase-2.6.3 change 8: Mark for Review button. Same store as
+              the WhyModal version on assess items; the debrief deep-dive
+              section will pull marked interventions through the same
+              expand_marked_items API path. */}
+          <div style={{marginTop:14,paddingTop:12,borderTop:"1px solid rgba(255,255,255,0.1)"}}>
+            <button onClick={function(){var it=popMarkItem();if(it)toggleMark(it);}} style={{width:"100%",padding:"8px 12px",borderRadius:10,fontSize:12,fontWeight:700,cursor:"pointer",background:popMarked?"rgba(254,202,87,0.2)":"rgba(255,255,255,0.06)",border:"1px solid "+(popMarked?"rgba(254,202,87,0.55)":"rgba(255,255,255,0.18)"),color:popMarked?"#FECA57":"#ddd"}}>{popMarked?"✓ Marked for Review":"Mark for Review"}</button>
+            <p style={{fontSize:10,color:"#888",marginTop:6,textAlign:"center",lineHeight:1.4}}>{popMarked?"Will appear in the debrief with an expanded deep dive.":"Save this intervention for a deeper review at the end."}</p>
+          </div>
+          <button onClick={function(){setPop(null);}} style={{width:"100%",marginTop:12,padding:"12px 0",borderRadius:12,fontWeight:700,color:"white",fontSize:13,background:pop.info.ok?"rgba(0,184,148,0.3)":"rgba(255,165,2,0.2)",border:"none",cursor:"pointer"}}>Got It</button>
         </div></div>)}
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:8,marginTop:12,flexWrap:"wrap"}}>
         <div style={{fontSize:11,color:"#666"}}>{explored+"/"+total+" explored"}</div>

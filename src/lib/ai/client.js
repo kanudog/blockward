@@ -136,6 +136,16 @@ export async function generateScenario(txt, cbMode, signal, onProgress){
 // flagged with Mark for Review. Returns a Map of itemId → deepDive
 // string. Throws on any error so the caller can render a fallback.
 // Stays non-streaming — small response, has its own loading UI.
+//
+// Phase-2.6.3-hotfix: parser hardened against AI output drift.
+// The original implementation used cl.indexOf("{") + cl.lastIndexOf("}")
+// which captured too much when the AI emitted any trailing prose
+// containing a `}` (common despite the "Return ONLY valid JSON"
+// instruction — the diagnostic showed the AI was already going
+// off-script by including extra `label` and `type` fields in items).
+// Now uses balanced-brace candidate extraction (same approach as the
+// main scenario parser), a loose-JSON fix-fallback, plus diagnostic
+// console logging so future failures are visible.
 export async function expandMarkedItems(scenario, items, signal){
   if(!Array.isArray(items)||items.length===0)return {};
   var ctx={
@@ -144,6 +154,7 @@ export async function expandMarkedItems(scenario, items, signal){
     cc:scenario.patient&&scenario.patient.cc,
     description:scenario.description
   };
+  var requestedIds=items.map(function(i){return i.id;});
   var userContent="Patient context: "+JSON.stringify(ctx)+"\n\nItems to expand:\n"+JSON.stringify(items.map(function(i){return{id:i.id,label:i.label,type:i.type,originalWhy:i.originalWhy};}));
   var r=await fetch("/api/generate",{method:"POST",headers:{"Content-Type":"application/json"},signal:signal,
     body:JSON.stringify({model:MODEL_ID,max_tokens:6000,mode:"expand_marked_items",
@@ -155,13 +166,45 @@ export async function expandMarkedItems(scenario, items, signal){
   var tb="";(d.content||[]).forEach(function(b){if(b.type==="text"&&b.text)tb+=b.text;});
   if(!tb.trim())throw new Error("No text in deep-dive response.");
   var cl=tb.replace(/```json\s*/gi,"").replace(/```\s*/g,"").trim();
-  var open=cl.indexOf("{");var close=cl.lastIndexOf("}");
-  if(open<0||close<0)throw new Error("Deep-dive response did not contain a JSON object.");
-  cl=cl.substring(open,close+1);
+  // Walk braces, collect balanced top-level {...} candidates, take longest.
+  var candidates=[];var depth=0;var cStart=-1;
+  for(var ci=0;ci<cl.length;ci++){if(cl[ci]==="{"){if(depth===0)cStart=ci;depth++;}else if(cl[ci]==="}"){depth--;if(depth===0&&cStart>=0){candidates.push({s:cStart,e:ci,len:ci-cStart});cStart=-1;}}}
+  if(candidates.length===0)throw new Error("Deep-dive response did not contain a balanced JSON object.");
+  candidates.sort(function(a,b){return b.len-a.len;});
+  var bestSlice=cl.substring(candidates[0].s,candidates[0].e+1);
   var parsed;
-  try{parsed=JSON.parse(cl);}catch(pe){throw new Error("Deep-dive response had invalid JSON.");}
-  if(!parsed||!Array.isArray(parsed.items))throw new Error("Deep-dive response missing items array.");
+  try{parsed=JSON.parse(bestSlice);}catch(pe){
+    // Loose-JSON fallback: trailing commas, control chars in strings.
+    try{var fixed=bestSlice.replace(/,\s*}/g,"}").replace(/,\s*]/g,"]").replace(/[\x00-\x1f]/g,function(c){return c==="\n"?"\\n":c==="\r"?"\\r":c==="\t"?"\\t":"";});
+      parsed=JSON.parse(fixed);
+    }catch(pe2){
+      console.error("[deepDive] both strict and loose JSON parse failed",{rawTextLen:tb.length,sliceLen:bestSlice.length,sliceHead:bestSlice.slice(0,200),sliceTail:bestSlice.slice(-200),strictErr:pe.message,looseErr:pe2.message});
+      throw new Error("Deep-dive response had invalid JSON.");
+    }
+  }
+  if(!parsed||!Array.isArray(parsed.items)){
+    console.error("[deepDive] response missing items array",{parsedKeys:parsed?Object.keys(parsed):null});
+    throw new Error("Deep-dive response missing items array.");
+  }
   var out={};
   parsed.items.forEach(function(it){if(it&&it.id&&it.deepDive)out[it.id]=it.deepDive;});
+  // Id-normalization safety net (per the brief's "lookup mismatch" hint):
+  // if the AI dropped or altered our prefix on any item, fall back to
+  // matching by suffix. Specifically, if a requested id like "tool:ivKit"
+  // has no exact key in `out`, try matching any returned id whose suffix
+  // (after the last `:`) equals our suffix.
+  var returnedIds=Object.keys(out);
+  requestedIds.forEach(function(reqId){
+    if(out[reqId])return;
+    var reqSuffix=reqId.indexOf(":")>=0?reqId.split(":").pop():reqId;
+    for(var i=0;i<returnedIds.length;i++){
+      var got=returnedIds[i];
+      var gotSuffix=got.indexOf(":")>=0?got.split(":").pop():got;
+      if(gotSuffix===reqSuffix){out[reqId]=out[got];break;}
+    }
+  });
+  // Diagnostic: log requested vs returned ids on every successful parse
+  // until we have confidence the prefixed-id flow is solid.
+  console.info("[deepDive] requested:",requestedIds,"returned:",returnedIds,"resolved:",Object.keys(out).filter(function(k){return requestedIds.indexOf(k)>=0;}));
   return out;
 }

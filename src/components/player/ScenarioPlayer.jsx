@@ -107,7 +107,7 @@ export function ScenarioPlayer(props){
             )}
           </div>
         </div></div>)}
-      {stage==="assess"&&<AssessPanel ph={ph} vit={vit} curSigns={curSigns} curLabs={curLabs} flags={flags} showFb={showFb} submit={submit} afterA={afterA} flag={flag}/>}
+      {stage==="assess"&&<AssessPanel ph={ph} vit={vit} curSigns={curSigns} curLabs={curLabs} flags={flags} showFb={showFb} submit={submit} afterA={afterA} flag={flag} patient={sc.patient}/>}
       {stage==="act"&&(<div className="slu">
         <div className="bw-split">
           <div className="bw-split-left">

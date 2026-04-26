@@ -5,6 +5,7 @@ import { BodySystemsView } from "./BodySystemsView.jsx";
 import { LabPanel } from "./LabPanel.jsx";
 import { WhyModal, WhyButton } from "../shared/WhyModal.jsx";
 import { TextBlock } from "../shared/TextBlock.jsx";
+import { PatientHeader } from "./PatientHeader.jsx";
 
 var BS={width:"100%",marginTop:12,padding:"12px 0",borderRadius:12,fontWeight:700,color:"white",fontSize:16,border:"none",cursor:"pointer"};
 var GR="linear-gradient(135deg,#4ECDC4,#44B09E)";
@@ -13,6 +14,7 @@ var PP="linear-gradient(135deg,#a55eea,#8854d0)";
 export function AssessPanel(props){
   var ph=props.ph;var vit=props.vit;var curSigns=props.curSigns;var curLabs=props.curLabs;
   var flags=props.flags;var showFb=props.showFb;var submit=props.submit;var afterA=props.afterA;var flag=props.flag;
+  var patient=props.patient||{};
   var _why=useState(null);var whyTarget=_why[0];var setWhyTarget=_why[1];
   var vitItems=ph.assessItems.filter(function(it){return !it.cat||it.cat==="vital";});
   var labItems=ph.assessItems.filter(function(it){return it.cat==="lab";});
@@ -57,14 +59,21 @@ export function AssessPanel(props){
       </button>
     </div>);}
   return(<div className="slu">
+    {/* Phase-3.0 change 1: patient header + narrative anchored at top
+        of Phase 1, replacing the previous bottom-of-left-column position.
+        Header is compact (Age · Sex · Wt · CC); narrative reads as a
+        clinical paragraph below it. */}
+    <div style={{marginBottom:12}}>
+      <PatientHeader patient={patient}/>
+      {ph&&ph.narrative&&<div style={{marginTop:8,padding:"10px 12px",borderRadius:10,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.06)"}}>
+        <TextBlock text={ph.narrative} style={{fontSize:13,color:"#ddd",lineHeight:1.55}}/>
+      </div>}
+    </div>
     <div className="bw-split">
       <div className="bw-split-left">
         <VitalsDisplay vitals={vit} reveal={revealMap}/>
         <BodySystemsView signs={curSigns}/>
         <LabPanel labs={curLabs}/>
-        <div style={{borderRadius:12,padding:10,marginTop:8,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.06)"}}>
-          <TextBlock text={ph?ph.narrative:""} style={{fontSize:12,color:"#999",lineHeight:1.5}}/>
-        </div>
       </div>
       <div className="bw-split-right">
         {!showFb&&<div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10,padding:"8px 12px",borderRadius:10,background:"rgba(78,205,196,0.08)",border:"1px solid rgba(78,205,196,0.2)"}}>

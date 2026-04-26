@@ -126,8 +126,14 @@ export function ScenarioPlayer(props){
         <div className="alp" style={{textAlign:"center",marginBottom:12}}><div style={{display:"inline-block",padding:"8px 16px",borderRadius:20,fontWeight:900,color:"white",fontSize:13,background:"#FF4757"}}>UNEXPECTED EVENT</div></div>
         <div className="bw-split">
           <div className="bw-split-left">
-            <PatientView status="critical" rr={vit.rr} signs={sc.curveball?sc.curveball.signs:[]} ageGroup={ageG} sex={sexG} visuals={scVisuals}/>
+            {/* Phase-2.6.3 change 6: pass signs={[]} to avoid the narrow
+                flanking-column layout PatientView uses (~99px each on desktop
+                inside bw-split-left). Surface curveball signs through
+                BodySystemsView below — same pattern cb-act uses, full-width
+                systems list reads cleanly at any column width. */}
+            <PatientView status="critical" rr={vit.rr} signs={[]} ageGroup={ageG} sex={sexG} visuals={scVisuals}/>
             <div style={{marginTop:12}}><VitalsDisplay vitals={vit} flash={true}/></div>
+            <BodySystemsView signs={sc.curveball?sc.curveball.signs:[]}/>
             <LabPanel labs={curLabs}/>
           </div>
           <div className="bw-split-right">

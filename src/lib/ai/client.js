@@ -137,15 +137,73 @@ export async function generateScenario(txt, cbMode, signal, onProgress){
 // string. Throws on any error so the caller can render a fallback.
 // Stays non-streaming — small response, has its own loading UI.
 //
-// Phase-2.6.3-hotfix: parser hardened against AI output drift.
-// The original implementation used cl.indexOf("{") + cl.lastIndexOf("}")
-// which captured too much when the AI emitted any trailing prose
-// containing a `}` (common despite the "Return ONLY valid JSON"
-// instruction — the diagnostic showed the AI was already going
-// off-script by including extra `label` and `type` fields in items).
-// Now uses balanced-brace candidate extraction (same approach as the
-// main scenario parser), a loose-JSON fix-fallback, plus diagnostic
-// console logging so future failures are visible.
+// Phase-2.6.3-hotfix: balanced-brace JSON extraction + loose-fix
+// fallback (kept in this file as a secondary parse path).
+//
+// Phase-2.6.6-hotfix: PRIMARY parse path is now delimited plain-text
+// (###ITEM:<id>...###END) per the new buildDeepDivePrompt contract.
+// JSON's quote-escaping was repeatedly failing on multi-paragraph
+// medical prose (asterisks, em-dashes, embedded quotes — canonical
+// MTP scenarios reliably reproduced "Expected ',' or '}' after
+// property value at position N"). The AI is much more reliable at
+// emitting plain text between explicit markers than at emitting valid
+// JSON containing the same content.
+//
+// Fallback: if the new-format markers aren't found in the response
+// (older cached scenarios in flight, model regression), falls back
+// to the legacy JSON parser path. On JSON failure we now log a
+// 200-char window AROUND the parse error position so future failures
+// pinpoint the exact character class breaking syntax.
+function parseDelimitedDeepDives(text){
+  // Match ###ITEM:<id>\n<body>\n###END for each item.
+  // Tolerates extra whitespace around markers. id captured up to first newline.
+  var rx=/###ITEM:\s*([^\r\n]+)[\r\n]+([\s\S]*?)[\r\n]+###END/g;
+  var out={};
+  var m;
+  while((m=rx.exec(text))!==null){
+    var id=m[1].trim();
+    var body=m[2].trim();
+    if(id&&body)out[id]=body;
+  }
+  return out;
+}
+function parseLegacyJsonDeepDives(tb){
+  var cl=tb.replace(/```json\s*/gi,"").replace(/```\s*/g,"").trim();
+  var candidates=[];var depth=0;var cStart=-1;
+  for(var ci=0;ci<cl.length;ci++){if(cl[ci]==="{"){if(depth===0)cStart=ci;depth++;}else if(cl[ci]==="}"){depth--;if(depth===0&&cStart>=0){candidates.push({s:cStart,e:ci,len:ci-cStart});cStart=-1;}}}
+  if(candidates.length===0)throw new Error("Deep-dive response did not contain a balanced JSON object.");
+  candidates.sort(function(a,b){return b.len-a.len;});
+  var bestSlice=cl.substring(candidates[0].s,candidates[0].e+1);
+  var parsed;
+  try{parsed=JSON.parse(bestSlice);}catch(pe){
+    try{var fixed=bestSlice.replace(/,\s*}/g,"}").replace(/,\s*]/g,"]").replace(/[\x00-\x1f]/g,function(c){return c==="\n"?"\\n":c==="\r"?"\\r":c==="\t"?"\\t":"";});
+      parsed=JSON.parse(fixed);
+    }catch(pe2){
+      // Phase-2.6.6-hotfix: extract position from the strict-error
+      // message and dump the surrounding 200 chars so future failures
+      // pinpoint the exact character class breaking syntax.
+      var posMatch=pe.message.match(/position (\d+)/);
+      var pos=posMatch?Number(posMatch[1]):-1;
+      var around=pos>=0?bestSlice.slice(Math.max(0,pos-100),pos+100):"(no position in error message)";
+      console.error("[deepDive] both strict and loose JSON parse failed",{
+        rawTextLen:tb.length,sliceLen:bestSlice.length,
+        sliceHead:bestSlice.slice(0,200),sliceTail:bestSlice.slice(-200),
+        strictErr:pe.message,looseErr:pe2.message,
+        errorPosition:pos,
+        charsAroundError:around
+      });
+      throw new Error("Deep-dive response had invalid JSON.");
+    }
+  }
+  if(!parsed||!Array.isArray(parsed.items)){
+    console.error("[deepDive] response missing items array",{parsedKeys:parsed?Object.keys(parsed):null});
+    throw new Error("Deep-dive response missing items array.");
+  }
+  var out={};
+  parsed.items.forEach(function(it){if(it&&it.id&&it.deepDive)out[it.id]=it.deepDive;});
+  return out;
+}
+
 export async function expandMarkedItems(scenario, items, signal){
   if(!Array.isArray(items)||items.length===0)return {};
   var ctx={
@@ -165,34 +223,21 @@ export async function expandMarkedItems(scenario, items, signal){
   if(d.error)throw new Error(d.error.message||"API error");
   var tb="";(d.content||[]).forEach(function(b){if(b.type==="text"&&b.text)tb+=b.text;});
   if(!tb.trim())throw new Error("No text in deep-dive response.");
-  var cl=tb.replace(/```json\s*/gi,"").replace(/```\s*/g,"").trim();
-  // Walk braces, collect balanced top-level {...} candidates, take longest.
-  var candidates=[];var depth=0;var cStart=-1;
-  for(var ci=0;ci<cl.length;ci++){if(cl[ci]==="{"){if(depth===0)cStart=ci;depth++;}else if(cl[ci]==="}"){depth--;if(depth===0&&cStart>=0){candidates.push({s:cStart,e:ci,len:ci-cStart});cStart=-1;}}}
-  if(candidates.length===0)throw new Error("Deep-dive response did not contain a balanced JSON object.");
-  candidates.sort(function(a,b){return b.len-a.len;});
-  var bestSlice=cl.substring(candidates[0].s,candidates[0].e+1);
-  var parsed;
-  try{parsed=JSON.parse(bestSlice);}catch(pe){
-    // Loose-JSON fallback: trailing commas, control chars in strings.
-    try{var fixed=bestSlice.replace(/,\s*}/g,"}").replace(/,\s*]/g,"]").replace(/[\x00-\x1f]/g,function(c){return c==="\n"?"\\n":c==="\r"?"\\r":c==="\t"?"\\t":"";});
-      parsed=JSON.parse(fixed);
-    }catch(pe2){
-      console.error("[deepDive] both strict and loose JSON parse failed",{rawTextLen:tb.length,sliceLen:bestSlice.length,sliceHead:bestSlice.slice(0,200),sliceTail:bestSlice.slice(-200),strictErr:pe.message,looseErr:pe2.message});
-      throw new Error("Deep-dive response had invalid JSON.");
+  // Try delimited format first (current prompt). Fall back to JSON
+  // (legacy prompt or model drift) if no markers found.
+  var out=parseDelimitedDeepDives(tb);
+  var parseSource="delimited";
+  if(Object.keys(out).length===0){
+    parseSource="json-fallback";
+    try{out=parseLegacyJsonDeepDives(tb);}
+    catch(legacyErr){
+      console.error("[deepDive] no delimited markers and JSON fallback failed",{textHead:tb.slice(0,300),textTail:tb.slice(-200),legacyErr:legacyErr.message});
+      throw legacyErr;
     }
   }
-  if(!parsed||!Array.isArray(parsed.items)){
-    console.error("[deepDive] response missing items array",{parsedKeys:parsed?Object.keys(parsed):null});
-    throw new Error("Deep-dive response missing items array.");
-  }
-  var out={};
-  parsed.items.forEach(function(it){if(it&&it.id&&it.deepDive)out[it.id]=it.deepDive;});
-  // Id-normalization safety net (per the brief's "lookup mismatch" hint):
-  // if the AI dropped or altered our prefix on any item, fall back to
-  // matching by suffix. Specifically, if a requested id like "tool:ivKit"
-  // has no exact key in `out`, try matching any returned id whose suffix
-  // (after the last `:`) equals our suffix.
+  // Id-normalization safety net (kept from 2.6.3-hotfix): if any
+  // requested id has no exact key in `out`, try matching any returned
+  // id whose suffix after the last ":" equals our suffix.
   var returnedIds=Object.keys(out);
   requestedIds.forEach(function(reqId){
     if(out[reqId])return;
@@ -203,8 +248,6 @@ export async function expandMarkedItems(scenario, items, signal){
       if(gotSuffix===reqSuffix){out[reqId]=out[got];break;}
     }
   });
-  // Diagnostic: log requested vs returned ids on every successful parse
-  // until we have confidence the prefixed-id flow is solid.
-  console.info("[deepDive] requested:",requestedIds,"returned:",returnedIds,"resolved:",Object.keys(out).filter(function(k){return requestedIds.indexOf(k)>=0;}));
+  console.info("[deepDive] parseSource:"+parseSource,"requested:",requestedIds,"returned:",returnedIds,"resolved:",Object.keys(out).filter(function(k){return requestedIds.indexOf(k)>=0;}));
   return out;
 }

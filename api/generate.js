@@ -76,7 +76,7 @@ export default async function handler(req, res) {
 
       const reader = apiResp.body.getReader();
       const decoder = new TextDecoder();
-      let totalIn = 0, totalOut = 0, finalStopReason = null, snippet = '';
+      let totalIn = 0, totalOut = 0, totalSearches = 0, finalStopReason = null, snippet = '';
 
       while (true) {
         const { value, done } = await reader.read();
@@ -87,6 +87,11 @@ export default async function handler(req, res) {
         if (usageMatch) totalIn = Math.max(totalIn, Number(usageMatch[1]));
         const outMatch = chunkText.match(/"output_tokens":(\d+)/);
         if (outMatch) totalOut = Math.max(totalOut, Number(outMatch[1]));
+        // Phase-2.6.3 change 1: capture web_search_requests from server_tool_use.
+        // Anthropic returns it under usage.server_tool_use.web_search_requests
+        // — appears in the message_delta usage update once the message ends.
+        const searchMatch = chunkText.match(/"web_search_requests":(\d+)/);
+        if (searchMatch) totalSearches = Math.max(totalSearches, Number(searchMatch[1]));
         const stopMatch = chunkText.match(/"stop_reason":"([a-z_]+)"/);
         if (stopMatch && stopMatch[1] !== 'null') finalStopReason = stopMatch[1];
         if (snippet.length < 200) {
@@ -101,6 +106,7 @@ export default async function handler(req, res) {
       console.log('[generate diagnostic]', JSON.stringify({
         mode: mode, streaming: true, http_status: apiResp.status,
         stop_reason: finalStopReason, input_tokens: totalIn, output_tokens: totalOut,
+        web_search_requests: totalSearches,
         duration_s: duration, first_200_chars: snippet
       }));
       logToGoogleForm('[' + mode + ' stream] ' + userPrompt, finalStopReason || 'success', duration, totalIn, totalOut, estCost).catch(function () {});
@@ -131,6 +137,10 @@ export default async function handler(req, res) {
     const duration = ((Date.now() - startTime) / 1000).toFixed(1) + 's';
     const inputTokens = data.usage ? data.usage.input_tokens : 0;
     const outputTokens = data.usage ? data.usage.output_tokens : 0;
+    // Phase-2.6.3 change 1: capture web_search_requests count from
+    // usage.server_tool_use.web_search_requests. Default to 0 (not null)
+    // for runs where no search happened so the field is graphable.
+    const searchRequests = (data.usage && data.usage.server_tool_use && typeof data.usage.server_tool_use.web_search_requests === 'number') ? data.usage.server_tool_use.web_search_requests : 0;
     // PHASE 2.6.1 PART 1 DIAGNOSTIC — temporary; remove once root cause is fixed.
     let firstContent = '';
     try {
@@ -147,6 +157,7 @@ export default async function handler(req, res) {
       stop_reason: data.stop_reason || null,
       input_tokens: inputTokens,
       output_tokens: outputTokens,
+      web_search_requests: searchRequests,
       duration_s: duration,
       content_blocks: (data.content || []).length,
       content_block_types: (data.content || []).map(function (b) { return b && b.type; }),

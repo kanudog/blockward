@@ -11,6 +11,7 @@ import { BodySystemsView } from "./BodySystemsView.jsx";
 import { LabPanel } from "./LabPanel.jsx";
 import { ActionPanel } from "./ActionPanel.jsx";
 import { AssessPanel } from "./AssessPanel.jsx";
+import { PatientHeader } from "./PatientHeader.jsx";
 import { Debrief } from "./Debrief.jsx";
 import { TextBlock } from "../shared/TextBlock.jsx";
 import { Modal } from "../shared/Modal.jsx";
@@ -109,6 +110,16 @@ export function ScenarioPlayer(props){
         </div></div>)}
       {stage==="assess"&&<AssessPanel ph={ph} vit={vit} curSigns={curSigns} curLabs={curLabs} flags={flags} showFb={showFb} submit={submit} afterA={afterA} flag={flag} patient={sc.patient}/>}
       {stage==="act"&&(<div className="slu">
+        {/* Phase-3.0 change 2: patient header + narrative anchored at
+            top of Phase 2, mirroring change 1 on Phase 1. The right-
+            column glass card now holds only the "Intervention Time"
+            sub-header above the action panel. */}
+        <div style={{marginBottom:12}}>
+          <PatientHeader patient={sc.patient}/>
+          {ph&&ph.narrative&&<div style={{marginTop:8,padding:"10px 12px",borderRadius:10,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.06)"}}>
+            <TextBlock text={ph.narrative} style={{fontSize:13,color:"#ddd",lineHeight:1.55}}/>
+          </div>}
+        </div>
         <div className="bw-split">
           <div className="bw-split-left">
             <VitalsDisplay vitals={vit}/>
@@ -116,10 +127,9 @@ export function ScenarioPlayer(props){
           </div>
           <div className="bw-split-right">
             <div className="bw-glass" style={{borderRadius:16,padding:12,marginBottom:8}}>
-              <TextBlock text={ph?ph.narrative:""} style={{fontSize:13,color:"#ddd",lineHeight:1.6,marginBottom:8}}/>
-              <div style={{borderTop:"1px solid rgba(255,255,255,0.08)",paddingTop:8,marginTop:8}}>
-                <p style={{fontSize:14,fontWeight:700,color:"#4ECDC4",marginBottom:4}}>Intervention Time</p>
-                <p style={{fontSize:11,color:"#bbb"}}>Tap each tool and med. Find all correct actions to continue.</p></div></div>
+              <p style={{fontSize:14,fontWeight:700,color:"#4ECDC4",marginTop:0,marginBottom:4}}>Intervention Time</p>
+              <p style={{fontSize:11,color:"#bbb",margin:0}}>Tap each tool and med. Find all correct actions to continue.</p>
+            </div>
             <ActionPanel tools={ph.tools} meds={ph.meds} actions={ph.actions} onDone={function(s,sel){recordAction({phaseId:ph.id,phaseName:ph.name||ph.id,tools:ph.tools||[],meds:ph.meds||[],actions:ph.actions||{},sel:sel||{}});afterAct(s);}} onSkip={function(s,m,sel){if(m&&m.length>0)addSkipped(m.map(function(x){return Object.assign({},x,{phase:ph.name||ph.id});}));recordAction({phaseId:ph.id,phaseName:ph.name||ph.id,tools:ph.tools||[],meds:ph.meds||[],actions:ph.actions||{},sel:sel||{}});afterAct(s);}}/>
           </div>
         </div></div>)}

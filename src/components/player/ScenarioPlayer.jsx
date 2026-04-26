@@ -169,10 +169,15 @@ export function ScenarioPlayer(props){
           <div className="bw-glass" style={{borderRadius:16,padding:12,marginBottom:12}}>
             <TextBlock text={reNarrative} style={{fontSize:13,color:"#ddd",lineHeight:1.6}}/>
           </div>
-          <div style={{marginBottom:12}}>
+          {/* Phase-2.6.3 change 5: cap monitor width to match phase/act
+              rendering. Reassess stacks vertically (no bw-split column),
+              so without a max-width the monitor stretches across the
+              full 900px desktop container. ~400px matches the effective
+              width of bw-split-left (42% of 900px ≈ 378px) used elsewhere. */}
+          <div style={{maxWidth:400,margin:"0 auto 12px"}}>
             <VitalsDisplay vitals={reVitals}/>
           </div>
-          {reSigns.length>0&&<BodySystemsView signs={reSigns}/>}
+          {reSigns.length>0&&<div style={{maxWidth:400,margin:"0 auto"}}><BodySystemsView signs={reSigns}/></div>}
           <button onClick={function(){setStage("recovery");}} style={Object.assign({},BS,{background:GR})}>Continue</button>
         </div>);
       })()}

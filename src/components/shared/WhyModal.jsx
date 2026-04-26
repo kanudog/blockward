@@ -14,12 +14,15 @@ export function WhyModal(props){
     return s.markedForReview.some(function(x){return x.id===item.id;});
   });
   var toggle=usePlayerStore(function(s){return s.toggleMarkForReview;});
-  return(<Modal open={open} onClose={onClose} title={title} accent={accent}>
+  // Phase-2.6.5 change 1: Mark for Review moved out of children and
+  // into Modal's new sticky footer slot, so it stays reachable when
+  // the body content scrolls.
+  var footer=item?(<div>
+    <button onClick={function(){toggle(item);}} style={{width:"100%",padding:"8px 12px",borderRadius:10,fontSize:12,fontWeight:700,cursor:"pointer",background:marked?"rgba(254,202,87,0.2)":"rgba(255,255,255,0.06)",border:"1px solid "+(marked?"rgba(254,202,87,0.55)":"rgba(255,255,255,0.18)"),color:marked?"#FECA57":"#ddd"}}>{marked?"✓ Marked for Review":"Mark for Review"}</button>
+    <p style={{fontSize:10,color:"#888",marginTop:6,textAlign:"center",lineHeight:1.4}}>{marked?"Will appear in the debrief with an expanded deep dive.":"Save this for a deeper review at the end of the scenario."}</p>
+  </div>):null;
+  return(<Modal open={open} onClose={onClose} title={title} accent={accent} footer={footer}>
     <TextBlock text={body||""} style={{fontSize:13,color:"#ddd",lineHeight:1.6}}/>
-    {item&&<div style={{marginTop:14,paddingTop:12,borderTop:"1px solid rgba(255,255,255,0.1)"}}>
-      <button onClick={function(){toggle(item);}} style={{width:"100%",padding:"8px 12px",borderRadius:10,fontSize:12,fontWeight:700,cursor:"pointer",background:marked?"rgba(254,202,87,0.2)":"rgba(255,255,255,0.06)",border:"1px solid "+(marked?"rgba(254,202,87,0.55)":"rgba(255,255,255,0.18)"),color:marked?"#FECA57":"#ddd"}}>{marked?"✓ Marked for Review":"Mark for Review"}</button>
-      <p style={{fontSize:10,color:"#888",marginTop:6,textAlign:"center",lineHeight:1.4}}>{marked?"Will appear in the debrief with an expanded deep dive.":"Save this for a deeper review at the end of the scenario."}</p>
-    </div>}
   </Modal>);
 }
 

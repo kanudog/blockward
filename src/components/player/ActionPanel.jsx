@@ -94,35 +94,44 @@ export function ActionPanel(props){
             <div style={{width:26,height:32,borderRadius:6,display:"flex",alignItems:"center",justifyContent:"center",background:m.color||"#636e72",fontSize:16,color:"white"}}><MedIcon type={m.medType||"iv"} size={18} color="white"/></div>
             <span style={{fontSize:11,color:"#ccc",fontWeight:600,textAlign:"center",lineHeight:1.2}}>{m.label}</span>
             {u&&<span style={{position:"absolute",top:6,right:6}}>{o?<Check size={12} color="#55efc4"/>:<Minus size={12} color="#FECA57"/>}</span>}</button>);})}</div></div>)}
-      {pop&&(<div onClick={function(){setPop(null);}} style={{position:"fixed",inset:0,zIndex:50,display:"flex",alignItems:"center",justifyContent:"center",padding:16,background:"rgba(0,0,0,0.6)"}}>
-        <div onClick={function(e){e.stopPropagation();}} style={{width:"100%",maxWidth:"min(420px, 90vw)",borderRadius:16,padding:20,background:"#1a1a3e",border:"2px solid "+(pop.info.ok?"#00b894":"#ffa502"),animation:"popIn .25s ease-out"}}>
-          <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12}}>
-            <div style={{padding:"4px 12px",borderRadius:20,fontSize:11,fontWeight:900,background:pop.info.ok?"rgba(0,184,148,0.2)":"rgba(255,165,2,0.2)",color:pop.info.ok?"#00b894":"#ffa502",display:"flex",alignItems:"center",gap:4}}>{pop.info.ok?<><Check size={14}/> APPROPRIATE</>:<><X size={14}/> NOT INDICATED NOW</>}</div>
-            {pop.info.pri&&<div style={{padding:"4px 8px",borderRadius:20,fontSize:10,fontWeight:700,background:"rgba(78,205,196,0.15)",color:"#4ECDC4"}}>{"Priority #"+pop.info.pri}</div>}
+      {/* Phase-2.6.5 change 1: popup restructured into sticky header +
+          scrolling body + sticky footer. Container uses display:flex
+          column with maxHeight:85vh; only the body region scrolls so
+          the badge row, label, and the Mark for Review / Got It buttons
+          stay reachable regardless of body length (canonical MTP content
+          can run 8+ bullets and previously pushed the buttons off screen).
+          z-index bumped 50 → 1000 so the modal sits above all Phase 2
+          content on every device. */}
+      {pop&&(<div onClick={function(){setPop(null);}} style={{position:"fixed",top:0,left:0,right:0,bottom:0,zIndex:1000,display:"flex",alignItems:"center",justifyContent:"center",padding:16,background:"rgba(0,0,0,0.7)"}}>
+        <div onClick={function(e){e.stopPropagation();}} style={{display:"flex",flexDirection:"column",width:"100%",maxWidth:"min(440px, 92vw)",maxHeight:"85vh",borderRadius:16,background:"#1a1a3e",border:"2px solid "+(pop.info.ok?"#00b894":"#ffa502"),animation:"popIn .25s ease-out",boxShadow:"0 8px 32px rgba(0,0,0,0.5)"}}>
+          {/* Header — sticky */}
+          <div style={{padding:"16px 20px 12px",borderBottom:"1px solid rgba(255,255,255,0.06)",flexShrink:0}}>
+            <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8,flexWrap:"wrap"}}>
+              <div style={{padding:"4px 12px",borderRadius:20,fontSize:11,fontWeight:900,background:pop.info.ok?"rgba(0,184,148,0.2)":"rgba(255,165,2,0.2)",color:pop.info.ok?"#00b894":"#ffa502",display:"flex",alignItems:"center",gap:4}}>{pop.info.ok?<><Check size={14}/> APPROPRIATE</>:<><X size={14}/> NOT INDICATED NOW</>}</div>
+              {pop.info.pri&&<div style={{padding:"4px 8px",borderRadius:20,fontSize:10,fontWeight:700,background:"rgba(78,205,196,0.15)",color:"#4ECDC4"}}>{"Priority #"+pop.info.pri}</div>}
+            </div>
+            <h4 style={{color:"white",fontWeight:700,marginTop:0,marginBottom:4}}>{pop.ty==="t"?(TOOLS[pop.id]?TOOLS[pop.id].label:pop.id):(MEDS[pop.id]?MEDS[pop.id].label:pop.id)}</h4>
+            <p style={{fontSize:11,color:"#999",margin:0}}>{pop.ty==="t"?(TOOLS[pop.id]?TOOLS[pop.id].desc:""):(MEDS[pop.id]?MEDS[pop.id].desc:"")}</p>
           </div>
-          <h4 style={{color:"white",fontWeight:700,marginBottom:4}}>{pop.ty==="t"?(TOOLS[pop.id]?TOOLS[pop.id].label:pop.id):(MEDS[pop.id]?MEDS[pop.id].label:pop.id)}</h4>
-          <p style={{fontSize:11,color:"#999",marginBottom:8}}>{pop.ty==="t"?(TOOLS[pop.id]?TOOLS[pop.id].desc:""):(MEDS[pop.id]?MEDS[pop.id].desc:"")}</p>
-          {/* Phase-2.6.4 change 5: when the user clicks mtpActivate, swap
-              the AI's per-action fb for the canonical MTP teaching block
-              so the protocol explanation is consistent across scenarios.
-              The AI's scenario-specific rationale (why MTP is indicated
-              for THIS patient) renders below in the smaller note. */}
-          {pop.ty==="m"&&pop.id==="mtpActivate"?(<div>
-            <TextBlock text={MTP_CANONICAL} style={{fontSize:13,color:"#ddd",lineHeight:1.55}}/>
-            {pop.info.fb&&<div style={{marginTop:12,paddingTop:10,borderTop:"1px solid rgba(255,255,255,0.08)"}}>
-              <p style={{fontSize:10,textTransform:"uppercase",letterSpacing:1,color:"#888",fontWeight:700,marginBottom:6}}>Why for this patient</p>
-              <TextBlock text={pop.info.fb} style={{fontSize:12,color:"#bbb",lineHeight:1.5}}/>
-            </div>}
-          </div>):(<TextBlock text={pop.info.fb} style={{fontSize:13,color:"#ddd",lineHeight:1.5}}/>)}
-          {/* Phase-2.6.3 change 8: Mark for Review button. Same store as
-              the WhyModal version on assess items; the debrief deep-dive
-              section will pull marked interventions through the same
-              expand_marked_items API path. */}
-          <div style={{marginTop:14,paddingTop:12,borderTop:"1px solid rgba(255,255,255,0.1)"}}>
+          {/* Body — scrolls */}
+          <div style={{padding:"14px 20px",overflowY:"auto",flex:1,minHeight:0}}>
+            {/* Phase-2.6.4 change 5: mtpActivate gets canonical MTP teaching
+                content, with AI's per-scenario rationale below. */}
+            {pop.ty==="m"&&pop.id==="mtpActivate"?(<div>
+              <TextBlock text={MTP_CANONICAL} style={{fontSize:13,color:"#ddd",lineHeight:1.55}}/>
+              {pop.info.fb&&<div style={{marginTop:12,paddingTop:10,borderTop:"1px solid rgba(255,255,255,0.08)"}}>
+                <p style={{fontSize:10,textTransform:"uppercase",letterSpacing:1,color:"#888",fontWeight:700,marginBottom:6}}>Why for this patient</p>
+                <TextBlock text={pop.info.fb} style={{fontSize:12,color:"#bbb",lineHeight:1.5}}/>
+              </div>}
+            </div>):(<TextBlock text={pop.info.fb} style={{fontSize:13,color:"#ddd",lineHeight:1.5}}/>)}
+          </div>
+          {/* Footer — sticky. Mark for Review (phase-2.6.3 change 8) +
+              Got It dismiss. Always visible regardless of body scroll. */}
+          <div style={{padding:"12px 20px 16px",borderTop:"1px solid rgba(255,255,255,0.06)",flexShrink:0}}>
             <button onClick={function(){var it=popMarkItem();if(it)toggleMark(it);}} style={{width:"100%",padding:"8px 12px",borderRadius:10,fontSize:12,fontWeight:700,cursor:"pointer",background:popMarked?"rgba(254,202,87,0.2)":"rgba(255,255,255,0.06)",border:"1px solid "+(popMarked?"rgba(254,202,87,0.55)":"rgba(255,255,255,0.18)"),color:popMarked?"#FECA57":"#ddd"}}>{popMarked?"✓ Marked for Review":"Mark for Review"}</button>
-            <p style={{fontSize:10,color:"#888",marginTop:6,textAlign:"center",lineHeight:1.4}}>{popMarked?"Will appear in the debrief with an expanded deep dive.":"Save this intervention for a deeper review at the end."}</p>
+            <p style={{fontSize:10,color:"#888",marginTop:6,marginBottom:10,textAlign:"center",lineHeight:1.4}}>{popMarked?"Will appear in the debrief with an expanded deep dive.":"Save this intervention for a deeper review at the end."}</p>
+            <button onClick={function(){setPop(null);}} style={{width:"100%",padding:"12px 0",borderRadius:12,fontWeight:700,color:"white",fontSize:13,background:pop.info.ok?"rgba(0,184,148,0.3)":"rgba(255,165,2,0.2)",border:"none",cursor:"pointer"}}>Got It</button>
           </div>
-          <button onClick={function(){setPop(null);}} style={{width:"100%",marginTop:12,padding:"12px 0",borderRadius:12,fontWeight:700,color:"white",fontSize:13,background:pop.info.ok?"rgba(0,184,148,0.3)":"rgba(255,165,2,0.2)",border:"none",cursor:"pointer"}}>Got It</button>
         </div></div>)}
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:8,marginTop:12,flexWrap:"wrap"}}>
         <div style={{fontSize:11,color:"#666"}}>{explored+"/"+total+" explored"}</div>

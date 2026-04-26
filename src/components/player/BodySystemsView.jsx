@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Brain, Heart, Wind, Droplets, Shield, Gauge, Eye, Search, Flag } from "lucide-react";
+import { Brain, Heart, Wind, Droplets, Shield, Gauge, Eye, Search, Flag, Check, X, AlertTriangle } from "lucide-react";
 import { WhyModal, WhyButton } from "../shared/WhyModal.jsx";
 
 // Phase-3.0 change 5: each sign row inside a body-system card is now
@@ -74,13 +74,43 @@ export function BodySystemsView(props) {
               {grouped[sys].map(function(s,j) {
                 var match=clickable?findAssessForSign(s,assessItems):null;
                 var isFlagged=match&&!!flags[match.id];
-                var rowBg=clickable&&!showFb?(isFlagged?"rgba(78,205,196,0.18)":"transparent"):"transparent";
-                var rowBrd=clickable&&!showFb?(isFlagged?"1px solid rgba(78,205,196,0.55)":"1px solid transparent"):"1px solid transparent";
+                // Phase-3.0 change 7: post-submit reveal — same caught/missed/wrong
+                // semantics as LabPanel, driven off matched assessItem.bad.
+                var revealBad = match ? !!match.bad : false;
+                var revealState = null;
+                if(clickable&&showFb){
+                  if(revealBad&&isFlagged)revealState="caught";
+                  else if(revealBad&&!isFlagged)revealState="missed";
+                  else if(!revealBad&&isFlagged)revealState="wrong";
+                }
+                var rowBg, rowBrd;
+                if(clickable&&!showFb){
+                  rowBg=isFlagged?"rgba(78,205,196,0.18)":"transparent";
+                  rowBrd=isFlagged?"1px solid rgba(78,205,196,0.55)":"1px solid transparent";
+                }else if(clickable&&showFb){
+                  if(revealState==="caught"){rowBg="rgba(0,184,148,0.14)";rowBrd="1px solid rgba(0,184,148,0.5)";}
+                  else if(revealState==="missed"){rowBg="rgba(255,71,87,0.14)";rowBrd="1px solid rgba(255,71,87,0.5)";}
+                  else if(revealState==="wrong"){rowBg="rgba(254,202,87,0.14)";rowBrd="1px solid rgba(254,202,87,0.5)";}
+                  else{rowBg="transparent";rowBrd="1px solid transparent";}
+                }else{
+                  rowBg="transparent";rowBrd="1px solid transparent";
+                }
+                // Why? button: post-submit interactive mode, on every bad item
+                // (per brief). Read-only mode keeps legacy s.why trigger.
+                var showWhyBtn = clickable ? (showFb && match && match.bad) : (showFb && !!s.why);
+                var whyAccent = revealBad?"#FF6B81":"#4ECDC4";
+                function openWhy(e){
+                  if(e&&e.stopPropagation)e.stopPropagation();
+                  var why = s.why || (match && match.why) || "";
+                  setWhyTarget(Object.assign({}, s, {why: why, _matchBad: revealBad}));
+                }
                 var inner=(<div style={{position:"relative",fontSize:11,color:"#ccd",lineHeight:1.4,padding:"4px 8px",borderRadius:6,background:rowBg,border:rowBrd,display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}>
                   {clickable&&!showFb&&isFlagged&&<Flag size={11} color="#4ECDC4" style={{flexShrink:0}}/>}
+                  {revealState==="caught"&&<Check size={12} color="#00b894" style={{flexShrink:0}}/>}
+                  {revealState==="missed"&&<X size={12} color="#FF6B81" style={{flexShrink:0}}/>}
+                  {revealState==="wrong"&&<AlertTriangle size={11} color="#FECA57" style={{flexShrink:0}}/>}
                   <span style={{flex:1,minWidth:0,textAlign:"left"}}><span style={{fontWeight:600,color:"#ddd"}}>{s.label}:</span> {s.finding}</span>
-                  {showFb&&s.why&&<WhyButton onClick={function(e){if(e&&e.stopPropagation)e.stopPropagation();setWhyTarget(s);}} compact={true}/>}
-                  {!clickable&&!showFb&&s.why&&<WhyButton onClick={function(){setWhyTarget(s);}} compact={true}/>}
+                  {showWhyBtn&&<WhyButton onClick={openWhy} compact={true} accent={whyAccent}/>}
                 </div>);
                 if(clickable&&!showFb){
                   return(<button key={j} onClick={function(){if(match)onFlag(match.id);}} className="bw-tap" style={{background:"none",border:"none",padding:0,marginBottom:2,display:"block",width:"100%",cursor:match?"pointer":"default",opacity:match?1:0.6,color:"inherit",textAlign:"left"}}>{inner}</button>);
@@ -91,7 +121,7 @@ export function BodySystemsView(props) {
           );
         })}
       </div>
-      <WhyModal open={!!whyTarget} onClose={function(){setWhyTarget(null);}} title={whyTarget?whyTarget.label:""} body={whyTarget?whyTarget.why:""} item={whyTarget?{id:"sign:"+whyTarget.label,label:whyTarget.label,type:"finding",originalWhy:whyTarget.why}:null}/>
+      <WhyModal open={!!whyTarget} onClose={function(){setWhyTarget(null);}} title={whyTarget?whyTarget.label:""} body={whyTarget?whyTarget.why:""} accent={whyTarget&&whyTarget._matchBad?"#FF6B81":"#4ECDC4"} item={whyTarget?{id:"sign:"+whyTarget.label,label:whyTarget.label,type:"finding",originalWhy:whyTarget.why}:null}/>
     </div>
   );
 }

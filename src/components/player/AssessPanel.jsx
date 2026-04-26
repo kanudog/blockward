@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Flag, Check, X } from "lucide-react";
+import { Flag, Check, X, AlertTriangle } from "lucide-react";
 import { VitalsDisplay } from "./VitalsDisplay.jsx";
 import { BodySystemsView } from "./BodySystemsView.jsx";
 import { LabPanel } from "./LabPanel.jsx";
@@ -107,13 +107,42 @@ export function AssessPanel(props){
         {vitalTiles(vit).map(function(t){
           var match=vitAssessByKey[t.key];
           var isFlagged=match&&!!flags[match.id];
-          var bg=!showFb?(isFlagged?"rgba(78,205,196,0.12)":"rgba(255,255,255,0.04)"):"rgba(255,255,255,0.04)";
-          var brd=!showFb?(isFlagged?"2px solid rgba(78,205,196,0.55)":"1px solid rgba(255,255,255,0.08)"):"1px solid rgba(255,255,255,0.06)";
+          // Phase-3.0 change 7: post-submit reveal — caught/missed/wrong
+          // driven by matched assessItem.bad. Same semantics as labs +
+          // body system rows.
+          var revealBad = match ? !!match.bad : false;
+          var revealState = null;
+          if(showFb){
+            if(revealBad&&isFlagged)revealState="caught";
+            else if(revealBad&&!isFlagged)revealState="missed";
+            else if(!revealBad&&isFlagged)revealState="wrong";
+          }
+          var bg, brd;
+          if(!showFb){
+            bg=isFlagged?"rgba(78,205,196,0.12)":"rgba(255,255,255,0.04)";
+            brd=isFlagged?"2px solid rgba(78,205,196,0.55)":"1px solid rgba(255,255,255,0.08)";
+          }else if(revealState==="caught"){bg="rgba(0,184,148,0.12)";brd="2px solid rgba(0,184,148,0.5)";}
+          else if(revealState==="missed"){bg="rgba(255,71,87,0.12)";brd="2px solid rgba(255,71,87,0.5)";}
+          else if(revealState==="wrong"){bg="rgba(254,202,87,0.12)";brd="2px solid rgba(254,202,87,0.5)";}
+          else{bg="rgba(255,255,255,0.04)";brd="1px solid rgba(255,255,255,0.06)";}
+          var valueColor = showFb && revealBad ? "#ff7675" : "#fff";
+          var showWhyBtn = showFb && match && match.bad && match.why;
+          var whyAccent = revealBad?"#ff7675":"#4ECDC4";
+          function openWhy(e){
+            if(e&&e.stopPropagation)e.stopPropagation();
+            setWhyTarget(match);
+          }
           var inner=(<div style={{position:"relative",borderRadius:8,padding:"8px 12px",background:bg,border:brd,color:"white",textAlign:"left"}}>
             {!showFb&&isFlagged&&<div style={{position:"absolute",top:6,right:6}}><Flag size={11} color="#4ECDC4"/></div>}
-            <div style={{fontSize:10,color:"#aaa",fontWeight:600}}>{t.label}</div>
+            {revealState==="caught"&&<div style={{position:"absolute",top:6,right:6}}><Check size={13} color="#00b894"/></div>}
+            {revealState==="missed"&&<div style={{position:"absolute",top:6,right:6}}><X size={13} color="#FF6B81"/></div>}
+            {revealState==="wrong"&&<div style={{position:"absolute",top:6,right:6}}><AlertTriangle size={12} color="#FECA57"/></div>}
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:6,paddingRight:revealState?16:0}}>
+              <div style={{fontSize:10,color:"#aaa",fontWeight:600}}>{t.label}</div>
+              {showWhyBtn&&<WhyButton onClick={openWhy} compact={true} accent={whyAccent}/>}
+            </div>
             <div style={{display:"flex",alignItems:"baseline",gap:4}}>
-              <span style={{fontSize:16,fontWeight:800,color:"#fff"}}>{t.value}</span>
+              <span style={{fontSize:16,fontWeight:800,color:valueColor}}>{t.value}</span>
               <span style={{fontSize:9,color:"#888"}}>{t.unit}</span>
             </div>
           </div>);

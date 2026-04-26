@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Flag } from "lucide-react";
+import { Flag, Check, X, AlertTriangle } from "lucide-react";
 import { WhyModal, WhyButton } from "../shared/WhyModal.jsx";
 
 // Phase-3.0 change 4: lab tiles are directly clickable. No pre-submit
@@ -51,20 +51,28 @@ export function LabPanel(props) {
           var match=clickable?findAssessForLab(lab,assessItems):null;
           var isFlagged=match&&!!flags[match.id];
           var hasWhy = !!lab.why;
-          // Visual states (clickable, pre-submit only — change 7 layers
-          // post-submit reveal on top).
+          // Phase-3.0 change 7: post-submit reveal drives off the matched
+          // assessItem.bad (interactive mode) or lab.critical (read-only
+          // fallback). Three reveal states: caught (bad+selected, green),
+          // missed (bad+not selected, red), wrong (not bad+selected, amber).
+          var revealBad = match ? !!match.bad : !!lab.critical;
+          var revealState = null;
+          if(clickable&&showFb){
+            if(revealBad&&isFlagged)revealState="caught";
+            else if(revealBad&&!isFlagged)revealState="missed";
+            else if(!revealBad&&isFlagged)revealState="wrong";
+          }
           var bg, brd;
           if(clickable&&!showFb){
             // Pre-submit: neutral OR teal-selected. No red regardless of
             // lab.critical — pedagogy fix per brief.
             bg=isFlagged?"rgba(78,205,196,0.12)":"rgba(255,255,255,0.04)";
             brd=isFlagged?"2px solid rgba(78,205,196,0.55)":"1px solid rgba(255,255,255,0.08)";
-          }else if(showFb){
-            // Post-submit (set by change 7) — keep critical highlight
-            // visible so the user sees abnormal values in red after
-            // they've made their call.
-            bg=lab.critical?"rgba(255,71,87,0.12)":"rgba(255,255,255,0.04)";
-            brd=lab.critical?"1px solid rgba(255,71,87,0.25)":"1px solid rgba(255,255,255,0.06)";
+          }else if(clickable&&showFb){
+            if(revealState==="caught"){bg="rgba(0,184,148,0.12)";brd="2px solid rgba(0,184,148,0.5)";}
+            else if(revealState==="missed"){bg="rgba(255,71,87,0.12)";brd="2px solid rgba(255,71,87,0.5)";}
+            else if(revealState==="wrong"){bg="rgba(254,202,87,0.12)";brd="2px solid rgba(254,202,87,0.5)";}
+            else{bg="rgba(255,255,255,0.04)";brd="1px solid rgba(255,255,255,0.06)";}
           }else{
             // Read-only callers (phase / act / cb-* / reassess): keep
             // the legacy critical-red treatment so display screens
@@ -72,12 +80,25 @@ export function LabPanel(props) {
             bg=lab.critical?"rgba(255,71,87,0.12)":"rgba(255,255,255,0.04)";
             brd=lab.critical?"1px solid rgba(255,71,87,0.25)":"1px solid rgba(255,255,255,0.06)";
           }
-          var valueColor=showFb?(lab.critical?"#ff7675":"#fff"):"#fff";
+          var valueColor=showFb&&revealBad?"#ff7675":"#fff";
+          // Why? button: post-submit, on every truly-abnormal item (bad)
+          // in interactive mode, regardless of whether the user caught it.
+          // Read-only mode keeps the legacy lab.why trigger.
+          var showWhyBtn = clickable ? (showFb && match && match.bad) : (showFb && hasWhy);
+          var whyAccent = revealBad?"#ff7675":"#4ECDC4";
+          function openWhy(e){
+            if(e&&e.stopPropagation)e.stopPropagation();
+            var why = lab.why || (match && match.why) || "";
+            setWhyTarget(Object.assign({}, lab, {why: why, _matchBad: revealBad}));
+          }
           var inner=(<div style={{borderRadius:8,padding:"8px 12px",background:bg,border:brd,position:"relative",cursor:clickable&&!showFb?"pointer":"default",color:"white",textAlign:"left",width:"100%"}}>
             {clickable&&!showFb&&isFlagged&&<div style={{position:"absolute",top:6,right:6}}><Flag size={11} color="#4ECDC4"/></div>}
-            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:6}}>
+            {revealState==="caught"&&<div style={{position:"absolute",top:6,right:6}}><Check size={13} color="#00b894"/></div>}
+            {revealState==="missed"&&<div style={{position:"absolute",top:6,right:6}}><X size={13} color="#FF6B81"/></div>}
+            {revealState==="wrong"&&<div style={{position:"absolute",top:6,right:6}}><AlertTriangle size={12} color="#FECA57"/></div>}
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:6,paddingRight:revealState?16:0}}>
               <div style={{fontSize:10,color:"#aaa",fontWeight:600}}>{lab.name}</div>
-              {showFb&&hasWhy&&<WhyButton onClick={function(e){if(e&&e.stopPropagation)e.stopPropagation();setWhyTarget(lab);}} compact={true} accent={lab.critical?"#ff7675":"#4ECDC4"}/>}
+              {showWhyBtn&&<WhyButton onClick={openWhy} compact={true} accent={whyAccent}/>}
             </div>
             <div style={{display:"flex",alignItems:"baseline",gap:4}}>
               <span style={{fontSize:16,fontWeight:800,color:valueColor}}>{lab.value}</span>
@@ -91,7 +112,7 @@ export function LabPanel(props) {
           return(<div key={i}>{inner}</div>);
         })}
       </div>
-      <WhyModal open={!!whyTarget} onClose={function(){setWhyTarget(null);}} title={whyTarget?whyTarget.name+": "+whyTarget.value+" "+(whyTarget.unit||""):""} body={whyTarget?whyTarget.why:""} accent={whyTarget&&whyTarget.critical?"#ff7675":"#4ECDC4"} item={whyTarget?{id:"lab:"+whyTarget.name,label:whyTarget.name+" "+whyTarget.value+(whyTarget.unit?" "+whyTarget.unit:""),type:"lab",originalWhy:whyTarget.why}:null}/>
+      <WhyModal open={!!whyTarget} onClose={function(){setWhyTarget(null);}} title={whyTarget?whyTarget.name+": "+whyTarget.value+" "+(whyTarget.unit||""):""} body={whyTarget?whyTarget.why:""} accent={whyTarget&&(whyTarget._matchBad||whyTarget.critical)?"#ff7675":"#4ECDC4"} item={whyTarget?{id:"lab:"+whyTarget.name,label:whyTarget.name+" "+whyTarget.value+(whyTarget.unit?" "+whyTarget.unit:""),type:"lab",originalWhy:whyTarget.why}:null}/>
     </div>
   );
 }

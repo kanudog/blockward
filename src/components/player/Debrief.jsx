@@ -90,16 +90,28 @@ export function Debrief(props){
         {deepStatus==="error"&&<div style={{padding:10,marginBottom:8,borderRadius:8,background:"rgba(255,71,87,0.1)",border:"1px solid rgba(255,71,87,0.3)",fontSize:11,color:"#ff9a9f"}}>
           Deep dive unavailable — showing original notes. <button onClick={retryDeepDives} style={{marginLeft:6,background:"none",border:"none",color:"#74b9ff",textDecoration:"underline",cursor:"pointer",fontSize:11}}>Retry</button>
         </div>}
+        {/* Phase-2.6.4 change 4: each marked item is its own collapsible
+            row. All collapsed by default — overview list of what the user
+            marked, click to expand each deep dive on demand. Multiple can
+            be open simultaneously. Uses the existing itemExp/toggleItem
+            helpers from phase-2.5 issue 8 with a "marked:" key prefix. */}
         {markedForReview.map(function(item,i){
+          var k="marked:"+i;
+          var open=!!itemExp[k];
           var deep=deepDives[item.id];
           var fallback=!deep&&deepStatus==="error";
           var loading=!deep&&deepStatus==="loading";
-          return(<div key={i} style={{marginBottom:10,borderRadius:8,padding:10,background:"rgba(255,255,255,0.03)",border:"1px solid rgba(254,202,87,0.25)"}}>
-            <div style={{fontSize:12,fontWeight:700,color:"#FECA57",marginBottom:6}}>{item.label}<span style={{fontSize:9,color:"#888",fontWeight:600,marginLeft:6,textTransform:"uppercase",letterSpacing:0.5}}>{item.type}</span></div>
-            {deep?<TextBlock text={deep} style={{fontSize:12,color:"#ddd",lineHeight:1.6}}/>
-              :loading?<p className="bw-deep-loading" style={{fontSize:11,color:"#888",fontStyle:"italic",margin:0}}>Loading deep dive…</p>
-              :fallback?<TextBlock text={item.originalWhy||"No additional content available."} style={{fontSize:12,color:"#aaa",lineHeight:1.5}}/>
-              :null}
+          return(<div key={k} style={{marginBottom:6,borderRadius:8,background:"rgba(255,255,255,0.03)",border:"1px solid rgba(254,202,87,0.25)",overflow:"hidden"}}>
+            <button onClick={function(){toggleItem(k);}} style={{width:"100%",textAlign:"left",padding:"8px 10px",background:"none",border:"none",cursor:"pointer",color:"white",display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
+              <span style={{fontSize:12,fontWeight:700,color:"#FECA57",flex:1,minWidth:0}}>{item.label}<span style={{fontSize:9,color:"#888",fontWeight:600,marginLeft:6,textTransform:"uppercase",letterSpacing:0.5}}>{item.type}</span></span>
+              <span style={{color:"#FECA57",flexShrink:0}}>{open?<Minus size={12}/>:<Plus size={12}/>}</span>
+            </button>
+            {open&&<div style={{padding:"0 10px 10px"}}>
+              {deep?<TextBlock text={deep} style={{fontSize:12,color:"#ddd",lineHeight:1.6}}/>
+                :loading?<p className="bw-deep-loading" style={{fontSize:11,color:"#888",fontStyle:"italic",margin:0}}>Loading deep dive…</p>
+                :fallback?<TextBlock text={item.originalWhy||"No additional content available."} style={{fontSize:12,color:"#aaa",lineHeight:1.5}}/>
+                :null}
+            </div>}
           </div>);
         })}
       </div>}

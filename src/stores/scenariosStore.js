@@ -42,13 +42,14 @@ export var useScenariosStore = create(function(set, get) {
       saveS("bw-custom", u);
       saveS("bw-prog", p);
     },
-    recordCompletion: function(id, score) {
-      var b = score.c / (score.t || 1);
+    recordCompletion: function(id) {
+      // Phase-4a: scoring removed. Track only completion + attempt count.
+      // Existing entries may carry a stale `best` field — left in place,
+      // no migration needed.
       var prev = get().progress[id];
       var p = Object.assign({}, get().progress);
       p[id] = {
         done: true,
-        best: Math.max(b, prev ? prev.best || 0 : 0),
         n: (prev ? prev.n || 0 : 0) + 1
       };
       set({ progress: p });

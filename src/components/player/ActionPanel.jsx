@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Check, X, Minus } from "lucide-react";
 import { TOOLS, MEDS } from "../../lib/scenarios/builtIn.js";
-import { computeActionScore } from "../../lib/scenarios/scoring.js";
 import { ToolIcon, MedIcon } from "./icons.jsx";
 import { TextBlock } from "../shared/TextBlock.jsx";
 import { usePlayerStore } from "../../stores/playerStore.js";
@@ -66,13 +65,15 @@ export function ActionPanel(props){
     setSel(function(p){var n=Object.assign({},p);n[id]=info;return n;});
     setPop({id:id,ty:ty,info:info});
   };
-  var finish=function(){onDone(computeActionScore(tools,meds,actions,sel),sel);};
+  // Phase-4a: scoring removed. onDone/onSkip just hand back the selection
+  // map (and missed list for skip) so ScenarioPlayer can record what the
+  // user picked. The per-action ok/correct color logic stays in this file.
+  var finish=function(){onDone(sel);};
   var skip=function(){
     var missed=[];
     rT.forEach(function(id){if(!sel[id]){var t=TOOLS[id];missed.push({id:id,label:t?t.label:id,type:"tool"});}});
     rM.forEach(function(id){if(!sel[id]){var m=MEDS[id];missed.push({id:id,label:m?m.label:id,type:"med"});}});
-    var score=computeActionScore(tools,meds,actions,sel);
-    if(onSkip)onSkip(score,missed,sel);else onDone(score,sel);
+    if(onSkip)onSkip(missed,sel);else onDone(sel);
   };
   function tbg(u,o){if(!u)return"rgba(255,255,255,0.05)";return o?"rgba(0,184,148,0.12)":"rgba(255,165,0,0.1)";}
   function tbd(u,o){if(!u)return"2px solid rgba(255,255,255,0.08)";return o?"2px solid rgba(0,184,148,0.35)":"2px solid rgba(255,165,0,0.25)";}

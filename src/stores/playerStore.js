@@ -14,7 +14,6 @@ var initialState = {
   flags: {},
   showFb: false,
   cbDone: false,
-  score: { c: 0, t: 0 },
   vitals: null,
   shake: false,
   skippedActions: [],
@@ -33,7 +32,6 @@ export var usePlayerStore = create(function(set) {
         flags: {},
         showFb: false,
         cbDone: false,
-        score: { c: 0, t: 0 },
         vitals: sc && sc.phases && sc.phases[0] ? sc.phases[0].vitals : null,
         shake: false,
         skippedActions: [],
@@ -59,11 +57,6 @@ export var usePlayerStore = create(function(set) {
     setCbDone: function(b) { set({ cbDone: b }); },
     setVitals: function(v) { set({ vitals: v }); },
     setShake: function(b) { set({ shake: b }); },
-    addScore: function(delta) {
-      set(function(s) {
-        return { score: { c: s.score.c + delta.c, t: s.score.t + delta.t } };
-      });
-    },
     addSkipped: function(items) {
       set(function(s) {
         return { skippedActions: s.skippedActions.concat(items) };

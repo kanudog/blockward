@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Heart, Zap, Sparkles, Star, Trophy, Shield, Check } from "lucide-react";
 import { TOOLS, MEDS } from "../../lib/scenarios/builtIn.js";
-import { computeAssessScore } from "../../lib/scenarios/scoring.js";
 import { canonicalizeAssessItem } from "../../lib/scenarios/canonicalize.js";
 import { usePlayerStore } from "../../stores/playerStore.js";
 import { guessAge, guessSex } from "../../lib/scenarios/age.js";
@@ -22,8 +21,8 @@ import { replaceIdsWithLabels } from "../../lib/scenarios/labels.js";
 export function ScenarioPlayer(props){
   var sc=props.sc;var onExit=props.onExit;var onDone=props.onDone;
   var ageG=guessAge(sc);var sexG=guessSex(sc);var scVisuals=sc.visuals||[];
-  var stage=usePlayerStore(function(s){return s.stage;});var pi=usePlayerStore(function(s){return s.phaseIndex;});var flags=usePlayerStore(function(s){return s.flags;});var showFb=usePlayerStore(function(s){return s.showFb;});var cbDone=usePlayerStore(function(s){return s.cbDone;});var score=usePlayerStore(function(s){return s.score;});var shake=usePlayerStore(function(s){return s.shake;});var vit=usePlayerStore(function(s){return s.vitals;});
-  var _ps=usePlayerStore.getState();var setStage=_ps.setStage;var setPi=_ps.setPhaseIndex;var setFlags=_ps.setFlags;var toggleFlag=_ps.toggleFlag;var setShowFb=_ps.setShowFb;var setCbDone=_ps.setCbDone;var setShake=_ps.setShake;var setVit=_ps.setVitals;var addScore=_ps.addScore;var addSkipped=_ps.addSkipped;var recordAssess=_ps.recordAssess;var recordAction=_ps.recordAction;
+  var stage=usePlayerStore(function(s){return s.stage;});var pi=usePlayerStore(function(s){return s.phaseIndex;});var flags=usePlayerStore(function(s){return s.flags;});var showFb=usePlayerStore(function(s){return s.showFb;});var cbDone=usePlayerStore(function(s){return s.cbDone;});var shake=usePlayerStore(function(s){return s.shake;});var vit=usePlayerStore(function(s){return s.vitals;});
+  var _ps=usePlayerStore.getState();var setStage=_ps.setStage;var setPi=_ps.setPhaseIndex;var setFlags=_ps.setFlags;var toggleFlag=_ps.toggleFlag;var setShowFb=_ps.setShowFb;var setCbDone=_ps.setCbDone;var setShake=_ps.setShake;var setVit=_ps.setVitals;var addSkipped=_ps.addSkipped;var recordAssess=_ps.recordAssess;var recordAction=_ps.recordAction;
   function prevStageFor(s){if(s==="phase")return"intro";if(s==="assess")return"intro";if(s==="act")return"phase";if(s==="cb-alert")return"act";if(s==="cb-act")return"cb-alert";if(s==="reassess")return null;return null;}
   var prev=prevStageFor(stage);
   var goBack=function(){if(prev)setStage(prev);};
@@ -47,25 +46,21 @@ export function ScenarioPlayer(props){
   var trigCb=useCallback(function(){setShake(true);setTimeout(function(){setShake(false);},800);setVit(sc.curveball.vitals);setStage("cb-alert");setCbDone(true);},[sc]);
   var flag=function(id){if(!showFb)toggleFlag(id);};
   var submit=function(){
-    // Phase-3.0-hotfix: flags are now keyed by canonical display IDs
-    // (lab:Foo, vital:hr, sign:Bar) instead of raw assessItem.id, so
-    // scoring + recordAssess must look each assessItem up by mapping
-    // through canonicalizeAssessItem with the surrounding phase context.
-    var r=computeAssessScore(ph.assessItems,flags,ph);addScore({c:r.c,t:r.t});
+    // Phase-4a: scoring removed. Per-item breakdown still captured for debrief.
     recordAssess({phaseId:ph.id,phaseName:ph.name||ph.id,items:ph.assessItems.map(function(it){
       var cid=canonicalizeAssessItem(it,ph);
       return{id:it.id,label:it.label,cat:it.cat,bad:!!it.bad,why:it.why||"",userFlagged:!!(cid&&flags[cid])};
     })});
     setShowFb(true);};
   var afterA=function(){setFlags({});setShowFb(false);if(pi<sc.phases.length-1){var n=pi+1;setPi(n);setVit(sc.phases[n].vitals);setStage("phase");}else setStage("debrief");};
-  var afterAct=function(s){if(s&&s.t)addScore({c:s.c,t:s.t});if(!cbDone&&sc.curveball)trigCb();else setStage("reassess");};
+  var afterAct=function(){if(!cbDone&&sc.curveball)trigCb();else setStage("reassess");};
   var phaseHasIntervention=ph&&(ph.tools||ph.meds);;
   var BS={width:"100%",marginTop:12,padding:"12px 0",borderRadius:12,fontWeight:700,color:"white",fontSize:16,border:"none",cursor:"pointer"};
   var GR="linear-gradient(135deg,#4ECDC4,#44B09E)";var RD="linear-gradient(135deg,#FF4757,#c0392b)";var PP="linear-gradient(135deg,#a55eea,#8854d0)";
   var isCb=stage.startsWith("cb");
   var curSigns=isCb?(sc.curveball?sc.curveball.signs:[]):(ph?ph.signs:[]);
   var curLabs=isCb?(sc.curveball?sc.curveball.labs||[]:[]):(ph?ph.labs||[]:[]);
-  if(stage==="debrief")return <Debrief sc={sc} score={score} ageG={ageG} sexG={sexG} onDone={onDone} onExit={onExit}/>;
+  if(stage==="debrief")return <Debrief sc={sc} ageG={ageG} sexG={sexG} onDone={onDone} onExit={onExit}/>;
   return(<div className={shake?"bw-shake":""} style={{minHeight:"100dvh",padding:16,background:"linear-gradient(135deg,#0a0e1a,#1a1a3e)",color:"#fff"}}>
     <style>{"@keyframes bwShake{0%,100%{transform:translateX(0)}10%{transform:translateX(-8px)}20%{transform:translateX(8px)}30%{transform:translateX(-6px)}40%{transform:translateX(6px)}}.bw-shake{animation:bwShake .6s ease-in-out}@keyframes slideU{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}.slu{animation:slideU .4s ease-out}@keyframes alertP{0%,100%{box-shadow:0 0 0 0 rgba(255,71,87,.4)}50%{box-shadow:0 0 0 12px rgba(255,71,87,0)}}.alp{animation:alertP 1.5s infinite}@keyframes fadeCard{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}.bw-split{display:flex;flex-direction:column;gap:12px}.bw-split-left,.bw-split-right{width:100%}@media(min-width:768px){.bw-container{max-width:900px!important}.bw-split{flex-direction:row;gap:20px;align-items:flex-start}.bw-split-left{width:42%;position:sticky;top:16px;max-height:calc(100dvh - 80px);overflow-y:auto}.bw-split-right{width:58%;min-height:0}}"}</style>
     <div className="bw-container" style={{maxWidth:480,margin:"0 auto"}}>
@@ -75,12 +70,6 @@ export function ScenarioPlayer(props){
           {prev&&<button onClick={goBack} style={{color:"#888",fontSize:12,background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:8,padding:"4px 10px",cursor:"pointer"}}>&lt; Back</button>}
         </div>
         <div style={{padding:"4px 12px",borderRadius:20,fontSize:11,fontWeight:700,background:isCb?"rgba(255,71,87,0.2)":"rgba(78,205,196,0.15)",color:isCb?"#FF6B81":"#4ECDC4"}}>{isCb?"CURVEBALL":"Phase "+(pi+1)+"/"+sc.phases.length}</div>
-        {/* phase-2.6 group G: in-play counter removed. It was a running
-            correct/total tally that confused users and leaked partial-correct
-            answers as the user tapped (e.g. 24/32 → 23/32 after a wrong
-            pick). The final score is shown in the debrief. If a per-stage
-            indicator becomes desired later, it should be a stage badge
-            (e.g. "Triage 2 of 3") rather than a score number. */}
         <div style={{width:1}}></div></div>
       {stage==="intro"&&(<div className="slu" style={{textAlign:"center"}}>
         <PatientView status="stable" rr={30} signs={[]} ageGroup={ageG} sex={sexG} visuals={scVisuals} emotion="sad"/>
@@ -139,7 +128,7 @@ export function ScenarioPlayer(props){
               <p style={{fontSize:14,fontWeight:700,color:"#4ECDC4",marginTop:0,marginBottom:4}}>Intervention Time</p>
               <p style={{fontSize:11,color:"#bbb",margin:0}}>Tap each tool and med. Find all correct actions to continue.</p>
             </div>
-            <ActionPanel tools={ph.tools} meds={ph.meds} actions={ph.actions} onDone={function(s,sel){recordAction({phaseId:ph.id,phaseName:ph.name||ph.id,tools:ph.tools||[],meds:ph.meds||[],actions:ph.actions||{},sel:sel||{}});afterAct(s);}} onSkip={function(s,m,sel){if(m&&m.length>0)addSkipped(m.map(function(x){return Object.assign({},x,{phase:ph.name||ph.id});}));recordAction({phaseId:ph.id,phaseName:ph.name||ph.id,tools:ph.tools||[],meds:ph.meds||[],actions:ph.actions||{},sel:sel||{}});afterAct(s);}}/>
+            <ActionPanel tools={ph.tools} meds={ph.meds} actions={ph.actions} onDone={function(sel){recordAction({phaseId:ph.id,phaseName:ph.name||ph.id,tools:ph.tools||[],meds:ph.meds||[],actions:ph.actions||{},sel:sel||{}});afterAct();}} onSkip={function(m,sel){if(m&&m.length>0)addSkipped(m.map(function(x){return Object.assign({},x,{phase:ph.name||ph.id});}));recordAction({phaseId:ph.id,phaseName:ph.name||ph.id,tools:ph.tools||[],meds:ph.meds||[],actions:ph.actions||{},sel:sel||{}});afterAct();}}/>
           </div>
         </div></div>)}
       {stage==="cb-alert"&&(<div className="slu">
@@ -175,7 +164,7 @@ export function ScenarioPlayer(props){
               <div style={{borderTop:"1px solid rgba(255,71,87,0.15)",paddingTop:8,marginTop:8}}>
                 <p style={{fontSize:14,fontWeight:700,color:"#FF6B81",marginBottom:4}}>Critical Intervention</p>
                 <p style={{fontSize:11,color:"#bbb"}}>Find all correct actions.</p></div></div>
-            <ActionPanel tools={sc.curveball.tools} meds={sc.curveball.meds} actions={sc.curveball.actions} onDone={function(s,sel){if(s&&s.t)addScore({c:s.c,t:s.t});recordAction({phaseId:"curveball",phaseName:"Curveball: "+(sc.curveball.name||""),tools:sc.curveball.tools||[],meds:sc.curveball.meds||[],actions:sc.curveball.actions||{},sel:sel||{}});setStage("reassess");}} onSkip={function(s,m,sel){if(m&&m.length>0)addSkipped(m.map(function(x){return Object.assign({},x,{phase:"Curveball: "+(sc.curveball.name||"")});}));if(s&&s.t)addScore({c:s.c,t:s.t});recordAction({phaseId:"curveball",phaseName:"Curveball: "+(sc.curveball.name||""),tools:sc.curveball.tools||[],meds:sc.curveball.meds||[],actions:sc.curveball.actions||{},sel:sel||{}});setStage("reassess");}}/>
+            <ActionPanel tools={sc.curveball.tools} meds={sc.curveball.meds} actions={sc.curveball.actions} onDone={function(sel){recordAction({phaseId:"curveball",phaseName:"Curveball: "+(sc.curveball.name||""),tools:sc.curveball.tools||[],meds:sc.curveball.meds||[],actions:sc.curveball.actions||{},sel:sel||{}});setStage("reassess");}} onSkip={function(m,sel){if(m&&m.length>0)addSkipped(m.map(function(x){return Object.assign({},x,{phase:"Curveball: "+(sc.curveball.name||"")});}));recordAction({phaseId:"curveball",phaseName:"Curveball: "+(sc.curveball.name||""),tools:sc.curveball.tools||[],meds:sc.curveball.meds||[],actions:sc.curveball.actions||{},sel:sel||{}});setStage("reassess");}}/>
           </div>
         </div></div>)}
       {stage==="reassess"&&(function(){

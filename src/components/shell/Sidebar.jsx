@@ -15,7 +15,7 @@ export function Sidebar(props){
   var open=props.open;var onClose=props.onClose;var onRequestClearAll=props.onRequestClearAll;
   var _tab=useState("ref");var tab=_tab[0];var setTab=_tab[1];
   var scn=useScenarios();var allScenarios=scn.allScenarios;
-  var pr=useProgress();var prog=pr.prog;var completed=pr.completed;var totalAttempts=pr.totalAttempts;var avgScore=pr.avgScore;
+  var pr=useProgress();var prog=pr.prog;var completed=pr.completed;var totalAttempts=pr.totalAttempts;
   if(!open)return null;
   return(<div style={{position:"fixed",top:0,left:0,right:0,bottom:0,zIndex:997,display:"flex"}}>
     <div style={{position:"absolute",top:0,left:0,right:0,bottom:0,background:"rgba(0,0,0,0.6)"}} onClick={onClose}></div>
@@ -63,16 +63,11 @@ export function Sidebar(props){
             <div style={{fontSize:28,fontWeight:900,color:"#c4b5fd"}}>{totalAttempts}</div>
             <div style={{fontSize:10,color:"#999"}}>Total Attempts</div>
           </div>
-          <div style={{borderRadius:10,padding:12,textAlign:"center",background:"rgba(0,184,148,0.1)",gridColumn:"1 / -1"}}>
-            <div style={{fontSize:28,fontWeight:900,color:"#00b894"}}>{avgScore>0?avgScore+"%":"--"}</div>
-            <div style={{fontSize:10,color:"#999"}}>Average Best Score</div>
-          </div>
         </div>
         <h4 style={{fontSize:12,fontWeight:700,color:"#ddd",marginBottom:8}}>Per Scenario</h4>
         {allScenarios.map(function(s){var p=prog[s.id];if(!p)return null;return(
-          <div key={s.id} style={{borderRadius:8,padding:8,marginBottom:4,background:"rgba(255,255,255,0.04)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <div key={s.id} style={{borderRadius:8,padding:8,marginBottom:4,background:"rgba(255,255,255,0.04)"}}>
             <span style={{fontSize:11,color:"#ccc"}}>{s.icon+" "+s.title}</span>
-            <span style={{fontSize:11,fontWeight:700,color:p.best>=0.8?"#00b894":p.best>=0.5?"#FECA57":"#FF6B81"}}>{Math.round(p.best*100)+"%"}</span>
           </div>
         );})}
       </div>}

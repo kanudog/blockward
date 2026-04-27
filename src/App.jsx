@@ -37,7 +37,7 @@ export default function App(){
     }
   },[]);
   var play=function(s){startPlayer(s);setView("play");};
-  var done=function(score){if(!act)return;recordCompletion(act.id,score);};
+  var done=function(){if(!act)return;recordCompletion(act.id);};
   var addC=function(s,opts){
     addCustom(s);
     if(opts&&opts.play){play(s);}else{setView("dash");}

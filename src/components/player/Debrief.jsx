@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Star, Trophy, BookOpen, Plus, Minus, Search, Check, Zap, Droplets, Bookmark } from "lucide-react";
+import { Trophy, Plus, Minus, Search, Check, Zap, Droplets, Bookmark } from "lucide-react";
 import { PatientSVG } from "./PatientSVG.jsx";
 import { TextBlock } from "../shared/TextBlock.jsx";
 import { TOOLS, MEDS } from "../../lib/scenarios/builtIn.js";
@@ -11,7 +11,7 @@ var BS={width:"100%",marginTop:12,padding:"12px 0",borderRadius:12,fontWeight:70
 var GR="linear-gradient(135deg,#4ECDC4,#44B09E)";
 
 export function Debrief(props){
-  var sc=props.sc;var score=props.score;var ageG=props.ageG;var sexG=props.sexG;var onDone=props.onDone;var onExit=props.onExit;
+  var sc=props.sc;var ageG=props.ageG;var sexG=props.sexG;var onDone=props.onDone;var onExit=props.onExit;
   var skippedActions=usePlayerStore(function(s){return s.skippedActions;});
   var assessHistory=usePlayerStore(function(s){return s.assessHistory;});
   var actionHistory=usePlayerStore(function(s){return s.actionHistory;});
@@ -75,7 +75,6 @@ export function Debrief(props){
   },[bannerPhase]);
   var _tldrOpen=useState({});var tldrOpen=_tldrOpen[0];var setTldrOpen=_tldrOpen[1];
   var toggleTldr=function(key){setTldrOpen(function(p){var n=Object.assign({},p);n[key]=!n[key];return n;});};
-  var pct=score.t>0?Math.round(score.c/score.t*100):0;var emIcon=pct>=80?<Star size={24} color="#FECA57"/>:pct>=50?<Trophy size={24} color="#FECA57"/>:<BookOpen size={24} color="#74b9ff"/>;var sBg=pct>=80?"#00b894":pct>=50?"#fdcb6e":"#e17055";
   // Build caught / missed / intervention lists from history (phase-2.5 issue 8)
   var caught=[];var missed=[];
   assessHistory.forEach(function(snap){
@@ -106,8 +105,7 @@ export function Debrief(props){
     <div style={{textAlign:"center",marginBottom:16}}>
       <div style={{width:100,margin:"0 auto"}}><PatientSVG status="stable" rr={20} ageGroup={ageG} sex={sexG} emotion="happy"/></div>
     </div>
-    <div style={{textAlign:"center",marginBottom:24}}><div style={{fontSize:44,display:"flex",justifyContent:"center"}}>{emIcon}</div><h2 style={{fontSize:24,fontWeight:900}}>Scenario Complete</h2>
-      <div className="si" style={{marginTop:8,display:"inline-block",padding:"8px 20px",borderRadius:20,fontSize:18,fontWeight:700,background:sBg}}>{score.c+"/"+score.t+" - "+pct+"%"}</div></div>
+    <div style={{textAlign:"center",marginBottom:24}}><h2 style={{fontSize:24,fontWeight:900}}>Scenario Complete</h2></div>
     <div className="bw-glass" style={{borderRadius:16,padding:16,marginBottom:16}}><TextBlock text={sc.debrief.summary} style={{fontSize:13,color:"#ccc",lineHeight:1.6}}/></div>
     {/* Marked for Review — top-most section, default expanded (phase-2.6 group D) */}
     {markedForReview.length>0&&<div style={{marginBottom:8,borderRadius:12,overflow:"hidden",background:"rgba(254,202,87,0.08)",border:"1px solid rgba(254,202,87,0.35)"}}>
@@ -291,5 +289,5 @@ export function Debrief(props){
         {skippedActions.map(function(a,i){return <li key={i}>{a.label}{a.phase?" ("+a.phase+")":""}</li>;})}
       </ul>
     </div>}
-    <button onClick={function(){onDone(score);onExit();}} style={Object.assign({},BS,{background:GR})}>Back to Dashboard</button></div></div>);
+    <button onClick={function(){onDone();onExit();}} style={Object.assign({},BS,{background:GR})}>Back to Dashboard</button></div></div>);
 }

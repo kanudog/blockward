@@ -43,17 +43,17 @@ export function LabPanel(props) {
           var cid = labCanonicalId(lab);
           var match = badMap ? badMap[cid] : null;
           var isFlagged = !!(flags && flags[cid]);
-          // Phase-3.0-hotfix-2: in interactive (clickable) mode, abnormality is
-          // defined strictly by the assessItems contract (match.bad) plus the AI's
-          // explicit critical flag. Educational `why` content does NOT make a lab
-          // abnormal — `why` is teaching scaffolding present on most labs regardless
-          // of clinical status. In read-only mode (no badMap), fall back to the
-          // legacy critical||why heuristic for display.
+          // Phase-3.0-hotfix-2 + phase-4-prep: abnormality is driven strictly
+          // by the assessItems contract (match.bad) plus the AI's explicit
+          // critical flag. Educational `why` content does NOT make a lab
+          // abnormal — `why` is teaching scaffolding present on most labs
+          // regardless of clinical status. Both clickable and read-only modes
+          // use the same `critical`-based predicate now.
           var isAbnormal;
           if (clickable) {
             isAbnormal = (match && !!match.bad) || !!lab.critical;
           } else {
-            isAbnormal = !!lab.critical || !!lab.why;
+            isAbnormal = !!lab.critical;
           }
           var revealState = null;
           if (clickable && showFb) {

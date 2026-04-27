@@ -43,15 +43,25 @@ export function LabPanel(props) {
           var cid = labCanonicalId(lab);
           var match = badMap ? badMap[cid] : null;
           var isFlagged = !!(flags && flags[cid]);
-          // A lab is "abnormal" if the matched assessItem says bad,
-          // or if the AI marked it critical, or it carries a why.
-          var isAbnormal = (match && !!match.bad) || !!lab.critical || !!lab.why;
+          // Phase-3.0-hotfix-2: in interactive (clickable) mode, abnormality is
+          // defined strictly by the assessItems contract (match.bad) plus the AI's
+          // explicit critical flag. Educational `why` content does NOT make a lab
+          // abnormal — `why` is teaching scaffolding present on most labs regardless
+          // of clinical status. In read-only mode (no badMap), fall back to the
+          // legacy critical||why heuristic for display.
+          var isAbnormal;
+          if (clickable) {
+            isAbnormal = (match && !!match.bad) || !!lab.critical;
+          } else {
+            isAbnormal = !!lab.critical || !!lab.why;
+          }
           var revealState = null;
           if (clickable && showFb) {
             var revealBad = (match && !!match.bad) || !!lab.critical;
             if (revealBad && isFlagged) revealState = "caught";
             else if (revealBad && !isFlagged) revealState = "missed";
             else if (!revealBad && isFlagged) revealState = "wrong";
+            else if (!revealBad && !isFlagged) revealState = "correct-skip";
           }
           var bg, brd;
           if (clickable && !showFb) {
@@ -61,6 +71,7 @@ export function LabPanel(props) {
             if (revealState === "caught") { bg = "rgba(0,184,148,0.12)"; brd = "2px solid rgba(0,184,148,0.5)"; }
             else if (revealState === "missed") { bg = "rgba(255,71,87,0.12)"; brd = "2px solid rgba(255,71,87,0.5)"; }
             else if (revealState === "wrong") { bg = "rgba(254,202,87,0.12)"; brd = "2px solid rgba(254,202,87,0.5)"; }
+            else if (revealState === "correct-skip") { bg = "rgba(78,205,196,0.06)"; brd = "1px solid rgba(78,205,196,0.25)"; }
             else { bg = "rgba(255,255,255,0.04)"; brd = "1px solid rgba(255,255,255,0.06)"; }
           } else {
             bg = lab.critical ? "rgba(255,71,87,0.12)" : "rgba(255,255,255,0.04)";

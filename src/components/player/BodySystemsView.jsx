@@ -55,13 +55,21 @@ export function BodySystemsView(props) {
                 var cid = signCanonicalId(s);
                 var match = badMap ? badMap[cid] : null;
                 var isFlagged = !!(flags && flags[cid]);
-                var isAbnormal = (match && !!match.bad) || !!s.why;
+                // Phase-3.0-hotfix-2: parallel to LabPanel — abnormality from assessItems
+                // contract in interactive mode, legacy why-based fallback in read-only.
+                var isAbnormal;
+                if (clickable) {
+                  isAbnormal = match && !!match.bad;
+                } else {
+                  isAbnormal = !!s.why;
+                }
                 var revealState = null;
                 if (clickable && showFb) {
                   var revealBad = match && !!match.bad;
                   if (revealBad && isFlagged) revealState = "caught";
                   else if (revealBad && !isFlagged) revealState = "missed";
                   else if (!revealBad && isFlagged) revealState = "wrong";
+                  else if (!revealBad && !isFlagged) revealState = "correct-skip";
                 }
                 var rowBg, rowBrd;
                 if (clickable && !showFb) {
@@ -71,6 +79,7 @@ export function BodySystemsView(props) {
                   if (revealState === "caught") { rowBg = "rgba(0,184,148,0.14)"; rowBrd = "1px solid rgba(0,184,148,0.5)"; }
                   else if (revealState === "missed") { rowBg = "rgba(255,71,87,0.14)"; rowBrd = "1px solid rgba(255,71,87,0.5)"; }
                   else if (revealState === "wrong") { rowBg = "rgba(254,202,87,0.14)"; rowBrd = "1px solid rgba(254,202,87,0.5)"; }
+                  else if (revealState === "correct-skip") { rowBg = "rgba(78,205,196,0.06)"; rowBrd = "1px solid rgba(78,205,196,0.25)"; }
                   else { rowBg = "transparent"; rowBrd = "1px solid transparent"; }
                 } else {
                   rowBg = "transparent"; rowBrd = "1px solid transparent";

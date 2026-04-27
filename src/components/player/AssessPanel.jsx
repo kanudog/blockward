@@ -74,6 +74,7 @@ export function AssessPanel(props){
             if(isAbnormal && isFlagged) revealState="caught";
             else if(isAbnormal && !isFlagged) revealState="missed";
             else if(!isAbnormal && isFlagged) revealState="wrong";
+            else if(!isAbnormal && !isFlagged) revealState="correct-skip";
           }
           var bg, brd;
           if(!showFb){
@@ -82,6 +83,7 @@ export function AssessPanel(props){
           }else if(revealState==="caught"){bg="rgba(0,184,148,0.12)";brd="2px solid rgba(0,184,148,0.5)";}
           else if(revealState==="missed"){bg="rgba(255,71,87,0.12)";brd="2px solid rgba(255,71,87,0.5)";}
           else if(revealState==="wrong"){bg="rgba(254,202,87,0.12)";brd="2px solid rgba(254,202,87,0.5)";}
+          else if(revealState==="correct-skip"){bg="rgba(78,205,196,0.06)";brd="1px solid rgba(78,205,196,0.25)";}
           else{bg="rgba(255,255,255,0.04)";brd="1px solid rgba(255,255,255,0.06)";}
           var valueColor = showFb && isAbnormal ? "#ff7675" : "#fff";
           // Phase-3.0-hotfix change 2: Why? on every truly-abnormal vital

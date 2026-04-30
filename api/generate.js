@@ -36,6 +36,12 @@ export default async function handler(req, res) {
     system: body.system || "",
     messages: body.messages || [],
     tools: body.tools || undefined,
+    // Phase-4-prep: forward thinking + output_config when the client opts in.
+    // Both use the `|| undefined` pattern so JSON.stringify drops the key
+    // when the client did not send it (e.g., the marked-for-review path).
+    // Anthropic rejects `thinking: null` so the dropped-key behavior matters.
+    thinking: body.thinking || undefined,
+    output_config: body.output_config || undefined,
   };
   if (isStreaming) upstreamBody.stream = true;
 
@@ -76,7 +82,7 @@ export default async function handler(req, res) {
 
       const reader = apiResp.body.getReader();
       const decoder = new TextDecoder();
-      let totalIn = 0, totalOut = 0, totalSearches = 0, finalStopReason = null, snippet = '';
+      let totalIn = 0, totalOut = 0, totalSearches = 0, totalCacheCreate = 0, totalCacheRead = 0, finalStopReason = null, snippet = '';
 
       while (true) {
         const { value, done } = await reader.read();
@@ -92,6 +98,14 @@ export default async function handler(req, res) {
         // — appears in the message_delta usage update once the message ends.
         const searchMatch = chunkText.match(/"web_search_requests":(\d+)/);
         if (searchMatch) totalSearches = Math.max(totalSearches, Number(searchMatch[1]));
+        // Phase-4-prep: prompt-cache metrics. cache_creation_input_tokens
+        // appears on the first call after a cache_control breakpoint
+        // changes; cache_read_input_tokens > 0 confirms a cache hit on
+        // subsequent calls within the 5-minute TTL.
+        const cacheCreateMatch = chunkText.match(/"cache_creation_input_tokens":(\d+)/);
+        if (cacheCreateMatch) totalCacheCreate = Math.max(totalCacheCreate, Number(cacheCreateMatch[1]));
+        const cacheReadMatch = chunkText.match(/"cache_read_input_tokens":(\d+)/);
+        if (cacheReadMatch) totalCacheRead = Math.max(totalCacheRead, Number(cacheReadMatch[1]));
         const stopMatch = chunkText.match(/"stop_reason":"([a-z_]+)"/);
         if (stopMatch && stopMatch[1] !== 'null') finalStopReason = stopMatch[1];
         if (snippet.length < 200) {
@@ -107,6 +121,8 @@ export default async function handler(req, res) {
         mode: mode, streaming: true, http_status: apiResp.status,
         stop_reason: finalStopReason, input_tokens: totalIn, output_tokens: totalOut,
         web_search_requests: totalSearches,
+        cache_creation_input_tokens: totalCacheCreate,
+        cache_read_input_tokens: totalCacheRead,
         duration_s: duration, first_200_chars: snippet
       }));
       logToGoogleForm('[' + mode + ' stream] ' + userPrompt, finalStopReason || 'success', duration, totalIn, totalOut, estCost).catch(function () {});
@@ -141,6 +157,11 @@ export default async function handler(req, res) {
     // usage.server_tool_use.web_search_requests. Default to 0 (not null)
     // for runs where no search happened so the field is graphable.
     const searchRequests = (data.usage && data.usage.server_tool_use && typeof data.usage.server_tool_use.web_search_requests === 'number') ? data.usage.server_tool_use.web_search_requests : 0;
+    // Phase-4-prep: prompt-cache metrics. Same fields as the streaming path
+    // — surfaces whether the cache_control breakpoint on the system prompt
+    // is being filled (creation > 0) and reused (read > 0).
+    const cacheCreate = (data.usage && typeof data.usage.cache_creation_input_tokens === 'number') ? data.usage.cache_creation_input_tokens : 0;
+    const cacheRead = (data.usage && typeof data.usage.cache_read_input_tokens === 'number') ? data.usage.cache_read_input_tokens : 0;
     // PHASE 2.6.1 PART 1 DIAGNOSTIC — temporary; remove once root cause is fixed.
     let firstContent = '';
     try {
@@ -158,6 +179,8 @@ export default async function handler(req, res) {
       input_tokens: inputTokens,
       output_tokens: outputTokens,
       web_search_requests: searchRequests,
+      cache_creation_input_tokens: cacheCreate,
+      cache_read_input_tokens: cacheRead,
       duration_s: duration,
       content_blocks: (data.content || []).length,
       content_block_types: (data.content || []).map(function (b) { return b && b.type; }),

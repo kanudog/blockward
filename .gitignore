@@ -3,3 +3,12 @@ dist/
 .vercel/
 .vercel
 .env*.local
+smoke-test-call-1.json
+smoke-test-call-2.json
+smoke-test-usage.json
+smoke-test.mjs
+smoke-test-request-shape.json
+smoke-test-call-1.usage.json
+smoke-test-call-2.usage.json
+smoke-test-call-1.json.raw.txt
+smoke-test-call-2.json.raw.txt

@@ -71,10 +71,19 @@ function parseAccumulated(tb){
 // arrive. message is set only when a new phase key is detected.
 export async function generateScenario(txt, cbMode, signal, onProgress){
   var userContent="Create pediatric scenario:\n\n"+txt+randomNameHint();
+  // Phase-4-prep: adaptive thinking at high effort + prompt caching.
+  // The system prompt is the largest stable block in the request and is
+  // identical across every scenario generation, so it gets the cache
+  // breakpoint. Adaptive thinking is the recommended mode for Sonnet 4.6
+  // (replaces the deprecated `enabled + budget_tokens` form). output_config
+  // is a top-level parameter, not nested under thinking. max_tokens=48000
+  // covers JSON output (~14-16k) + thinking budget (~8-20k) + safety buffer.
   var r=await fetch("/api/generate",{method:"POST",headers:{"Content-Type":"application/json"},signal:signal,
     body:JSON.stringify({model:MODEL_ID,max_tokens:MAX_TOKENS,
+      thinking:{type:"adaptive"},
+      output_config:{effort:"medium"},
       tools:[{type:"web_search_20250305",name:"web_search"}],
-      system:buildSystemPrompt(cbMode),
+      system:[{type:"text",text:buildSystemPrompt(cbMode),cache_control:{type:"ephemeral"}}],
       messages:[{role:"user",content:userContent}],
       stream:true})});
   if(!r.ok){
@@ -214,9 +223,13 @@ export async function expandMarkedItems(scenario, items, signal){
   };
   var requestedIds=items.map(function(i){return i.id;});
   var userContent="Patient context: "+JSON.stringify(ctx)+"\n\nItems to expand:\n"+JSON.stringify(items.map(function(i){return{id:i.id,label:i.label,type:i.type,originalWhy:i.originalWhy};}));
+  // Phase-4-prep: prompt caching on the deep-dive system prompt — same
+  // prompt every call, ideal cache target. No thinking block on this
+  // path (cost/latency outweighs benefit for shorter content). max_tokens
+  // 6000 → 8000 to give a small headroom margin without overshooting.
   var r=await fetch("/api/generate",{method:"POST",headers:{"Content-Type":"application/json"},signal:signal,
-    body:JSON.stringify({model:MODEL_ID,max_tokens:6000,mode:"expand_marked_items",
-      system:buildDeepDivePrompt(),
+    body:JSON.stringify({model:MODEL_ID,max_tokens:8000,mode:"expand_marked_items",
+      system:[{type:"text",text:buildDeepDivePrompt(),cache_control:{type:"ephemeral"}}],
       messages:[{role:"user",content:userContent}]})});
   var raw=await r.text();var d;
   try{d=JSON.parse(raw);}catch(je){throw new Error("Server returned invalid response (status "+r.status+").");}

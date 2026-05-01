@@ -1,7 +1,7 @@
 import { useScenariosStore } from "../stores/scenariosStore.js";
-import { SC1, SC2, SC3, SC4 } from "../lib/scenarios/builtIn.js";
+import { SC1, SC2, SC3, SC4, SC5 } from "../lib/scenarios/builtIn.js";
 
-var BUILT_IN=[SC1,SC2,SC3,SC4];
+var BUILT_IN=[SC1,SC2,SC3,SC4,SC5];
 
 function minifyScenario(sc){
   function trimFb(obj){if(!obj)return obj;var o={};Object.keys(obj).forEach(function(k){if(typeof obj[k]==="object"&&obj[k]&&obj[k].fb){o[k]={ok:obj[k].ok,pri:obj[k].pri,fb:obj[k].fb.substring(0,120)};}else{o[k]=obj[k];}});return o;}

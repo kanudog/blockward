@@ -1072,3 +1072,574 @@ export var SC4 = {
     ]
   }
 };
+
+
+export var SC5 = {
+  "id": "rsv-bronchiolitis-hfnc-failure",
+  "title": "Mira's Breathing Emergency",
+  "tier": 2,
+  "icon": "🫁",
+  "tagline": "HFNC is maxed — and she's still not breathing.",
+  "description": "An 8-month-old presents with worsening RSV bronchiolitis. She arrived on high-flow nasal cannula but continues to deteriorate with retractions, grunting, and dropping saturations. The team must recognize impending respiratory failure and escalate support before she fatigues.",
+  "visuals": [
+    "Infant in a hospital crib, nasal cannula tubing in place, chest visibly heaving with each breath",
+    "Cardiac monitor showing tachycardia and SpO2 waveform trending downward",
+    "Suction bulb and nasal saline on the bedside table"
+  ],
+  "patient": {
+    "ageLabel": "8-month-old",
+    "weightKg": 8,
+    "sex": "Female",
+    "cc": "Worsening breathing difficulty on HFNC",
+    "history": "Mira Okonkwo is an 8-month-old previously healthy female born full-term with no significant medical history. She presented to the ED 18 hours ago with 3 days of rhinorrhea, cough, and progressive respiratory distress. RSV antigen test was positive. She was placed on high-flow nasal cannula (HFNC) at 8 L/min (1 L/kg/min) at 40% FiO2 and admitted to the pediatric ward. Over the past 2 hours her work of breathing has significantly increased despite maximum HFNC settings of 16 L/min (2 L/kg/min) at 60% FiO2. She is on continuous cardiorespiratory monitoring. She has had no oral intake for 10 hours and is currently NPO with an IV in place in her right hand (24-gauge). She has received no bronchodilators or steroids."
+  },
+  "emsReport": "Mira is an 8-month-old female transferred from the pediatric ward to the PICU on high-flow nasal cannula at maximum settings of 16 L/min at 60% FiO2. RSV-positive bronchiolitis diagnosed on admission 18 hours ago. Peripheral IV access established in right hand. No medications given during transport.",
+  "learnMore": "Severe RSV bronchiolitis causes small-airway obstruction via bronchial inflammation, mucus plugging, and smooth-muscle constriction, leading to increased airway resistance, air trapping, and dynamic hyperinflation. HFNC provides modest positive distending pressure and reduces the inspiratory resistance imposed by nasal airways, but does not generate sufficient continuous positive airway pressure to reliably stent open obstructed airways. When HFNC fails — defined as persistent or worsening tachypnea, rising PCO2, or increasing FiO2 requirement — escalation to CPAP or BiPAP is the evidence-supported next step before invasive mechanical ventilation.",
+  "norms": {
+    "hr": [
+      80,
+      160
+    ],
+    "rr": [
+      25,
+      50
+    ],
+    "sbp": [
+      70,
+      100
+    ],
+    "dbp": [
+      40,
+      65
+    ],
+    "spo2": [
+      95,
+      100
+    ],
+    "temp": [
+      36.5,
+      37.5
+    ]
+  },
+  "phases": [
+    {
+      "id": "triage",
+      "name": "Triage",
+      "narrative": "Mira is brought to the PICU bed on HFNC at maximum settings. She is awake but visibly exhausted, unable to maintain her normal level of alertness. Her chest heaves with every breath — subcostal and intercostal retractions are prominent. Audible grunting can be heard without a stethoscope at the bedside. Her nasal cannula prongs are in place and the circuit is intact. A 24-gauge peripheral IV is confirmed patent in the right dorsal hand. Continuous SpO2 and cardiac monitoring are active. Breath sounds are present bilaterally on auscultation with diffuse expiratory wheeze and transmitted upper-airway noise; there is no focal consolidation and no pneumothorax sign. Trachea is midline. Abdomen is soft and non-distended with normal bowel sounds.",
+      "vitals": {
+        "hr": 188,
+        "rr": 72,
+        "sbp": 82,
+        "dbp": 52,
+        "spo2": 88,
+        "temp": 38.6,
+        "cap": 3
+      },
+      "signs": [
+        {
+          "label": "Retractions",
+          "finding": "Moderate subcostal and intercostal retractions present bilaterally with each breath; suprasternal notch tug visible",
+          "pos": "body",
+          "sys": "respiratory",
+          "why": "Retractions reflect markedly increased work of breathing against elevated airway resistance.\n\n- **Subcostal** and **intercostal** retractions occur when the diaphragm and accessory muscles generate large negative intrathoracic pressures to force air through obstructed small airways\n- **Suprasternal tug** indicates upper-airway involvement and severe respiratory effort\n- In RSV bronchiolitis, **bronchial and peribronchial inflammation**, mucus plugging, and smooth-muscle constriction drive airway resistance to multiple times normal\n- Persistent retractions on **maximum HFNC** signal that the current support level is insufficient to offset the imposed work of breathing"
+        },
+        {
+          "label": "Grunting",
+          "finding": "Audible expiratory grunt with each breath, heard without stethoscope at the bedside",
+          "pos": "face",
+          "sys": "respiratory",
+          "why": "Grunting is a physiologic auto-PEEP maneuver in infants with severe respiratory distress.\n\n- The infant partially closes the **glottis** during expiration to generate back-pressure, functionally mimicking external PEEP\n- This prevents **end-expiratory alveolar collapse** in the setting of diffuse small-airway obstruction and air trapping\n- Audible grunting without a stethoscope indicates the degree of glottic braking is maximal — a sign of **impending respiratory failure**\n- It is a critical clinical indicator that the infant's intrinsic compensatory mechanisms are near their limit"
+        },
+        {
+          "label": "Skin & Perfusion",
+          "finding": "Skin pale and mildly mottled over the trunk; capillary refill 3 seconds centrally; mucous membranes moist",
+          "pos": "body",
+          "sys": "cardiovascular",
+          "why": "Pallor and delayed capillary refill reflect impaired peripheral perfusion from sympathetic-mediated vasoconstriction in the setting of hypoxemia and physiologic stress.\n\n- **Hypoxemia** triggers sympathetic discharge, causing peripheral vasoconstriction to preferentially redirect cardiac output to vital organs\n- **Capillary refill >2 seconds** centrally indicates reduced cutaneous perfusion and is a flagworthy sign of circulatory compromise\n- **Moist mucous membranes** are reassuring that the child is not severely dehydrated, but do not negate the peripheral perfusion concern\n- Mottling in an infant is an ominous sign reflecting vasomotor instability — it should prompt urgent reassessment of cardiac output"
+        },
+        {
+          "label": "Mental Status",
+          "finding": "Eyes open, but decreased baseline alertness; does not track faces or reach for objects; responds only to painful stimuli with weak cry",
+          "pos": "head",
+          "sys": "neurological",
+          "why": "Decreased alertness in an infant with respiratory distress is a critical HFNC failure sign.\n\n- **Cerebral hypoxia** from hypoxemia (SpO2 88%) impairs cortical activity, manifesting as loss of age-appropriate engagement and weak cry\n- Failure to track faces or reach for objects is developmentally abnormal for an 8-month-old and indicates **altered sensorium**\n- In the context of escalating respiratory failure, **decreased responsiveness** signals that the infant cannot sustain the work of breathing and cardiorespiratory collapse may be imminent\n- This finding alone is an indication for **immediate respiratory support escalation** regardless of other parameters"
+        },
+        {
+          "label": "Lung Sounds",
+          "finding": "Diffuse expiratory wheeze bilaterally; transmitted upper-airway noise; breath sounds equal bilaterally; no focal crackles; trachea midline",
+          "pos": "body",
+          "sys": "respiratory",
+          "why": "Diffuse bilateral wheeze and equal breath sounds are consistent with RSV bronchiolitis, not a unilateral process.\n\n- **Diffuse expiratory wheeze** reflects widespread small-airway narrowing due to RSV-mediated inflammation and mucus plugging — this is the expected auscultatory finding in bronchiolitis\n- **Equal breath sounds bilaterally** with **midline trachea** rule out pneumothorax, pleural effusion, or right mainstem intubation — these are the reassuring elements of this compound finding\n- The absence of **focal crackles or consolidation** makes secondary bacterial pneumonia less likely at this time\n- The transmitted upper-airway noise reflects nasal secretions passing through the HFNC circuit and does not represent a new pulmonary finding"
+        },
+        {
+          "label": "Abdominal Exam",
+          "finding": "Abdomen soft, non-distended, non-tender with normal bowel sounds; no hepatosplenomegaly",
+          "pos": "body",
+          "sys": "gastrointestinal",
+          "why": "A soft, non-distended abdomen is a reassuring finding that rules out air-swallowing gastric distension as a complication of HFNC.\n\n- Infants on **HFNC** can develop gastric distension from swallowed high-flow air, which can splint the diaphragm and worsen respiratory mechanics\n- A **soft, non-distended abdomen** confirms this has not occurred and that abdominal compartment physiology is not contributing to respiratory compromise\n- The absence of **hepatomegaly** makes congestive heart failure from structural heart disease less likely as the primary etiology\n- This is a genuinely reassuring finding that should NOT be flagged as a concern in this scenario"
+        }
+      ],
+      "assessItems": [
+        {
+          "id": "hr-188",
+          "label": "HR 188 bpm",
+          "bad": true,
+          "why": "Sinus tachycardia at 188 bpm markedly exceeds the normal 8-month-old range of 80–160 bpm.\n\n- **Tachycardia** in this setting reflects combined physiologic stressors: hypoxemia, hypercarbia, fever, and elevated sympathetic tone from increased work of breathing\n- In the HFNC failure literature, **failure to improve tachycardia** after initiating HFNC is one of the strongest predictors of subsequent intubation\n- A **rate of 188 bpm** sustained under maximum support indicates the infant's cardiovascular system is compensating maximally\n- **Persistent or worsening tachycardia** on HFNC is a direct trigger criterion for escalating to CPAP or BiPAP",
+          "cat": "vital"
+        },
+        {
+          "id": "rr-72",
+          "label": "RR 72 breaths/min",
+          "bad": true,
+          "why": "A respiratory rate of 72 breaths/min is severely elevated above the normal 8-month-old range of 25–50 breaths/min.\n\n- **Tachypnea** at this extreme reduces expiratory time so that each breath ends before full exhalation — this generates **dynamic hyperinflation and auto-PEEP**\n- The infant must then overcome this intrinsic PEEP on every subsequent inspiration, dramatically increasing the work of breathing\n- A **RR >60 breaths/min** in an infant on maximum HFNC is a direct criterion for evaluation of respiratory support escalation\n- **Worsening tachypnea** despite HFNC indicates the flow is not adequately offsetting airway resistance or inspiratory load",
+          "cat": "vital"
+        },
+        {
+          "id": "bp-82-52",
+          "label": "BP 82/52 mmHg",
+          "bad": false,
+          "why": "BP 82/52 mmHg falls within the acceptable range for an 8-month-old infant (normal SBP 70–100 mmHg, DBP 40–65 mmHg).\n\n- The **minimum acceptable SBP** for an 8-month-old can be estimated as 70 + (2 × age in years) ≈ 71 mmHg; 82 mmHg exceeds this threshold\n- While this value sits in the lower half of the normal range, it is **not hypotensive** and does not indicate cardiovascular decompensation at this point\n- In the context of severe RSV bronchiolitis, the primary concern is **respiratory failure**, not hemodynamic shock\n- This vital sign should **not be flagged** — clinical energy should be directed at the respiratory compromise",
+          "cat": "vital"
+        },
+        {
+          "id": "spo2-88",
+          "label": "SpO2 88%",
+          "bad": true,
+          "why": "SpO2 of 88% is critically low and represents significant hypoxemia despite HFNC at 60% FiO2.\n\n- Normal SpO2 in infants is **95–100%**; values below **90%** define hypoxemic respiratory failure\n- An SpO2 of 88% on **60% FiO2 via HFNC** demonstrates refractory hypoxemia — the HFNC is no longer able to maintain adequate oxygenation\n- The **V/Q mismatch** caused by mucus plugging, air trapping, and atelectasis is too severe for open-interface, flow-based oxygen delivery to overcome\n- This is a primary criterion for **HFNC failure** and mandates immediate escalation to a pressure-generating modality (CPAP/BiPAP or intubation)",
+          "cat": "vital"
+        },
+        {
+          "id": "temp-38.6",
+          "label": "Temp 38.6°C",
+          "bad": true,
+          "why": "A temperature of 38.6°C represents a low-grade fever exceeding the normal upper limit of 37.5°C.\n\n- **Fever** in RSV bronchiolitis reflects the innate immune response to viral replication in respiratory epithelium — it is an expected but flagworthy finding\n- Fever increases **metabolic oxygen demand** and CO2 production, worsening the respiratory burden in an already-compromised infant\n- Temperature elevation also contributes to **tachycardia** and should be considered as a modifiable driver of physiologic stress\n- **Acetaminophen** is appropriate to reduce fever-related metabolic demand; antipyretics do not treat the underlying bronchiolitis but reduce physiologic stress",
+          "cat": "vital"
+        },
+        {
+          "id": "cap-3",
+          "label": "Cap Refill 3 sec",
+          "bad": true,
+          "why": "A central capillary refill time of 3 seconds exceeds the normal threshold of less than 2 seconds.\n\n- **Capillary refill >2 seconds** centrally indicates reduced cutaneous perfusion, driven by sympathetic vasoconstriction from hypoxemia and physiologic stress\n- In the context of severe respiratory failure, prolonged cap refill reflects the **cardiovascular cost of sustained high work of breathing** and impending circulatory compromise\n- Combined with pallor and mottling on exam, this finding suggests the infant is on the verge of **decompensated cardiorespiratory failure**\n- Restoration of normal cap refill is an important endpoint of successful respiratory support escalation and hemodynamic stabilization",
+          "cat": "vital"
+        },
+        {
+          "id": "retractions",
+          "label": "Retractions",
+          "bad": true,
+          "why": "Subcostal and intercostal retractions with suprasternal tug are signs of severe increased work of breathing.\n\n- **Retractions** indicate the respiratory muscles are generating extreme negative intrathoracic pressure to overcome elevated airway resistance\n- In RSV bronchiolitis, **airway resistance** is increased due to bronchial inflammation, mucus plugging, and smooth-muscle bronchoconstriction\n- Retractions persisting on **maximum HFNC** directly signal the modality has reached its therapeutic ceiling\n- This finding, especially combined with grunting and decreased alertness, constitutes an **HFNC failure triad** requiring immediate escalation",
+          "cat": "clinical"
+        },
+        {
+          "id": "grunting",
+          "label": "Grunting",
+          "bad": true,
+          "why": "Audible expiratory grunting is a critical sign of imminent respiratory failure in infants.\n\n- **Grunting** represents voluntary glottic braking — the infant is generating intrinsic PEEP to prevent end-expiratory alveolar collapse\n- When grunting becomes **audible without a stethoscope**, the infant's auto-PEEP generation is at maximum capacity\n- This is a terminal compensatory mechanism; once the infant fatigues, alveolar collapse will occur rapidly with precipitous **oxygen desaturation and hypercapnia**\n- Audible grunting in an infant on maximum HFNC is a **code-level warning** sign: escalation must happen before, not after, the infant fatigues",
+          "cat": "clinical"
+        },
+        {
+          "id": "skin-perfusion",
+          "label": "Skin & Perfusion",
+          "bad": true,
+          "why": "Pallor, mottling, and central capillary refill of 3 seconds confirm impaired peripheral perfusion.\n\n- **Pallor and mottling** reflect vasomotor instability from maximal sympathetic discharge in response to hypoxemia and physiologic stress\n- **Central mottling** over the trunk is particularly concerning — peripheral mottling can be seen with ambient cold, but truncal mottling indicates systemic hemodynamic compromise\n- The **moist mucous membranes** are the only reassuring element here, confirming this is not a dehydration-mediated finding\n- The overall integrated picture of pallor + mottling + 3-second refill is a **flag for impending cardiovascular decompensation** and must be acted upon",
+          "cat": "clinical"
+        },
+        {
+          "id": "mental-status",
+          "label": "Mental Status",
+          "bad": true,
+          "why": "Decreased alertness and absent age-appropriate behavior are critical warning signs of cerebral hypoxia.\n\n- An 8-month-old should actively track faces, reach for objects, and respond to voice — **absence of these behaviors** is developmentally abnormal and indicates altered sensorium\n- **Cerebral hypoxia** from SpO2 88% impairs cortical activity; the weak cry in response to pain only indicates the infant is in a pre-arrest state of neurological depression\n- Altered mental status from hypoxemia is a **non-recoverable warning** — if left untreated, the next step is apnea and cardiorespiratory arrest\n- **AAP and PALS guidelines** both identify decreased responsiveness as a primary criterion for immediate airway intervention",
+          "cat": "clinical"
+        },
+        {
+          "id": "lung-sounds",
+          "label": "Lung Sounds",
+          "bad": false,
+          "why": "Bilateral equal breath sounds with a midline trachea are reassuring against pneumothorax, tension pneumothorax, or unilateral consolidation.\n\n- **Equal bilateral breath sounds** confirm that air entry is symmetric — unequal sounds would raise concern for pneumothorax, mucus plug, or mainstem intubation\n- **Midline trachea** rules out mediastinal shift from a tension pneumothorax, which can mimic severe respiratory distress\n- **Diffuse expiratory wheeze** is consistent with the known RSV bronchiolitis diagnosis — it is expected, not a new or escalating concern\n- The absence of **focal consolidation or crackles** makes superimposed bacterial pneumonia less likely at this time, narrowing the differential back to the primary RSV diagnosis",
+          "cat": "clinical"
+        },
+        {
+          "id": "abdominal-exam",
+          "label": "Abdominal Exam",
+          "bad": false,
+          "why": "A soft, non-distended abdomen rules out gastric air-distension as a HFNC complication.\n\n- Infants on **high-flow nasal cannula** can swallow significant volumes of delivered air, causing **gastric distension** that mechanically splints the diaphragm and worsens respiratory mechanics\n- A **non-distended, soft abdomen** confirms this complication has not occurred and that diaphragmatic excursion is not being mechanically compromised by abdominal contents\n- Absence of **hepatomegaly** makes congestive heart failure from structural heart disease unlikely as a primary driver\n- This is a genuinely normal and **reassuring finding** in this context — no action required based on abdominal exam alone",
+          "cat": "clinical"
+        },
+        {
+          "id": "vbg-ph",
+          "label": "pH",
+          "bad": true,
+          "why": "A venous blood gas pH of 7.22 indicates combined respiratory acidosis with a metabolic component.\n\n- Normal blood pH is **7.35–7.45**; a pH of 7.22 represents significant acidemia\n- In RSV bronchiolitis, **CO2 retention** from hypoventilation (inadequate minute ventilation against high airway resistance) drives **respiratory acidosis** — this is the primary mechanism\n- The associated **bicarbonate depletion** reflects a degree of metabolic acidosis from tissue hypoxia and hypoperfusion\n- A **pH <7.25 on venous gas** in an infant on maximum HFNC is a strong criterion for escalation to CPAP/BiPAP or intubation",
+          "cat": "lab"
+        },
+        {
+          "id": "vbg-pco2",
+          "label": "pCO2",
+          "bad": true,
+          "why": "A venous pCO2 of 68 mmHg demonstrates significant CO2 retention (hypercapnia) and ventilatory failure.\n\n- Normal venous pCO2 is approximately **41–51 mmHg** (venous adds ~5 mmHg to arterial values)\n- A pCO2 of 68 mmHg confirms **alveolar hypoventilation** — the infant cannot generate adequate minute ventilation to clear CO2 despite tachypnea\n- This results from **dynamic hyperinflation and auto-PEEP**: tachypnea shortens expiratory time, gas is trapped, dead-space fraction rises, and net alveolar ventilation falls despite high respiratory rate\n- **Rising pCO2 on HFNC** is the single strongest predictor of HFNC failure and need for escalation or intubation",
+          "cat": "lab"
+        },
+        {
+          "id": "vbg-hco3",
+          "label": "HCO3",
+          "bad": true,
+          "why": "A bicarbonate of 17 mEq/L is below the normal range and indicates a concurrent metabolic acidosis.\n\n- Normal bicarbonate is **22–26 mEq/L**; 17 mEq/L represents bicarbonate depletion\n- In the setting of respiratory acidosis (pH 7.22, pCO2 68), a bicarbonate of **only 17** means there is NOT adequate metabolic compensation — instead, metabolic acidosis is adding to the pH drop\n- The metabolic component arises from **tissue hypoxia** (SpO2 88%), which drives anaerobic metabolism and lactic acid production\n- Internal consistency check: pH 7.22 with pCO2 68 and HCO3 17 is consistent — **Henderson-Hasselbalch** confirms combined respiratory + metabolic acidosis",
+          "cat": "lab"
+        },
+        {
+          "id": "lactate",
+          "label": "Lactate",
+          "bad": true,
+          "why": "A lactate of 3.8 mmol/L confirms anaerobic metabolism from tissue hypoxia.\n\n- Normal lactate is **<2.0 mmol/L**; values above 2 indicate anaerobic metabolism\n- A lactate of **3.8 mmol/L** in this infant reflects tissue oxygen debt from SpO2 88% — cells have shifted to anaerobic glycolysis because oxygen delivery is insufficient for aerobic metabolism\n- This also explains the **bicarbonate depletion** (HCO3 17): lactic acid is consuming bicarbonate buffer reserves\n- **Trending lactate** during resuscitation is a key endpoint — a falling lactate confirms that respiratory support escalation is restoring oxygen delivery",
+          "cat": "lab"
+        },
+        {
+          "id": "glucose",
+          "label": "Glucose",
+          "bad": false,
+          "why": "A blood glucose of 88 mg/dL is within the normal range for an infant.\n\n- Normal glucose in infants is **70–110 mg/dL**; 88 mg/dL is reassuringly normal\n- Hypoglycemia is a risk in acutely ill infants who have had decreased oral intake, but is not present here\n- This finding does **not require intervention** and should not distract from the primary respiratory emergency\n- Continued monitoring is prudent given NPO status, but this is not an actionable concern at the present time",
+          "cat": "lab"
+        },
+        {
+          "id": "wbc",
+          "label": "WBC",
+          "bad": false,
+          "why": "A WBC of 11.8 K/µL is within normal limits and does not suggest bacterial superinfection.\n\n- Normal WBC in an 8-month-old is **6–15 K/µL**; 11.8 is well within range\n- RSV bronchiolitis is a **viral illness** — leukocytosis with a left shift would raise concern for bacterial superinfection, but this count is reassuringly normal\n- UCSF and AAP guidelines note that **routine CBC is not indicated** for uncomplicated bronchiolitis; when obtained, a normal WBC supports viral-only etiology\n- This value should **not be flagged** — it is a reassuring distractor for learners who might over-interpret any lab in a sick infant",
+          "cat": "lab"
+        },
+        {
+          "id": "rsv-antigen",
+          "label": "RSV Antigen",
+          "bad": true,
+          "why": "A positive RSV antigen confirms RSV as the causative pathogen of this bronchiolitis episode.\n\n- **RSV (Respiratory Syncytial Virus)** is the most common cause of bronchiolitis and accounts for 60–80% of cases in infants under 12 months\n- The positive antigen result confirms that this is a **viral, not bacterial** lower respiratory tract infection — antibiotics are not indicated\n- RSV primarily infects **bronchiolar epithelium**, triggering a cascade of inflammation, mucus hypersecretion, cell sloughing, and smooth-muscle bronchoconstriction that narrows small-airway lumens\n- This result is flagworthy because it **defines the diagnosis** and guides the treatment pathway: supportive care, suction, respiratory support escalation — not antibiotics, not bronchodilators",
+          "cat": "lab"
+        },
+        {
+          "id": "hemoglobin",
+          "label": "Hemoglobin",
+          "bad": false,
+          "why": "A hemoglobin of 10.8 g/dL is within the normal range for an 8-month-old.\n\n- Infants 6–12 months old have a **physiologic nadir of hemoglobin** around 9.5–12 g/dL; 10.8 g/dL is within acceptable range\n- While lower hemoglobin reduces oxygen-carrying capacity, a value of **10.8 g/dL** does not independently require transfusion\n- The primary oxygen-delivery problem in this patient is **ventilatory failure and hypoxemia**, not anemia — correcting the respiratory failure will restore oxygen delivery more effectively than transfusion\n- This finding is **not actionable** and should not distract from the respiratory emergency",
+          "cat": "lab"
+        }
+      ],
+      "labs": [
+        {
+          "name": "pH",
+          "value": "7.22",
+          "unit": "",
+          "ref": "7.35–7.45",
+          "critical": true,
+          "why": "pH 7.22 represents significant acidemia from combined respiratory and metabolic acidosis.\n\n- **Respiratory component**: CO2 retention from alveolar hypoventilation drives pH down\n- **Metabolic component**: tissue hypoxia generates lactic acid, consuming bicarbonate buffer\n- pH <7.25 in an infant on maximum HFNC is a **direct escalation criterion**\n- Internal consistency: pH 7.22 is consistent with pCO2 68 and HCO3 17 by **Henderson-Hasselbalch**"
+        },
+        {
+          "name": "pCO2",
+          "value": "68",
+          "unit": "mmHg",
+          "ref": "41–51 mmHg",
+          "critical": true,
+          "why": "pCO2 68 mmHg confirms ventilatory failure with CO2 retention despite tachypnea.\n\n- **Dynamic hyperinflation** from rapid breathing shortens expiration, trapping gas and increasing dead-space fraction\n- Net **alveolar minute ventilation** falls despite elevated respiratory rate — the shallow, rapid breaths are not efficiently clearing CO2\n- **Rising pCO2** on maximum HFNC is the strongest single predictor of HFNC failure\n- Escalation to CPAP/BiPAP or intubation is required to restore adequate alveolar ventilation"
+        },
+        {
+          "name": "HCO3",
+          "value": "17",
+          "unit": "mEq/L",
+          "ref": "22–26 mEq/L",
+          "critical": true,
+          "why": "Bicarbonate of 17 mEq/L indicates concurrent metabolic acidosis, not compensatory.\n\n- Normal metabolic **compensation** for a primary respiratory acidosis would produce an elevated bicarbonate — here bicarbonate is LOW, confirming a **second independent acidosis**\n- Metabolic acidosis arises from **lactic acid** generated by anaerobic metabolism in hypoxic tissues (lactate 3.8 mmol/L)\n- HCO3 17 is consistent with pH 7.22 and pCO2 68 — the lab values are internally coherent\n- Bicarbonate will not normalize until both **CO2 retention** and **tissue hypoxia** are corrected"
+        },
+        {
+          "name": "Lactate",
+          "value": "3.8",
+          "unit": "mmol/L",
+          "ref": "0.5–2.0 mmol/L",
+          "critical": true,
+          "why": "Lactate 3.8 mmol/L confirms tissue oxygen debt and anaerobic metabolism.\n\n- **Lactate >2.0 mmol/L** indicates cells have shifted to anaerobic glycolysis because oxygen delivery is insufficient\n- The primary driver here is **hypoxemia** (SpO2 88%) combined with possible low cardiac output from the physiologic stress of severe respiratory distress\n- Elevated lactate explains **bicarbonate consumption** (HCO3 17): lactic acid is being buffered by the bicarbonate system\n- A **falling lactate** during treatment is a key marker that oxygen delivery is being restored"
+        },
+        {
+          "name": "Glucose",
+          "value": "88",
+          "unit": "mg/dL",
+          "ref": "70–110 mg/dL",
+          "critical": false
+        },
+        {
+          "name": "WBC",
+          "value": "11.8",
+          "unit": "K/µL",
+          "ref": "6–15 K/µL",
+          "critical": false
+        },
+        {
+          "name": "RSV Antigen",
+          "value": "Positive",
+          "unit": "",
+          "ref": "Negative",
+          "critical": true,
+          "why": "Positive RSV antigen confirms the viral etiology and directs supportive management.\n\n- **RSV** is responsible for 60–80% of bronchiolitis cases in infants under 12 months\n- A positive antigen confirms **viral bronchiolitis** as the diagnosis, making antibiotics unnecessary\n- RSV causes **bronchiolar epithelial necrosis**, triggering inflammation, mucus plugging, and smooth-muscle bronchoconstriction\n- Treatment is entirely **supportive**: airway clearance, respiratory support escalation, hydration — no specific antiviral therapy available for routine use"
+        },
+        {
+          "name": "Hemoglobin",
+          "value": "10.8",
+          "unit": "g/dL",
+          "ref": "9.5–13.5 g/dL",
+          "critical": false
+        }
+      ],
+      "tools": null,
+      "meds": null,
+      "actions": null
+    },
+    {
+      "id": "escalation",
+      "name": "Escalation",
+      "narrative": "Despite being on HFNC at maximum settings (16 L/min, 60% FiO2), Mira continues to deteriorate. She is exhausted, grunting with every breath, and her SpO2 has fallen to 88%. Venous blood gas shows pH 7.22, pCO2 68 mmHg, and HCO3 17 mEq/L — she is in combined respiratory and metabolic acidosis. Her tachycardia of 188 bpm and RR of 72 breaths/min have not responded to HFNC. She is moving toward respiratory arrest. The PICU attending has been notified. The pediatric anesthesia team is en route for airway backup. The bedside nurse has confirmed patent IV access in the right dorsal hand. The patient is currently on continuous cardiorespiratory monitoring with waveform capnography available. A bulb syringe and nasal saline are at the bedside. Your escalation decisions must be made now.",
+      "vitals": {
+        "hr": 188,
+        "rr": 72,
+        "sbp": 82,
+        "dbp": 52,
+        "spo2": 88,
+        "temp": 38.6,
+        "cap": 3
+      },
+      "signs": [
+        {
+          "label": "Respiratory Effort",
+          "finding": "Increasing subcostal, intercostal, and suprasternal retractions; paradoxical abdominal breathing (seesaw pattern) developing; grunting with every breath",
+          "pos": "body",
+          "sys": "respiratory",
+          "why": "The seesaw pattern indicates diaphragmatic-thoracic dyscoordination from near-exhaustion of respiratory muscles.\n\n- **Paradoxical breathing** (chest moves in while abdomen moves out during inspiration) occurs when accessory muscles are overwhelmed and thoracic chest wall is being pulled inward by severe negative intrathoracic pressure\n- This pattern signals **imminent respiratory muscle fatigue** — the infant can no longer sustain coordinated respiratory effort\n- Seesaw breathing is a **pre-arrest pattern** in infants and should be treated with the same urgency as apnea\n- Immediate **non-invasive or invasive ventilatory support** is required to rest the respiratory muscles"
+        },
+        {
+          "label": "Nasal Secretions",
+          "finding": "Thick, copious clear nasal secretions visible around HFNC prongs; audible snoring quality to inspiratory breath sounds",
+          "pos": "face",
+          "sys": "respiratory",
+          "why": "Nasal secretions in infants are a primary cause of increased upper-airway resistance and HFNC failure.\n\n- Infants are **obligate nasal breathers** — nasal secretion obstruction dramatically increases inspiratory resistance\n- Thick secretions impair HFNC efficacy by **occluding prong-to-airway interface**, reducing delivered flow and FiO2 at the level of the nasopharynx\n- **Gentle nasopharyngeal suction** prior to CPAP or intubation reduces airway resistance and can produce brief but meaningful improvement in SpO2 and work of breathing\n- Suction should be performed **before mask or CPAP application** to prevent pushing secretions deeper into the airway"
+        },
+        {
+          "label": "Neurological State",
+          "finding": "Eyes half-open, no eye contact or response to voice; responds to sternal rub with weak grimace only; tone decreased",
+          "pos": "head",
+          "sys": "neurological",
+          "why": "Deteriorating neurological state indicates progressive cerebral hypoxia and hypercapnia.\n\n- **Hypercapnia** (pCO2 68 mmHg) causes cerebral vasodilation and CO2 narcosis, further depressing the level of consciousness\n- **Hypoxemia** (SpO2 88%) impairs neuronal ATP production, reducing cortical activity\n- Decreased tone in infants is a late pre-arrest sign reflecting global **CNS depression** from combined respiratory and metabolic acidosis\n- At this stage the infant **cannot protect her airway** and loss of airway reflexes followed by apnea is imminent"
+        },
+        {
+          "label": "Chest Wall Motion",
+          "finding": "Visually reduced bilateral chest rise with each breath compared to admission; hyperinflated anteroposterior chest diameter noted",
+          "pos": "body",
+          "sys": "respiratory",
+          "why": "Reduced chest rise despite maximal effort indicates worsening gas trapping and dynamic hyperinflation.\n\n- **Dynamic hyperinflation** from incomplete exhalation causes progressive air trapping, increasing functional residual capacity beyond normal\n- The lungs are already **near total lung capacity** at end-expiration, leaving less room for tidal volume on each inspiration despite extreme respiratory effort\n- **Hyperinflated AP diameter** (barrel chest) is a visual correlate of air trapping — ribs and sternum are pushed outward by chronically elevated intrathoracic volume\n- Reduced chest excursion despite massive effort predicts that **tidal volume is critically low**, driving the hypercapnia and V/Q mismatch",
+          "cat": "respiratory"
+        },
+        {
+          "label": "Heart Sounds",
+          "finding": "Tachycardic at 188 bpm; regular rhythm; no murmur; no gallop",
+          "pos": "body",
+          "sys": "cardiovascular",
+          "why": "Tachycardia is the clinically significant element; rhythm and absence of murmur are reassuring.\n\n- **Heart rate 188 bpm** remains above normal range (80–160 bpm) for this age, driven by hypoxemia, sympathetic activation, and fever\n- **Regular rhythm** without murmur or gallop rules out arrhythmia and structural heart disease as contributors\n- The absence of a **new murmur** is important — severe pulmonary hypertension from hypoxemia could cause a tricuspid regurgitation murmur; its absence is reassuring\n- The tachycardia alone is flagworthy; the absence of rhythm abnormality narrows the differential and guides management toward **respiratory cause**"
+        },
+        {
+          "label": "IV Access",
+          "finding": "24-gauge peripheral IV in right dorsal hand; flushes without resistance; no swelling or infiltration at site",
+          "pos": "body",
+          "sys": "vascular",
+          "why": "Patent IV access is critically important for medication delivery during respiratory escalation.\n\n- A **24-gauge IV** is the smallest acceptable gauge for emergent medication administration in an infant; it is adequate for bolus medications but has high resistance for rapid fluid administration\n- A **patent, non-infiltrated IV** confirms that emergency medications (sedatives, paralytics, vasopressors if needed) can be administered without delay\n- **Confirmation of IV patency** before escalation prevents the worst-case scenario: attempting intubation induction without working access\n- If IV access were lost, **IO placement** (tibial intraosseous) should be established immediately; the ivKit tool covers this contingency"
+        }
+      ],
+      "assessItems": [],
+      "labs": [
+        {
+          "name": "pH",
+          "value": "7.22",
+          "unit": "",
+          "ref": "7.35–7.45",
+          "critical": true,
+          "why": "pH 7.22 confirms ongoing combined acidosis requiring immediate respiratory support escalation."
+        },
+        {
+          "name": "pCO2",
+          "value": "68",
+          "unit": "mmHg",
+          "ref": "41–51 mmHg",
+          "critical": true,
+          "why": "pCO2 68 mmHg demonstrates ventilatory failure — CO2 retention is worsening on maximum HFNC."
+        },
+        {
+          "name": "HCO3",
+          "value": "17",
+          "unit": "mEq/L",
+          "ref": "22–26 mEq/L",
+          "critical": true,
+          "why": "Bicarbonate 17 mEq/L confirms concurrent metabolic acidosis from tissue hypoxia."
+        },
+        {
+          "name": "Lactate",
+          "value": "3.8",
+          "unit": "mmol/L",
+          "ref": "0.5–2.0 mmol/L",
+          "critical": true,
+          "why": "Lactate 3.8 mmol/L confirms tissue oxygen debt; trending this value guides resuscitation adequacy."
+        },
+        {
+          "name": "Glucose",
+          "value": "88",
+          "unit": "mg/dL",
+          "ref": "70–110 mg/dL",
+          "critical": false
+        }
+      ],
+      "tools": [
+        "suction",
+        "bvm",
+        "bvmReady",
+        "ivKit",
+        "defib",
+        "stethoscope"
+      ],
+      "meds": [
+        "racemicEpi",
+        "albuterol",
+        "acetaminophen",
+        "dextrose",
+        "epinephrine",
+        "nsBolus"
+      ],
+      "actions": {
+        "tools": {
+          "suction": {
+            "label": "Perform Nasopharyngeal Suction",
+            "ok": true,
+            "priority": 1,
+            "fb": "You gently suction Mira's nares with a bulb syringe, clearing thick mucopurulent secretions. Her SpO2 briefly improves to 91% and the snoring quality to her breath sounds resolves. Secretion clearance reduces upper-airway resistance and temporarily improves HFNC efficacy, but her work of breathing and blood gas remain critical — this buys a minute, not a solution."
+          },
+          "bvmReady": {
+            "label": "Bring Bag-Mask to Bedside",
+            "ok": true,
+            "priority": 2,
+            "fb": "Correct preparatory action. A properly sized BVM (size 1 infant mask) is staged at the bedside and connected to wall oxygen at 10 L/min. If CPAP fails or the patient apneas, the team can immediately transition to positive-pressure ventilation. Preparation before deterioration prevents the deadly 30-second scramble for equipment during a code."
+          },
+          "ivKit": {
+            "label": "Confirm IV/IO Access",
+            "ok": true,
+            "priority": 3,
+            "fb": "You confirm the 24-gauge peripheral IV in the right dorsal hand is patent and flushes freely. Wristband is confirmed. Access is adequate for emergency medications. If IV access were lost, tibial intraosseous placement would be immediately required before any procedural sedation or intubation could proceed safely."
+          },
+          "stethoscope": {
+            "label": "Auscultate Lung Fields",
+            "ok": true,
+            "priority": 4,
+            "fb": "Repeat auscultation confirms diffuse bilateral expiratory wheeze with globally reduced air entry. Breath sounds remain equal bilaterally — no new unilateral silence, no tension pneumothorax pattern. The trachea is midline. This assessment confirms the clinical picture is consistent with progressive RSV bronchiolitis without a mechanical airway complication requiring needle decompression."
+          },
+          "bvm": {
+            "label": "Begin Bag-Mask Ventilation",
+            "ok": false,
+            "fb": "Not the right first move. Mira still has a respiratory drive — she is breathing 72 times per minute. Jumping directly to BVM ventilation before attempting CPAP/BiPAP escalation bypasses a critical intermediate step. BVM is reserved for apnea or agonal breathing. Initiating mask ventilation in a conscious, fighting infant also risks vomiting, gastric distension, and aspiration. Stage the BVM at the bedside; escalate to CPAP/BiPAP first."
+          },
+          "defib": {
+            "label": "Apply Defibrillator Pads",
+            "ok": false,
+            "fb": "The cardiac monitor shows sinus tachycardia at 188 bpm — no shockable rhythm is present. Placing defibrillator pads is not indicated and wastes precious time that should be spent escalating respiratory support. Please put down the paddles and pick up the suction catheter."
+          },
+          "needleDecomp": {
+            "label": "Needle Decompression",
+            "ok": false,
+            "fb": "Needle decompression is not indicated here. Breath sounds are equal bilaterally with a midline trachea — there is no clinical evidence of tension pneumothorax. The diffuse bilateral wheeze and hyperinflated chest are consistent with RSV air trapping, not unilateral pleural air. Performing needle decompression without a tension pneumothorax will cause a iatrogenic pneumothorax and significantly worsen the patient's respiratory status."
+          }
+        },
+        "meds": {
+          "racemicEpi": {
+            "label": "Racemic Epinephrine 0.05 mL/kg nebulized",
+            "ok": false,
+            "fb": "Racemic epinephrine is not indicated for RSV bronchiolitis. Its primary mechanism — alpha-1-mediated mucosal vasoconstriction — reduces subglottic edema in croup, not the lower-airway inflammation and mucus plugging of bronchiolitis. It provides no benefit in bronchiolitis and risks tachycardia, hypertension, and a rebound effect. Current AAP and UCSF bronchiolitis guidelines explicitly recommend against its use."
+          },
+          "albuterol": {
+            "label": "Albuterol 0.15 mg/kg (min 2.5 mg) nebulized",
+            "ok": false,
+            "fb": "Albuterol is not effective in RSV bronchiolitis and is not recommended. Bronchiolitis causes airway obstruction via viral inflammation, mucus plugging, and cell debris — not smooth-muscle bronchospasm that responds to beta-2 agonism. Multiple RCTs and the AAP Clinical Practice Guideline demonstrate no reduction in hospitalization duration, ICU admission, or intubation rate with albuterol in bronchiolitis. It should not be given."
+          },
+          "acetaminophen": {
+            "label": "Acetaminophen 15 mg/kg IV (120 mg)",
+            "ok": true,
+            "priority": 2,
+            "fb": "Correct. Acetaminophen 15 mg/kg IV (120 mg for 8 kg) is administered for Mira's fever of 38.6°C. Reducing fever decreases metabolic oxygen demand and CO2 production, lowering the respiratory load. While this will not resolve the HFNC failure, it is a clinically sound supportive measure. IV route is preferred given NPO status and the risk of aspiration with oral medications."
+          },
+          "dextrose": {
+            "label": "D10W 2 mL/kg (16 mL) IV push",
+            "ok": false,
+            "fb": "Dextrose is not indicated here. Mira's blood glucose is 88 mg/dL — firmly within normal range. Administering unnecessary glucose risks hyperglycemia, which worsens outcomes in critically ill pediatric patients by impairing neutrophil function and increasing cerebral injury risk. Reserve dextrose for documented or symptomatic hypoglycemia (glucose <50 mg/dL in infants)."
+          },
+          "epinephrine": {
+            "label": "Epinephrine 0.01 mg/kg (0.08 mg) IV/IO for arrest",
+            "ok": false,
+            "fb": "Epinephrine is a cardiac arrest and anaphylaxis medication. Mira currently has a pulse and a blood pressure — she is NOT in cardiac arrest. Administering epinephrine IV in a non-arrest infant with HR 188 bpm risks inducing ventricular fibrillation or dangerous supraventricular tachycardia. Focus on escalating her respiratory support to prevent arrest rather than treating a condition she does not yet have."
+          },
+          "nsBolus": {
+            "label": "Normal Saline 20 mL/kg (160 mL) IV bolus",
+            "ok": false,
+            "fb": "A full 20 mL/kg NS bolus is not indicated and potentially harmful. Mira's SBP is 82 mmHg — within normal range for age. She does not have hemodynamic shock requiring fluid resuscitation. In severe bronchiolitis, excess IV fluid can worsen pulmonary edema and increase airway secretions. Current guidelines support maintenance IV fluids (given NPO status) at approximately 100 mL/kg/day for the first 10 kg — not an emergency bolus."
+          }
+        }
+      }
+    }
+  ],
+  "curveball": null,
+  "reassessment": {
+    "narrative": "Following nasopharyngeal suction, fever management with IV acetaminophen, and immediate escalation to CPAP at 6 cmH2O with 60% FiO2 (initiated by the PICU team after your preparatory actions), Mira shows meaningful clinical improvement. Her SpO2 rises from 88% to 94% within 10 minutes of CPAP initiation. The audible grunting diminishes as CPAP provides the positive end-expiratory pressure she was generating manually with her glottis. Retractions decrease from severe to mild. Her tachycardia improves from 188 to 158 bpm and her respiratory rate slows from 72 to 52 breaths/min as respiratory muscle fatigue is relieved. She begins to open her eyes and track faces again — a reassuring return of cortical function as hypoxemia and hypercapnia begin to correct.",
+    "vitals": {
+      "hr": 158,
+      "rr": 52,
+      "sbp": 86,
+      "dbp": 54,
+      "spo2": 94,
+      "temp": 37.9,
+      "cap": 2
+    },
+    "signs": [
+      {
+        "label": "Retractions",
+        "finding": "Mild subcostal retractions only; suprasternal tug and intercostal retractions resolved",
+        "pos": "body",
+        "sys": "respiratory"
+      },
+      {
+        "label": "Grunting",
+        "finding": "Grunting resolved; expiratory sounds quiet on auscultation",
+        "pos": "face",
+        "sys": "respiratory"
+      },
+      {
+        "label": "Mental Status",
+        "finding": "Eyes open, tracks faces; responds to voice; tone improved; consolable with voice",
+        "pos": "head",
+        "sys": "neurological"
+      },
+      {
+        "label": "Skin & Perfusion",
+        "finding": "Pallor improved; mottling resolved; capillary refill 2 seconds centrally",
+        "pos": "body",
+        "sys": "cardiovascular"
+      }
+    ]
+  },
+  "stabilizationSummary": "Nasopharyngeal suction cleared thick secretions that were occluding the HFNC interface, reducing upper-airway resistance and temporarily improving SpO2 — a necessary preparatory step before CPAP mask application. BVM staged at the bedside ensured the team was ready for immediate positive-pressure ventilation if the patient apnead during the transition. Acetaminophen reduced fever-driven metabolic oxygen demand and CO2 production, lowering the respiratory burden and contributing to the modest improvement in tachycardia.",
+  "debrief": {
+    "summary": "Mira presented with RSV bronchiolitis progressing to HFNC failure, evidenced by combined respiratory and metabolic acidosis (pH 7.22, pCO2 68 mmHg), refractory hypoxemia (SpO2 88% on 60% FiO2), and pre-arrest neurological signs. The correct clinical sequence was: (1) recognize HFNC failure using the failure triad of persistent tachypnea, rising pCO2, and declining mental status; (2) clear secretions to optimize the airway before applying a face mask; (3) stage BVM at bedside as immediate backup; (4) confirm IV access before any procedural escalation; and (5) manage fever as a modifiable contributor to respiratory load. Escalation to CPAP — not bronchodilators, not albuterol, not epinephrine — is the evidence-supported next step in HFNC-failing bronchiolitis.",
+    "explainers": [
+      {
+        "title": "Why HFNC Fails in RSV Bronchiolitis",
+        "content": "HFNC provides flow-based oxygen delivery and modest nasopharyngeal washout but cannot generate reliable continuous positive airway pressure sufficient to stent open severely obstructed small airways.\n\n- **RSV bronchiolitis** causes bronchial inflammation, mucus plugging, and smooth-muscle bronchoconstriction that dramatically increase small-airway resistance\n- **Air trapping and dynamic hyperinflation** develop when tachypnea shortens expiratory time — incomplete exhalation generates auto-PEEP and progressively reduces tidal volume\n- **HFNC failure criteria** include: FiO2 requirement >50%, worsening tachypnea, rising pCO2, declining mental status, or SpO2 persistently <90%\n- **CPAP** applies a fixed positive end-expiratory pressure that counteracts auto-PEEP, stents collapsed distal airways open, and reduces the work of breathing — mechanisms HFNC cannot replicate\n- **Intubation** is reserved for CPAP/BiPAP failure, apnea, or inability to protect the airway",
+        "tldr": "HFNC cannot generate sufficient PEEP to overcome severe bronchiolitis-related airway obstruction; CPAP is the evidence-based next step when HFNC fails."
+      },
+      {
+        "title": "Why Albuterol and Racemic Epinephrine Are Contraindicated",
+        "content": "RSV bronchiolitis is not bronchospasm — it is airway obstruction from inflammation and mucus, making bronchodilators ineffective and potentially harmful.\n\n- **Albuterol** (beta-2 agonist) relaxes bronchial smooth muscle — effective in asthma where bronchoconstriction is the primary mechanism, ineffective when obstruction is from **mucus, debris, and edema**\n- Multiple **RCTs and meta-analyses** show albuterol does not reduce hospitalization, ICU admission, or intubation rates in bronchiolitis\n- **Racemic epinephrine** reduces subglottic mucosal edema via alpha-1 vasoconstriction — its indication is **croup** (laryngotracheobronchitis), not bronchiolitis\n- Both medications add **tachycardia** in an already tachycardic infant, increasing myocardial oxygen demand\n- **AAP Clinical Practice Guideline** explicitly recommends against routine bronchodilator use in bronchiolitis",
+        "tldr": "Albuterol and racemic epinephrine treat bronchoconstriction and croup respectively — neither addresses the mucus-plugging and inflammation mechanism of RSV bronchiolitis."
+      },
+      {
+        "title": "Reading the Blood Gas: Combined Acidosis Pattern",
+        "content": "The venous blood gas in this scenario shows a combined (mixed) respiratory and metabolic acidosis — a pattern that changes management compared to either acidosis alone.\n\n- **pH 7.22**: significantly acidemic (normal 7.35–7.45); the magnitude exceeds what either acidosis alone would cause\n- **pCO2 68 mmHg**: primary respiratory acidosis from alveolar hypoventilation — CO2 cannot be cleared despite tachypnea because dynamic hyperinflation reduces effective alveolar ventilation\n- **HCO3 17 mEq/L**: below normal (22–26) — confirms this is NOT metabolic compensation (which would raise HCO3); instead it is a **second independent acidosis**\n- **Metabolic component** arises from **lactic acidosis** (lactate 3.8 mmol/L) driven by tissue hypoxia — lactic acid consumes bicarbonate buffer\n- **Clinical implication**: the metabolic acidosis will not resolve with bicarbonate infusion alone — it resolves only when **oxygen delivery is restored** by fixing the respiratory failure\n- **Henderson-Hasselbalch consistency check**: pH 7.22 with pCO2 68 and HCO3 17 is internally coherent — do this check mentally for every blood gas",
+        "tldr": "pH 7.22, pCO2 68, HCO3 17 = combined respiratory + metabolic acidosis from CO2 retention AND tissue hypoxia — both resolve only when respiratory failure is corrected."
+      }
+    ]
+  }
+};

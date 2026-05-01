@@ -93,6 +93,13 @@ export function ActionPanel(props){
   };
   function tbg(u,o){if(!u)return"rgba(255,255,255,0.05)";return o?"rgba(0,184,148,0.12)":"rgba(255,165,0,0.1)";}
   function tbd(u,o){if(!u)return"2px solid rgba(255,255,255,0.08)";return o?"2px solid rgba(0,184,148,0.35)":"2px solid rgba(255,165,0,0.25)";}
+  // Phase-4b-hotfix: registry lookup for the open popup, hoisted to
+  // component scope so the popup's JSX header (label + optional custom
+  // description) can reference it. Was previously trapped inside
+  // popMarkItem's scope; the JSX referenced `meta` undeclared and
+  // threw ReferenceError on every Phase 2 tile click.
+  var popActionEntry=pop?(pop.ty==="t"?(actions&&actions.tools?actions.tools[pop.id]:null):(actions&&actions.meds?actions.meds[pop.id]:null)):null;
+  var meta=pop?(pop.ty==="t"?lookupTool(pop.id,popActionEntry):lookupMed(pop.id,popActionEntry)):null;
   return(
     <div style={{marginTop:16}}>
       {/* Phase-2.6.3 change 7: action-tile grid mirrors the assess-tile

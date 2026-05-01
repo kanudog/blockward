@@ -1,47 +1,7 @@
-// Built-in tools, meds, and scenarios. Extracted verbatim from App.jsx in phase-2 checkpoint 1.
-
-export var TOOLS = {
-  glucometer:{id:"glucometer",label:"Check Glucose",icon:"glucometer",desc:"Heel stick / fingerstick POC glucose"},
-  stethoscope:{id:"stethoscope",label:"Auscultate",icon:"stethoscope",desc:"Listen to heart and lung sounds"},
-  bvm:{id:"bvm",label:"Begin Bag-Mask Ventilation",icon:"bvm",desc:"Active manual ventilation via BVM at age-appropriate rate"},
-  bvmReady:{id:"bvmReady",label:"Bring Bag-Mask to Bedside",icon:"bvm",desc:"Preparatory: have BVM ready, do not yet ventilate"},
-  suction:{id:"suction",label:"Suction Airway",icon:"suction",desc:"Yankauer oropharyngeal suction"},
-  o2mask:{id:"o2mask",label:"Apply O2 15L NRB",icon:"o2mask",desc:"Non-rebreather mask at 15 L/min"},
-  ivKit:{id:"ivKit",label:"Establish or Confirm IV/IO Placement",icon:"ivKit",desc:"Peripheral IV or intraosseous access; confirm patency if already placed"},
-  defib:{id:"defib",label:"Apply Defib Pads",icon:"defib",desc:"Defibrillator pads for monitoring or shock"},
-  thermometer:{id:"thermometer",label:"Recheck Temp",icon:"thermometer",desc:"Recheck core temperature"},
-  capRefill:{id:"capRefill",label:"Check Cap Refill",icon:"capRefill",desc:"Press nail bed 5 sec, count refill time"},
-  needleDecomp:{id:"needleDecomp",label:"Needle Decompress",icon:"needleDecomp",desc:"14-16g angiocath at 2nd ICS midclavicular"},
-  pupilCheck:{id:"pupilCheck",label:"Check Pupils",icon:"pupilCheck",desc:"Assess size, reactivity, symmetry"},
-  epiPen:{id:"epiPen",label:"Give IM EpiPen",icon:"epiPen",desc:"IM epinephrine auto-injector to lateral thigh"},
-  peakFlow:{id:"peakFlow",label:"Peak Flow Test",icon:"peakFlow",desc:"Measure peak expiratory flow rate"},
-};
-export var MEDS = {
-  lorazepam:{id:"lorazepam",label:"Give Lorazepam IV",color:"#6c5ce7",medType:"push",desc:"0.1 mg/kg IV push over 2 min"},
-  phenytoin:{id:"phenytoin",label:"Load Fosphenytoin IV",color:"#e17055",medType:"iv",desc:"20 PE/kg IV over 20 min"},
-  epinephrine:{id:"epinephrine",label:"Give Epinephrine",color:"#d63031",medType:"push",desc:"0.01 mg/kg IV or 0.01 mg/kg IM"},
-  dextrose:{id:"dextrose",label:"Push D10W IV",color:"#fdcb6e",medType:"push",desc:"2-4 mL/kg IV push"},
-  nsBolus:{id:"nsBolus",label:"Bolus NS 20mL/kg IV",color:"#74b9ff",medType:"iv",desc:"0.9% NaCl, push-pull technique"},
-  ceftriaxone:{id:"ceftriaxone",label:"Give Ceftriaxone IV",color:"#00b894",medType:"iv",desc:"50 mg/kg IV over 30 min"},
-  acetaminophen:{id:"acetaminophen",label:"Give Tylenol PO/PR",color:"#ffeaa7",medType:"oral",desc:"15 mg/kg PO or PR"},
-  albuterol:{id:"albuterol",label:"Neb Albuterol",color:"#55efc4",medType:"neb",desc:"2.5-5 mg via continuous neb"},
-  atropine:{id:"atropine",label:"Give Atropine IV",color:"#fab1a0",medType:"push",desc:"0.02 mg/kg IV push (min 0.1mg)"},
-  adenosine:{id:"adenosine",label:"Push Adenosine IV",color:"#ff7675",medType:"push",desc:"0.1 mg/kg rapid IV push with flush"},
-  hypertonic:{id:"hypertonic",label:"Give 3% Saline IV",color:"#0984e3",medType:"iv",desc:"5 mL/kg IV over 10-20 min"},
-  mannitolMed:{id:"mannitolMed",label:"Give Mannitol IV",color:"#636e72",medType:"iv",desc:"0.5-1 g/kg IV over 15-20 min"},
-  levetiracetam:{id:"levetiracetam",label:"Load Keppra IV",color:"#b2bec3",medType:"iv",desc:"20 mg/kg IV over 15 min"},
-  diphenhydramine:{id:"diphenhydramine",label:"Give Benadryl IV/IM",color:"#fd79a8",medType:"push",desc:"1 mg/kg IV or IM"},
-  methylpred:{id:"methylpred",label:"Give Solumedrol IV",color:"#a29bfe",medType:"push",desc:"2 mg/kg IV push"},
-  famotidine:{id:"famotidine",label:"Give Famotidine IV",color:"#81ecec",medType:"push",desc:"0.25 mg/kg IV over 2 min"},
-  racemicEpi:{id:"racemicEpi",label:"Neb Racemic Epi",color:"#e17055",medType:"neb",desc:"0.5 mL of 2.25% via neb"},
-  // Phase-2.6.3 change 2: trauma / massive transfusion meds.
-  prbcWarmed:{id:"prbcWarmed",label:"Give Warmed pRBCs",color:"#c0392b",medType:"iv",desc:"10-15 mL/kg warmed packed red blood cells per MTP protocol"},
-  ffp:{id:"ffp",label:"Give FFP",color:"#e67e22",medType:"iv",desc:"10-15 mL/kg fresh frozen plasma per MTP ratio (1:1:1 with pRBC and platelets)"},
-  platelets:{id:"platelets",label:"Give Platelets",color:"#d35400",medType:"iv",desc:"10 mL/kg platelets per MTP ratio"},
-  calciumChloride:{id:"calciumChloride",label:"Push Calcium Chloride IV",color:"#00cec9",medType:"push",desc:"10-20 mg/kg IV slow push for citrate toxicity in massive transfusion or symptomatic hypocalcemia"},
-  txa:{id:"txa",label:"Give TXA IV",color:"#9b59b6",medType:"iv",desc:"15 mg/kg IV over 10 min within 3 hours of injury"},
-  mtpActivate:{id:"mtpActivate",label:"Activate Pediatric MTP",color:"#e74c3c",medType:"protocol",desc:"Page blood bank, request pediatric massive transfusion protocol pack"},
-};
+// Phase-4b: TOOLS and MEDS objects removed. The pack registry in
+// src/lib/scenarios/packs/ + visualMeta.js now hold display metadata.
+// Renderers look up labels via ALL_TOOLS / ALL_MEDS, icons via ToolIcon
+// (id-keyed), and color/medType via medColor/medType helpers.
 
 export var SC1 = {
   id:"fussy-infant",title:"The Fussy Infant",tier:1,icon:"\u{1F476}",
@@ -116,7 +76,7 @@ export var SC1 = {
         {name:"Base deficit",value:"-12",unit:"",ref:"-2 to +2",critical:true,why:"Severely negative. Base deficit quantifies the total acid load the body is carrying. A value of -12 means the body has consumed 12 mEq/L of buffer capacity trying to neutralize the acid produced by poor perfusion. This correlates directly with the severity and duration of tissue oxygen debt."},
       ],
       tools:["ivKit","stethoscope","capRefill","glucometer","thermometer","defib"],
-      meds:["nsBolus","ceftriaxone","acetaminophen","epinephrine","albuterol","dextrose"],
+      meds:["nsBolus","ceftriaxone","acetaminophen","epiIV","albuterol","dextroseBolus"],
       actions:{tools:{
         ivKit:{ok:true,pri:1,fb:"Essential. You need IV access for fluids and antibiotics. In a vasoconstricted infant, target saphenous or antecubital veins. Two attempts at peripheral access, then go IO at the proximal tibia (1-2 cm below tibial tuberosity, flat medial surface). IO provides equivalent flow rates to central access."},
         stethoscope:{ok:true,pri:null,fb:"Auscultate before pushing fluid. Establish baseline: clear lungs (crackles suggest pneumonia or edema), regular rhythm (irregular rhythm changes approach), no murmur (new murmur raises endocarditis concern), no S3 gallop (volume overload marker). Re-auscultate lungs after each bolus for developing crackles."},
@@ -128,9 +88,9 @@ export var SC1 = {
         nsBolus:{ok:true,pri:1,fb:"First-line intervention. Push 20 mL/kg (150 mL) of 0.9% NS via push-pull technique over 5 minutes. Sepsis causes vasodilation and capillary leak, depleting effective circulating volume. Crystalloid restores preload, increasing stroke volume via Frank-Starling mechanism. Reassess after each bolus. Repeat up to 60 mL/kg total. No improvement = fluid-refractory shock, start vasopressors."},
         ceftriaxone:{ok:true,pri:2,fb:"Broad-spectrum antibiotics must begin within 60 minutes of recognizing sepsis. Ceftriaxone 50 mg/kg IV covers S. pneumoniae, N. meningitidis, E. coli, and H. influenzae. Binds penicillin-binding proteins, inhibiting peptidoglycan crosslinking, leading to bacterial cell wall rupture. Draw cultures first if quick (<5 min), but never delay antibiotics for cultures. Each hour of delay increases mortality 4-8%."},
         acetaminophen:{ok:false,pri:null,fb:"Already given 20 minutes ago and within therapeutic window. The tachycardia is NOT fever-driven anymore - HR-temp dissociation proves compensatory shock physiology. Fever itself is a beneficial immune response up to 39.5C (enhances neutrophil chemotaxis and antibody production). The cardiovascular collapse is the emergency, not the temperature."},
-        epinephrine:{ok:false,pri:null,fb:"Wrong timing. Epinephrine stimulates alpha-1, beta-1, and beta-2 receptors and IS appropriate for fluid-refractory septic shock. But no fluid has been given yet. Vasopressors on an empty vascular tree produces high SVR with dangerously low CO - BP number may transiently improve while tissue perfusion worsens. Algorithm: volume first (up to 60 mL/kg), then epi 0.05-0.3 mcg/kg/min if still hypotensive."},
+        epiIV:{ok:false,pri:null,fb:"Wrong timing. Epinephrine stimulates alpha-1, beta-1, and beta-2 receptors and IS appropriate for fluid-refractory septic shock. But no fluid has been given yet. Vasopressors on an empty vascular tree produces high SVR with dangerously low CO - BP number may transiently improve while tissue perfusion worsens. Algorithm: volume first (up to 60 mL/kg), then epi 0.05-0.3 mcg/kg/min if still hypotensive."},
         albuterol:{ok:false,pri:null,fb:"No airway pathology present. Albuterol is a beta-2 agonist for bronchospasm. The tachypnea here is metabolic acidosis compensation - poor perfusion causes lactic acid buildup, stimulating central chemoreceptors to increase RR. Adding albuterol causes unnecessary tachycardia without addressing the perfusion deficit. Fix the volume and the tachypnea resolves."},
-        dextrose:{ok:false,pri:null,fb:"Check glucose FIRST, do not give empirically. If glucose is normal, empiric dextrose causes iatrogenic hyperglycemia. In sepsis, hyperglycemia worsens outcomes through osmotic diuresis, impaired neutrophil bactericidal function, and pro-inflammatory AGE production. Measure, then treat if <45 mg/dL."},
+        dextroseBolus:{ok:false,pri:null,fb:"Check glucose FIRST, do not give empirically. If glucose is normal, empiric dextrose causes iatrogenic hyperglycemia. In sepsis, hyperglycemia worsens outcomes through osmotic diuresis, impaired neutrophil bactericidal function, and pro-inflammatory AGE production. Measure, then treat if <45 mg/dL."},
       }},
     },
   ],
@@ -150,20 +110,20 @@ export var SC1 = {
       {name:"pH",value:"7.18",unit:"",ref:"7.35-7.45",critical:true,why:"Worsening acidosis. Both the seizure (lactic acid from muscle) and the shock (lactic acid from tissue hypoperfusion) are driving the pH down. Below 7.20, cardiac contractility begins to decline and catecholamines become less effective."},
       {name:"pO2",value:"48",unit:"mmHg",ref:"80-100",critical:true,why:"Severely hypoxic. Corresponds to the SpO2 of 83%. The infant is not ventilating effectively during the seizure because the respiratory muscles are contracting with everything else. The brain is seizing AND hypoxic simultaneously - a double insult."},
     ],
-    tools:["suction","o2mask","bvmReady","glucometer","stethoscope","defib"],
-    meds:["lorazepam","phenytoin","dextrose","epinephrine","nsBolus","atropine"],
+    tools:["suction","o2Mask","bvmReady","glucometer","stethoscope","defib"],
+    meds:["lorazepam","fosphenytoin","dextroseBolus","epiIV","nsBolus","atropine"],
     actions:{tools:{
       suction:{ok:true,pri:1,fb:"Protect the airway first. Seizing infant has lost gag, cough, and swallow reflexes. High aspiration risk from salivation and vomiting. Use Yankauer catheter for oropharyngeal suction. Avoid deep flexible catheter suctioning - stimulates vagus nerve, can trigger bradycardia."},
-      o2mask:{ok:true,pri:2,fb:"SpO2 83% = PaO2 approximately 48 mmHg, severely hypoxic. Apply non-rebreather at 10-15 L/min (delivers 60-80% FiO2). The seizing brain has massively increased O2 demand while ventilation is impaired. Hypoxic brain injury begins within 4-6 minutes."},
+      o2Mask:{ok:true,pri:2,fb:"SpO2 83% = PaO2 approximately 48 mmHg, severely hypoxic. Apply non-rebreather at 10-15 L/min (delivers 60-80% FiO2). The seizing brain has massively increased O2 demand while ventilation is impaired. Hypoxic brain injury begins within 4-6 minutes."},
       bvmReady:{ok:true,pri:null,fb:"Have BVM staged at the bedside. Do NOT ventilate during the tonic phase when the glottis is contracted - bagging then drives air into the stomach. Be ready to deliver gentle breaths during clonic relaxation phases only if SpO2 falls further. Avoid over-bagging - causes gastric distension and increased aspiration risk."},
       glucometer:{ok:true,pri:3,fb:"Check POC glucose immediately. Infant hepatic glycogen: 3-4g (adults: 70-100g). After 12 hours of illness, stores may be exhausted. Infant gluconeogenesis pathways are immature. If glucose <45 mg/dL, push D10W 2-4 mL/kg. Glucose correction alone may terminate the seizure."},
       stethoscope:{ok:false,pri:null,fb:"Cannot auscultate meaningfully during active tonic-clonic seizure. Muscle contraction artifact drowns out heart and lung sounds. Useful AFTER seizure control to assess for aspiration or arrhythmia. Not a priority right now."},
       defib:{ok:false,pri:null,fb:"HR 210 with narrow QRS = sinus tachycardia. Appropriate physiologic response to seizure, hypoxia, and catecholamine surge. Defibrillation is for VF or pulseless VT only. Shocking sinus tachycardia could induce an actual arrhythmia. Monitor pads are fine but do not charge."},
     },meds:{
       lorazepam:{ok:true,pri:1,fb:"First-line antiepileptic. 0.1 mg/kg IV (0.75 mg for this infant). Binds GABA-A receptor benzodiazepine site, increasing chloride channel opening frequency. Chloride influx hyperpolarizes the neuron from -70mV toward -90mV, suppressing the electrical storm. Onset 1-3 min IV. Alternative: midazolam 0.2 mg/kg IN or IM. Two failed doses = status epilepticus."},
-      phenytoin:{ok:false,pri:null,fb:"Second-line only after two benzodiazepine doses fail. Fosphenytoin blocks voltage-gated sodium channels. Requires 20-minute infusion (rapid push causes hypotension and arrhythmia via His-Purkinje depression). Too slow for first-line use. Also: always check glucose before escalating antiepileptics - hypoglycemia-driven seizures will not respond to antiepileptics."},
-      dextrose:{ok:true,pri:2,fb:"Give after checking glucose. If <45 mg/dL, push D10W 2-4 mL/kg (15-30 mL). Use D10W in infants, not D25 or D50 (hyperosmolar, causes venous endothelial damage and rebound hyperinsulinemia). Without glucose, neuronal ATP production stops, Na/K ATPase fails, membrane depolarizes uncontrollably. May terminate seizure within 1-2 minutes."},
-      epinephrine:{ok:false,pri:null,fb:"Harmful in this context. Beta-1 stimulation increases myocardial O2 demand (HR already 210). Alpha-1 increases afterload. CNS catecholamine stimulation lowers seizure threshold. Epinephrine also raises ICP. Indicated for pulseless arrest or fluid-refractory shock only. Neither applies here."},
+      fosphenytoin:{ok:false,pri:null,fb:"Second-line only after two benzodiazepine doses fail. Fosphenytoin blocks voltage-gated sodium channels. Requires 20-minute infusion (rapid push causes hypotension and arrhythmia via His-Purkinje depression). Too slow for first-line use. Also: always check glucose before escalating antiepileptics - hypoglycemia-driven seizures will not respond to antiepileptics."},
+      dextroseBolus:{ok:true,pri:2,fb:"Give after checking glucose. If <45 mg/dL, push D10W 2-4 mL/kg (15-30 mL). Use D10W in infants, not D25 or D50 (hyperosmolar, causes venous endothelial damage and rebound hyperinsulinemia). Without glucose, neuronal ATP production stops, Na/K ATPase fails, membrane depolarizes uncontrollably. May terminate seizure within 1-2 minutes."},
+      epiIV:{ok:false,pri:null,fb:"Harmful in this context. Beta-1 stimulation increases myocardial O2 demand (HR already 210). Alpha-1 increases afterload. CNS catecholamine stimulation lowers seizure threshold. Epinephrine also raises ICP. Indicated for pulseless arrest or fluid-refractory shock only. Neither applies here."},
       nsBolus:{ok:true,pri:null,fb:"Do NOT stop the bolus. The seizure was caused by sepsis (hypoglycemia, meningitis, or fever), not by normal saline. Septic shock is still present and requires ongoing volume resuscitation. Continue fluid while managing seizure simultaneously. Delegate tasks across the team."},
       atropine:{ok:false,pri:null,fb:"Blocks M2 muscarinic receptors, increasing heart rate by removing vagal tone. Patient is already at 210 bpm. Pushing atropine could drive rate above 220, reducing diastolic filling time so severely that stroke volume drops and CO paradoxically falls. Indicated for symptomatic bradycardia only."},
     }},
@@ -261,7 +221,7 @@ export var SC2 = {
         {name:"Mg2+",value:"1.4",unit:"mg/dL",ref:"1.7-2.2",critical:true,why:"Low magnesium accompanies prolonged vomiting. Magnesium depletion makes it harder to correct potassium because Mg2+ is required for the Na/K ATPase pump to retain potassium intracellularly. Must replace Mg2+ to effectively correct K+."},
       ],
       tools:["ivKit","stethoscope","capRefill","glucometer","thermometer","defib"],
-      meds:["nsBolus","dextrose","acetaminophen","epinephrine","albuterol","ceftriaxone"],
+      meds:["nsBolus","dextroseBolus","acetaminophen","epiIV","albuterol","ceftriaxone"],
       actions:{tools:{
         ivKit:{ok:true,pri:1,fb:"Confirm and secure IV access. May need a second line. If this child decompensates, you need reliable access for fluids and emergency meds. Consider IO if peripheral access is failing - dehydrated toddlers have collapsed veins."},
         stethoscope:{ok:true,pri:null,fb:"Auscultate before and after each bolus. Listen for gallop (S3 = volume overload), crackles (pulmonary edema from over-resuscitation). Also establishes if bowel sounds are present - ileus from hypokalemia is possible with prolonged vomiting."},
@@ -271,9 +231,9 @@ export var SC2 = {
         defib:{ok:false,pri:null,fb:"Whoa there. This toddler is in sinus tachycardia from dehydration. You just defibrillated a child who needed a glass of water. The rhythm is a normal compensatory response to hypovolemia. Defibrillation is for VF or pulseless VT. This child has a pulse and an organized rhythm. Step away from the defibrillator and go hang a bag of saline."},
       },meds:{
         nsBolus:{ok:true,pri:1,fb:"First-line. Push 20 mL/kg (240 mL for 12 kg) normal saline over 5-10 minutes. Reassess perfusion markers after each bolus. May need 40-60 mL/kg total. Isotonic crystalloid replaces intravascular volume and improves preload, stroke volume, and cardiac output."},
-        dextrose:{ok:false,pri:null,fb:"Check glucose first, then give only if < 60 mg/dL. Prolonged vomiting with poor intake puts this child at risk, but empiric dextrose without checking can cause rebound hyperglycemia and osmotic complications. Always measure first."},
+        dextroseBolus:{ok:false,pri:null,fb:"Check glucose first, then give only if < 60 mg/dL. Prolonged vomiting with poor intake puts this child at risk, but empiric dextrose without checking can cause rebound hyperglycemia and osmotic complications. Always measure first."},
         acetaminophen:{ok:false,pri:null,fb:"Not indicated. Temperature is 36.6C - normal. There is no fever to treat. Giving acetaminophen to a dehydrated child with no fever adds no benefit and creates a false sense of action. Focus on volume."},
-        epinephrine:{ok:false,pri:null,fb:"Premature. This is hypovolemic shock, not distributive. The treatment is volume replacement, not vasopressors. Epinephrine in an empty vascular system just squeezes harder on nothing. Fill the tank first."},
+        epiIV:{ok:false,pri:null,fb:"Premature. This is hypovolemic shock, not distributive. The treatment is volume replacement, not vasopressors. Epinephrine in an empty vascular system just squeezes harder on nothing. Fill the tank first."},
         albuterol:{ok:false,pri:null,fb:"No respiratory pathology here. The tachypnea is metabolic compensation for lactic acidosis, not bronchospasm. Albuterol would add tachycardia without addressing the underlying volume deficit."},
         ceftriaxone:{ok:false,pri:null,fb:"No evidence of infection. Afebrile, no localizing signs, clear history of viral gastroenteritis. Antibiotics are for septic shock, not hypovolemic shock from GI losses. Unnecessary antibiotics add risk without benefit."},
       }},
@@ -296,7 +256,7 @@ export var SC2 = {
       {name:"pH",value:"7.52",unit:"",ref:"7.35-7.45",critical:true,why:"Significantly alkalotic from ongoing gastric H+ losses. The alkalosis is driving the hypokalemia (kidneys waste K+ to retain H+) and the hypocalcemia (alkalemia increases Ca2+ protein binding). Fixing the pH helps fix the electrolytes."},
     ],
     tools:["stethoscope","defib","glucometer","ivKit","capRefill","thermometer"],
-    meds:["adenosine","epinephrine","nsBolus","lorazepam","atropine","albuterol"],
+    meds:["adenosine","epiIV","nsBolus","lorazepam","atropine","albuterol"],
     actions:{tools:{
       stethoscope:{ok:true,pri:null,fb:"Auscultate quickly to confirm rate and rhythm. In wide-complex tachycardia, you're listening for whether beats are regular (VT, SVT with aberrancy) or irregular (polymorphic VT/torsades). Also check for cannon A waves in the neck veins - present in VT due to AV dissociation."},
       defib:{ok:true,pri:1,fb:"CRITICAL. Get the defibrillator pads ON immediately. If this child becomes pulseless or hemodynamically unstable (which they are), synchronized cardioversion at 0.5-1 J/kg is first-line for unstable wide-complex tachycardia. You must be ready. In peds, the sequence is: unstable + wide complex = synchronized cardioversion first."},
@@ -306,7 +266,7 @@ export var SC2 = {
       thermometer:{ok:false,pri:null,fb:"Temperature is irrelevant in an acute arrhythmia emergency. This child needs rhythm correction, not temperature monitoring. Every second counts."},
     },meds:{
       adenosine:{ok:false,pri:null,fb:"DANGEROUS in this context. Adenosine is for NARROW-complex SVT, not wide-complex tachycardia. If this is ventricular tachycardia (which it likely is in a hypokalemic child), adenosine will not convert it and may worsen hemodynamic collapse. Additionally, if this is torsades de pointes from hypokalemia, adenosine is contraindicated. The correct treatment is to FIX THE POTASSIUM and cardiovert if unstable."},
-      epinephrine:{ok:false,pri:null,fb:"Not first-line for wide-complex tachycardia with a pulse. Epinephrine increases myocardial oxygen demand, raises heart rate further, and can trigger VF in an already irritable myocardium. It's indicated for pulseless arrest, not organized tachyarrhythmia. If this child goes pulseless, then epi enters the algorithm."},
+      epiIV:{ok:false,pri:null,fb:"Not first-line for wide-complex tachycardia with a pulse. Epinephrine increases myocardial oxygen demand, raises heart rate further, and can trigger VF in an already irritable myocardium. It's indicated for pulseless arrest, not organized tachyarrhythmia. If this child goes pulseless, then epi enters the algorithm."},
       nsBolus:{ok:true,pri:null,fb:"Appropriate as a temporizing measure. This child is hypovolemic AND arrhythmic. Volume helps maintain preload during the arrhythmia. But the DEFINITIVE treatment is correcting the rhythm and the underlying electrolyte abnormality. Fluid alone won't fix a potassium of 2.0."},
       lorazepam:{ok:false,pri:null,fb:"Not indicated for arrhythmia. Benzodiazepines are for seizures or procedural sedation. If you need to cardiovert, you WILL need sedation (etomidate or ketamine preferred), but lorazepam alone does nothing for the rhythm."},
       atropine:{ok:false,pri:null,fb:"Atropine increases heart rate by blocking vagal tone. This child's rate is ALREADY 220. Pushing atropine would be like adding fuel to a fire. Atropine is for symptomatic bradycardia, the opposite of this situation."},
@@ -400,11 +360,11 @@ export var SC3 = {
         {id:"spo3_2",label:"SpO2 90%",cat:"vital",bad:true,why:"Falling despite 4L NC. At SpO2 90%, PaO2 is approximately 60 mmHg - the inflection point of the oxyhemoglobin curve. Below this, saturation drops rapidly with small PaO2 changes. This child is on the cliff edge."},
         {id:"cap3_2",label:"Cap Refill 2s",cat:"vital",bad:false,why:"Still normal - primary respiratory failure has not yet progressed to cardiovascular compromise. But this can change in minutes if respiratory arrest occurs."},
       ],
-      tools:["stethoscope","o2mask","bvmReady","peakFlow","ivKit","capRefill","defib"],
-      meds:["albuterol","epinephrine","methylpred","nsBolus","acetaminophen","lorazepam"],
+      tools:["stethoscope","o2Mask","bvmReady","peakFlow","ivKit","capRefill","defib"],
+      meds:["albuterol","epiIM","methylprednisolone","nsBolus","acetaminophen","lorazepam"],
       actions:{tools:{
         stethoscope:{ok:true,pri:1,fb:"CRITICAL assessment. Auscultate all lung fields bilaterally. You need to hear air entry. A quiet chest means critical air trapping with minimal ventilation. Compare left vs right - unequal air entry could indicate mucus plugging, atelectasis, or developing pneumothorax."},
-        o2mask:{ok:true,pri:2,fb:"Escalate oxygen delivery. Move from nasal cannula to non-rebreather mask at 15 L/min. SpO2 90% on NC means she needs higher FiO2. NRB provides 60-80% FiO2 vs 28-44% from NC."},
+        o2Mask:{ok:true,pri:2,fb:"Escalate oxygen delivery. Move from nasal cannula to non-rebreather mask at 15 L/min. SpO2 90% on NC means she needs higher FiO2. NRB provides 60-80% FiO2 vs 28-44% from NC."},
         bvmReady:{ok:true,pri:null,fb:"Stage the BVM at the bedside. If SpO2 continues to fall or she becomes apneic, transition to active bagging immediately. In severe asthma, use slow rate (8-10/min) with long expiratory time to allow trapped air to escape. Aggressive bagging worsens hyperinflation."},
         peakFlow:{ok:false,pri:null,fb:"She can barely say her own name and you want her to blow into a peak flow meter? Peak flow requires maximal effort from a cooperative patient. In critical status asthmaticus, this wastes time and energy she does not have. Save it for when she can actually breathe."},
         ivKit:{ok:true,pri:null,fb:"Ensure IV access is secure. If she deteriorates to intubation, you need IV for RSI meds (ketamine preferred in asthma for bronchodilatory properties). May also need IV magnesium sulfate, which is next-line for refractory status asthmaticus."},
@@ -412,8 +372,8 @@ export var SC3 = {
         defib:{ok:false,pri:null,fb:"She is wheezing, not fibrillating. This child has sinus tachycardia from hypoxia and beta-agonist use. There is no shockable rhythm. Defibrillation is for VF or pulseless VT only. The defibrillator cannot fix bronchospasm. Please redirect your energy toward the nebulizer."},
       },meds:{
         albuterol:{ok:true,pri:1,fb:"Continue continuous nebulized albuterol. In status asthmaticus, continuous nebulization (10-20 mg/hr) is more effective than intermittent dosing. Beta-2 receptors on bronchial smooth muscle relax when stimulated, increasing airway diameter. Monitor for tachycardia and tremor but do not stop - the tachycardia from hypoxia is more dangerous than from albuterol."},
-        epinephrine:{ok:true,pri:2,fb:"IM epinephrine 0.01 mg/kg is appropriate for life-threatening asthma refractory to inhaled beta-agonists. Systemic epinephrine provides bronchodilation through beta-2 AND reduces mucosal edema through alpha-1 vasoconstriction. It reaches airways that nebulized albuterol can't penetrate due to severe bronchospasm and mucus plugging."},
-        methylpred:{ok:false,pri:null,fb:"Already given. Steroids take 4-6 hours for full effect. They work by reducing airway inflammation, decreasing mucus production, and upregulating beta-2 receptor sensitivity. Giving another dose this soon adds no benefit - the first dose is still working its way into action."},
+        epiIM:{ok:true,pri:2,fb:"IM epinephrine 0.01 mg/kg is appropriate for life-threatening asthma refractory to inhaled beta-agonists. Systemic epinephrine provides bronchodilation through beta-2 AND reduces mucosal edema through alpha-1 vasoconstriction. It reaches airways that nebulized albuterol can't penetrate due to severe bronchospasm and mucus plugging."},
+        methylprednisolone:{ok:false,pri:null,fb:"Already given. Steroids take 4-6 hours for full effect. They work by reducing airway inflammation, decreasing mucus production, and upregulating beta-2 receptor sensitivity. Giving another dose this soon adds no benefit - the first dose is still working its way into action."},
         nsBolus:{ok:false,pri:null,fb:"Not indicated. BP is 112/70 and cap refill is normal. This child is not in shock - she is in respiratory failure. Volume loading a child who doesn't need it risks pulmonary edema, which would worsen her already compromised gas exchange."},
         acetaminophen:{ok:false,pri:null,fb:"Temp is 37.4C - not clinically significant. Treating a low-grade temp does not improve asthma outcomes and distracts from the real problem: worsening airway obstruction."},
         lorazepam:{ok:false,pri:null,fb:"Absolutely not. You want to sedate a child who is using every ounce of energy to keep breathing? Benzodiazepines cause respiratory depression by enhancing GABAergic inhibition in the brainstem respiratory centers. In a child barely maintaining ventilation, this could trigger immediate respiratory arrest. Anxiolytics in status asthmaticus are contraindicated unless you are actively intubating."},
@@ -436,18 +396,18 @@ export var SC3 = {
       {label:"Trachea",finding:"Deviated toward the left",pos:"face"},
       {label:"Hypotension",finding:"BP 82/50, down from 112/70",pos:"body"},
     ],
-    tools:["stethoscope","needleDecomp","o2mask","bvm","defib","ivKit"],
-    meds:["nsBolus","epinephrine","albuterol","lorazepam","atropine","acetaminophen"],
+    tools:["stethoscope","needleDecomp","o2Mask","bvm","defib","ivKit"],
+    meds:["nsBolus","epiIV","albuterol","lorazepam","atropine","acetaminophen"],
     actions:{tools:{
       needleDecomp:{ok:true,pri:1,fb:"IMMEDIATE needle decompression. This is a tension pneumothorax - a clinical diagnosis that does NOT wait for chest X-ray. In a pediatric patient: insert a 14-16 gauge angiocatheter at the 2nd intercostal space, midclavicular line (or 4th-5th ICS, anterior axillary line in larger children). Go over the top of the rib to avoid the neurovascular bundle running along the inferior border. You should hear a rush of air. This converts tension pneumo to simple pneumo and buys time for chest tube placement. DECOMPRESS BEFORE INTUBATING - positive pressure ventilation will worsen tension physiology."},
       stethoscope:{ok:true,pri:null,fb:"Confirms unilateral absent breath sounds on the right. This clinical finding + sudden desat + hypotension + JVD = tension pneumothorax. You've already done this - now ACT on the finding. In tension pneumo, auscultation gives you the diagnosis. Don't wait for imaging."},
-      o2mask:{ok:true,pri:2,fb:"Maximize FiO2 with non-rebreather at 15 L/min. The collapsed right lung isn't participating in gas exchange. You're relying entirely on the left lung. Give it the highest oxygen concentration possible. This child's SpO2 of 78% means PaO2 is approximately 40 mmHg - severely hypoxic."},
+      o2Mask:{ok:true,pri:2,fb:"Maximize FiO2 with non-rebreather at 15 L/min. The collapsed right lung isn't participating in gas exchange. You're relying entirely on the left lung. Give it the highest oxygen concentration possible. This child's SpO2 of 78% means PaO2 is approximately 40 mmHg - severely hypoxic."},
       bvm:{ok:false,pri:null,fb:"DANGEROUS right now. Positive pressure ventilation (bagging) will push MORE air into the pleural space through the ruptured bleb, worsening the tension. You must decompress FIRST. After needle decompression converts tension to simple pneumothorax, THEN you can assist ventilation if needed. Sequence matters: decompress, then ventilate."},
       defib:{ok:false,pri:null,fb:"Not indicated. The rhythm is sinus tachycardia - an appropriate response to hypoxia and low cardiac output. The heart is doing what it should given the catastrophic lung problem. Fix the pneumothorax and the tachycardia will improve. Defibrillation is for VF/pulseless VT."},
       ivKit:{ok:true,pri:null,fb:"Ensure IV access for post-decompression management. May need fluid bolus (preload was acutely reduced by tension physiology), sedation for chest tube placement, and continued asthma management once the pneumothorax is addressed."},
     },meds:{
       nsBolus:{ok:true,pri:null,fb:"Reasonable after decompression. Tension pneumothorax acutely reduces preload by compressing the IVC/SVC. Even after relieving the tension, the child may need a 20 mL/kg bolus to restore circulating volume and improve cardiac output during recovery."},
-      epinephrine:{ok:false,pri:null,fb:"Not the right drug for this problem. The hemodynamic collapse is MECHANICAL - compressed great vessels from tension pneumothorax. Epinephrine can't fix plumbing that is physically kinked. Decompress first - if hypotension persists after decompression, then consider vasopressors. But usually BP recovers immediately once tension is relieved."},
+      epiIV:{ok:false,pri:null,fb:"Not the right drug for this problem. The hemodynamic collapse is MECHANICAL - compressed great vessels from tension pneumothorax. Epinephrine can't fix plumbing that is physically kinked. Decompress first - if hypotension persists after decompression, then consider vasopressors. But usually BP recovers immediately once tension is relieved."},
       albuterol:{ok:false,pri:null,fb:"Albuterol treats bronchospasm, not pneumothorax. While this child does have asthma, the acute crisis is a mechanical problem - air in the pleural space. Bronchodilators cannot fix a collapsed lung. Stabilize the pneumothorax first, then resume asthma management."},
       lorazepam:{ok:false,pri:null,fb:"Respiratory depressant in a child with SpO2 of 78%. Sedation without securing the airway and fixing the pneumothorax could cause respiratory arrest. May be appropriate LATER for procedural sedation during chest tube insertion, but not now."},
       atropine:{ok:false,pri:null,fb:"Heart rate is 170. Atropine increases HR by blocking vagal tone. This patient needs the opposite - fix the mechanical problem (pneumothorax) so the compensatory tachycardia can resolve."},
@@ -935,8 +895,8 @@ export var SC4 = {
           "critical": false
         }
       ],
-      "tools": ["ivKit", "o2mask", "stethoscope", "defib", "bvm", "pupilCheck"],
-      "meds": ["dextrose", "ceftriaxone", "nsBolus", "epinephrine", "acetaminophen", "lorazepam"],
+      "tools": ["ivKit", "o2Mask", "stethoscope", "defib", "bvm", "pupilCheck"],
+      "meds": ["dextroseBolus", "ceftriaxone", "nsBolus", "epiIV", "acetaminophen", "lorazepam"],
       "actions": {
         "tools": {
           "ivKit": {
@@ -945,7 +905,7 @@ export var SC4 = {
             "priority": 1,
             "fb": "The 24-gauge peripheral IV in the left antecubital fossa is confirmed patent with excellent blood return and flushes without resistance or subcutaneous swelling. For an 8 kg infant in decompensated septic shock, this access is functional but marginal — adequate for push-dose medications but limited for rapid large-volume resuscitation.\n\n- **Blood return confirmed**: validates intravenous placement before administering dextrose or any hyperosmolar medication — extravasation would cause tissue injury\n- **24g bore**: flow rate is limited; manual pressure or pressure bags may be needed for rapid fluid delivery\n- If this IV fails, **IO access in the proximal tibia** (EZ-IO 15mm needle for pediatric patients) is the immediate rescue — do not attempt multiple peripheral IVs; go straight to IO\n- All critical medications — dextrose, antibiotics, and fluids — can be delivered through this line now; do not delay"
           },
-          "o2mask": {
+          "o2Mask": {
             "label": "Apply Non-Rebreather Mask (High-Flow O2)",
             "ok": true,
             "priority": 2,
@@ -974,7 +934,7 @@ export var SC4 = {
           }
         },
         "meds": {
-          "dextrose": {
+          "dextroseBolus": {
             "label": "D10W 5 mL/kg IV — 40 mL (Dextrose for Hypoglycemia)",
             "ok": true,
             "priority": 1,
@@ -992,7 +952,7 @@ export var SC4 = {
             "priority": 3,
             "fb": "Normal saline 80 mL (10 mL/kg) administered as a rapid IV bolus over 5-10 minutes. This brings total crystalloid administered to 280 mL (35 mL/kg) including the prehospital bolus. Reassess perfusion markers — HR, cap refill, BP, mental status — immediately after completion.\n\n- **PALS recommends** 20 mL/kg isotonic crystalloid (NS or LR) IV pushes with reassessment between each bolus, up to **40-60 mL/kg total** before escalating to vasopressors\n- Total of **35 mL/kg** is within the safe resuscitation window; reassess before giving further volume\n- Monitor actively for signs of **fluid overload**: new crackles on auscultation, worsening respiratory effort, hepatomegaly — none currently present\n- If perfusion does not improve after 40-60 mL/kg total crystalloid, **epinephrine infusion** is the vasopressor of choice for cold septic shock\n- Reassess cap refill, BP, HR, and urine output after each bolus — septic shock resuscitation is iterative"
           },
-          "epinephrine": {
+          "epiIV": {
             "label": "Epinephrine Infusion 0.1 mcg/kg/min IV (Vasopressor)",
             "ok": false,
             "fb": "Epinephrine is the correct vasopressor choice for pediatric cold septic shock — but the PALS algorithm recommends maximizing fluid resuscitation to 40-60 mL/kg before initiating vasopressors in a patient without immediate cardiovascular collapse. This infant has received 35 mL/kg total; an additional fluid bolus and reassessment should precede vasopressor initiation.\n\n- **Epinephrine** (0.1-1 mcg/kg/min) is first-line for **cold septic shock** — its combined α1 (vasoconstriction, increased SVR) and β1 (inotropy, chronotropy) effects address the low-cardiac-output, high-SVR physiology\n- **Norepinephrine** is preferred for warm septic shock (vasodilated phenotype with bounding pulses) — the wrong choice here\n- Vasopressors are indicated when shock persists despite **40-60 mL/kg** total fluid — this infant is at 35 mL/kg; one more bolus and reassessment first\n- If initiated, epinephrine must be delivered via **IO or central access** — peripheral extravasation causes severe tissue necrosis 💉"
@@ -1500,8 +1460,8 @@ export var SC5 = {
         "racemicEpi",
         "albuterol",
         "acetaminophen",
-        "dextrose",
-        "epinephrine",
+        "dextroseBolus",
+        "epiIV",
         "nsBolus"
       ],
       "actions": {
@@ -1563,12 +1523,12 @@ export var SC5 = {
             "priority": 2,
             "fb": "Correct. Acetaminophen 15 mg/kg IV (120 mg for 8 kg) is administered for Mira's fever of 38.6°C. Reducing fever decreases metabolic oxygen demand and CO2 production, lowering the respiratory load. While this will not resolve the HFNC failure, it is a clinically sound supportive measure. IV route is preferred given NPO status and the risk of aspiration with oral medications."
           },
-          "dextrose": {
+          "dextroseBolus": {
             "label": "D10W 2 mL/kg (16 mL) IV push",
             "ok": false,
             "fb": "Dextrose is not indicated here. Mira's blood glucose is 88 mg/dL — firmly within normal range. Administering unnecessary glucose risks hyperglycemia, which worsens outcomes in critically ill pediatric patients by impairing neutrophil function and increasing cerebral injury risk. Reserve dextrose for documented or symptomatic hypoglycemia (glucose <50 mg/dL in infants)."
           },
-          "epinephrine": {
+          "epiIV": {
             "label": "Epinephrine 0.01 mg/kg (0.08 mg) IV/IO for arrest",
             "ok": false,
             "fb": "Epinephrine is a cardiac arrest and anaphylaxis medication. Mira currently has a pulse and a blood pressure — she is NOT in cardiac arrest. Administering epinephrine IV in a non-arrest infant with HR 188 bpm risks inducing ventricular fibrillation or dangerous supraventricular tachycardia. Focus on escalating her respiratory support to prevent arrest rather than treating a condition she does not yet have."

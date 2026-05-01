@@ -1,6 +1,21 @@
 import { useState } from "react";
 import { Check, X, Minus } from "lucide-react";
-import { TOOLS, MEDS } from "../../lib/scenarios/builtIn.js";
+import { ALL_TOOLS, ALL_MEDS, isCustomTool, isCustomMed } from "../../lib/scenarios/packs/index.js";
+import { medColor, medType as lookupMedType } from "../../lib/scenarios/visualMeta.js";
+
+// Phase-4b: tool/med entries come from the pack registry rather than the
+// pre-Phase-4b builtIn.js TOOLS / MEDS maps. Custom entries (id starts
+// with "customTool" or "customMed") read label and description from the
+// per-scenario action entry instead of the registry. lookupTool /
+// lookupMed wrap that branching so the renderer stays uncluttered.
+function lookupTool(id, actionEntry) {
+  if (isCustomTool(id)) return { id: id, label: (actionEntry && actionEntry.label) || id, description: actionEntry && actionEntry.description, custom: true };
+  return ALL_TOOLS[id] || null;
+}
+function lookupMed(id, actionEntry) {
+  if (isCustomMed(id)) return { id: id, label: (actionEntry && actionEntry.label) || id, description: actionEntry && actionEntry.description, custom: true };
+  return ALL_MEDS[id] || null;
+}
 import { ToolIcon, MedIcon } from "./icons.jsx";
 import { TextBlock } from "../shared/TextBlock.jsx";
 import { usePlayerStore } from "../../stores/playerStore.js";
@@ -32,7 +47,8 @@ export function ActionPanel(props){
   var toggleMark=usePlayerStore(function(s){return s.toggleMarkForReview;});
   function popMarkItem(){
     if(!pop)return null;
-    var meta=pop.ty==="t"?TOOLS[pop.id]:MEDS[pop.id];
+    var popActionEntry=pop.ty==="t"?(actions&&actions.tools?actions.tools[pop.id]:null):(actions&&actions.meds?actions.meds[pop.id]:null);
+    var meta=pop.ty==="t"?lookupTool(pop.id,popActionEntry):lookupMed(pop.id,popActionEntry);
     var label=meta?meta.label:pop.id;
     // Phase-2.6.4 change 5: for mtpActivate, the originalWhy passed to
     // the deep-dive expansion should be the canonical MTP content (what
@@ -71,8 +87,8 @@ export function ActionPanel(props){
   var finish=function(){onDone(sel);};
   var skip=function(){
     var missed=[];
-    rT.forEach(function(id){if(!sel[id]){var t=TOOLS[id];missed.push({id:id,label:t?t.label:id,type:"tool"});}});
-    rM.forEach(function(id){if(!sel[id]){var m=MEDS[id];missed.push({id:id,label:m?m.label:id,type:"med"});}});
+    rT.forEach(function(id){if(!sel[id]){var t=lookupTool(id,actions&&actions.tools?actions.tools[id]:null);missed.push({id:id,label:t?t.label:id,type:"tool"});}});
+    rM.forEach(function(id){if(!sel[id]){var m=lookupMed(id,actions&&actions.meds?actions.meds[id]:null);missed.push({id:id,label:m?m.label:id,type:"med"});}});
     if(onSkip)onSkip(missed,sel);else onDone(sel);
   };
   function tbg(u,o){if(!u)return"rgba(255,255,255,0.05)";return o?"rgba(0,184,148,0.12)":"rgba(255,165,0,0.1)";}
@@ -85,14 +101,14 @@ export function ActionPanel(props){
           same borderRadius (12), same minHeight (78). */}
       <style>{"@keyframes popIn{from{opacity:0;transform:scale(.92) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}@media(min-width:768px){.bw-action-grid{grid-template-columns:repeat(3,1fr) !important}}@media(min-width:1024px){.bw-action-grid{grid-template-columns:repeat(4,1fr) !important}}"}</style>
       {tools&&tools.length>0&&(<div style={{marginBottom:16}}><div style={{fontSize:10,textTransform:"uppercase",letterSpacing:2,color:"#999",fontWeight:700,marginBottom:8}}>Tool Belt</div>
-        <div className="bw-action-grid" style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:6}}>{tools.map(function(id){var t=TOOLS[id];if(!t)return null;var u=!!sel[id];var o=actions&&actions.tools&&actions.tools[id]?actions.tools[id].ok:false;
+        <div className="bw-action-grid" style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:6}}>{tools.map(function(id){var t=lookupTool(id,actions&&actions.tools?actions.tools[id]:null);if(!t)return null;var u=!!sel[id];var o=actions&&actions.tools&&actions.tools[id]?actions.tools[id].ok:false;
           return(<button key={id} onClick={function(){pick(id,"t");}} className="bw-tap" style={{position:"relative",display:"flex",flexDirection:"column",alignItems:"center",gap:6,padding:10,borderRadius:12,minHeight:78,background:tbg(u,o),border:tbd(u,o),cursor:"pointer",color:"white"}}>
             <ToolIcon name={id} size={26} color={u?(o?"#55efc4":"#FECA57"):"#4ECDC4"}/><span style={{fontSize:11,color:"#ccc",fontWeight:600,textAlign:"center",lineHeight:1.2}}>{t.label}</span>
             {u&&<span style={{position:"absolute",top:6,right:6}}>{o?<Check size={12} color="#55efc4"/>:<Minus size={12} color="#FECA57"/>}</span>}</button>);})}</div></div>)}
       {meds&&meds.length>0&&(<div style={{marginBottom:16}}><div style={{fontSize:10,textTransform:"uppercase",letterSpacing:2,color:"#999",fontWeight:700,marginBottom:8}}>Med Cart</div>
-        <div className="bw-action-grid" style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:6}}>{meds.map(function(id){var m=MEDS[id];if(!m)return null;var u=!!sel[id];var o=actions&&actions.meds&&actions.meds[id]?actions.meds[id].ok:false;
+        <div className="bw-action-grid" style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:6}}>{meds.map(function(id){var m=lookupMed(id,actions&&actions.meds?actions.meds[id]:null);if(!m)return null;var u=!!sel[id];var o=actions&&actions.meds&&actions.meds[id]?actions.meds[id].ok:false;
           return(<button key={id} onClick={function(){pick(id,"m");}} className="bw-tap" style={{position:"relative",display:"flex",flexDirection:"column",alignItems:"center",gap:6,padding:10,borderRadius:12,minHeight:78,background:tbg(u,o),border:tbd(u,o),cursor:"pointer",color:"white"}}>
-            <div style={{width:26,height:32,borderRadius:6,display:"flex",alignItems:"center",justifyContent:"center",background:m.color||"#636e72",fontSize:16,color:"white"}}><MedIcon type={m.medType||"iv"} size={18} color="white"/></div>
+            <div style={{width:26,height:32,borderRadius:6,display:"flex",alignItems:"center",justifyContent:"center",background:medColor(id),fontSize:16,color:"white"}}><MedIcon type={lookupMedType(id)} size={18} color="white"/></div>
             <span style={{fontSize:11,color:"#ccc",fontWeight:600,textAlign:"center",lineHeight:1.2}}>{m.label}</span>
             {u&&<span style={{position:"absolute",top:6,right:6}}>{o?<Check size={12} color="#55efc4"/>:<Minus size={12} color="#FECA57"/>}</span>}</button>);})}</div></div>)}
       {/* Phase-2.6.5 change 1: popup restructured into sticky header +
@@ -111,8 +127,8 @@ export function ActionPanel(props){
               <div style={{padding:"4px 12px",borderRadius:20,fontSize:11,fontWeight:900,background:pop.info.ok?"rgba(0,184,148,0.2)":"rgba(255,165,2,0.2)",color:pop.info.ok?"#00b894":"#ffa502",display:"flex",alignItems:"center",gap:4}}>{pop.info.ok?<><Check size={14}/> APPROPRIATE</>:<><X size={14}/> NOT INDICATED NOW</>}</div>
               {pop.info.pri&&<div style={{padding:"4px 8px",borderRadius:20,fontSize:10,fontWeight:700,background:"rgba(78,205,196,0.15)",color:"#4ECDC4"}}>{"Priority #"+pop.info.pri}</div>}
             </div>
-            <h4 style={{color:"white",fontWeight:700,marginTop:0,marginBottom:4}}>{pop.ty==="t"?(TOOLS[pop.id]?TOOLS[pop.id].label:pop.id):(MEDS[pop.id]?MEDS[pop.id].label:pop.id)}</h4>
-            <p style={{fontSize:11,color:"#999",margin:0}}>{pop.ty==="t"?(TOOLS[pop.id]?TOOLS[pop.id].desc:""):(MEDS[pop.id]?MEDS[pop.id].desc:"")}</p>
+            <h4 style={{color:"white",fontWeight:700,marginTop:0,marginBottom:4}}>{meta?meta.label:pop.id}</h4>
+            {meta&&meta.custom&&meta.description&&<p style={{fontSize:11,color:"#999",margin:0}}>{meta.description}</p>}
           </div>
           {/* Body — scrolls */}
           <div style={{padding:"14px 20px",overflowY:"auto",flex:1,minHeight:0}}>

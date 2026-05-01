@@ -12,14 +12,14 @@
 // appear naturally in narrative — replacing them would produce
 // awkward output like "Give TXA IV was administered" mid-sentence.
 
-import { TOOLS, MEDS } from "./builtIn.js";
+import { ALL_TOOLS, ALL_MEDS } from "./packs/index.js";
 
 export function replaceIdsWithLabels(text){
   if(!text||typeof text!=="string")return text;
   var out=text;
   var entries=[];
-  Object.keys(TOOLS).forEach(function(k){entries.push({id:k,label:TOOLS[k].label});});
-  Object.keys(MEDS).forEach(function(k){entries.push({id:k,label:MEDS[k].label});});
+  Object.keys(ALL_TOOLS).forEach(function(k){entries.push({id:k,label:ALL_TOOLS[k].label});});
+  Object.keys(ALL_MEDS).forEach(function(k){entries.push({id:k,label:ALL_MEDS[k].label});});
   // Sort by length desc so longer IDs match first (prevents "iv" from
   // matching part of "ivKit"). Also gates on camelCase to avoid
   // false replacements on real drug names.

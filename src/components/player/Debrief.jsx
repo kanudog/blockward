@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Trophy, Plus, Minus, Search, Check, Zap, Droplets, Bookmark } from "lucide-react";
 import { PatientSVG } from "./PatientSVG.jsx";
 import { TextBlock } from "../shared/TextBlock.jsx";
-import { TOOLS, MEDS } from "../../lib/scenarios/builtIn.js";
+import { ALL_TOOLS, ALL_MEDS, isCustomTool, isCustomMed } from "../../lib/scenarios/packs/index.js";
 import { usePlayerStore } from "../../stores/playerStore.js";
 import { expandMarkedItems } from "../../lib/ai/client.js";
 import { replaceIdsWithLabels } from "../../lib/scenarios/labels.js";
@@ -90,13 +90,14 @@ export function Debrief(props){
     var tools=snap.tools||[];var meds=snap.meds||[];var actions=snap.actions||{};var sel=snap.sel||{};
     tools.forEach(function(id){
       var info=actions.tools?actions.tools[id]:null;if(!info)return;
-      var t=TOOLS[id];
-      interventions.push({phase:snap.phaseName,label:t?t.label:id,type:"tool",id:id,info:info,selected:!!sel[id],pri:info.pri,ok:!!info.ok});
+      // Phase-4b: custom entries carry their own label on the action info.
+      var label=isCustomTool(id)?(info.label||id):(ALL_TOOLS[id]?ALL_TOOLS[id].label:id);
+      interventions.push({phase:snap.phaseName,label:label,type:"tool",id:id,info:info,selected:!!sel[id],pri:info.pri,ok:!!info.ok});
     });
     meds.forEach(function(id){
       var info=actions.meds?actions.meds[id]:null;if(!info)return;
-      var m=MEDS[id];
-      interventions.push({phase:snap.phaseName,label:m?m.label:id,type:"med",id:id,info:info,selected:!!sel[id],pri:info.pri,ok:!!info.ok});
+      var label=isCustomMed(id)?(info.label||id):(ALL_MEDS[id]?ALL_MEDS[id].label:id);
+      interventions.push({phase:snap.phaseName,label:label,type:"med",id:id,info:info,selected:!!sel[id],pri:info.pri,ok:!!info.ok});
     });
   });
   var correctInt=interventions.filter(function(x){return x.ok;}).sort(function(a,b){return(a.pri||99)-(b.pri||99);});

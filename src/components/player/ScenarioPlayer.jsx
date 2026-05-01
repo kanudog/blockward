@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Heart, Zap, Sparkles, Star, Trophy, Shield, Check } from "lucide-react";
-import { TOOLS, MEDS } from "../../lib/scenarios/builtIn.js";
+import { ALL_TOOLS, ALL_MEDS, isCustomTool, isCustomMed } from "../../lib/scenarios/packs/index.js";
+import { medType as lookupMedType } from "../../lib/scenarios/visualMeta.js";
 import { canonicalizeAssessItem } from "../../lib/scenarios/canonicalize.js";
 import { usePlayerStore } from "../../stores/playerStore.js";
 import { guessAge, guessSex } from "../../lib/scenarios/age.js";
@@ -33,12 +34,12 @@ export function ScenarioPlayer(props){
   var correctActions=[];
   sc.phases.forEach(function(p){
     if(!p.actions)return;
-    if(p.actions.tools){Object.entries(p.actions.tools).forEach(function(e){if(e[1].ok&&e[1].pri){var t=TOOLS[e[0]];correctActions.push({name:t?t.label:e[0],toolId:e[0],medType:null,fb:e[1].fb?e[1].fb.split(".")[0]+".":"",pri:e[1].pri,type:"tool"});}});}
-    if(p.actions.meds){Object.entries(p.actions.meds).forEach(function(e){if(e[1].ok&&e[1].pri){var m=MEDS[e[0]];correctActions.push({name:m?m.label:e[0],toolId:null,medType:m?m.medType:"iv",fb:e[1].fb?e[1].fb.split(".")[0]+".":"",pri:e[1].pri,type:"med"});}});}
+    if(p.actions.tools){Object.entries(p.actions.tools).forEach(function(e){if(e[1].ok&&e[1].pri){var label=isCustomTool(e[0])?(e[1].label||e[0]):(ALL_TOOLS[e[0]]?ALL_TOOLS[e[0]].label:e[0]);correctActions.push({name:label,toolId:e[0],medType:null,fb:e[1].fb?e[1].fb.split(".")[0]+".":"",pri:e[1].pri,type:"tool"});}});}
+    if(p.actions.meds){Object.entries(p.actions.meds).forEach(function(e){if(e[1].ok&&e[1].pri){var label=isCustomMed(e[0])?(e[1].label||e[0]):(ALL_MEDS[e[0]]?ALL_MEDS[e[0]].label:e[0]);correctActions.push({name:label,toolId:null,medType:lookupMedType(e[0]),fb:e[1].fb?e[1].fb.split(".")[0]+".":"",pri:e[1].pri,type:"med"});}});}
   });
   if(sc.curveball&&sc.curveball.actions){
-    if(sc.curveball.actions.tools){Object.entries(sc.curveball.actions.tools).forEach(function(e){if(e[1].ok&&e[1].pri){var t=TOOLS[e[0]];correctActions.push({name:t?t.label:e[0],toolId:e[0],medType:null,fb:e[1].fb?e[1].fb.split(".")[0]+".":"",pri:e[1].pri,type:"tool"});}});}
-    if(sc.curveball.actions.meds){Object.entries(sc.curveball.actions.meds).forEach(function(e){if(e[1].ok&&e[1].pri){var m=MEDS[e[0]];correctActions.push({name:m?m.label:e[0],toolId:null,medType:m?m.medType:"iv",fb:e[1].fb?e[1].fb.split(".")[0]+".":"",pri:e[1].pri,type:"med"});}});}
+    if(sc.curveball.actions.tools){Object.entries(sc.curveball.actions.tools).forEach(function(e){if(e[1].ok&&e[1].pri){var label=isCustomTool(e[0])?(e[1].label||e[0]):(ALL_TOOLS[e[0]]?ALL_TOOLS[e[0]].label:e[0]);correctActions.push({name:label,toolId:e[0],medType:null,fb:e[1].fb?e[1].fb.split(".")[0]+".":"",pri:e[1].pri,type:"tool"});}});}
+    if(sc.curveball.actions.meds){Object.entries(sc.curveball.actions.meds).forEach(function(e){if(e[1].ok&&e[1].pri){var label=isCustomMed(e[0])?(e[1].label||e[0]):(ALL_MEDS[e[0]]?ALL_MEDS[e[0]].label:e[0]);correctActions.push({name:label,toolId:null,medType:lookupMedType(e[0]),fb:e[1].fb?e[1].fb.split(".")[0]+".":"",pri:e[1].pri,type:"med"});}});}
   }
   correctActions.sort(function(a,b){return(a.pri||99)-(b.pri||99);});
   useEffect(function(){if(stage!=="recovery")return;setRecStep(0);var iv=setInterval(function(){setRecStep(function(p){if(p>=correctActions.length)return p;return p+1;});},1200);return function(){clearInterval(iv);};},[stage]);

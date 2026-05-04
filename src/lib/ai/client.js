@@ -43,6 +43,9 @@ function applyPostParseFixups(scenario,cbMode){
     scenario._validatorWarnings=surfaceable;
     surfaceable.forEach(function(w){console.warn("Validator ["+(w.phase||"?")+", "+w.kind+"]:",w.message,w.label?"— item: "+w.label:"");});
   }
+  // Phase-5.1: tag every AI-generated scenario with a source marker so
+  // downstream code can branch on origin without hardcoded ID lists.
+  scenario.source="ai";
   return scenario;
 }
 

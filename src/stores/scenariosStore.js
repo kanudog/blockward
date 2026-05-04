@@ -12,8 +12,18 @@ export var useScenariosStore = create(function(set, get) {
     progress: {},
     hydrated: false,
     hydrate: function() {
+      // Phase-5.1: backfill source:"ai" on any pre-existing custom scenario
+      // saved before the source marker was introduced. One-time migration —
+      // write back to localStorage only when a backfill actually happened.
+      var customRaw = loadS("bw-custom", []);
+      var migrated = false;
+      var custom = customRaw.map(function(sc) {
+        if (sc && !sc.source) { migrated = true; return Object.assign({}, sc, { source: "ai" }); }
+        return sc;
+      });
+      if (migrated) saveS("bw-custom", custom);
       set({
-        custom: loadS("bw-custom", []),
+        custom: custom,
         progress: loadS("bw-prog", {}),
         hydrated: true
       });
@@ -21,6 +31,10 @@ export var useScenariosStore = create(function(set, get) {
     addCustom: function(sc) {
       // Phase-2.6 group J3: prepend so the freshly-built scenario shows
       // at the top of the dashboard list instead of getting buried.
+      // Phase-5.1: tripwire — every scenario reaching the store should
+      // already carry a source marker. Warn (don't block) so we catch any
+      // path that bypasses applyPostParseFixups or decodeScenario.
+      if (!sc.source) console.warn("Scenario missing source field:", sc.id);
       var u = [sc].concat(get().custom);
       set({ custom: u });
       saveS("bw-custom", u);

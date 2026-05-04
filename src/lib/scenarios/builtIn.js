@@ -4,7 +4,7 @@
 // (id-keyed), and color/medType via medColor/medType helpers.
 
 export var SC1 = {
-  id:"fussy-infant",title:"The Fussy Infant",tier:1,icon:"\u{1F476}",
+  id:"fussy-infant",source:"builtin",title:"The Fussy Infant",tier:1,icon:"\u{1F476}",
   tagline:"6-month-old - Fussiness and Fever",
   description:"A 6-month-old male brought in for increasing fussiness and fever.",
   patient:{ageLabel:"6 months",weightKg:7.5,sex:"Male",cc:"Fussiness and fever x 12 hours",
@@ -153,7 +153,7 @@ export var SC1 = {
   },
 };
 export var SC2 = {
-  id:"vomiting-toddler",title:"Won't Stop Vomiting",tier:2,icon:"\u{1F922}",
+  id:"vomiting-toddler",source:"builtin",title:"Won't Stop Vomiting",tier:2,icon:"\u{1F922}",
   tagline:"2-year-old - Vomiting and Lethargy",
   description:"A 2-year-old with 3 days of vomiting and diarrhea, increasingly lethargic.",
   patient:{ageLabel:"2 years",weightKg:12,sex:"Male",cc:"Vomiting/diarrhea x 3 days, lethargy",
@@ -298,7 +298,7 @@ export var SC2 = {
   },
 };
 export var SC3 = {
-  id:"asthma-crisis",title:"Can't Catch My Breath",tier:2,icon:"\u{1FAC1}",
+  id:"asthma-crisis",source:"builtin",title:"Can't Catch My Breath",tier:2,icon:"\u{1FAC1}",
   tagline:"8-year-old - Severe Asthma Exacerbation",
   description:"An 8-year-old known asthmatic with worsening wheeze unresponsive to home treatment.",
   patient:{ageLabel:"8 years",weightKg:25,sex:"Female",cc:"Worsening wheeze x 2 days, albuterol not helping",
@@ -446,6 +446,7 @@ export var SC3 = {
 // age-appropriate physiology, and vital chip ↔ assessItem alignment.
 export var SC4 = {
   "id": "infant-septic-shock",
+  "source": "builtin",
   "title": "Limp and Lethargic: Infant in Septic Shock",
   "tier": 2,
   "icon": "🌡️",
@@ -1036,6 +1037,7 @@ export var SC4 = {
 
 export var SC5 = {
   "id": "rsv-bronchiolitis-hfnc-failure",
+  "source": "builtin",
   "title": "Mira's Breathing Emergency",
   "tier": 2,
   "icon": "🫁",
@@ -1607,6 +1609,7 @@ export var SC5 = {
 
 export var SC6 = {
   "id": "opioid-overdose-adolescent-naloxone",
+  "source": "builtin",
   "title": "Unresponsive at the Party",
   "packs": ["respiratoryAirway", "toxicologyAntidotes", "cardiac"],
   "tier": 2,

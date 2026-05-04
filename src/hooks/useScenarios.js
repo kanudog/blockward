@@ -11,7 +11,15 @@ function minifyScenario(sc){
   return m;
 }
 function encodeScenario(sc){try{return btoa(unescape(encodeURIComponent(JSON.stringify(sc))));}catch(e){return null;}}
-export function decodeScenario(str){try{return JSON.parse(decodeURIComponent(escape(atob(str))));}catch(e){return null;}}
+export function decodeScenario(str){
+  // Phase-5.1: shared links predate the source marker; default to "ai"
+  // when missing (every shareable scenario has been AI-generated).
+  try{
+    var sc=JSON.parse(decodeURIComponent(escape(atob(str))));
+    if(sc&&!sc.source)sc.source="ai";
+    return sc;
+  }catch(e){return null;}
+}
 
 export function useScenarios(){
   var custom=useScenariosStore(function(s){return s.custom;});

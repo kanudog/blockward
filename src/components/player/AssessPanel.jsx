@@ -16,6 +16,10 @@ export function AssessPanel(props){
   var ph=props.ph;var vit=props.vit;var curSigns=props.curSigns;var curLabs=props.curLabs;
   var flags=props.flags;var showFb=props.showFb;var submit=props.submit;var afterA=props.afterA;var flag=props.flag;
   var patient=props.patient||{};
+  // Phase-5.2.5: phaseIdx propagates into slot refs constructed for
+  // marked-for-review items so the lookup at debrief time can resolve
+  // current why/fb text from the live scenario.
+  var phaseIdx=props.phaseIdx!==undefined?props.phaseIdx:0;
   var _why=useState(null);var whyTarget=_why[0];var setWhyTarget=_why[1];
   // Phase-3.0-hotfix change 1: build a single canonical-ID → assessItem map
   // for the whole phase. Every panel below uses the same map so click
@@ -115,11 +119,22 @@ export function AssessPanel(props){
           return(<div key={t.key}>{inner}</div>);
         })}
       </div>
-      <BodySystemsView signs={curSigns} badMap={badMap} flags={flags} onFlag={flag} showFb={showFb}/>
-      <LabPanel labs={curLabs} badMap={badMap} flags={flags} onFlag={flag} showFb={showFb}/>
+      <BodySystemsView signs={curSigns} badMap={badMap} flags={flags} onFlag={flag} showFb={showFb} phaseIdx={phaseIdx}/>
+      <LabPanel labs={curLabs} badMap={badMap} flags={flags} onFlag={flag} showFb={showFb} phaseIdx={phaseIdx}/>
       {!showFb?<button onClick={submit} style={Object.assign({},BS,{background:PP})}>Submit Assessment</button>
         :<button onClick={afterA} style={Object.assign({},BS,{background:GR})}>{ph.tools?"Open Tool Belt":"Continue"}</button>}
     </div>
-    <WhyModal open={!!whyTarget} onClose={function(){setWhyTarget(null);}} title={whyTarget?whyTarget.label:""} body={whyTarget?whyTarget.why:""} accent={whyTarget&&whyTarget._abnormal?"#ff7675":"#4ECDC4"} item={whyTarget?{id:whyTarget.cid||("assess:"+(whyTarget._match?whyTarget._match.id:whyTarget.label)),label:whyTarget.label,type:"vital",originalWhy:whyTarget.why}:null}/>
+    <WhyModal open={!!whyTarget} onClose={function(){setWhyTarget(null);}} title={whyTarget?whyTarget.label:""} body={whyTarget?whyTarget.why:""} accent={whyTarget&&whyTarget._abnormal?"#ff7675":"#4ECDC4"} item={whyTarget?(function(){
+      // Phase-5.2.5: build slot-ref payload. The vital path uses cid="vital:<key>";
+      // strip prefix for indexOrId. Falls back to assessItem ref when no canonical
+      // vital cid is present.
+      var cid=whyTarget.cid;
+      var vk=cid&&cid.indexOf(":")>=0?cid.split(":")[1]:null;
+      if(vk){
+        return{id:cid,kind:"vital",phaseIdx:phaseIdx,label:whyTarget.label,_slotRef:{kind:"vital",phaseIdx:phaseIdx,indexOrId:vk}};
+      }
+      var aiId=whyTarget._match?whyTarget._match.id:whyTarget.label;
+      return{id:"assess:"+aiId,kind:"assessItem",phaseIdx:phaseIdx,label:whyTarget.label,_slotRef:{kind:"assessItem",phaseIdx:phaseIdx,indexOrId:aiId}};
+    })():null}/>
   </div>);
 }

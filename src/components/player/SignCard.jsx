@@ -3,6 +3,10 @@ import { WhyModal, WhyButton } from "../shared/WhyModal.jsx";
 
 export function SignCard(props){
   var s=props.s;var delay=props.delay||0;
+  // Phase-5.2.5: optional phaseIdx for slot-ref construction. Currently
+  // dead code path (every PatientView caller passes signs={[]}); kept
+  // in sync with the slot-ref shape for future re-enablement.
+  var phaseIdx=props.phaseIdx!==undefined?props.phaseIdx:0;
   var _open=useState(false);var open=_open[0];var setOpen=_open[1];
   return(<div style={{marginBottom:6,opacity:0,animation:"fadeCard 0.4s ease-out "+delay+"s forwards"}}>
     <div style={{borderRadius:8,padding:10,background:"rgba(10,14,26,0.92)",border:"1.5px solid rgba(78,205,196,0.4)"}}>
@@ -12,6 +16,6 @@ export function SignCard(props){
       </div>
       <div style={{fontSize:11,color:"#bbc",lineHeight:1.4,marginTop:2}}>{s.finding}</div>
     </div>
-    <WhyModal open={open} onClose={function(){setOpen(false);}} title={s.label} body={s.why} item={{id:"sign:"+s.label,label:s.label,type:"finding",originalWhy:s.why}}/>
+    <WhyModal open={open} onClose={function(){setOpen(false);}} title={s.label} body={s.why} item={{id:"sign:"+s.label,kind:"sign",phaseIdx:phaseIdx,label:s.label,_slotRef:{kind:"sign",phaseIdx:phaseIdx,indexOrId:s.label}}}/>
   </div>);
 }

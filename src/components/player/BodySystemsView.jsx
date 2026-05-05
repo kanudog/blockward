@@ -19,6 +19,8 @@ export function BodySystemsView(props) {
   var flags = props.flags || null;
   var onFlag = props.onFlag || null;
   var showFb = !!props.showFb;
+  // Phase-5.2.5: optional phaseIdx for slot-ref construction.
+  var phaseIdx = props.phaseIdx !== undefined ? props.phaseIdx : 0;
   var clickable = !!(badMap && flags && onFlag);
   var _why=useState(null);var whyTarget=_why[0];var setWhyTarget=_why[1];
   function guessSys(s) {
@@ -113,7 +115,7 @@ export function BodySystemsView(props) {
           );
         })}
       </div>
-      <WhyModal open={!!whyTarget} onClose={function(){setWhyTarget(null);}} title={whyTarget?whyTarget.label:""} body={whyTarget?whyTarget.why:""} accent={whyTarget&&whyTarget._abnormal?"#FF6B81":"#4ECDC4"} item={whyTarget?{id:signCanonicalId(whyTarget),label:whyTarget.label,type:"finding",originalWhy:whyTarget.why}:null}/>
+      <WhyModal open={!!whyTarget} onClose={function(){setWhyTarget(null);}} title={whyTarget?whyTarget.label:""} body={whyTarget?whyTarget.why:""} accent={whyTarget&&whyTarget._abnormal?"#FF6B81":"#4ECDC4"} item={whyTarget?{id:signCanonicalId(whyTarget),kind:"sign",phaseIdx:phaseIdx,label:whyTarget.label,_slotRef:{kind:"sign",phaseIdx:phaseIdx,indexOrId:whyTarget.label}}:null}/>
     </div>
   );
 }

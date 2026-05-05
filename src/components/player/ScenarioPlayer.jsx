@@ -1,9 +1,13 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Heart, Zap, Sparkles, Star, Trophy, Shield, Check } from "lucide-react";
 import { ALL_TOOLS, ALL_MEDS, isCustomTool, isCustomMed } from "../../lib/scenarios/packs/index.js";
 import { medType as lookupMedType } from "../../lib/scenarios/visualMeta.js";
 import { canonicalizeAssessItem } from "../../lib/scenarios/canonicalize.js";
 import { usePlayerStore } from "../../stores/playerStore.js";
+import { useScenariosStore } from "../../stores/scenariosStore.js";
+import { fetchExplanations } from "../../lib/ai/client.js";
+import { collectMissingExplanationSlots } from "../../lib/scenarios/explanationSlots.js";
+import { writeExplanationToSlot } from "../../lib/scenarios/slotResolve.js";
 import { guessAge, guessSex } from "../../lib/scenarios/age.js";
 import { VitalsDisplay } from "./VitalsDisplay.jsx";
 import { PatientSVG } from "./PatientSVG.jsx";
@@ -29,6 +33,52 @@ export function ScenarioPlayer(props){
   var goBack=function(){if(prev)setStage(prev);};
   var _recStep=useState(0);var recStep=_recStep[0];var setRecStep=_recStep[1];
   var _learnOpen=useState(false);var learnOpen=_learnOpen[0];var setLearnOpen=_learnOpen[1];
+  // Phase-5.3: lazy explanation fetch state.
+  // isLazyFetching drives the small loading pill near the phase header.
+  // lazyAbortRef holds the controller for the in-flight fetch so we can
+  // abort on phase change or unmount.
+  var _isLazyFetching=useState(false);var isLazyFetching=_isLazyFetching[0];var setIsLazyFetching=_isLazyFetching[1];
+  var lazyAbortRef=useRef(null);
+  var markLazySlotFetched=usePlayerStore(function(s){return s.markLazySlotFetched;});
+  var lazyFetchedSlots=usePlayerStore(function(s){return s.lazyFetchedSlots;});
+  var forceRefreshScenario=usePlayerStore(function(s){return s.forceRefreshScenario;});
+  var updateCustom=useScenariosStore(function(s){return s.updateCustom;});
+  // Phase-5.3 sub-step C: fan out parallel Haiku calls for any
+  // why/fb fields still missing or carrying the synthesized fallback
+  // when the user enters Phase 2 or later. AI scenarios only — built-ins
+  // are a no-op early return. Phase 1 explanations stay in main
+  // generation by design (see investigation §1.7 / project hybrid choice).
+  useEffect(function(){
+    if(!sc||sc.source!=="ai")return;            // built-in fast path
+    if(stage!=="phase"||pi<1)return;            // Phase 2+ entry only
+    var slots=collectMissingExplanationSlots(sc,pi);
+    var toFetch=slots.filter(function(s){return !lazyFetchedSlots[s.id];});
+    if(toFetch.length===0)return;
+    var controller=new AbortController();
+    lazyAbortRef.current=controller;
+    setIsLazyFetching(true);
+    function onCallComplete(info){
+      if(!info||!info.body||!info.item||!info.item._slotRef)return;
+      // Mark before write so a cancelled-then-resumed call doesn't double-fire.
+      markLazySlotFetched(info.item.id);
+      var hit=writeExplanationToSlot(sc,info.item._slotRef,info.body);
+      if(hit){
+        try{updateCustom(sc);}catch(e){/* persistence is best-effort */}
+        forceRefreshScenario();
+      }
+    }
+    fetchExplanations(sc,toFetch,controller.signal,onCallComplete).then(function(){
+      setIsLazyFetching(false);
+    }).catch(function(err){
+      if(err&&err.name==="AbortError")return;
+      setIsLazyFetching(false);
+      console.warn("[lazy fetch] phase entry error: "+(err&&err.message||err));
+    });
+    return function(){
+      controller.abort();
+      if(lazyAbortRef.current===controller)lazyAbortRef.current=null;
+    };
+  },[sc&&sc.id,stage,pi]);
   var ph=sc.phases[pi];
   /* Build correct actions list for recovery screen (must be at top level for hook rules) */
   var correctActions=[];
@@ -63,7 +113,7 @@ export function ScenarioPlayer(props){
   var curLabs=isCb?(sc.curveball?sc.curveball.labs||[]:[]):(ph?ph.labs||[]:[]);
   if(stage==="debrief")return <Debrief sc={sc} ageG={ageG} sexG={sexG} onDone={onDone} onExit={onExit}/>;
   return(<div className={shake?"bw-shake":""} style={{minHeight:"100dvh",padding:16,background:"linear-gradient(135deg,#0a0e1a,#1a1a3e)",color:"#fff"}}>
-    <style>{"@keyframes bwShake{0%,100%{transform:translateX(0)}10%{transform:translateX(-8px)}20%{transform:translateX(8px)}30%{transform:translateX(-6px)}40%{transform:translateX(6px)}}.bw-shake{animation:bwShake .6s ease-in-out}@keyframes slideU{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}.slu{animation:slideU .4s ease-out}@keyframes alertP{0%,100%{box-shadow:0 0 0 0 rgba(255,71,87,.4)}50%{box-shadow:0 0 0 12px rgba(255,71,87,0)}}.alp{animation:alertP 1.5s infinite}@keyframes fadeCard{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}.bw-split{display:flex;flex-direction:column;gap:12px}.bw-split-left,.bw-split-right{width:100%}@media(min-width:768px){.bw-container{max-width:900px!important}.bw-split{flex-direction:row;gap:20px;align-items:flex-start}.bw-split-left{width:42%;position:sticky;top:16px;max-height:calc(100dvh - 80px);overflow-y:auto}.bw-split-right{width:58%;min-height:0}}"}</style>
+    <style>{"@keyframes bwShake{0%,100%{transform:translateX(0)}10%{transform:translateX(-8px)}20%{transform:translateX(8px)}30%{transform:translateX(-6px)}40%{transform:translateX(6px)}}.bw-shake{animation:bwShake .6s ease-in-out}@keyframes slideU{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}.slu{animation:slideU .4s ease-out}@keyframes alertP{0%,100%{box-shadow:0 0 0 0 rgba(255,71,87,.4)}50%{box-shadow:0 0 0 12px rgba(255,71,87,0)}}.alp{animation:alertP 1.5s infinite}@keyframes fadeCard{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}@keyframes lazyPulse{0%,100%{opacity:.4}50%{opacity:1}}@keyframes lazyFade{from{opacity:0;transform:translateY(-2px)}to{opacity:1;transform:translateY(0)}}.bw-lazy-pill{animation:lazyFade .35s ease-out}.bw-split{display:flex;flex-direction:column;gap:12px}.bw-split-left,.bw-split-right{width:100%}@media(min-width:768px){.bw-container{max-width:900px!important}.bw-split{flex-direction:row;gap:20px;align-items:flex-start}.bw-split-left{width:42%;position:sticky;top:16px;max-height:calc(100dvh - 80px);overflow-y:auto}.bw-split-right{width:58%;min-height:0}}"}</style>
     <div className="bw-container" style={{maxWidth:480,margin:"0 auto"}}>
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12,gap:8}}>
         <div style={{display:"flex",alignItems:"center",gap:8}}>
@@ -71,7 +121,16 @@ export function ScenarioPlayer(props){
           {prev&&<button onClick={goBack} style={{color:"#888",fontSize:12,background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:8,padding:"4px 10px",cursor:"pointer"}}>&lt; Back</button>}
         </div>
         <div style={{padding:"4px 12px",borderRadius:20,fontSize:11,fontWeight:700,background:isCb?"rgba(255,71,87,0.2)":"rgba(78,205,196,0.15)",color:isCb?"#FF6B81":"#4ECDC4"}}>{isCb?"CURVEBALL":"Phase "+(pi+1)+"/"+sc.phases.length}</div>
-        <div style={{width:1}}></div></div>
+        {/* Phase-5.3 sub-step D: subtle loading pill that appears while
+            lazy explanation fetch is in flight on Phase 2+ entry. Sits
+            in the right slot of the header row without expanding height
+            or shifting the phase badge. Fades in/out smoothly. */}
+        <div style={{display:"flex",alignItems:"center",justifyContent:"flex-end",minWidth:1}}>
+          {isLazyFetching&&<div className="bw-lazy-pill" style={{display:"inline-flex",alignItems:"center",gap:6,padding:"3px 10px",borderRadius:20,fontSize:10,fontWeight:700,background:"rgba(78,205,196,0.10)",color:"#4ECDC4",border:"1px solid rgba(78,205,196,0.28)"}}>
+            <span style={{width:6,height:6,borderRadius:"50%",background:"#4ECDC4",animation:"lazyPulse 1.4s ease-in-out infinite",flexShrink:0}}></span>
+            <span>Loading details</span>
+          </div>}
+        </div></div>
       {stage==="intro"&&(<div className="slu" style={{textAlign:"center"}}>
         <PatientView status="stable" rr={30} signs={[]} ageGroup={ageG} sex={sexG} visuals={scVisuals} emotion="sad"/>
         <h2 style={{fontSize:24,fontWeight:900,marginTop:12,marginBottom:8}}>{sc.title}</h2>
@@ -107,7 +166,7 @@ export function ScenarioPlayer(props){
             )}
           </div>
         </div></div>)}
-      {stage==="assess"&&<AssessPanel ph={ph} vit={vit} curSigns={curSigns} curLabs={curLabs} flags={flags} showFb={showFb} submit={submit} afterA={afterA} flag={flag} patient={sc.patient}/>}
+      {stage==="assess"&&<AssessPanel ph={ph} vit={vit} curSigns={curSigns} curLabs={curLabs} flags={flags} showFb={showFb} submit={submit} afterA={afterA} flag={flag} patient={sc.patient} phaseIdx={pi}/>}
       {stage==="act"&&(<div className="slu">
         {/* Phase-3.0 change 2: patient header + narrative anchored at
             top of Phase 2, mirroring change 1 on Phase 1. The right-
@@ -129,7 +188,7 @@ export function ScenarioPlayer(props){
               <p style={{fontSize:14,fontWeight:700,color:"#4ECDC4",marginTop:0,marginBottom:4}}>Intervention Time</p>
               <p style={{fontSize:11,color:"#bbb",margin:0}}>Tap each tool and med. Find all correct actions to continue.</p>
             </div>
-            <ActionPanel tools={ph.tools} meds={ph.meds} actions={ph.actions} onDone={function(sel){recordAction({phaseId:ph.id,phaseName:ph.name||ph.id,tools:ph.tools||[],meds:ph.meds||[],actions:ph.actions||{},sel:sel||{}});afterAct();}} onSkip={function(m,sel){if(m&&m.length>0)addSkipped(m.map(function(x){return Object.assign({},x,{phase:ph.name||ph.id});}));recordAction({phaseId:ph.id,phaseName:ph.name||ph.id,tools:ph.tools||[],meds:ph.meds||[],actions:ph.actions||{},sel:sel||{}});afterAct();}}/>
+            <ActionPanel tools={ph.tools} meds={ph.meds} actions={ph.actions} phaseIdx={pi} onDone={function(sel){recordAction({phaseId:ph.id,phaseName:ph.name||ph.id,tools:ph.tools||[],meds:ph.meds||[],actions:ph.actions||{},sel:sel||{}});afterAct();}} onSkip={function(m,sel){if(m&&m.length>0)addSkipped(m.map(function(x){return Object.assign({},x,{phase:ph.name||ph.id});}));recordAction({phaseId:ph.id,phaseName:ph.name||ph.id,tools:ph.tools||[],meds:ph.meds||[],actions:ph.actions||{},sel:sel||{}});afterAct();}}/>
           </div>
         </div></div>)}
       {stage==="cb-alert"&&(<div className="slu">
@@ -165,7 +224,7 @@ export function ScenarioPlayer(props){
               <div style={{borderTop:"1px solid rgba(255,71,87,0.15)",paddingTop:8,marginTop:8}}>
                 <p style={{fontSize:14,fontWeight:700,color:"#FF6B81",marginBottom:4}}>Critical Intervention</p>
                 <p style={{fontSize:11,color:"#bbb"}}>Find all correct actions.</p></div></div>
-            <ActionPanel tools={sc.curveball.tools} meds={sc.curveball.meds} actions={sc.curveball.actions} onDone={function(sel){recordAction({phaseId:"curveball",phaseName:"Curveball: "+(sc.curveball.name||""),tools:sc.curveball.tools||[],meds:sc.curveball.meds||[],actions:sc.curveball.actions||{},sel:sel||{}});setStage("reassess");}} onSkip={function(m,sel){if(m&&m.length>0)addSkipped(m.map(function(x){return Object.assign({},x,{phase:"Curveball: "+(sc.curveball.name||"")});}));recordAction({phaseId:"curveball",phaseName:"Curveball: "+(sc.curveball.name||""),tools:sc.curveball.tools||[],meds:sc.curveball.meds||[],actions:sc.curveball.actions||{},sel:sel||{}});setStage("reassess");}}/>
+            <ActionPanel tools={sc.curveball.tools} meds={sc.curveball.meds} actions={sc.curveball.actions} phaseIdx="curveball" onDone={function(sel){recordAction({phaseId:"curveball",phaseName:"Curveball: "+(sc.curveball.name||""),tools:sc.curveball.tools||[],meds:sc.curveball.meds||[],actions:sc.curveball.actions||{},sel:sel||{}});setStage("reassess");}} onSkip={function(m,sel){if(m&&m.length>0)addSkipped(m.map(function(x){return Object.assign({},x,{phase:"Curveball: "+(sc.curveball.name||"")});}));recordAction({phaseId:"curveball",phaseName:"Curveball: "+(sc.curveball.name||""),tools:sc.curveball.tools||[],meds:sc.curveball.meds||[],actions:sc.curveball.actions||{},sel:sel||{}});setStage("reassess");}}/>
           </div>
         </div></div>)}
       {stage==="reassess"&&(function(){

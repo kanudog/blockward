@@ -1,4 +1,5 @@
 import { buildSystemPrompt, buildDeepDivePrompt, buildExplanationPrompt, MODEL_ID, HAIKU_MODEL_ID, MAX_TOKENS } from "./prompt.js";
+import { resolveSlotText, kindToPromptType } from "../scenarios/slotResolve.js";
 import { validateSchema, validateConsistency, validateCounts, applyAutocorrections } from "./validate.js";
 
 var NAME_HINT_LETTERS="ABCDEFGHIJKLMNOPRSTUVWYZ"; // skip Q and X — rare initial sounds
@@ -262,6 +263,30 @@ export async function expandMarkedItems(scenario, items, signal){
   });
   console.info("[deepDive] parseSource:"+parseSource,"requested:",requestedIds,"returned:",returnedIds,"resolved:",Object.keys(out).filter(function(k){return requestedIds.indexOf(k)>=0;}));
   return out;
+}
+
+// Phase-5.2.5: single-item wrapper for the eager deep-dive trigger.
+// Fired from the Mark-for-Review handler so the deep dive is ready by
+// the time the user reaches debrief. Returns the deep-dive text only,
+// not a map. Empty string on no-result. Stays on Sonnet (MODEL_ID) per
+// the deep-dive contract — Haiku is for the lazy why/fb path, not for
+// post-game multi-paragraph deep dives.
+//
+// markedItem is the slot-ref-shape payload from playerStore.markedForReview:
+// {id, kind, phaseIdx, label, _slotRef}. We re-resolve originalWhy
+// freshly from the live scenario so any explanation text that landed
+// between mark-time and now is available as anchoring context.
+export async function expandSingleMarkedItem(scenario, markedItem, signal) {
+  if (!markedItem || !markedItem.id || !markedItem._slotRef) return "";
+  var originalWhy = resolveSlotText(scenario, markedItem._slotRef) || "";
+  var internal = {
+    id: markedItem.id,
+    label: markedItem.label || markedItem.id,
+    type: kindToPromptType(markedItem.kind),
+    originalWhy: originalWhy
+  };
+  var map = await expandMarkedItems(scenario, [internal], signal);
+  return map[markedItem.id] || "";
 }
 
 // Phase-5.2: lazy explanation fetch via Haiku 4.5.

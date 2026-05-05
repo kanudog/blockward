@@ -39,6 +39,16 @@ export var useScenariosStore = create(function(set, get) {
       set({ custom: u });
       saveS("bw-custom", u);
     },
+    // Phase-5.3: in-place update for lazy-fetch write-throughs. Replaces
+    // the entry whose id matches; no-op if not found (e.g., built-ins).
+    // Distinct from addCustom (which prepends — would duplicate) and
+    // addCustomIfNew (skips when present — wouldn't re-persist).
+    updateCustom: function(sc) {
+      if (!sc || !sc.id) return;
+      var u = get().custom.map(function(x) { return x && x.id === sc.id ? sc : x; });
+      set({ custom: u });
+      saveS("bw-custom", u);
+    },
     addCustomIfNew: function(sc) {
       var existing = get().custom;
       var already = existing.some(function(c) { return c.id === sc.id; });

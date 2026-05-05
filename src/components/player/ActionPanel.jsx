@@ -1,7 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Check, X, Minus } from "lucide-react";
 import { ALL_TOOLS, ALL_MEDS, isCustomTool, isCustomMed } from "../../lib/scenarios/packs/index.js";
 import { medColor, medType as lookupMedType } from "../../lib/scenarios/visualMeta.js";
+import { fetchExplanations, expandSingleMarkedItem } from "../../lib/ai/client.js";
+import { writeExplanationToSlot, SYNTHESIZED_FB_FALLBACK } from "../../lib/scenarios/slotResolve.js";
+import { useScenariosStore } from "../../stores/scenariosStore.js";
 
 // Phase-4b: tool/med entries come from the pack registry rather than the
 // pre-Phase-4b builtIn.js TOOLS / MEDS maps. Custom entries (id starts
@@ -37,25 +40,91 @@ var MTP_CANONICAL=
 "- **The lethal triad:** hypothermia, acidosis, and coagulopathy reinforce each other. MTP combats all three: warmed products preserve temperature, FFP and platelets restore clotting, pRBCs restore oxygen delivery, calcium maintains contractility.";
 export function ActionPanel(props){
   var tools=props.tools;var meds=props.meds;var actions=props.actions;var onDone=props.onDone;var onSkip=props.onSkip;
+  // Phase-5.2.5: phaseIdx for slot-ref construction. Pass "curveball"
+  // for cb-act stage; pass the regular phase index otherwise. Default
+  // to 0 keeps existing tests green.
+  var phaseIdx=props.phaseIdx!==undefined?props.phaseIdx:0;
   var _sel=useState({});var sel=_sel[0];var setSel=_sel[1];
   var _pop=useState(null);var pop=_pop[0];var setPop=_pop[1];
+  // Phase-5.3 sub-step E: popup-local lazy-fetch state for synthesized
+  // fb fallback. popLoading suppresses Mark for Review and shows a
+  // shimmer in the popup body; popError shows a polite retry option.
+  var _popLoading=useState(false);var popLoading=_popLoading[0];var setPopLoading=_popLoading[1];
+  var _popError=useState(null);var popError=_popError[0];var setPopError=_popError[1];
   // Phase-2.6.3 change 8: Mark for Review on intervention popup.
   // Reads/writes the same playerStore.markedForReview list that
   // WhyModal uses for assess items, so marked interventions show
   // up alongside marked findings in the debrief deep-dive section.
   var markedForReview=usePlayerStore(function(s){return s.markedForReview;});
   var toggleMark=usePlayerStore(function(s){return s.toggleMarkForReview;});
+  var setDeepDive=usePlayerStore(function(s){return s.setDeepDive;});
+  var forceRefreshScenario=usePlayerStore(function(s){return s.forceRefreshScenario;});
+  var updateCustom=useScenariosStore(function(s){return s.updateCustom;});
   function popMarkItem(){
     if(!pop)return null;
     var popActionEntry=pop.ty==="t"?(actions&&actions.tools?actions.tools[pop.id]:null):(actions&&actions.meds?actions.meds[pop.id]:null);
     var meta=pop.ty==="t"?lookupTool(pop.id,popActionEntry):lookupMed(pop.id,popActionEntry);
     var label=meta?meta.label:pop.id;
-    // Phase-2.6.4 change 5: for mtpActivate, the originalWhy passed to
-    // the deep-dive expansion should be the canonical MTP content (what
-    // the user actually saw), not the AI's scenario-specific fb.
-    var originalWhy=pop.info.fb||"";
-    if(pop.ty==="m"&&pop.id==="mtpActivate")originalWhy=MTP_CANONICAL+(pop.info.fb?"\n\nWhy for this patient: "+pop.info.fb:"");
-    return{id:(pop.ty==="t"?"tool:":"med:")+pop.id,label:label,type:"intervention",originalWhy:originalWhy};
+    // Phase-5.2.5: slot-ref payload — debrief resolves text fresh via
+    // resolveSlotText, including any post-mark lazy-fetch updates. The
+    // mtpActivate canonical-content special case lives in the popup
+    // render (see MTP_CANONICAL block below); the deep-dive prompt
+    // receives the resolved fb directly via expandSingleMarkedItem.
+    var kind=pop.ty==="t"?"tool":"med";
+    return{
+      id:(pop.ty==="t"?"tool:":"med:")+pop.id,
+      kind:kind,
+      phaseIdx:phaseIdx,
+      label:label,
+      _slotRef:{kind:kind,phaseIdx:phaseIdx,indexOrId:pop.id}
+    };
+  }
+  // Phase-5.3 sub-step E: when popup opens with a synthesized-fallback
+  // fb, kick off a single-item lazy fetch and write the result back to
+  // the live scenario. Mark for Review stays disabled while loading so
+  // the user doesn't pin a placeholder. On error, show a Retry button.
+  useEffect(function(){
+    if(!pop)return;
+    if(!pop.info||pop.info.fb!==SYNTHESIZED_FB_FALLBACK)return;
+    setPopLoading(true);
+    setPopError(null);
+    var sc=usePlayerStore.getState().activeScenario;
+    if(!sc){setPopLoading(false);return;}
+    var actionEntry=pop.ty==="t"?(actions&&actions.tools?actions.tools[pop.id]:null):(actions&&actions.meds?actions.meds[pop.id]:null);
+    var meta=pop.ty==="t"?lookupTool(pop.id,actionEntry):lookupMed(pop.id,actionEntry);
+    var kind=pop.ty==="t"?"tool":"med";
+    var slotItem={
+      id:(pop.ty==="t"?"tool:":"med:")+pop.id,
+      label:meta?meta.label:pop.id,
+      type:kind,
+      context:{id:pop.id,ok:!!pop.info.ok,priority:pop.info.pri||null},
+      _slotRef:{kind:kind,phaseIdx:phaseIdx,indexOrId:pop.id}
+    };
+    var ctrl=new AbortController();
+    fetchExplanations(sc,[slotItem],ctrl.signal).then(function(map){
+      var text=map[slotItem.id];
+      if(!text){setPopError("Couldn't load details — please try again.");setPopLoading(false);return;}
+      writeExplanationToSlot(sc,slotItem._slotRef,text);
+      try{updateCustom(sc);}catch(e){}
+      forceRefreshScenario();
+      // Update local pop state so the popup body re-renders with the
+      // freshly fetched text without waiting for a parent re-render.
+      setPop(function(p){if(!p||p.id!==slotItem.context.id)return p;return Object.assign({},p,{info:Object.assign({},p.info,{fb:text})});});
+      setPopLoading(false);
+    }).catch(function(err){
+      if(err&&err.name==="AbortError")return;
+      setPopError(err.message||"Couldn't load details — please try again.");
+      setPopLoading(false);
+    });
+    return function(){ctrl.abort();};
+  },[pop&&pop.id,pop&&pop.ty]);
+  function retryPopFetch(){
+    // Re-trigger the effect by toggling pop reference. Simplest: reset
+    // info.fb back to the synthesized string so the effect predicate
+    // matches again on next mount.
+    if(!pop)return;
+    setPopError(null);
+    setPop(function(p){if(!p)return p;return Object.assign({},p,{info:Object.assign({},p.info,{fb:SYNTHESIZED_FB_FALLBACK})});});
   }
   var popMarked=(function(){var it=popMarkItem();return it?markedForReview.some(function(x){return x.id===it.id;}):false;})();
   var rT=Object.entries(actions&&actions.tools?actions.tools:{}).filter(function(e){return e[1].ok;}).map(function(e){return e[0];});
@@ -106,7 +175,7 @@ export function ActionPanel(props){
           grid (2 cols mobile, 3 at 768px, 4 at 1024px) so Phase 1 and
           Phase 2 share visual rhythm. Same gap (6), same padding (10),
           same borderRadius (12), same minHeight (78). */}
-      <style>{"@keyframes popIn{from{opacity:0;transform:scale(.92) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}@media(min-width:768px){.bw-action-grid{grid-template-columns:repeat(3,1fr) !important}}@media(min-width:1024px){.bw-action-grid{grid-template-columns:repeat(4,1fr) !important}}"}</style>
+      <style>{"@keyframes popIn{from{opacity:0;transform:scale(.92) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}@keyframes lazyPulse{0%,100%{opacity:.4}50%{opacity:1}}@media(min-width:768px){.bw-action-grid{grid-template-columns:repeat(3,1fr) !important}}@media(min-width:1024px){.bw-action-grid{grid-template-columns:repeat(4,1fr) !important}}"}</style>
       {tools&&tools.length>0&&(<div style={{marginBottom:16}}><div style={{fontSize:10,textTransform:"uppercase",letterSpacing:2,color:"#999",fontWeight:700,marginBottom:8}}>Tool Belt</div>
         <div className="bw-action-grid" style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:6}}>{tools.map(function(id){var t=lookupTool(id,actions&&actions.tools?actions.tools[id]:null);if(!t)return null;var u=!!sel[id];var o=actions&&actions.tools&&actions.tools[id]?actions.tools[id].ok:false;
           return(<button key={id} onClick={function(){pick(id,"t");}} className="bw-tap" style={{position:"relative",display:"flex",flexDirection:"column",alignItems:"center",gap:6,padding:10,borderRadius:12,minHeight:78,background:tbg(u,o),border:tbd(u,o),cursor:"pointer",color:"white"}}>
@@ -139,21 +208,45 @@ export function ActionPanel(props){
           </div>
           {/* Body — scrolls */}
           <div style={{padding:"14px 20px",overflowY:"auto",flex:1,minHeight:0}}>
-            {/* Phase-2.6.4 change 5: mtpActivate gets canonical MTP teaching
-                content, with AI's per-scenario rationale below. */}
-            {pop.ty==="m"&&pop.id==="mtpActivate"?(<div>
+            {/* Phase-5.3 sub-step E: synthesized-fallback popup shows
+                a small loading state while the lazy fetch lands, then
+                the freshly fetched fb. Error path offers a retry. */}
+            {popLoading?(<div style={{display:"flex",alignItems:"center",gap:8,padding:"4px 0",color:"#4ECDC4",fontSize:13}}>
+              <span style={{display:"inline-block",width:8,height:8,borderRadius:"50%",background:"#4ECDC4",animation:"lazyPulse 1.4s ease-in-out infinite",flexShrink:0}}></span>
+              <span style={{color:"#bbb"}}>Loading clinical context for this action...</span>
+            </div>):popError?(<div style={{padding:"4px 0",color:"#ff9a9f",fontSize:12,lineHeight:1.5}}>
+              {popError} <button onClick={retryPopFetch} style={{marginLeft:6,background:"none",border:"none",color:"#74b9ff",textDecoration:"underline",cursor:"pointer",fontSize:12}}>Retry</button>
+            </div>):
+            (pop.ty==="m"&&pop.id==="mtpActivate"?(<div>
               <TextBlock text={MTP_CANONICAL} style={{fontSize:13,color:"#ddd",lineHeight:1.55}}/>
               {pop.info.fb&&<div style={{marginTop:12,paddingTop:10,borderTop:"1px solid rgba(255,255,255,0.08)"}}>
                 <p style={{fontSize:10,textTransform:"uppercase",letterSpacing:1,color:"#888",fontWeight:700,marginBottom:6}}>Why for this patient</p>
                 <TextBlock text={pop.info.fb} style={{fontSize:12,color:"#bbb",lineHeight:1.5}}/>
               </div>}
-            </div>):(<TextBlock text={pop.info.fb} style={{fontSize:13,color:"#ddd",lineHeight:1.5}}/>)}
+            </div>):(<TextBlock text={pop.info.fb} style={{fontSize:13,color:"#ddd",lineHeight:1.5}}/>))}
           </div>
           {/* Footer — sticky. Mark for Review (phase-2.6.3 change 8) +
               Got It dismiss. Always visible regardless of body scroll. */}
           <div style={{padding:"12px 20px 16px",borderTop:"1px solid rgba(255,255,255,0.06)",flexShrink:0}}>
-            <button onClick={function(){var it=popMarkItem();if(it)toggleMark(it);}} style={{width:"100%",padding:"8px 12px",borderRadius:10,fontSize:12,fontWeight:700,cursor:"pointer",background:popMarked?"rgba(254,202,87,0.2)":"rgba(255,255,255,0.06)",border:"1px solid "+(popMarked?"rgba(254,202,87,0.55)":"rgba(255,255,255,0.18)"),color:popMarked?"#FECA57":"#ddd"}}>{popMarked?"✓ Marked for Review":"Mark for Review"}</button>
-            <p style={{fontSize:10,color:"#888",marginTop:6,marginBottom:10,textAlign:"center",lineHeight:1.4}}>{popMarked?"Will appear in the debrief with an expanded deep dive.":"Save this intervention for a deeper review at the end."}</p>
+            {/* Phase-5.3 sub-step E: Mark for Review disabled while
+                lazy fetch is in flight (the fb is still the synthesized
+                placeholder; pinning it would store useless context for
+                the deep-dive prompt). Re-enables once content lands. */}
+            <button disabled={popLoading} onClick={function(){
+              if(popLoading)return;
+              var it=popMarkItem();
+              if(!it)return;
+              var transition=toggleMark(it);
+              if(transition!=="added")return;
+              var sc=usePlayerStore.getState().activeScenario;
+              if(!sc)return;
+              expandSingleMarkedItem(sc,it).then(function(text){
+                if(text)usePlayerStore.getState().setDeepDive(it.id,text);
+              }).catch(function(err){
+                console.warn("[eager deep-dive] "+it.id+" — "+(err&&err.message||err));
+              });
+            }} style={{width:"100%",padding:"8px 12px",borderRadius:10,fontSize:12,fontWeight:700,cursor:popLoading?"not-allowed":"pointer",background:popMarked?"rgba(254,202,87,0.2)":"rgba(255,255,255,0.06)",border:"1px solid "+(popMarked?"rgba(254,202,87,0.55)":"rgba(255,255,255,0.18)"),color:popMarked?"#FECA57":"#ddd",opacity:popLoading?0.45:1}}>{popMarked?"✓ Marked for Review":"Mark for Review"}</button>
+            <p style={{fontSize:10,color:"#888",marginTop:6,marginBottom:10,textAlign:"center",lineHeight:1.4}}>{popLoading?"Available once details finish loading.":popMarked?"Will appear in the debrief with an expanded deep dive.":"Save this intervention for a deeper review at the end."}</p>
             <button onClick={function(){setPop(null);}} style={{width:"100%",padding:"12px 0",borderRadius:12,fontWeight:700,color:"white",fontSize:13,background:pop.info.ok?"rgba(0,184,148,0.3)":"rgba(255,165,2,0.2)",border:"none",cursor:"pointer"}}>Got It</button>
           </div>
         </div></div>)}

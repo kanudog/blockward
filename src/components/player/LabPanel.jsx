@@ -21,6 +21,11 @@ export function LabPanel(props) {
   var flags = props.flags || null;
   var onFlag = props.onFlag || null;
   var showFb = !!props.showFb;
+  // Phase-5.2.5: optional phaseIdx for slot-ref construction in
+  // marked-for-review payloads. Defaults to 0 when omitted (read-only
+  // callers like cb-alert/cb-act don't show Why? buttons anyway, so
+  // the slot ref is never actually built in those modes).
+  var phaseIdx = props.phaseIdx !== undefined ? props.phaseIdx : 0;
   var clickable = !!(badMap && flags && onFlag);
   var _why = useState(null); var whyTarget = _why[0]; var setWhyTarget = _why[1];
   if (labs.length === 0) return null;
@@ -112,7 +117,7 @@ export function LabPanel(props) {
           return (<div key={i}>{inner}</div>);
         })}
       </div>
-      <WhyModal open={!!whyTarget} onClose={function(){setWhyTarget(null);}} title={whyTarget?whyTarget.name+": "+whyTarget.value+" "+(whyTarget.unit||""):""} body={whyTarget?whyTarget.why:""} accent={whyTarget&&(whyTarget._abnormal||whyTarget.critical)?"#ff7675":"#4ECDC4"} item={whyTarget?{id:labCanonicalId(whyTarget),label:whyTarget.name+" "+whyTarget.value+(whyTarget.unit?" "+whyTarget.unit:""),type:"lab",originalWhy:whyTarget.why}:null}/>
+      <WhyModal open={!!whyTarget} onClose={function(){setWhyTarget(null);}} title={whyTarget?whyTarget.name+": "+whyTarget.value+" "+(whyTarget.unit||""):""} body={whyTarget?whyTarget.why:""} accent={whyTarget&&(whyTarget._abnormal||whyTarget.critical)?"#ff7675":"#4ECDC4"} item={whyTarget?{id:labCanonicalId(whyTarget),kind:"lab",phaseIdx:phaseIdx,label:whyTarget.name+" "+whyTarget.value+(whyTarget.unit?" "+whyTarget.unit:""),_slotRef:{kind:"lab",phaseIdx:phaseIdx,indexOrId:whyTarget.name}}:null}/>
     </div>
   );
 }

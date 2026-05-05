@@ -6,6 +6,7 @@ import { ALL_TOOLS, ALL_MEDS, isCustomTool, isCustomMed } from "../../lib/scenar
 import { usePlayerStore } from "../../stores/playerStore.js";
 import { expandMarkedItems } from "../../lib/ai/client.js";
 import { replaceIdsWithLabels } from "../../lib/scenarios/labels.js";
+import { resolveSlotText, kindToPromptType } from "../../lib/scenarios/slotResolve.js";
 
 var BS={width:"100%",marginTop:12,padding:"12px 0",borderRadius:12,fontWeight:700,color:"white",fontSize:16,border:"none",cursor:"pointer"};
 var GR="linear-gradient(135deg,#4ECDC4,#44B09E)";
@@ -16,9 +17,15 @@ export function Debrief(props){
   var assessHistory=usePlayerStore(function(s){return s.assessHistory;});
   var actionHistory=usePlayerStore(function(s){return s.actionHistory;});
   var markedForReview=usePlayerStore(function(s){return s.markedForReview;});
+  // Phase-5.2.5: eager-fetch results land here as the user marks items
+  // during play. Reading at debrief time avoids a redundant batch call
+  // for items that already finished generating.
+  var deepDiveCache=usePlayerStore(function(s){return s.deepDiveCache;});
   var _expI=useState("marked");var expI=_expI[0];var setExpI=_expI[1];
   var _itemExp=useState({});var itemExp=_itemExp[0];var setItemExp=_itemExp[1];
   var toggleItem=function(k){setItemExp(function(p){var n=Object.assign({},p);n[k]=!n[k];return n;});};
+  // Local cache for items that come in via the batch backstop. Merged
+  // with the store-level deepDiveCache at render time.
   var _deepDives=useState({});var deepDives=_deepDives[0];var setDeepDives=_deepDives[1];
   var _deepStatus=useState("idle");var deepStatus=_deepStatus[0];var setDeepStatus=_deepStatus[1];
   var _deepError=useState(null);var deepError=_deepError[0];var setDeepError=_deepError[1];
@@ -32,9 +39,26 @@ export function Debrief(props){
   useEffect(function(){
     if(markedForReview.length===0)return;
     if(deepStatus!=="idle")return;
+    // Phase-5.2.5 batch backstop: only fetch items that the eager
+    // path didn't already cover. If every marked item is already in
+    // deepDiveCache, skip the batch entirely and short-circuit to "done".
+    var needed=markedForReview.filter(function(item){return !deepDiveCache[item.id];});
+    if(needed.length===0){setDeepStatus("done");return;}
+    // Map the slot-ref-shape items into the {id,label,type,originalWhy}
+    // shape that expandMarkedItems expects. originalWhy is resolved
+    // freshly from the live scenario so any lazy-fetch updates are
+    // visible to the deep-dive prompt.
+    var internalItems=needed.map(function(item){
+      return{
+        id:item.id,
+        label:item.label,
+        type:kindToPromptType(item.kind),
+        originalWhy:(item._slotRef?resolveSlotText(sc,item._slotRef):null)||""
+      };
+    });
     setDeepStatus("loading");
     var controller=new AbortController();
-    expandMarkedItems(sc,markedForReview,controller.signal).then(function(map){
+    expandMarkedItems(sc,internalItems,controller.signal).then(function(map){
       setDeepDives(map);setDeepStatus("done");
     }).catch(function(err){
       // Phase-3.0-hotfix change 5: AbortError on this catch is the
@@ -149,20 +173,23 @@ export function Debrief(props){
         {markedForReview.map(function(item,i){
           var k="marked:"+i;
           var open=!!itemExp[k];
-          var deep=deepDives[item.id];
-          // Phase-2.6.5 change 2: during loading AND on error, expanded
-          // body shows the original notes (user's Phase 1/2 Why? content).
-          // On success it shows the deep dive. The banner above
-          // distinguishes loading vs error visually.
+          // Phase-5.2.5: prefer the eager-fetched deep dive (kicked off
+          // when the user marked the item) over the batch backstop result.
+          // Fallback path resolves the current why/fb fresh from the
+          // scenario via slot ref — that text reflects any lazy-fetch
+          // updates that landed after the user marked the item.
+          var deep=deepDiveCache[item.id]||deepDives[item.id];
+          var typeChip=item.kind||item.type||"";
+          var fallbackText=(item._slotRef?resolveSlotText(sc,item._slotRef):null)||"No additional content available.";
           return(<div key={k} style={{marginBottom:6,borderRadius:8,background:"rgba(255,255,255,0.03)",border:"1px solid rgba(254,202,87,0.25)",overflow:"hidden"}}>
             <button onClick={function(){toggleItem(k);}} style={{width:"100%",textAlign:"left",padding:"8px 10px",background:"none",border:"none",cursor:"pointer",color:"white",display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
-              <span style={{fontSize:12,fontWeight:700,color:"#FECA57",flex:1,minWidth:0}}>{item.label}<span style={{fontSize:9,color:"#888",fontWeight:600,marginLeft:6,textTransform:"uppercase",letterSpacing:0.5}}>{item.type}</span></span>
+              <span style={{fontSize:12,fontWeight:700,color:"#FECA57",flex:1,minWidth:0}}>{item.label}<span style={{fontSize:9,color:"#888",fontWeight:600,marginLeft:6,textTransform:"uppercase",letterSpacing:0.5}}>{typeChip}</span></span>
               <span style={{color:"#FECA57",flexShrink:0}}>{open?<Minus size={12}/>:<Plus size={12}/>}</span>
             </button>
             {open&&<div style={{padding:"0 10px 10px"}}>
               {deep
                 ?<TextBlock text={deep} style={{fontSize:12,color:"#ddd",lineHeight:1.6}}/>
-                :<TextBlock text={item.originalWhy||"No additional content available."} style={{fontSize:12,color:"#aaa",lineHeight:1.5}}/>}
+                :<TextBlock text={fallbackText} style={{fontSize:12,color:"#aaa",lineHeight:1.5}}/>}
             </div>}
           </div>);
         })}

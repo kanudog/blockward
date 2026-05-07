@@ -37,7 +37,7 @@ var initialState = {
   lazyFetchedSlots: {}
 };
 
-export var usePlayerStore = create(function(set) {
+export var usePlayerStore = create(function(set, get) {
   return Object.assign({}, initialState, {
     start: function(sc) {
       set({

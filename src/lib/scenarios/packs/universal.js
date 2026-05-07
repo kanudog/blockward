@@ -13,6 +13,7 @@ export const TOOLS = [
   { id: "thermometer",   label: "Recheck Temp",                        pack: "universal" },
   { id: "pulseOx",       label: "Place Pulse Oximeter",                pack: "universal" },
   { id: "bpCuff",        label: "Place BP Cuff",                       pack: "universal" },
+  { id: "vsMonitor",     label: "Connect to Vital Signs Monitor",      pack: "universal" },
   { id: "pupilCheck",    label: "Check Pupils",                        pack: "universal" },
   { id: "capRefill",     label: "Recheck Capillary Refill",            pack: "universal" }
 ];

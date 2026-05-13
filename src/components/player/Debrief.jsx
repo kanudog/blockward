@@ -103,7 +103,7 @@ export function Debrief(props){
   var caught=[];var missed=[];
   assessHistory.forEach(function(snap){
     snap.items.forEach(function(it){
-      var entry={phase:snap.phaseName,label:it.label,why:it.why,cat:it.cat,bad:it.bad,userFlagged:it.userFlagged};
+      var entry={phase:snap.phaseName,label:it.label,why:it.why,bad:it.bad,userFlagged:it.userFlagged};
       var correct=it.userFlagged===it.bad;
       if(correct&&(it.userFlagged||it.bad))caught.push(entry);
       else if(!correct)missed.push(entry);

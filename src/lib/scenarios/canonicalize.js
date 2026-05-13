@@ -1,13 +1,11 @@
 // Phase-3.0-hotfix: canonical-ID helpers that bridge the user-facing
 // click targets (lab tiles, vital tiles, body-system sub-finding rows)
-// to the assessItems that drive scoring + the Why? content.
+// to the items that drive scoring + the Why? content.
 //
-// Pre-hotfix the LabPanel / BodySystemsView / AssessPanel each did their
-// own content-substring match against assessItems. When the AI's
-// assessItems labels did not exactly match the displayed labels, the
-// match silently failed: the tile became unclickable and got no Why?
-// button. This module replaces that fragile coupling with a single
-// canonical-ID scheme, so click targets are decoupled from scoring.
+// Phase-5.4.3a: schema 5.4.1 stores items in typed collections
+// (phase.vitals object keyed by id, phase.signs[] and phase.labs[]
+// arrays of id-keyed items). buildBadMap iterates the typed collections
+// directly; the assessItems demux/cat-discriminator has been deleted.
 
 // Map a vital-display label keyword to the vital field key used in
 // `phase.vitals`. Mirrors the heuristic that AssessPanel previously
@@ -26,62 +24,48 @@ export function vitalKeyForLabel(label) {
 // Canonical IDs for displayed items. Stable per-phase because labs and
 // signs are scoped to a phase. Mark for Review and the deep-dive
 // expander already use these prefixes — keep them aligned.
-export function labCanonicalId(lab) { return "lab:" + (lab && lab.name ? lab.name : ""); }
+//
+// Phase-5.4.3a: items now carry an explicit .id field (signs[].id,
+// labs[].id). The helpers prefer that .id and fall back to the legacy
+// .label / .name fields so transitional fixtures still work.
+export function labCanonicalId(lab) {
+  if (!lab) return "lab:";
+  return "lab:" + (lab.id || lab.name || "");
+}
 export function vitalCanonicalId(key) { return "vital:" + key; }
-export function signCanonicalId(sign) { return "sign:" + (sign && sign.label ? sign.label : ""); }
-
-// Map an assessItem to its canonical display ID using the surrounding
-// phase context (labs[], signs[], vitals object). Returns null when no
-// display item corresponds — the assessItem still scores, but the user
-// has no tile to click. Callers should treat null as "orphaned".
-export function canonicalizeAssessItem(it, phase) {
-  if (!it) return null;
-  if (it.cat === "vital") {
-    var k = vitalKeyForLabel(it.label);
-    return k ? vitalCanonicalId(k) : null;
-  }
-  if (it.cat === "lab") {
-    if (!phase || !phase.labs) return null;
-    var lblKey = (it.label || "").toLowerCase();
-    for (var i = 0; i < phase.labs.length; i++) {
-      var lab = phase.labs[i];
-      if (lab && lab.name && lblKey.indexOf(lab.name.toLowerCase()) >= 0) {
-        return labCanonicalId(lab);
-      }
-    }
-    return null;
-  }
-  if (it.cat === "clinical") {
-    if (!phase || !phase.signs) return null;
-    var key = (it.label || "").toLowerCase().trim();
-    // exact match first
-    for (var j = 0; j < phase.signs.length; j++) {
-      var s = phase.signs[j];
-      if (!s || !s.label) continue;
-      if (s.label.toLowerCase().trim() === key) return signCanonicalId(s);
-    }
-    // substring fallback both directions
-    for (var k2 = 0; k2 < phase.signs.length; k2++) {
-      var s2 = phase.signs[k2];
-      if (!s2 || !s2.label) continue;
-      var sl = s2.label.toLowerCase().trim();
-      if (sl.indexOf(key) >= 0 || key.indexOf(sl) >= 0) return signCanonicalId(s2);
-    }
-    return null;
-  }
-  return null;
+export function signCanonicalId(sign) {
+  if (!sign) return "sign:";
+  return "sign:" + (sign.id || sign.label || "");
 }
 
-// Build a canonical-ID → assessItem map for a phase. Used by the
-// rendering panels to look up bad / why content for each displayed tile.
-// Orphan assessItems (no display match) are not included in this map but
-// still flow through scoring via the assessItems list itself.
+// Build a canonical-ID → item map for a phase. Used by the rendering
+// panels to look up bad / why content for each displayed tile.
+//
+// Phase-5.4.3a: iterates phase.vitals (object keyed by id), phase.signs[]
+// and phase.labs[] directly. Map values are the typed-collection items
+// themselves — they already carry .bad and .why under the new schema.
 export function buildBadMap(phase) {
   var map = {};
-  if (!phase || !phase.assessItems) return map;
-  phase.assessItems.forEach(function(it) {
-    var cid = canonicalizeAssessItem(it, phase);
-    if (cid && !map[cid]) map[cid] = it;
-  });
+  if (!phase) return map;
+  if (phase.vitals && typeof phase.vitals === "object") {
+    Object.keys(phase.vitals).forEach(function (k) {
+      var v = phase.vitals[k];
+      // Skip the legacy scalar shape — only rich objects participate
+      // in bad/why lookups. Display code still tolerates either.
+      if (v && typeof v === "object") map[vitalCanonicalId(k)] = v;
+    });
+  }
+  if (Array.isArray(phase.signs)) {
+    phase.signs.forEach(function (s) {
+      var cid = signCanonicalId(s);
+      if (cid && !map[cid]) map[cid] = s;
+    });
+  }
+  if (Array.isArray(phase.labs)) {
+    phase.labs.forEach(function (l) {
+      var cid = labCanonicalId(l);
+      if (cid && !map[cid]) map[cid] = l;
+    });
+  }
   return map;
 }

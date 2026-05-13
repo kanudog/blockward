@@ -6,6 +6,18 @@ Working notes on architectural decisions, in-flight phase work, and pending engi
 
 ---
 
+## 2026-05-13 — Phase 5.4.3a observations for future cleanup
+
+Two pre-existing bugs surfaced during manual verification of the typed-collection migration. Both are not 5.4.3a regressions but should be addressed before Phase 5.4.4 (or alongside it, before curveball is re-enabled).
+
+Bug 1 — Mark-for-Review keying lacks phase context. The marked-entry id is type-prefixed but not phase-scoped (e.g., "tool:glucometer" rather than "tool:glucometer@phase[1]"). When the same tool or med id appears in two phases (notably curveball + regular), marking it in the first phase causes the same item to display as already-marked in the second. Proposed fix: include phaseIdx in the marked-entry id. Origin: Phase 2.6.3.
+
+Bug 2 — Eager deep-dive call has no per-slot in-flight guard. Rapid mark/unmark/mark click sequences fire expandSingleMarkedItem twice for the same slot. No crash, just wasted API calls. Proposed fix: track pending promises per slot id in playerStore; skip new fires when one is in flight. Origin: pre-existing.
+
+Both bugs traced to ActionPanel.jsx mark handling logic and playerStore.toggleMarkForReview — both files untouched by Phase 5.4.3a.
+
+---
+
 ## 2026-05-08 — Phase 5.4.2 complete, smoke test green
 
 Phase 5.4.2 (orchestrator prompt design and implementation) is complete and committed locally:

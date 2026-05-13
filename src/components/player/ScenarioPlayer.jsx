@@ -2,7 +2,17 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { Heart, Zap, Sparkles, Star, Trophy, Shield, Check } from "lucide-react";
 import { ALL_TOOLS, ALL_MEDS, isCustomTool, isCustomMed } from "../../lib/scenarios/packs/index.js";
 import { medType as lookupMedType } from "../../lib/scenarios/visualMeta.js";
-import { canonicalizeAssessItem } from "../../lib/scenarios/canonicalize.js";
+import { vitalCanonicalId, signCanonicalId, labCanonicalId } from "../../lib/scenarios/canonicalize.js";
+
+// Phase-5.4.3a: a phase has assessable items if any typed collection
+// is non-empty. Replaces the legacy ph.assessItems.length check.
+function phaseHasAssessables(ph){
+  if(!ph)return false;
+  var vCount=ph.vitals&&typeof ph.vitals==="object"?Object.keys(ph.vitals).length:0;
+  var sCount=Array.isArray(ph.signs)?ph.signs.length:0;
+  var lCount=Array.isArray(ph.labs)?ph.labs.length:0;
+  return(vCount+sCount+lCount)>0;
+}
 import { usePlayerStore } from "../../stores/playerStore.js";
 import { useScenariosStore } from "../../stores/scenariosStore.js";
 import { fetchExplanations } from "../../lib/ai/client.js";
@@ -98,10 +108,31 @@ export function ScenarioPlayer(props){
   var flag=function(id){if(!showFb)toggleFlag(id);};
   var submit=function(){
     // Phase-4a: scoring removed. Per-item breakdown still captured for debrief.
-    recordAssess({phaseId:ph.id,phaseName:ph.name||ph.id,items:ph.assessItems.map(function(it){
-      var cid=canonicalizeAssessItem(it,ph);
-      return{id:it.id,label:it.label,cat:it.cat,bad:!!it.bad,why:it.why||"",userFlagged:!!(cid&&flags[cid])};
-    })});
+    // Phase-5.4.3a: snapshot items come from typed collections directly.
+    var snapshotItems=[];
+    if(ph.vitals&&typeof ph.vitals==="object"){
+      Object.keys(ph.vitals).forEach(function(vk){
+        var v=ph.vitals[vk];if(!v||typeof v!=="object")return;
+        var cid=vitalCanonicalId(vk);
+        snapshotItems.push({id:cid,label:v.label||vk,bad:!!v.bad,why:v.why||"",userFlagged:!!flags[cid]});
+      });
+    }
+    if(Array.isArray(ph.signs)){
+      ph.signs.forEach(function(s){
+        if(!s)return;
+        var cid=signCanonicalId(s);
+        snapshotItems.push({id:cid,label:s.label||s.id||"",bad:!!s.bad,why:s.why||"",userFlagged:!!flags[cid]});
+      });
+    }
+    if(Array.isArray(ph.labs)){
+      ph.labs.forEach(function(l){
+        if(!l)return;
+        var cid=labCanonicalId(l);
+        var lbl=(l.name||l.id||"")+(l.value?" "+l.value:"")+(l.unit?" "+l.unit:"");
+        snapshotItems.push({id:cid,label:lbl,bad:!!l.bad,why:l.why||"",userFlagged:!!flags[cid]});
+      });
+    }
+    recordAssess({phaseId:ph.id,phaseName:ph.name||ph.id,items:snapshotItems});
     setShowFb(true);};
   var afterA=function(){setFlags({});setShowFb(false);if(pi<sc.phases.length-1){var n=pi+1;setPi(n);setVit(sc.phases[n].vitals);setStage("phase");}else setStage("debrief");};
   var afterAct=function(){if(!cbDone&&sc.curveball)trigCb();else setStage("reassess");};
@@ -144,7 +175,7 @@ export function ScenarioPlayer(props){
           <TextBlock text={sc.emsReport||sc.patient.history} style={{fontSize:13,color:"#ddd",lineHeight:1.6}}/>
         </div>
         {sc.learnMore&&<button onClick={function(){setLearnOpen(true);}} style={{marginBottom:12,padding:"8px 16px",borderRadius:10,fontWeight:700,color:"#74b9ff",fontSize:12,background:"rgba(116,185,255,0.1)",border:"1px solid rgba(116,185,255,0.3)",cursor:"pointer"}}>Learn More</button>}
-        <button onClick={function(){var hasAssess=ph&&ph.assessItems&&ph.assessItems.length>0;setStage(hasAssess?"assess":(phaseHasIntervention?"act":"phase"));}} style={Object.assign({},BS,{background:GR})}>{ph&&ph.assessItems&&ph.assessItems.length>0?"Assess":"Begin Intervention"}</button>
+        <button onClick={function(){var hasAssess=phaseHasAssessables(ph);setStage(hasAssess?"assess":(phaseHasIntervention?"act":"phase"));}} style={Object.assign({},BS,{background:GR})}>{phaseHasAssessables(ph)?"Assess":"Begin Intervention"}</button>
         <Modal open={learnOpen} onClose={function(){setLearnOpen(false);}} title="Background" accent="#74b9ff">
           <TextBlock text={sc.learnMore||""} style={{fontSize:13,color:"#ddd",lineHeight:1.6}}/>
         </Modal>

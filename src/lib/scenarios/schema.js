@@ -1,53 +1,60 @@
 // Scenario shape typedefs. Documentation only — no runtime validation yet.
 // See lib/scenarios/builtIn.js for SC1/SC2/SC3 as shape-of-record examples.
+//
+// Phase-5.4.3a: aligned with schema 5.4.1. Items live in typed collections
+// (vitals keyed object, signs[] and labs[] id-keyed arrays). AssessItem
+// removed — each typed-collection entry carries its own .bad/.why.
 
 /**
- * @typedef {Object} Vitals
- * @property {number} hr
- * @property {number} rr
- * @property {number} sbp
- * @property {number} dbp
- * @property {number} spo2
- * @property {number} temp
- * @property {number} cap
+ * @typedef {Object} Vital
+ * Per schema 5.4.1: vitals are rich objects keyed by id (hr, rr, sbp, dbp,
+ * spo2, temp, cap). The numeric monitor reading is on .value (string per
+ * spec); .bad and .why drive the Why? affordance during assessment.
+ * @property {string} id
+ * @property {string} label
+ * @property {string} value
+ * @property {string} unit
+ * @property {boolean} bad
+ * @property {string|null} [why]
+ * @property {string} [_slotRef]
+ */
+
+/**
+ * @typedef {Object<string, Vital>} Vitals
+ * Keyed by vital id (hr / rr / sbp / dbp / spo2 / temp / cap).
  */
 
 /**
  * @typedef {Object} Sign
  * Split-objective-from-pathophys (phase-2.5 issue 1): `finding` is what the
  * nurse sees; `why` is optional pathophysiology shown only when the user
- * clicks a "Why?" button. Prior schema used `detail` for the same slot as
- * `finding` but mixed in rationale; the rename reinforces the contract.
+ * clicks a "Why?" button. id was added in Phase 5.4.3a so _slotRef can
+ * address signs without label-substring matching.
+ * @property {string} id
  * @property {string} label
  * @property {string} finding
  * @property {"head"|"face"|"body"} pos
  * @property {string} [sys]
+ * @property {boolean} [bad]
  * @property {string} [why]
- */
-
-/**
- * @typedef {Object} AssessItem
- * `label` is the objective finding (e.g. "HR 178"). `why` is pathophysiology
- * shown on demand after the user submits — never before. Phase-2.5 issue 1
- * reinforces this by hiding `why` behind a "Why?" button in AssessPanel.
- * @property {string} id
- * @property {string} label
- * @property {"vital"|"lab"|"clinical"} cat
- * @property {boolean} bad
- * @property {string} [why]
+ * @property {string} [_slotRef]
  */
 
 /**
  * @typedef {Object} Lab
  * Phase-2.5 issue 1 renamed `explain` → `why` for consistency across signs,
  * labs, and assess items. Critical labs should still carry `why`;
- * non-critical labs may omit it.
+ * non-critical labs may omit it. id was added in Phase 5.4.3a so _slotRef
+ * can address labs without name-substring matching.
+ * @property {string} id
  * @property {string} name
  * @property {string} value
  * @property {string} unit
  * @property {string} ref
  * @property {boolean} critical
+ * @property {boolean} [bad]
  * @property {string} [why]
+ * @property {string} [_slotRef]
  */
 
 /**
@@ -78,7 +85,6 @@
  * @property {string} narrative
  * @property {Vitals} vitals
  * @property {Sign[]} signs
- * @property {AssessItem[]|null} assessItems
  * @property {Lab[]} labs
  * @property {string[]|null} tools
  * @property {string[]|null} meds

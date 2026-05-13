@@ -16,6 +16,11 @@
 //
 // Also added validateCounts() which warns when an AI scenario falls
 // short of the per-category counts the prompt asked for.
+//
+// Phase-5.4.3a: migrated to schema 5.4.1 typed collections.
+// phase.assessItems is gone; vitals (object) / signs[] / labs[] are
+// walked directly. Curveball iteration is dropped — 5.4.1 doesn't
+// emit a curveball block in v1.
 
 export function validateSchema(sc){
   var errs=[];
@@ -41,8 +46,7 @@ export function validateSchema(sc){
       if(!p||typeof p!=="object"){errs.push("phases["+i+"] is not an object");return;}
       if(!p.id)errs.push("phases["+i+"].id missing");
       if(!p.vitals)errs.push("phases["+i+"].vitals missing");
-      if(!Array.isArray(p.signs))errs.push("phases["+i+"].signs must be an array");
-      if(p.assessItems&&!Array.isArray(p.assessItems))errs.push("phases["+i+"].assessItems must be an array when present");
+      if(p.signs&&!Array.isArray(p.signs))errs.push("phases["+i+"].signs must be an array when present");
       if(p.labs&&!Array.isArray(p.labs))errs.push("phases["+i+"].labs must be an array when present");
     });
   }
@@ -85,7 +89,53 @@ function parseThreshold(why){
   return null;
 }
 
-// validateConsistency: walks every assessItem and classifies any
+// Phase-5.4.3a: yield every assessable item across a phase as a flat
+// stream of {id, label, why, bad, _collection, _key} records so the
+// existing checkItem/applyAutocorrection logic can iterate uniformly
+// across vitals / signs / labs without re-implementing the demux.
+function _iterPhaseItems(p) {
+  var out = [];
+  if (p && p.vitals && typeof p.vitals === "object") {
+    Object.keys(p.vitals).forEach(function (k) {
+      var v = p.vitals[k];
+      if (!v || typeof v !== "object") return;
+      out.push({
+        id: v.id || k,
+        label: ((v.label || k) + " " + (v.value || "")).trim(),
+        why: v.why,
+        bad: !!v.bad,
+        _ref: v
+      });
+    });
+  }
+  if (Array.isArray(p && p.signs)) {
+    p.signs.forEach(function (s) {
+      if (!s) return;
+      out.push({
+        id: s.id || s.label,
+        label: s.label || s.id,
+        why: s.why,
+        bad: !!s.bad,
+        _ref: s
+      });
+    });
+  }
+  if (Array.isArray(p && p.labs)) {
+    p.labs.forEach(function (l) {
+      if (!l) return;
+      out.push({
+        id: l.id || l.name,
+        label: ((l.name || l.id) + " " + (l.value || "")).trim(),
+        why: l.why,
+        bad: !!l.bad,
+        _ref: l
+      });
+    });
+  }
+  return out;
+}
+
+// validateConsistency: walks every assessable item and classifies any
 // contradiction. Returns array of decisions:
 //   {itemId, label, phase, kind, message, suggestedBad}
 // Kinds: "autocorrect" (caller may set bad to suggestedBad),
@@ -109,7 +159,6 @@ export function validateConsistency(sc){
     if(it.bad&&!violatesLo&&!violatesHi){
       // Contradiction: marked abnormal, no violation found.
       if(withinRange){
-        // C1: auto-correct — verifiably within stated normal range.
         decisions.push({
           itemId:it.id,label:it.label,phase:phaseName,
           kind:"autocorrect",suggestedBad:false,
@@ -117,11 +166,7 @@ export function validateConsistency(sc){
         });
         return;
       }
-      // Single-sided threshold. Two sub-cases:
       if(hasLo&&!hasHi){
-        // Parser found "lo=N" but value is >= N. If value is far above N,
-        // the AI likely meant a hi threshold ("above N is bad") and the
-        // parser misread the wording. Keep the flag, log a warning.
         if(v>=thr.lo*1.5){
           decisions.push({
             itemId:it.id,label:it.label,phase:phaseName,
@@ -139,7 +184,6 @@ export function validateConsistency(sc){
         });
         return;
       }
-      // Anything else: ambiguous — surface to UI but do not mutate.
       decisions.push({
         itemId:it.id,label:it.label,phase:phaseName,
         kind:"ambiguous",
@@ -148,12 +192,8 @@ export function validateConsistency(sc){
     }
   }
   sc.phases.forEach(function(p){
-    if(!p||!Array.isArray(p.assessItems))return;
-    p.assessItems.forEach(function(it){checkItem(it,p.name||p.id);});
+    _iterPhaseItems(p).forEach(function(it){checkItem(it,p.name||p.id);});
   });
-  if(sc.curveball&&Array.isArray(sc.curveball.assessItems)){
-    sc.curveball.assessItems.forEach(function(it){checkItem(it,"Curveball: "+(sc.curveball.name||""));});
-  }
   return decisions;
 }
 
@@ -166,36 +206,30 @@ export function applyAutocorrections(sc,decisions){
     if(d.kind!=="autocorrect")return;
     var found=false;
     sc.phases.forEach(function(p){
-      if(!Array.isArray(p.assessItems))return;
-      p.assessItems.forEach(function(it){
-        if(it.id===d.itemId){it.bad=d.suggestedBad;found=true;}
+      _iterPhaseItems(p).forEach(function(it){
+        if(it.id===d.itemId&&it._ref){it._ref.bad=d.suggestedBad;found=true;}
       });
     });
-    if(!found&&sc.curveball&&Array.isArray(sc.curveball.assessItems)){
-      sc.curveball.assessItems.forEach(function(it){
-        if(it.id===d.itemId){it.bad=d.suggestedBad;found=true;}
-      });
-    }
     if(found)applied++;
   });
   return applied;
 }
 
-// validateCounts: warn if AI returned fewer per-category items than
-// the prompt asked for. Phase-2.6 C2.
+// validateCounts: warn if the triage phase falls short of the
+// per-category counts the prompt asked for. Phase-2.6 C2.
+// Phase-5.4.3a: counts come from direct typed-collection lengths.
 export function validateCounts(sc){
   var warnings=[];
   if(!sc||!Array.isArray(sc.phases))return warnings;
   sc.phases.forEach(function(p,idx){
-    if(!Array.isArray(p.assessItems))return;
-    var byCat={vital:0,lab:0,clinical:0};
-    p.assessItems.forEach(function(it){if(byCat[it.cat]!==undefined)byCat[it.cat]++;});
-    if(idx===0){
-      if(p.assessItems.length<6)warnings.push({phase:p.name||p.id,message:"Only "+p.assessItems.length+" assess items in triage phase; prompt asked for 6-8."});
-      ["vital","lab","clinical"].forEach(function(cat){
-        if(byCat[cat]<3)warnings.push({phase:p.name||p.id,message:"Only "+byCat[cat]+" "+cat+" items; prompt asked for 3+ each category."});
-      });
-    }
+    if(idx!==0)return;
+    var vCount=p.vitals&&typeof p.vitals==="object"?Object.keys(p.vitals).length:0;
+    var sCount=Array.isArray(p.signs)?p.signs.length:0;
+    var lCount=Array.isArray(p.labs)?p.labs.length:0;
+    var pname=p.name||p.id;
+    if(vCount<3)warnings.push({phase:pname,message:"Only "+vCount+" vitals; prompt asks for 3+."});
+    if(sCount<3)warnings.push({phase:pname,message:"Only "+sCount+" signs; prompt asks for 3+."});
+    if(lCount<3)warnings.push({phase:pname,message:"Only "+lCount+" labs; prompt asks for 3+."});
   });
   return warnings;
 }

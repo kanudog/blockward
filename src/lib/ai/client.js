@@ -1,6 +1,7 @@
 import { buildSystemPrompt, buildDeepDivePrompt, buildExplanationPrompt, MODEL_ID, HAIKU_MODEL_ID, MAX_TOKENS } from "./prompt.js";
 import { resolveSlotText, kindToPromptType } from "../scenarios/slotResolve.js";
 import { validateSchema, validateConsistency, validateCounts, applyAutocorrections } from "./validate.js";
+import { migrateLegacyScenario } from "../scenarios/migrateLegacyScenario.js";
 
 var NAME_HINT_LETTERS="ABCDEFGHIJKLMNOPRSTUVWYZ"; // skip Q and X — rare initial sounds
 function randomNameHint(){
@@ -31,6 +32,11 @@ var PHASE_KEYS=[
 ];
 
 function applyPostParseFixups(scenario,cbMode){
+  // Phase-5.4.3a: legacy buildSystemPrompt() still instructs Sonnet to
+  // emit flat assessItems[]. Upgrade the shape to schema 5.4.1 before
+  // anything else touches the scenario. Idempotent — no-op for 5.4.1
+  // output once Phase 5.4.4 wires in the orchestrator prompt.
+  scenario=migrateLegacyScenario(scenario);
   if(!cbMode)scenario.curveball=null;
   if(!scenario.debrief)scenario.debrief={summary:"Complete.",explainers:[]};
   var schemaErrs=validateSchema(scenario);

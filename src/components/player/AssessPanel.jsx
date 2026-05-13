@@ -12,6 +12,13 @@ var BS={width:"100%",marginTop:12,padding:"12px 0",borderRadius:12,fontWeight:70
 var GR="linear-gradient(135deg,#4ECDC4,#44B09E)";
 var PP="linear-gradient(135deg,#a55eea,#8854d0)";
 
+// Phase-5.4.3a: phase.vitals entries are rich objects per schema 5.4.1:
+//   { id, label, value, unit, bad, why, _slotRef }
+// Helper extracts the display value from either the rich form or a
+// legacy scalar (tolerated during incremental migration of test fixtures).
+function vVal(v){if(v==null||v==="")return v;if(typeof v==="object")return v.value;return v;}
+function vUnit(v,fallback){if(v&&typeof v==="object"&&v.unit)return v.unit;return fallback;}
+
 export function AssessPanel(props){
   var ph=props.ph;var vit=props.vit;var curSigns=props.curSigns;var curLabs=props.curLabs;
   var flags=props.flags;var showFb=props.showFb;var submit=props.submit;var afterA=props.afterA;var flag=props.flag;
@@ -28,15 +35,17 @@ export function AssessPanel(props){
   // / clinical assessItems to their display canonical IDs.
   var badMap = buildBadMap(Object.assign({}, ph, {labs: curLabs, signs: curSigns}));
   // Phase-3.0 change 6: tile data for each vital field present in `vit`.
+  // Phase-5.4.3a: vital entries are now rich objects under schema 5.4.1.
   function vitalTiles(vitObj){
     if(!vitObj)return [];
     var t=[];
-    if(vitObj.hr!==undefined)t.push({key:"hr",label:"HR",value:vitObj.hr,unit:"bpm"});
-    if(vitObj.spo2!==undefined)t.push({key:"spo2",label:"SpO₂",value:vitObj.spo2,unit:"%"});
-    if(vitObj.rr!==undefined)t.push({key:"rr",label:"RR",value:vitObj.rr,unit:"/min"});
-    if(vitObj.sbp!==undefined&&vitObj.dbp!==undefined)t.push({key:"sbp",label:"BP",value:vitObj.sbp+"/"+vitObj.dbp,unit:"mmHg"});
-    if(vitObj.temp!==undefined)t.push({key:"temp",label:"Temp",value:typeof vitObj.temp==="number"?vitObj.temp.toFixed(1):vitObj.temp,unit:"°C"});
-    if(vitObj.cap!==undefined)t.push({key:"cap",label:"Cap Refill",value:vitObj.cap,unit:"sec"});
+    function tempStr(v){var vv=vVal(v);if(vv==null||vv==="")return vv;var n=parseFloat(vv);return isNaN(n)?vv:n.toFixed(1);}
+    if(vitObj.hr!==undefined)t.push({key:"hr",label:"HR",value:vVal(vitObj.hr),unit:vUnit(vitObj.hr,"bpm")});
+    if(vitObj.spo2!==undefined)t.push({key:"spo2",label:"SpO₂",value:vVal(vitObj.spo2),unit:vUnit(vitObj.spo2,"%")});
+    if(vitObj.rr!==undefined)t.push({key:"rr",label:"RR",value:vVal(vitObj.rr),unit:vUnit(vitObj.rr,"/min")});
+    if(vitObj.sbp!==undefined&&vitObj.dbp!==undefined)t.push({key:"sbp",label:"BP",value:vVal(vitObj.sbp)+"/"+vVal(vitObj.dbp),unit:vUnit(vitObj.sbp,"mmHg")});
+    if(vitObj.temp!==undefined)t.push({key:"temp",label:"Temp",value:tempStr(vitObj.temp),unit:vUnit(vitObj.temp,"°C")});
+    if(vitObj.cap!==undefined)t.push({key:"cap",label:"Cap Refill",value:vVal(vitObj.cap),unit:vUnit(vitObj.cap,"sec")});
     return t;
   }
   // Phase-2.6 group E: reveal vital colors only after the user has tapped

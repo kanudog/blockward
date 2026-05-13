@@ -5,6 +5,7 @@
 
 import { create } from "zustand";
 import { loadS, saveS } from "../lib/storage.js";
+import { migrateLegacyScenario } from "../lib/scenarios/migrateLegacyScenario.js";
 
 export var useScenariosStore = create(function(set, get) {
   return {
@@ -13,13 +14,19 @@ export var useScenariosStore = create(function(set, get) {
     hydrated: false,
     hydrate: function() {
       // Phase-5.1: backfill source:"ai" on any pre-existing custom scenario
-      // saved before the source marker was introduced. One-time migration —
-      // write back to localStorage only when a backfill actually happened.
+      // saved before the source marker was introduced.
+      // Phase-5.4.3a: upgrade legacy flat-assessItems scenarios to schema
+      // 5.4.1 in-place. Both upgrades are idempotent; we write back to
+      // localStorage only when an actual upgrade happened so existing
+      // saves persist the new shape (no repeat work on every hydrate).
       var customRaw = loadS("bw-custom", []);
       var migrated = false;
       var custom = customRaw.map(function(sc) {
-        if (sc && !sc.source) { migrated = true; return Object.assign({}, sc, { source: "ai" }); }
-        return sc;
+        var next = sc;
+        if (next && !next.source) { migrated = true; next = Object.assign({}, next, { source: "ai" }); }
+        var upgraded = migrateLegacyScenario(next);
+        if (upgraded !== next) migrated = true;
+        return upgraded;
       });
       if (migrated) saveS("bw-custom", custom);
       set({

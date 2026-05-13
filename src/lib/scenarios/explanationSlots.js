@@ -2,12 +2,16 @@
 // empty, or carries the synthesized fallback string. Drives the lazy
 // fetch fired from ScenarioPlayer on phase entry for AI scenarios.
 //
+// Phase-5.4.3a: schema 5.4.1 stores items in typed collections — three
+// clean loops over phase.vitals (object), phase.signs[] and phase.labs[]
+// replace the previous assessItems demux + sibling backstop walk.
+//
 // Returned items match the contract that fetchExplanations expects:
 // { id, label, type, context }. Each carries an attached _slotRef so
 // ScenarioPlayer can write the resolved text back into the right slot
 // via writeExplanationToSlot.
 
-import { vitalKeyForLabel, labCanonicalId, signCanonicalId, vitalCanonicalId } from "./canonicalize.js";
+import { vitalCanonicalId, labCanonicalId, signCanonicalId } from "./canonicalize.js";
 import { SYNTHESIZED_FB_FALLBACK } from "./slotResolve.js";
 
 function _isMissingText(s) {
@@ -41,105 +45,55 @@ export function collectMissingExplanationSlots(sc, phaseIdx) {
     out.push(item);
   }
 
-  // 1) Vitals — covered via assessItems with cat:"vital".
-  // The displayed surface is the vital chip; the explanation text lives
-  // on the matching assessItem.why. Slot ref keys by vital field name
-  // (hr, spo2, ...) for stable lookup.
-  if (phase.assessItems) {
-    phase.assessItems.forEach(function (it) {
-      if (!it || !it.cat) return;
-      if (it.cat === "vital") {
-        var vk = vitalKeyForLabel(it.label);
-        if (!vk) return;
-        if (!_isMissingText(it.why)) return;
-        pushIfNew({
-          id: vitalCanonicalId(vk),
-          label: it.label,
-          type: "vital",
-          context: { value: it.label, normalRef: phase.vitals && phase.vitals[vk], norms: sc.norms && sc.norms[vk] },
-          _slotRef: { kind: "vital", phaseIdx: phaseIdx, indexOrId: vk }
-        });
-      } else if (it.cat === "lab") {
-        // Lab assessItem's why is the primary content surface; its lab
-        // counterpart's lab.why is updated together by writeExplanationToSlot.
-        if (!_isMissingText(it.why)) return;
-        // Try to pin to a specific labs[] entry by name. If we can't
-        // find one, fall back to assessItem.id (the slot ref kind
-        // becomes "assessItem" since there's no lab to anchor to).
-        var lab = (phase.labs || []).find(function (l) { return l && l.name && it.label && it.label.toLowerCase().indexOf(l.name.toLowerCase()) >= 0; });
-        if (lab) {
-          pushIfNew({
-            id: labCanonicalId(lab),
-            label: it.label,
-            type: "lab",
-            context: { name: lab.name, value: lab.value, unit: lab.unit, ref: lab.ref, critical: !!lab.critical },
-            _slotRef: { kind: "lab", phaseIdx: phaseIdx, indexOrId: lab.name }
-          });
-        } else {
-          pushIfNew({
-            id: "assess:" + it.id,
-            label: it.label,
-            type: "assessItem",
-            context: { id: it.id, cat: it.cat, bad: !!it.bad },
-            _slotRef: { kind: "assessItem", phaseIdx: phaseIdx, indexOrId: it.id }
-          });
-        }
-      } else if (it.cat === "clinical") {
-        if (!_isMissingText(it.why)) return;
-        var sign = (phase.signs || []).find(function (s) { return s && s.label === it.label; });
-        if (sign) {
-          pushIfNew({
-            id: signCanonicalId(sign),
-            label: sign.label,
-            type: "sign",
-            context: { finding: sign.finding, sys: sign.sys, pos: sign.pos },
-            _slotRef: { kind: "sign", phaseIdx: phaseIdx, indexOrId: sign.label }
-          });
-        } else {
-          pushIfNew({
-            id: "assess:" + it.id,
-            label: it.label,
-            type: "assessItem",
-            context: { id: it.id, cat: it.cat, bad: !!it.bad },
-            _slotRef: { kind: "assessItem", phaseIdx: phaseIdx, indexOrId: it.id }
-          });
-        }
-      }
-    });
-  }
-
-  // 2) Standalone signs that aren't covered by an assessItem (rare —
-  // by schema every sign should have a clinical assessItem, but this
-  // backstop catches drift).
-  if (phase.signs) {
-    phase.signs.forEach(function (s) {
-      if (!s || !s.label) return;
-      if (!_isMissingText(s.why)) return;
-      var id = signCanonicalId(s);
-      if (seenIds[id]) return;
+  // 1) Vitals — keyed object. Each entry is a rich object with
+  // .value, .bad, .why under schema 5.4.1.
+  if (phase.vitals && typeof phase.vitals === "object") {
+    Object.keys(phase.vitals).forEach(function (vk) {
+      var v = phase.vitals[vk];
+      if (!v || typeof v !== "object") return;
+      if (!_isMissingText(v.why)) return;
       pushIfNew({
-        id: id,
-        label: s.label,
-        type: "sign",
-        context: { finding: s.finding, sys: s.sys, pos: s.pos },
-        _slotRef: { kind: "sign", phaseIdx: phaseIdx, indexOrId: s.label }
+        id: vitalCanonicalId(vk),
+        label: v.label || vk,
+        type: "vital",
+        context: { value: v.value, unit: v.unit, normalRef: sc.norms && sc.norms[vk] },
+        _slotRef: { kind: "vital", phaseIdx: phaseIdx, indexOrId: vk }
       });
     });
   }
 
-  // 3) Standalone labs not covered by an assessItem.
-  if (phase.labs) {
-    phase.labs.forEach(function (l) {
-      if (!l || !l.name) return;
-      if (!_isMissingText(l.why)) return;
-      var id = labCanonicalId(l);
-      if (seenIds[id]) return;
+  // 2) Signs — array of rich objects. id-keyed under 5.4.1; label
+  // fallback covers transitional fixtures.
+  if (Array.isArray(phase.signs)) {
+    phase.signs.forEach(function (s) {
+      if (!s) return;
+      if (!_isMissingText(s.why)) return;
+      var sid = s.id || s.label;
+      if (!sid) return;
       pushIfNew({
-        id: id,
-        label: l.name + " " + l.value + (l.unit ? " " + l.unit : ""),
+        id: signCanonicalId(s),
+        label: s.label || s.id,
+        type: "sign",
+        context: { finding: s.finding, sys: s.sys, pos: s.pos },
+        _slotRef: { kind: "sign", phaseIdx: phaseIdx, indexOrId: sid }
+      });
+    });
+  }
+
+  // 3) Labs — array of rich objects. id-keyed under 5.4.1; name
+  // fallback covers transitional fixtures.
+  if (Array.isArray(phase.labs)) {
+    phase.labs.forEach(function (l) {
+      if (!l) return;
+      if (!_isMissingText(l.why)) return;
+      var lid = l.id || l.name;
+      if (!lid) return;
+      pushIfNew({
+        id: labCanonicalId(l),
+        label: (l.name || l.id) + (l.value ? " " + l.value : "") + (l.unit ? " " + l.unit : ""),
         type: "lab",
-        context: { name: l.name, value: l.value, unit: l.unit, ref: l.ref, critical: !!l.critical },
-        _slotRef: { kind: "lab", phaseIdx: phaseIdx, indexOrId: l.name }
+        context: { name: l.name || l.id, value: l.value, unit: l.unit, ref: l.ref, critical: !!l.critical },
+        _slotRef: { kind: "lab", phaseIdx: phaseIdx, indexOrId: lid }
       });
     });
   }

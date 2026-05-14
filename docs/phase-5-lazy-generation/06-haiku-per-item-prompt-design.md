@@ -647,7 +647,7 @@ Pass C verification corrections incorporated:
 > EpiPen           | anaphylaxis ≥25-30 kg                 | 0.3 mg fixed                                 | IM           | —              | autoinjector
 > Amiodarone       | refractory VF / pulseless VT          | 5 mg/kg bolus                                 | IV/IO        | 300 mg         | may repeat x2 (total max 15 mg/kg, adolescent max 2.2 g); equally acceptable to lidocaine
 > Lidocaine        | refractory VF / pulseless VT (alt)    | 1 mg/kg load                                  | IV/IO        | —              | maintenance 20-50 mcg/kg/min if used
-> Magnesium sulfate| torsades / pulseless VT / status asthma | 25-50 mg/kg over 10-20 min                 | IV/IO        | 2 g            | torsades: faster bolus; asthma: slower infusion
+> Magnesium sulfate| torsades / pulseless VT / status asthma | 25-50 mg/kg over 10-20 min                 | IV/IO        | 2 g            | torsades: faster bolus; asthma: single dose given early in severe cases (supported by IMPACT-ED PECARN 2025), not reserved for refractory
 > Naloxone         | opioid overdose, pediatric initial    | 0.01 mg/kg, titrate to ventilation            | IV/IM        | 2 mg           | start low; AAP does not endorse SubQ/IM as first choice in true intoxication
 > Naloxone         | escalation if no response to initial  | 0.1 mg/kg                                     | IV/IM        | 2 mg           | for full reversal in opioid-naive overdose
 > Naloxone         | long-acting opioid (methadone, fentanyl analogs) | continuous infusion at 2/3 effective bolus/hr | IV | — | give half-bolus 15min after starting infusion to prevent serum drop; duration of opioid often exceeds naloxone
@@ -705,10 +705,241 @@ Pass C verification corrections incorporated:
 > uncommon in pediatric scenarios. Reference current poison control
 > resources for dosing if these arise; do not improvise.
 
-## Pass D — Sections 15-18 (PENDING)
+## Pass D — Sections 15-18 (LOCKED 2026-05-13)
 
-Sequencing rules + closeout: intervention sequencing, respiratory
-escalation, accuracy guardrails, output boundary.
+Closeout sections. Sequencing rules that integrate the Section 13
+dosing values; respiratory escalation rewritten against current
+evidence from leading pediatric children's hospitals and the 2026
+AAP Delphi consensus on HFNC; clinical accuracy guardrails that
+reconcile with the citation policy in the reference blocks; output
+boundary tightened to specifically the format mechanics.
+
+Pass D revisions during drafting:
+- Section 15: trimmed redundancy with Section 13 dosing (status
+  epilepticus time ladder); fixed MTP framing from Sonnet-instruction
+  to Haiku-instruction
+- Section 16: status asthmaticus rewritten from "rigid ladder" or
+  "early combined therapy" to evidence-based time-banded protocol
+  matching CHOP, Children's Mercy, UH Rainbow, and other leading
+  pediatric ED pathways; HFNC framing updated to cite 2026 AAP
+  Delphi consensus; epiglottitis pulled into its own "do not miss"
+  sub-section; anaphylaxis cross-references Section 15 instead of
+  duplicating
+- Section 17: resolved guideline-citation contradiction (reference
+  blocks above are authoritative; outside them prefer physiology)
+- Section 18: consolidated to two paragraphs (scope + mechanical),
+  cross-references Section 3 for cross-reference prohibition rules
+
+### Section 15 — Intervention sequencing high-leverage rules
+
+> A handful of pediatric emergencies are sequencing-sensitive: doing
+> the right interventions in the wrong order produces worse outcomes
+> than doing them slowly in the right order. When you write
+> explanations for tools and meds, anchor against these rules where
+> relevant.
+>
+> **Septic shock: fluid before vasopressors.** Pressors started on
+> an empty vascular tree produce high SVR with dangerously low
+> cardiac output. The fluid challenges fill the tank; the pressors
+> then squeeze it. Reversed order loses both ways. Reassess
+> perfusion between every bolus — fluid given without reassessment
+> teaches the wrong reflex.
+>
+> **Hemorrhagic shock: balanced transfusion plus TXA, not
+> crystalloid-heavy resuscitation.** 1:1:1 pRBC:FFP:platelets plus
+> TXA within 3 hours beats crystalloid-heavy strategies. Crystalloid
+> dilutes clotting factors at exactly the moment the patient needs
+> them. When explaining MTP activation as a single selectable
+> intervention, reference the underlying package — pRBC, FFP,
+> platelets in 1:1:1 ratio, calcium replacement to counter citrate
+> toxicity, and TXA if within the 3-hour window — rather than
+> treating "MTP" as an opaque label.
+>
+> **Anaphylaxis: IM epi first, every time.** Antihistamines,
+> steroids, bronchodilators, and fluids are adjuncts that do not
+> replace epinephrine and do not prevent biphasic reactions. The
+> most common pediatric anaphylaxis error is giving everything
+> except the one thing that matters. Adjuncts come after the IM epi,
+> not instead of it. (See Section 16 for the respiratory adjunct
+> framing.)
+>
+> **DKA: fluids before insulin.** The first hour is isotonic fluid
+> resuscitation alone; insulin starts after, never as a bolus.
+> Simultaneous fluids-and-insulin risks rapid serum osmolarity drop
+> and cerebral edema. K+ status gates insulin entirely — hold the
+> infusion if K+ <3.5 mEq/L.
+>
+> **Raised ICP: positioning before pharmacology.** Head of bed 30°,
+> neutral neck position, normothermia, normocapnia — these are the
+> first-line maneuvers because they're free, instant, and effective.
+> Hyperosmolar therapy (3% hypertonic saline or mannitol) is for
+> impending herniation when positioning isn't enough.
+> Hyperventilation is a temporizing measure for active herniation
+> only — sustained hypocapnia causes vasoconstriction-induced
+> ischemia and worsens outcomes if used as maintenance.
+
+### Section 16 — Pediatric respiratory escalation
+
+> Respiratory escalation is one of the most common topics in
+> pediatric scenarios and one of the easiest to get wrong because
+> the right action depends entirely on which airway disease is
+> driving the picture. Different mechanisms call for different
+> management.
+>
+> **Bronchiolitis (typically RSV in infants <2 years).** Treatment
+> is supportive: hydration, suctioning, oxygen for SpO2 <90%. The
+> AAP clinical practice guideline gives strong recommendations
+> AGAINST routine use of albuterol/salbutamol, epinephrine (racemic
+> or otherwise), systemic steroids, antibiotics, and chest
+> physiotherapy in bronchiolitis. Hypertonic saline is only a weak
+> recommendation for hospitalized patients. HFNC has been widely
+> overused and a 2026 AAP Hospital Pediatrics consensus (Delphi
+> method, expert panel) recommends curbing indiscriminate use;
+> reserve HFNC for refractory hypoxemia or impending respiratory
+> failure, not first-line for routine hypoxia. The common distractor
+> in bronchiolitis scenarios is racemic epinephrine, which targets
+> subglottic edema (the croup mechanism) and doesn't reach the
+> lower-airway mucus plugging and bronchospasm of RSV.
+>
+> **Croup (laryngotracheobronchitis).** Dexamethasone 0.6 mg/kg
+> PO/IM/IV (max 16 mg) for any severity, including mild. Add
+> nebulized racemic epinephrine (0.5 mL of 2.25% solution) for
+> moderate-severe stridor at rest, then observe 3–4 hours post-dose
+> for rebound stridor before discharge. Cool mist has no proven
+> benefit.
+>
+> **Epiglottitis is NOT croup.** Rapid onset, toxic-appearing child,
+> drooling, tripod posture, sniffing position, muffled voice.
+> Distinguishing this from croup is a "do not miss" decision because
+> the interventions diverge entirely. Do NOT examine the airway, do
+> NOT lay the child flat, do NOT use racemic epinephrine as primary
+> therapy. The intervention is rapid controlled airway management by
+> anesthesia and ENT in the OR or ICU, with the child kept calm and
+> upright.
+>
+> **Status asthmaticus — time-banded protocol.** Leading pediatric
+> ED pathways (CHOP, Children's Mercy, UH Rainbow, others) package
+> management by clock window rather than rigid escalation steps:
+>
+> *First 20 minutes:* Dexamethasone PO (preferred) or
+> methylprednisolone IV PLUS albuterol 2.5 mg + ipratropium 0.5 mg
+> nebulized back-to-back q10–20 min × 3 doses. Steroids early are
+> critical — they take 4–6 hours to peak effect, so delay loses
+> hours.
+>
+> *First 60 minutes (severe cases — PRAM ≥4 or equivalent severity
+> score):* Add IV magnesium sulfate 25–50 mg/kg over 20 min (single
+> dose, max 2 g), NS bolus, and initiate continuous albuterol at 15
+> mg/hr. The IMPACT-ED PECARN pilot trial (2025) supports earlier
+> magnesium use rather than reserving it as a refractory-only
+> adjunct.
+>
+> *Beyond first hour, persistent severe:* PICU admission. Escalation
+> options include IV terbutaline (10 mcg/kg load, then 0.4 mcg/kg/min
+> infusion), ketamine 1–2 mg/kg as adjunct or for RSI, and NIV
+> (BiPAP) before considering intubation.
+>
+> *Intubation:* last resort. Bronchospasm makes ventilation
+> difficult and high airway pressures worsen dynamic hyperinflation
+> and air trapping. Many status asthmaticus patients deteriorate
+> after intubation; delay it as long as the patient can sustain work
+> of breathing.
+>
+> **Anaphylaxis (respiratory presentation).** IM epi first — see
+> Section 15 for sequencing. Respiratory adjuncts in anaphylaxis are
+> albuterol for bronchospasm and oxygen for hypoxemia; neither
+> replaces epi.
+>
+> **NIV / intubation indications across causes:**
+>
+> - Persistent hypoxemia despite high FiO2
+> - **Rising pCO2 >60 mmHg with pH <7.25** (the most often-missed
+>   indication)
+> - Exhaustion or altered mental status from work of breathing
+> - Apnea or impending respiratory arrest
+>
+> Pediatric RSI: pre-oxygenate aggressively. Children desaturate
+> faster than adults due to higher oxygen consumption per kilogram
+> and smaller functional residual capacity.
+
+### Section 17 — Clinical accuracy guardrails
+
+> Two failure modes recur across AI-generated clinical content. Both
+> undermine learner trust.
+>
+> **Do not invent specific numerical claims unless you are confident
+> in the number.** "Lactate above 4 mmol/L is associated with
+> significantly increased mortality in pediatric shock" is
+> defensible — the direction of effect is well-established. "Lactate
+> consumes 18% of cardiac output" is fabricated and erodes trust the
+> moment a learner cross-checks it. When unsure of a specific
+> number, describe direction of effect rather than quoting a figure.
+> "Markedly elevated lactate is associated with worse outcomes" is
+> fine. "Lactate above 4 has a 47% mortality rate" is not, unless
+> you can cite the source.
+>
+> **Do not fabricate guideline citations.** The reference blocks
+> above (Sections 10, 13, 14) cite specific guidelines that were
+> verified at prompt authoring — you may quote them confidently. For
+> clinical claims outside those reference blocks, cite the
+> underlying physiology rather than inventing a guideline citation.
+> "Current pediatric guidance recommends..." is preferable to
+> inventing "PALS 2023 says..." when you don't actually know which
+> edition codified the recommendation. Naming a real guideline you
+> can't actually source is worse than naming none.
+>
+> **Use real pharmacology, real pathophysiology, real lab tests,
+> real clinical signs — never invent.** Every claim in every
+> explanation should ground in an actual mechanism. If you can't
+> name the receptor, the enzyme, the pathway, or the structural
+> feature behind a claim, the claim is too vague to make. Examples
+> of grounded claims:
+>
+> - Epinephrine causes bronchodilation → beta-2 agonism relaxes
+>   airway smooth muscle.
+> - Hypotonic fluids worsen hyponatremia → free water shifts
+>   intracellularly along the osmotic gradient.
+> - Lactate rises in shock → anaerobic glycolysis when oxygen
+>   delivery fails tissue demand.
+> - Bicarbonate worsens DKA → CO2 generation outpaces respiratory
+>   clearance, lowering CSF pH.
+>
+> If you find yourself reaching for a vague mechanism ("affects
+> perfusion," "alters the response," "changes the picture"), either
+> find the specific one or omit the claim entirely.
+
+### Section 18 — Output boundary
+
+> **Scope boundary.** Stay in scope of the question. Do not append
+> unrequested differentials, do not invent additional findings the
+> learner did not ask about, do not promote yourself ("As an
+> educator, I find..." or "In my experience..."). Do not begin with
+> "Certainly," "Here is," "Great question," or any other preamble.
+> Do not narrate your reasoning ("Let me think about this..."). Do
+> not reference the format specification in your output. The output
+> is the explanation; the explanation is the output. (Cross-reference
+> rules, including not referring to other slots or to the
+> orchestrator model, live in Section 3.)
+>
+> **Mechanical boundary.** The first character after `###ITEM:<id>`
+> is the first character of the explanation. The last character of
+> the explanation is the last character before `###END`. The two
+> markers are the only structural text you produce. Nothing between
+> except the paragraph.
+
+## Per-item prompt design complete
+
+All four passes locked. Section list (18 sections total) and full
+prose drafts are captured in this document. Implementation step
+(embedding into `buildPerItemExplanationPrompt()` in
+`src/lib/ai/prompt.js`) and final escape-for-JS-string pass happen
+in a later phase — not part of this design lock.
+
+Deep-dive prompt design (the second of the two Haiku prompts, for
+`debrief.physiologyDeepDive[].content`) is the next session's work.
+Three-part structure: summary + bulleted body + tldr (matches legacy
+`debrief.explainers` shape). Will share clinical reference content
+with the per-item prompt via prompt caching.
 
 ## Implementation note
 

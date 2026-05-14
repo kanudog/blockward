@@ -16,6 +16,21 @@ A running list of visual, CSS, and styling issues to be addressed by Claude Desi
 
 ## Open items
 
+### Debrief screen — physiology deep-dives (Phase 5.4.3b)
+
+- **TL;DR rendering as expandable button** — In the new debrief
+  physiology deep-dive layout (three-part content: summary +
+  bulleted body + TL;DR), the TL;DR should render as a collapsed
+  expandable element that the user taps/clicks to reveal, not as
+  always-visible prose. Default state: collapsed, showing only the
+  button label "TL;DR". Expanded state: the 1-2 sentence takeaway
+  text appears in the same row, expanding inline (NOT as a modal
+  popup overlay).
+  *Found: 2026-05-13, deep-dive prompt design phase.*
+  *Implementation note: prompt is designed to produce the TL;DR
+  paragraph with a parseable `**TL;DR:**` markdown prefix; player-
+  side rendering decision is independent of prompt content.*
+
 ### Phase 2 (Intervention) screen
 
 - **"Why?" popup background is transparent** — popup overlays directly on the page content, making the text nearly unreadable. Needs an opaque (or near-opaque) dark background with a defined edge/border. Phase 1 popup renders correctly; reference that styling.

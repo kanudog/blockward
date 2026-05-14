@@ -499,11 +499,211 @@ first (bedside clinician priority, not textbook priority).
 > finding looks the way it does), stay at the pathophysiology layer
 > and don't reach for etiology unless it adds clarity.
 
-## Pass C — Sections 10-14 (PENDING)
+## Pass C — Sections 10-14 (LOCKED 2026-05-13)
 
-Clinical reference blocks: vitals, labs, pearls, dosing, antidotes.
-Mostly verbatim from Phase 5.2 with the three accuracy corrections
-above. Sebastian reviews for any other errors.
+Clinical reference blocks. These are the cached anchor sections that
+pad the prompt above the 4,096-token cache eligibility floor and
+give Haiku canonical reference numbers to lean on rather than
+fabricate. Section 13 (resuscitation dosing) was web-verified against
+2025 PALS/AHA guidelines, 2024 AAP anaphylaxis reaffirmation, ABEM
+2024 pediatric status epilepticus, PECARN DKA FLUID + ISPAD 2022,
+CRASH-2/TIC-TOC pediatric TXA consensus, and FDA pediatric naloxone
+labeling. Three reference sections (10, 13, 14) use structured table
+format for ease of future audit; Section 11 is hybrid; Section 12
+stays prose because the content is reasoning rules, not lookup values.
+
+Pass C verification corrections incorporated:
+- Epinephrine cardiac arrest max single dose 1 mg added
+- Naloxone reframed from "partial vs full reversal" to "initial vs
+  escalation" per FDA pediatric labeling 2024
+- Amiodarone, lidocaine, magnesium sulfate, sodium bicarbonate rows
+  added (PALS 2025)
+- TXA split into <12y/<50kg pediatric protocol and ≥12y/≥50kg adult
+  protocol per Royal College of Paediatrics consensus
+- Calcium chloride vs gluconate selection context added
+- Glucose threshold outside neonatal period: <60 mg/dL (Sebastian's
+  facility threshold)
+- CRP cutoff: 8 mg/dL with explicit mg/L equivalence (>80 mg/L)
+- Guideline year citations preserved (AAP 2011, PES 2015, PECARN
+  NEJM 2018, etc.)
+
+### Section 10 — Pediatric vital sign reference (PALS 2020/2025)
+
+> Anchored to: PALS 2020/2025; capillary refill thresholds per WHO
+> and Oxford CRT systematic review (Fleming PLOS ONE 2015).
+>
+> ```
+> PEDIATRIC VITAL RANGES (awake)
+> Age band            | HR bpm    | RR /min | SBP hypotension threshold (5th %ile)
+> Neonate 0-28d       | 100-205   | 30-53   | <60
+> Infant 1-12mo       | 100-180   | 30-53   | <70
+> Toddler 1-3y        | 98-140    | 22-37   | <70 + (2 × age in years)
+> Preschool 4-6y      | 80-120    | 20-28   | <70 + (2 × age in years)
+> School age 6-12y    | 75-118    | 18-25   | <70 + (2 × age in years)
+> Adolescent 12y+     | 60-100    | 12-20   | <90
+> ```
+>
+> Universal: SpO2 target >94% sea level. Temp 36.5–37.5 °C; rectal
+> runs 0.5–1 °C above oral/axillary. Sleep HR runs ~20–30 bpm below
+> awake across all bands.
+>
+> ```
+> CAPILLARY REFILL
+> ≤2 sec  | clearly normal
+> 2-3 sec | borderline (some healthy children measure to 2.5s)
+> ≥3 sec  | clearly abnormal, red flag
+> ```
+>
+> Apply contextually: 2.5s in a febrile but otherwise-well child is
+> borderline; 3s with mottling and tachycardia is decompensating.
+>
+> PALS hypotension threshold is the 5th percentile — by the time you
+> cross it, the child is already significantly hypotensive. Clinical
+> concern should rise as BP drops toward threshold, not only after
+> crossing it. The 50th-percentile target (90 + 2 × age in years) is
+> the better resuscitation goal. Children compensate longer than
+> adults; hypotension is late and ominous, not an early sign of shock.
+
+### Section 11 — Age-stratified labs that matter
+
+> Anchored to: AAP 2011 neonatal hypoglycemia, PES 2015 neonatal
+> hypoglycemia.
+>
+> Most labs (electrolytes, lactate, pH, troponin, CRP) follow adult
+> ranges from infancy onward. The ones that do not:
+>
+> ```
+> AGE-STRATIFIED LAB RANGES (the ones that differ from adult)
+> Lab          | Neonate    | Infant      | Toddler    | School+
+> Hemoglobin   | 14-22      | 9-11 (nadir 2-3mo) → 11-13 by 1y | 11-13 | adult by puberty
+> WBC          | 10-30k     | 6-17k       | 5-15k      | 4.5-13k
+> BUN          | 5-18       | 5-18        | 5-18       | 5-18 (vs adult 7-20)
+> Creatinine   | 0.2-0.5    | 0.2-0.5     | 0.2-0.5    | 0.2-0.5 (vs adult 0.7-1.3)
+> ```
+>
+> ```
+> GLUCOSE TREATMENT THRESHOLDS
+> Neonate first 4h     | <40 (AAP) | target >50 (PES, stricter alternative)
+> Neonate 4-24h        | <45 (AAP) | target >50 (PES)
+> Neonate after 24h    | <47 (AAP) | target >60 (PES)
+> Outside neonatal     | <60       | (conventional treatment threshold)
+> ```
+>
+> Both AAP and PES neonatal guidelines are defensible — pick by
+> institutional policy. The hemoglobin nadir at 2–3 months is
+> physiologic, not pathologic; a hemoglobin of 10 in a 2-month-old
+> does not warrant transfusion absent other indication.
+
+### Section 12 — Pattern recognition pearls
+
+> Anchored to: clinical pattern recognition, PALS 2020/2025 derived
+> rules, Winter's formula for compensated metabolic acidosis.
+>
+> **Lactate** above 2 mmol/L should match a perfusion picture (cool
+> extremities, prolonged capillary refill, narrow pulse pressure,
+> lethargy). A high lactate without a perfusion picture should
+> prompt suspicion of a non-perfusion cause before assuming shock.
+>
+> **Acidemia drives potassium out of cells**; hyperkalemia and
+> acidosis travel together. Conversely, correcting acidosis without
+> addressing the total body potassium deficit (common in DKA) can
+> drop serum K+ precipitously once insulin and fluids begin working.
+>
+> **Bandemia** (band neutrophils above 5%) signals marrow releasing
+> immature cells under demand — a hallmark of acute bacterial
+> infection. A normal WBC with bandemia is still concerning; the
+> bandemia is the more sensitive marker in early bacterial sepsis.
+>
+> **Henderson-Hasselbalch** must reconcile pH with pCO2 and HCO3; an
+> expected-versus-actual gap signals a mixed disorder. For metabolic
+> acidosis, expected pCO2 ≈ 1.5 × HCO3 + 8 (Winter's formula). A
+> pCO2 that doesn't track tells you the picture is mixed.
+>
+> **CRP** in single digits does not reliably distinguish viral from
+> bacterial infection. CRP above 8 mg/dL (equivalent to above 80
+> mg/L) with bandemia in a febrile infant strongly suggests
+> bacterial sepsis. US labs report CRP in either mg/dL or mg/L
+> depending on the institution — the threshold above corresponds to
+> the same clinical state regardless of which unit appears on the
+> report.
+
+### Section 13 — Weight-based pediatric resuscitation dosing
+
+> Anchored to: PALS 2025 (Lasa et al, Circulation 2025); AAP 2017
+> anaphylaxis (reaffirmed March 2024); ABEM 2024 Pediatric Status
+> Epilepticus; ISPAD 2022 / PECARN DKA FLUID Trial (NEJM 2018);
+> CRASH-2 / TIC-TOC pediatric TXA consensus; FDA naloxone pediatric
+> labeling 2024.
+>
+> All doses mg/kg unless noted. Recompute every dose against the
+> patient's exact weight.
+>
+> ```
+> RESUSCITATION DOSING
+> Drug             | Indication                            | Dose                                          | Route        | Max single dose | Notes
+> Epinephrine      | cardiac arrest                        | 0.01 mg/kg of 1:10,000                        | IV/IO        | 1 mg           | repeat q3-5min; equals 0.1 mL/kg of 1:10,000; ET dose 0.1 mg/kg of 1:1,000
+> Epinephrine      | anaphylaxis                           | 0.01 mg/kg of 1:1,000                         | IM anterolateral thigh | 0.5 mg | repeat q5-15min PRN; biphasic risk reduces with prompt IM dosing
+> EpiPen Jr        | anaphylaxis ~10-25 kg                 | 0.15 mg fixed                                 | IM           | —              | autoinjector
+> EpiPen           | anaphylaxis ≥25-30 kg                 | 0.3 mg fixed                                 | IM           | —              | autoinjector
+> Amiodarone       | refractory VF / pulseless VT          | 5 mg/kg bolus                                 | IV/IO        | 300 mg         | may repeat x2 (total max 15 mg/kg, adolescent max 2.2 g); equally acceptable to lidocaine
+> Lidocaine        | refractory VF / pulseless VT (alt)    | 1 mg/kg load                                  | IV/IO        | —              | maintenance 20-50 mcg/kg/min if used
+> Magnesium sulfate| torsades / pulseless VT / status asthma | 25-50 mg/kg over 10-20 min                 | IV/IO        | 2 g            | torsades: faster bolus; asthma: slower infusion
+> Naloxone         | opioid overdose, pediatric initial    | 0.01 mg/kg, titrate to ventilation            | IV/IM        | 2 mg           | start low; AAP does not endorse SubQ/IM as first choice in true intoxication
+> Naloxone         | escalation if no response to initial  | 0.1 mg/kg                                     | IV/IM        | 2 mg           | for full reversal in opioid-naive overdose
+> Naloxone         | long-acting opioid (methadone, fentanyl analogs) | continuous infusion at 2/3 effective bolus/hr | IV | — | give half-bolus 15min after starting infusion to prevent serum drop; duration of opioid often exceeds naloxone
+> Lorazepam        | status epilepticus, first-line        | 0.1 mg/kg                                     | IV/IO        | 4 mg/dose      | repeat once at 5min if persists
+> Midazolam        | status, no IV access                  | 0.2 mg/kg                                     | IM/IN/buccal | 10 mg          | use when IV access delayed
+> Levetiracetam    | status, second-line                   | 60 mg/kg over 5 min                           | IV           | 4500 mg        | preferred at most peds centers; no arrhythmia risk; ESETT/EcLiPSE evidence
+> Fosphenytoin     | status, second-line alt               | 20 mg PE/kg over 10 min                       | IV           | 1500 mg PE     | use if levetiracetam unavailable; cardiac monitoring during infusion
+> Pyridoxine       | refractory status, infant <2mo        | 50-100 mg                                     | IV           | —              | treats INH-related & pyridoxine-dependent epilepsy
+> NS bolus         | shock (sepsis, hypovolemia)           | 20 mL/kg over 5-10 min                        | IV/IO        | 60 mL/kg before pressors | 2020 PALS allows 10-20 mL/kg with reassessment between; reassess for fluid overload signs
+> NS bolus         | DKA initial resuscitation             | 10-20 mL/kg over 30-60 min                    | IV           | —              | post-PECARN NEJM 2018; deficit replacement over 24-48h
+> Insulin          | DKA                                   | 0.05-0.1 U/kg/hr                              | IV infusion  | —              | start AFTER 1h fluids; NEVER bolus; equal efficacy at low and standard doses
+> D10W             | hypoglycemia                          | 2-4 mL/kg                                     | IV           | —              | use D25W or D50W for older/larger patients (peripheral vein safe to D10W only)
+> Defibrillation   | VF / pulseless VT                     | 2 J/kg first, 4 J/kg subsequent               | —            | —              | some institutions escalate to 10 J/kg for refractory
+> Cardioversion    | unstable SVT/VT with pulse            | 0.5-1 J/kg, escalate to 2 J/kg                | —            | —              | synchronized
+> Adenosine        | stable SVT                            | 0.1 mg/kg → 0.2 mg/kg                         | rapid IV push | 6 mg → 12 mg  | flush immediately after; give as proximal to heart as possible
+> Mannitol         | raised ICP                            | 0.25-1 g/kg                                   | IV           | —              | osmotic; monitor serum osm <320
+> 3% hypertonic saline | raised ICP                        | 3-5 mL/kg                                     | IV           | —              | osmotic alternative; some protocols allow up to 10 mL/kg
+> TXA              | trauma <12y or <50kg, within 3h       | 15 mg/kg over 10 min, then 2 mg/kg/hr × 8h    | IV           | 1 g load / 125 mg/hr | timing critical, no benefit if delayed past 3h
+> TXA              | trauma ≥12y or ≥50kg, within 3h       | 1 g over 10 min, then 1 g over 8 hours        | IV           | —              | adult CRASH-2 protocol
+> Calcium chloride | hyperkalemia / citrate toxicity / CCB OD | 10-20 mg/kg                                | IV slow push | —              | central line preferred; gluconate safer peripherally
+> Sodium bicarbonate | not routine in cardiac arrest       | 1-2 mEq/kg bolus                              | IV           | —              | only for hyperkalemia, TCA OD with QRS widening, or documented severe acidosis
+> ```
+>
+> **DKA caveats** (apply across all DKA cases): Do not start KCl
+> unless patient is urinating and K+ ≤5.5 mEq/L. Do not start insulin
+> if K+ <3.5 mEq/L. Add dextrose to maintenance fluids when serum
+> glucose reaches 250–300 mg/dL.
+>
+> **Calcium salt selection:** Calcium chloride contains ~3x the
+> elemental calcium of calcium gluconate. Chloride salt is preferred
+> for cardiac arrest and severe hyperkalemia when central access is
+> available. Gluconate is safer peripherally because of lower
+> tissue-necrosis risk if extravasation occurs.
+
+### Section 14 — Toxicology antidotes (pediatric)
+
+> Anchored to: PALS 2025 toxicology section; UpToDate poison
+> antidote summaries; FDA pediatric naloxone labeling 2024.
+>
+> ```
+> TOXICOLOGY ANTIDOTES (COMMON)
+> Toxin                         | Antidote          | Dose                                                  | Route | Max   | Notes
+> Acetaminophen                 | N-acetylcysteine  | 150 mg/kg over 60min, then 50 mg/kg over 4h, then 100 mg/kg over 16h | IV | — | IV preferred over PO; check Rumack-Matthew at 4h post-ingestion
+> Opioid                        | Naloxone          | see Section 13 dosing                                 | IV/IM | —    | initial 0.01 mg/kg titrated; escalate to 0.1 mg/kg if no response
+> Benzodiazepine                | Flumazenil        | 0.01 mg/kg                                            | IV    | 0.2 mg | use cautiously: can precipitate seizures in chronic users or mixed ingestions with proconvulsants
+> Beta-blocker or CCB           | Glucagon          | 50-150 mcg/kg bolus then infusion                     | IV    | —    | first-line for BB; second-line for CCB
+> Beta-blocker or CCB           | Calcium chloride  | 10-20 mg/kg                                           | IV    | —    | central line preferred for chloride salt
+> Beta-blocker or CCB           | High-dose insulin euglycemia | 1 U/kg bolus then 0.5-1 U/kg/hr             | IV    | —    | with concurrent dextrose to maintain euglycemia
+> TCA with QRS widening         | Sodium bicarbonate| 1-2 mEq/kg bolus, repeat to narrow QRS                | IV    | —    | target serum pH 7.45-7.55
+> ```
+>
+> Rare-toxin antidotes (deferoxamine for iron overdose,
+> hydroxocobalamin/sodium thiosulfate for cyanide, atropine +
+> pralidoxime for organophosphate) are clinically relevant but
+> uncommon in pediatric scenarios. Reference current poison control
+> resources for dosing if these arise; do not improvise.
 
 ## Pass D — Sections 15-18 (PENDING)
 

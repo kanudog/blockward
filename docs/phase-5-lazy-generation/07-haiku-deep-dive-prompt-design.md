@@ -1,6 +1,20 @@
 # Phase 5.4.3b — Haiku Deep-Dive Prompt Design (Locked)
 
 **Status:** LOCKED 2026-05-13
+
+**Revision 2026-05-13 (post-smoke-test):** Target word counts in
+Sections 5 and 6 expanded based on smoke-test reality. Original
+250–400 word target with 600 ceiling was set during design before
+any output was observed; testing showed that clinically
+substantive deep-dives on real Block Ward topics naturally land
+at 600–800 words when each bullet does its full mechanism →
+clinical correlate → bedside implication work. The revised
+target (250–600 words, 800 soft ceiling, 1000 hard runaway
+threshold) reflects observed behavior rather than aspirational
+compression. Per-bullet budget revised from 25–50 to 30–80 words
+for the same reason. Structural rules (markers, three-part
+shape, 6–12 bullets, sparing bold) unchanged.
+
 **Schema target:** 5.4.1
 **Purpose:** Capture the deep-dive Haiku worker prompt that fills
 `debrief.physiologyDeepDive[].content` slots. Second of the two
@@ -204,8 +218,17 @@ cache entry.
 >   sentences. This is the "if you remember one thing from this
 >   deep-dive" closer.
 >
-> Total target length is 250–400 words across all three parts. The
-> summary is short; the body carries the teaching weight; the TL;DR
+> Total target length is **250–600 words** across all three parts.
+> Treat 600 as a soft limit — as you approach it, start wrapping
+> up rather than continuing into new bullets or expanded analysis.
+> Components should fit roughly: summary 60–120 words; each
+> bullet 30–80 words; TL;DR 25–60 words. Running to 700 or 800
+> total is acceptable when the topic genuinely needs the room.
+> Avoid running past 1000 words; if you're heading there, you're
+> treating this as a textbook chapter rather than a focused
+> teaching artifact. **Never truncate mid-sentence or mid-bullet
+> to hit a word count** — finish what you started. The summary
+> is short; the body carries the teaching weight; the TL;DR
 > crystallizes.
 
 ### Section 6 — Three-part structure rules
@@ -237,7 +260,18 @@ cache entry.
 > **Bulleted body (6-12 bullets, 1-2 sentences each).**
 >
 > The body teaches the topic. This is where mechanism, examples,
-> exceptions, and pitfalls live. Each bullet is one clinical idea,
+> exceptions, and pitfalls live.
+>
+> Each bullet should aim for **30–80 words.** Some bullets need
+> more room — a mechanism walk-through that traces cause to
+> clinical correlate to bedside implication can earn its 80
+> words. Some need less — a single calibrated observation can
+> land in 30 words. The shape depends on what the bullet is
+> doing, not on a uniform target. A bullet past 100 words is
+> almost certainly two ideas trying to share one bullet and
+> should be split.
+>
+> Each bullet is one clinical idea,
 > not a sentence fragment and not a paragraph. Bullets should build
 > on each other: start with the foundational concept, then expand
 > to clinical correlates, then to edge cases or pitfalls.
@@ -274,6 +308,155 @@ cache entry.
 >
 > Bad TL;DR (just a summary): "**TL;DR:** Anion gap is calculated
 > as Na − (Cl + HCO3) and is important in DKA."
+>
+> **A complete worked example (metabolic topic).**
+>
+> The fragments above show what a good summary, a good body
+> bullet, and a good TL;DR look like in isolation. Here is what
+> the full three-part output looks like assembled — what you
+> should be producing per call.
+>
+> Topic: "Anion Gap and Mixed Acid-Base Disorders in DKA"
+>
+> ```
+> ###ITEM:dka-anion-gap
+> In DKA, the anion gap is the receipt for ketone production — it
+> tells you how much unmeasured acid the patient is carrying. A
+> normal anion gap with persistent acidosis means something else
+> is driving the picture, often hyperchloremic acidosis from
+> aggressive saline resuscitation. Knowing which one you're
+> looking at changes what you do next.
+>
+> - Anion gap = Na − (Cl + HCO3); normal is **8–12 mEq/L**. In
+>   DKA, the gap widens because ketones accumulate as unmeasured
+>   anions, so a 6-year-old with a gap of 25 tells you the
+>   acidosis is ketone-driven.
+> - **Beta-hydroxybutyrate dominates in DKA** — typically 6–12
+>   times higher than acetoacetate and accounting for ~75% of
+>   total ketone burden. As acidosis worsens, the redox state
+>   shifts the equilibrium even further toward BHB.
+> - **Urine ketones can be misleadingly negative in severe DKA**.
+>   Urine dipsticks detect acetoacetate, not BHB, so a profoundly
+>   ketotic patient can have low or negative urine ketones.
+>   Capillary or serum BHB is the more reliable bedside ketone
+>   measurement.
+> - As insulin works and ketones get metabolized, the gap closes.
+>   **Gap closure is the bedside marker that the metabolic
+>   problem is resolving**, often hours before pH normalizes.
+> - Aggressive normal saline resuscitation introduces a second
+>   acidosis: **hyperchloremic non-anion-gap acidosis**. The
+>   chloride load narrows the gap artificially, making it look
+>   like DKA is improving when really one acidosis has been
+>   swapped for another.
+> - This is why the **delta gap** matters: ΔAG / ΔHCO3 ≈ 1 means
+>   pure DKA. Less than 1 (gap fell more than bicarb rose)
+>   suggests coexistent hyperchloremic acidosis. Greater than 1
+>   suggests coexistent metabolic alkalosis, often from prolonged
+>   vomiting before presentation.
+> - **Balanced crystalloids (LR, Plasma-Lyte) reduce the chloride
+>   load** and may avoid the hyperchloremic shift, per ISPAD
+>   2022. Many pediatric protocols still use normal saline
+>   throughout; institutional practice varies.
+> - When acidosis persists with a normal gap, don't reflexively
+>   keep bolusing — reassess whether the fluids have caused the
+>   problem.
+>
+> **TL;DR:** A widening anion gap in DKA is the ketone receipt; a
+> normal gap with persistent acidosis usually means you've
+> over-salined the patient. Use the delta gap to distinguish, and
+> capillary BHB rather than urine ketones to measure ketone
+> burden.
+> ###END
+> ```
+>
+> This example demonstrates the three-part structure (105-word
+> summary + 8 bullets averaging 35 words each + 45-word TL;DR),
+> the layered teaching depth (mechanism → clinical correlate →
+> edge case → pitfall → adjacent topic), the "fact + so what"
+> bullet shape, sparing bold use (~1 per bullet), and
+> bedside-clinician voice. Total: 318 words. Aim for this shape.
+>
+> **A second complete worked example (hemodynamic topic).**
+>
+> Here is another full three-part output, this time for a
+> hemodynamic topic rather than a metabolic one. Notice how the
+> bullet shape and depth layers play out for a sequencing rule
+> rather than a lab-interpretation rule.
+>
+> Topic: "Fluid Resuscitation Sequencing in Pediatric Septic Shock"
+>
+> ```
+> ###ITEM:septic-shock-fluid-sequencing
+> Fluid before vasopressors is the bedside rule, but the modern
+> version of this rule is less about hitting 60 mL/kg and more
+> about reassessing after each bolus. The 2020 Surviving Sepsis
+> Campaign and AAP 2024 sepsis guidance moved from a fixed 20
+> mL/kg ✕ 3 protocol to titrated 10–20 mL/kg aliquots with
+> reassessment between each. The reason is fluid overload —
+> excess crystalloid in pediatric septic shock worsens outcomes,
+> and the patient who hasn't responded to 40 mL/kg often needs a
+> pressor, not another bolus.
+>
+> - **The mechanism: pressors on an empty tank produce high SVR
+>   with dangerously low cardiac output.** Norepinephrine or
+>   epinephrine clamps down the vessels, but if the intravascular
+>   volume is depleted, the heart has nothing to pump against the
+>   higher resistance. You raise the blood pressure number while
+>   perfusion gets worse.
+> - **AAP 2024 recommends 10–20 mL/kg aliquots over 5–20
+>   minutes**, titrated to clinical markers of cardiac output
+>   (HR, BP, cap refill, mental status, urine output, lactate).
+>   Faster infusion causes pulmonary edema; slower infusion fails
+>   to improve stroke volume.
+> - **Reassess after every bolus.** The teaching error is "give
+>   60 mL/kg then call the pressor." The correct version is
+>   "give 20 mL/kg, look at perfusion, decide whether another
+>   bolus or a pressor comes next." Children compensate well
+>   until they don't — overshooting fluid is harder to recover
+>   from than starting a pressor early.
+> - **Signs the patient is no longer fluid-responsive:** rising
+>   HR without falling cap refill, worsening work of breathing,
+>   new crackles, hepatomegaly developing during resuscitation.
+>   These are the bedside cues to pivot from fluid to pressor.
+> - **First-line vasopressor: epinephrine OR norepinephrine, not
+>   dopamine.** Dopamine was deprecated by the 2020 Surviving
+>   Sepsis Campaign pediatric guidance after two trials showed
+>   lower mortality with epinephrine. Choose epinephrine for
+>   cold shock (cool extremities, narrow pulse pressure, delayed
+>   cap refill — needs inotropy plus vasoconstriction) and
+>   norepinephrine for warm shock (flushed, bounding pulses,
+>   wide pulse pressure — pure vasoconstriction).
+> - **The cold/warm distinction is real but blurry.** Many
+>   pediatric patients shift between phenotypes during
+>   resuscitation. Reassess the phenotype if the initial pressor
+>   isn't working; you may need to switch or add a second agent.
+> - **The 2024 ANDES-CHILD pilot trial** explored starting
+>   epinephrine after only 20 mL/kg in pediatric septic shock
+>   instead of the standard 40–60 mL/kg. Time to pressor was 16
+>   minutes (early) vs. 49 minutes (standard). The trial was
+>   feasibility-only, but it points toward where pediatric
+>   sepsis resuscitation is heading.
+> - **Hydrocortisone for refractory shock** if hemodynamics don't
+>   respond to fluids and pressors. Suspect adrenal insufficiency
+>   in the catecholamine-resistant case.
+>
+> **TL;DR:** Fluid before pressors stays as the rule, but the
+> modern version is "20 mL/kg, reassess, repeat or pivot" rather
+> than "60 mL/kg, then call the pressor." Watch for fluid
+> overload signs, and start epinephrine or norepinephrine (not
+> dopamine) early in non-responders.
+> ###END
+> ```
+>
+> This second example demonstrates how the three-part structure
+> applies to a hemodynamic sequencing topic. Notice that the
+> bullets cover mechanism (bullet 1), guideline-anchored numbers
+> (bullet 2), bedside reassessment principle (bullet 3), clinical
+> cues to pivot (bullet 4), vasopressor choice (bullet 5), edge
+> case on phenotype shifting (bullet 6), recent trial pointing
+> toward future practice (bullet 7), and refractory-shock adjunct
+> (bullet 8). Total: 332 words. Same shape as the DKA example,
+> different physiology.
 
 ### Section 7 — Layered teaching depth
 

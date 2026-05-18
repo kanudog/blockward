@@ -16,3 +16,5 @@ smoke-test-call-2.json.raw.txt
 smoke-test-orchestrator-call.json
 smoke-test-orchestrator-usage.json
 smoke-test-orchestrator-raw.txt
+smoke-test-per-item-output.txt
+smoke-test-deep-dive-output.txt

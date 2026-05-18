@@ -164,7 +164,7 @@ export function writeExplanationToSlot(sc, slotRef, text) {
 }
 
 // Map slot kind to the "type" string the prompt builders understand.
-// buildDeepDivePrompt and buildExplanationPrompt branch on type;
+// buildMarkForReviewDeepDivePrompt and buildPerItemExplanationPrompt branch on type;
 // they recognize "vital", "lab", "sign", "tool", "med", "intervention",
 // "finding". Tool/med map to "intervention" (the pre-existing
 // convention used by ActionPanel marks); sign maps to "finding"

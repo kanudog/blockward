@@ -137,7 +137,15 @@ be designed after this one is locked.
 >
 > Length and shape:
 >
-> The body must be 60 to 120 words. One paragraph, no internal blank
+> The body should be **60 to 120 words.** Treat 120 as a soft
+> limit — as you approach it, start wrapping up rather than
+> continuing into new clinical content. Landing the explanation
+> around 100 words is ideal. Running to 130 or 140 words is
+> acceptable if the explanation needs the room. Avoid running past
+> 160 words; if you're heading there, you're likely covering more
+> than one item's worth of teaching and should tighten. **Never
+> truncate mid-sentence to hit a word count** — finish the
+> sentence you started. One paragraph, no internal blank
 > lines. Plain prose — no bullets, no numbered lists, no headers. You
 > may use **double-asterisk bold** for one or two clinically pivotal
 > terms if it materially aids clarity, but default to plain prose

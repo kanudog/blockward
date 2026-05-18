@@ -1,4 +1,4 @@
-import { buildSystemPrompt, buildDeepDivePrompt, buildExplanationPrompt, MODEL_ID, HAIKU_MODEL_ID, MAX_TOKENS } from "./prompt.js";
+import { buildSystemPrompt, buildMarkForReviewDeepDivePrompt, buildExplanationPrompt, MODEL_ID, HAIKU_MODEL_ID, MAX_TOKENS } from "./prompt.js";
 import { resolveSlotText, kindToPromptType } from "../scenarios/slotResolve.js";
 import { validateSchema, validateConsistency, validateCounts, applyAutocorrections } from "./validate.js";
 import { migrateLegacyScenario } from "../scenarios/migrateLegacyScenario.js";
@@ -156,7 +156,7 @@ export async function generateScenario(txt, cbMode, signal, onProgress){
 // fallback (kept in this file as a secondary parse path).
 //
 // Phase-2.6.6-hotfix: PRIMARY parse path is now delimited plain-text
-// (###ITEM:<id>...###END) per the new buildDeepDivePrompt contract.
+// (###ITEM:<id>...###END) per the new buildMarkForReviewDeepDivePrompt contract.
 // JSON's quote-escaping was repeatedly failing on multi-paragraph
 // medical prose (asterisks, em-dashes, embedded quotes — canonical
 // MTP scenarios reliably reproduced "Expected ',' or '}' after
@@ -235,7 +235,7 @@ export async function expandMarkedItems(scenario, items, signal){
   // 6000 → 8000 to give a small headroom margin without overshooting.
   var r=await fetch("/api/generate",{method:"POST",headers:{"Content-Type":"application/json"},signal:signal,
     body:JSON.stringify({model:MODEL_ID,max_tokens:8000,mode:"expand_marked_items",
-      system:[{type:"text",text:buildDeepDivePrompt(),cache_control:{type:"ephemeral"}}],
+      system:[{type:"text",text:buildMarkForReviewDeepDivePrompt(),cache_control:{type:"ephemeral"}}],
       messages:[{role:"user",content:userContent}]})});
   var raw=await r.text();var d;
   try{d=JSON.parse(raw);}catch(je){throw new Error("Server returned invalid response (status "+r.status+").");}

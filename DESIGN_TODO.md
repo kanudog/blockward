@@ -31,6 +31,49 @@ A running list of visual, CSS, and styling issues to be addressed by Claude Desi
   paragraph with a parseable `**TL;DR:**` markdown prefix; player-
   side rendering decision is independent of prompt content.*
 
+### EMS report screen — wave 1 loading state (Phase 5.4.4)
+
+- **"Assess" button gated on wave 1 completion** — When a
+  fresh AI-generated scenario loads, the dispatcher fires wave
+  1 (Phase 1 vitals/signs/labs why slots) on mount. The
+  "Assess" button on the EMS report screen should be disabled
+  until wave 1 completes. Estimated wait: 5-15 seconds
+  depending on Haiku response time and number of slots.
+  UX details to design:
+  - Button label during wait (e.g., "Loading details..." or
+    spinner-only)
+  - Whether to show progress indication (X of Y items
+    loaded) or just a generic spinner
+  - Whether to render a separate "ready to begin" indicator
+    when wave 1 completes
+  - How to handle the rare failure case where wave 1 cannot
+    complete (button stays disabled forever vs. fallback)
+  *Found: 2026-05-18, Commit 2 dispatcher design.*
+  *Note: replay of a scenario that's already been populated is
+  a no-op for the dispatcher; this loading state only appears
+  on first play.*
+
+### Player chips — per-slot loading shimmer (Phase 5.4.4)
+
+- **Per-chip shimmer for in-flight slots** — When the user
+  advances to Phase 1 assess before wave 1 fully completes,
+  or when the user enters Phase 2 before waves 3/4 complete,
+  some chips will have null why/fb content. Currently there's
+  only a global header pill ("Loading details") in Phase 2+.
+  Per-chip shimmer should:
+  - Apply to individual vital/sign/lab chips whose why slot
+    is still null
+  - Apply to individual tool/med action chips whose fb slot
+    is still null
+  - Disappear when the slot is populated (re-render triggered
+    by `forceRefreshScenario`)
+  - Render in modals when the user clicks "Why?" on a chip
+    whose content hasn't loaded yet
+  *Found: 2026-05-18, Commit 2 dispatcher design.*
+  *Note: this is UI scope that complements the dispatcher;
+  the dispatcher itself works without per-chip shimmer
+  (chips just show empty until populated).*
+
 ### Phase 2 (Intervention) screen
 
 - **"Why?" popup background is transparent** — popup overlays directly on the page content, making the text nearly unreadable. Needs an opaque (or near-opaque) dark background with a defined edge/border. Phase 1 popup renders correctly; reference that styling.

@@ -6,7 +6,7 @@ Working notes on architectural decisions, in-flight phase work, and pending engi
 
 ---
 
-## 2026-05-13 — Clinical verification gap, scheduled for Phase 5.4.4+
+## 2026-05-13 — Clinical verification gap, scheduled for Phase 5.4.4+ (Phase 6.1+)
 
 Sebastian raised a real concern during Phase 5.4.3b prompt design
 work: AI-generated clinical content has no verification layer
@@ -25,7 +25,7 @@ wild.
 This is a known limitation acknowledged at commit time of Phase
 5.4.3b. Mitigation is scheduled as follows, in priority order:
 
-**Phase 5.4.4 — Level 1 verification (cross-model check).**
+**Phase 5.4.4 (Phase 6.1) — Level 1 verification (cross-model check).**
 - Add a verification pass after Haiku emits an explanation or
   deep-dive containing numerical claims.
 - Use Sonnet as the verifier with a prompt like: "Identify any
@@ -40,7 +40,7 @@ This is a known limitation acknowledged at commit time of Phase
 - Implementation should hook into the dispatcher between Haiku
   emission and slot persistence.
 
-**Phase 5.4.4 or 5.4.5 — Level 2 tightening of accuracy
+**Phase 5.4.4 or 5.4.5 (Phase 6.1 or 6.2) — Level 2 tightening of accuracy
 guardrails (prompt-level).**
 - Tighten Section 17 (per-item) and Section 8 (deep-dive) from
   guidance ("don't invent specific numerical claims") to a
@@ -79,7 +79,7 @@ biggest assurance).**
   address recurring patterns.
 - Cadence: quarterly when stable, monthly while iterating.
 
-**Phase 5.4.4 or later — Deep-dive length validation across
+**Phase 5.4.4 or later (Phase 6.1 or later) — Deep-dive length validation across
 diverse topics.**
 
 Smoke testing during Phase 5.4.3b Commit 1 used one topic
@@ -124,7 +124,7 @@ verification layer is what catches this class of error.
 
 ## 2026-05-13 — Phase 5.4.3a observations for future cleanup
 
-Two pre-existing bugs surfaced during manual verification of the typed-collection migration. Both are not 5.4.3a regressions but should be addressed before Phase 5.4.4 (or alongside it, before curveball is re-enabled).
+Two pre-existing bugs surfaced during manual verification of the typed-collection migration. Both are not 5.4.3a regressions but should be addressed before Phase 5.4.4 (Phase 6.1) (or alongside it, before curveball is re-enabled).
 
 Bug 1 — Mark-for-Review keying lacks phase context. The marked-entry id is type-prefixed but not phase-scoped (e.g., "tool:glucometer" rather than "tool:glucometer@phase[1]"). When the same tool or med id appears in two phases (notably curveball + regular), marking it in the first phase causes the same item to display as already-marked in the second. Proposed fix: include phaseIdx in the marked-entry id. Origin: Phase 2.6.3.
 
@@ -158,7 +158,7 @@ The existing player/library code reads from flat phase.assessItems[] with a cat 
 
 Two options:
 
-- Path A: Migrate read sites to typed-collection iteration. Cleaner long-term, removes demultiplexer logic, but expands Phase 5.4.4 scope significantly.
+- Path A: Migrate read sites to typed-collection iteration. Cleaner long-term, removes demultiplexer logic, but expands Phase 5.4.4 (Phase 6.1) scope significantly.
 - Path B: Add a migrateLegacyAssessItems() adapter at load time. Faster to ship, but carries permanent legacy-shape tech debt.
 
 Decision deferred to next session. Both paths are technically viable.

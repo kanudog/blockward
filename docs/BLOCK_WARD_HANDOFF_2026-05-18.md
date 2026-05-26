@@ -9,6 +9,36 @@ embedding), and the design lock for Phase 5.4.3b Commit 2
 Use this doc as the starting point for any new conversation
 resuming Block Ward work.
 
+## Phase 6.0 (in progress, 2026-05-26)
+
+Mid-project phase renumbering. What was previously called "Phase
+5.4.3b Commit 2" through "Phase 5.4.6" has been rolled up under
+a Phase 6.x banner to reflect the larger architectural step:
+
+- **Phase 6.0 — Wave Dispatcher** (this commit). Builds
+  `src/lib/ai/dispatcher.js`, wires it into `playerStore.startDispatcher`,
+  fires on `ScenarioPlayer` mount, gates Assess on wave 1, renders
+  the schema-5.4.1 `debrief.physiologyDeepDive[]` shape in `Debrief.jsx`,
+  and deletes the Phase 5.2 / 5.3 lazy-fetch path
+  (`fetchExplanations`, `buildExplanationPrompt`,
+  `_explanationSingleCall`, etc.). Architecture amendment:
+  wave 5 now fires immediately after wave 4 in the same `.then()`
+  chain (see `08-dispatcher-architecture.md` Phase 6.0 amendment).
+- **Phase 6.1 — Orchestrator wiring** (was Phase 5.4.4). Wires
+  `buildOrchestratorPrompt()` into live generation, adds Level 1
+  cross-model verification, per-chip shimmer, and the UX polish
+  enumerated in `DESIGN_TODO.md`.
+- **Phase 6.2 — Deep-dive migration to Haiku** (was Phase 5.4.5).
+  Mark-for-Review deep dives move from Sonnet to Haiku.
+- **Phase 6.3 — Cleanup** (was Phase 5.4.6). Delete remaining
+  legacy code paths; migrate built-ins to the
+  `debrief.physiologyDeepDive` shape.
+
+Historical phase markers in existing code comments (`Phase-5.2.5`,
+`Phase-5.3`, `Phase-5.4.3a`, etc.) are immutable history and remain
+unchanged. New code authored under the new numbering uses
+`Phase 6.x`.
+
 ## Project overview
 
 Block Ward is a pediatric emergency medicine clinical simulator

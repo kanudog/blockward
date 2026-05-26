@@ -8,6 +8,36 @@ consumes a Sonnet-generated scenario skeleton with null why/fb/
 content slots and fires Haiku calls in priority waves to fill them,
 persisting results back to localStorage as it goes.
 
+## Phase 6.0 amendment (2026-05-26)
+
+Implementation of this dispatcher shipped under a renamed phase
+banner: **Phase 6.0 — Wave Dispatcher** (previously "Phase 5.4.3b
+Commit 2"). The architecture below is implemented as designed except
+for two amendments captured here:
+
+1. **Wave 5 fires automatically after wave 4, not on debrief mount.**
+   Original spec had wave 5 deferred until the user reached the
+   debrief screen. Amended: wave 5 runs inside the same background
+   `.then()` chain as waves 2-4. Rationale:
+   - **Cache TTL exposure.** Ephemeral prompt caches live for ~5
+     minutes after last use. A user who lingers mid-scenario for
+     several minutes between wave 4 and debrief could miss the
+     deep-dive cache window. Running all five waves in a tight
+     cluster keeps every call inside one cache window.
+   - **User intent.** The point of lazy generation is to fill the
+     scenario in the background so the user never waits. Tying
+     wave 5 to a screen navigation event re-introduces a "wait at
+     this screen" moment that defeats the design goal.
+2. **`startDeepDiveWave` action removed from the spec.** With wave 5
+   in the main chain, the separate playerStore action and the
+   Debrief mount-time `useEffect` from the original architecture are
+   not needed. The single `startDispatcher` action fires on
+   ScenarioPlayer mount and owns the whole pipeline.
+
+The five-wave grouping, per-wave persistence debouncing, cache
+warmup pattern, abort-on-scenario-change behavior, and built-in /
+replay gates all match the original spec.
+
 ## Relationship to prior design docs
 
 - Schema 5.4.1 (`04-skeleton-schema-v1.md`) defines the slot

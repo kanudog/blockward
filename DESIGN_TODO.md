@@ -99,6 +99,64 @@ A running list of visual, CSS, and styling issues to be addressed by Claude Desi
 - **Bolded key terms need a contrast color, not just bold weight.** Currently terms wrapped in `**asterisks**` render as bold but in the same color as body text, making them hard to distinguish at a glance. Suggest a warm accent color (amber? teal?) that works against the dark background.
   *Found: 2026-04-25.*
 
+### Phase 1 / Phase 2 — assessment screen UX
+
+- **Missing instructional message on assessment screen** — Phase 1
+  and Phase 2 currently show vitals + systems assessment + labs with
+  no header text explaining what the user is supposed to do. Add a
+  one-line instruction at the top of the assessment section. Suggested
+  wording: "Tap each value you believe is abnormal." Position above
+  the vitals row.
+  *Found: 2026-05-26, manual test of Phase 6.0.*
+
+- **System category labels (gi, skin, neuro, etc.) should be ALL
+  CAPS and bold** — currently lowercase, which reads inconsistent
+  with the bedside-monitor aesthetic the rest of the UI targets.
+  CSS-only change. Affects the small header above each finding card.
+  *Found: 2026-05-26.*
+
+- **Lab-draw tool icons render with a generic EKG-wave icon** —
+  affects arterial blood gas, draw blood cultures, perform e-FAST
+  (less critically; this is an imaging tool), perform FAST, order
+  chest x-ray, order abdominal CT, call surgery. The arterial blood
+  gas and draw blood cultures tools specifically should render with
+  a lab-tube icon styled consistently with the rest of the
+  intervention icon set. Imaging tools should get a distinct imaging
+  icon. Update visualMeta.js with new icon assignments.
+  *Found: 2026-05-26.*
+
+### Phase 7+ design directions (deferred)
+
+- **Systems assessment findings should become non-clickable
+  bulleted narration, not clickable cards** — current design forces
+  the user to judge "is this abnormal" against findings written as
+  paragraphs where one sentence may be abnormal and four may be
+  normal. The AI's bad:true|false flag on signs reflects clinical
+  context (e.g., compensatory tachypnea marked bad:false because it's
+  appropriate for the metabolic state), but the UI presents the same
+  task as a raw "click what looks wrong" judgment. This is a fairness
+  problem in the assessment task itself.
+
+  Phase 7 redesign:
+  - Render systems assessment as bullet points under the EMS
+    narration (not clickable cards)
+  - Keep only abnormal vitals + abnormal labs as user-judgment
+    targets
+  - On Phase 1 submit, synthesize a contextual "why" message that
+    explains how the physical findings, vitals, and labs together
+    paint the clinical picture
+  - Schema impact: signs collection becomes a simpler narrative
+    field with no bad/why per item; orchestrator emits a single
+    `signsSummary` field per phase
+  - Player UI: signs render as a styled bullet list with no click
+    behavior; no Why button needed
+
+  Trade-off: loses the "recognize abnormal physical exam" learning
+  objective, but eliminates the ambiguity trap. Discussed in Phase
+  6.0 test session 2026-05-26.
+
+  *Found: 2026-05-26.*
+
 ---
 
 ## Resolved

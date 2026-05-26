@@ -6,6 +6,98 @@ Working notes on architectural decisions, in-flight phase work, and pending engi
 
 ---
 
+## 2026-05-26 — Phase 6.0 manual test session findings
+
+Four observations from the first end-to-end manual test of the
+dispatcher against a live AI-generated 8yo sepsis scenario. None
+block Phase 6.0; all should be addressed during Phase 6.1 or as
+small follow-ups.
+
+### Metronidazole generated as customMed instead of native pack item
+
+The 8yo sepsis test scenario generated metronidazole correctly
+(present in meds[] and actions.meds.metronidazole with ok:true,
+priority:2, full fb text), but with extra fields suggesting the AI
+treated it as a customMed fallback:
+
+  "metronidazole": {
+    "ok": true, "priority": 2, "fb": "...",
+    "id": "customMed",            // ← shouldn't be here
+    "label": "Metronidazole (Flagyl)",
+    "description": "Nitroimidazole antibiotic..."
+  }
+
+Compare to ceftriaxone (correctly emitted):
+
+  "ceftriaxone": { "ok": true, "priority": 2, "fb": "..." }
+
+The customMed schema is the fallback for medications not in the
+registry. Metronidazole IS in the registry (under
+abdominal/infection packs). The AI either (a) didn't find it in the
+registry context block and synthesized a customMed entry, or (b) the
+prompt's customMed fallback is too easy to invoke and shadows real
+registry entries.
+
+User-facing symptom: the player's "explored" counter at the bottom
+of Phase 2 showed "16/17 explored" even after the user selected
+every visible item. Metronidazole was selected by the user but
+tracked under a different key than expected, leaving the counter
+short and the "Skip to next" button stuck enabled when nothing
+remained to skip.
+
+Fix path: tighten the system prompt's customMed guidance to require
+exhaustive registry search before falling back. Likely a Phase 6.1
+prompt-design item alongside the orchestrator wiring.
+
+### Explored counter off-by-one when custom med involved
+
+Symptom above. The "Skip to next" button label should change when
+all visible items have been explored, but it remained "Skip to next"
+because the counter showed 16/17. The 17th item exists in the data
+(metronidazole) but was indexed differently from how the explored
+tracker counts.
+
+Likely root cause: explored counter keys on registry item id
+("metronidazole"), but the customMed-formatted entry was tracked
+under "customMed" or its position-index. Investigation needed
+during the explored-tracker code path.
+
+Fix path: audit ActionPanel and the explored tracker logic to ensure
+both registry-shaped and customMed-shaped action entries are counted
+consistently. Smaller scope than the prompt-tightening above.
+
+### _validatorWarnings — SBP threshold parse noise
+
+The validator in src/lib/ai/validate.js emitted a warning on the
+8yo sepsis scenario:
+
+  { itemId: "sbp", label: "BP 88", phase: "Triage",
+    kind: "warning",
+    message: "Value 88 is well above 5; threshold wording likely
+              misparsed but flag stands." }
+
+The why text mentions "below the 5th percentile" and the validator's
+regex grabbed the literal "5" as a comparison threshold. Cosmetic
+issue; the clinical claim is correct. The warning is noisy in the
+data but doesn't affect rendering.
+
+Fix path: tighten the threshold-parsing regex in validate.js to
+require numeric context (e.g., ignore matches where the number is
+followed by "th percentile" or similar ordinal language). Low
+priority; visible only in the JSON, not in the UI.
+
+### One 404 observed during legacy Sonnet generation
+
+Single transient 404 during a 270-second Sonnet scenario generation
+(legacy path, pre-orchestrator). All 12 follow-up Haiku and Sonnet
+calls succeeded with 200 OK. The 404 is almost certainly a streaming
+artifact on the long-running Sonnet call. Phase 6.1 should eliminate
+the 270s call entirely by replacing it with the orchestrator path,
+so this likely resolves on its own without targeted fixes. Track but
+do not act unless it recurs frequently after Phase 6.1 ships.
+
+---
+
 ## 2026-05-13 — Clinical verification gap, scheduled for Phase 5.4.4+ (Phase 6.1+)
 
 Sebastian raised a real concern during Phase 5.4.3b prompt design

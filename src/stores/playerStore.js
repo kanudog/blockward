@@ -243,3 +243,9 @@ export var usePlayerStore = create(function(set, get) {
     }
   });
 });
+
+// Debug hook: expose the store on window for DevTools inspection.
+// Read with `window.__bw_playerStore.getState().activeScenario` or
+// similar. Safe in production; the hook is read-only and adds no
+// user-visible behavior. Remove when no longer needed.
+if(typeof window!=="undefined")window.__bw_playerStore=usePlayerStore;

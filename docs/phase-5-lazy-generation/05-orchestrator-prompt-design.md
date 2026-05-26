@@ -4,6 +4,55 @@
 **Schema target:** 5.4.1
 **Target prompt size:** ~12,700 characters / ~3,200 tokens (down from current 53,607 chars)
 
+## Phase 6.1 amendment (2026-05-26)
+
+The player and supporting code now consume the orchestrator's output
+shape natively (Phase 6.1 "Player Shape Migration"). The orchestrator
+itself is still dormant — that wiring is Phase 6.2 — but the shape
+contract is locked in code and tested end-to-end via the dispatcher
+smoke test. Specifics of the shape as actually implemented:
+
+- **Priority is a string enum**, not a number. Allowed values:
+  `correct`, `tied-correct`, `distractor-clinical`, `distractor-pack`,
+  `distractor-misc`. The player's PRIORITY_RANK map gives each enum
+  value a display rank (1..5) used for sort and for the "Priority #N"
+  popup badge. The migration helper additionally backfills a legacy
+  numeric `.pri` field on each action entry so pre-Phase-6.1 reads
+  (Debrief sort, recovery-screen ranking) keep working without
+  per-call-site rewrites.
+
+- **`phase.vitals` is an array** of rich items
+  `{id, label, value, unit, bad, cat: "vital", _slotRef, why}` rather
+  than an id-keyed object. Iteration order in the array is the
+  canonical chip order (`hr, rr, sbp, dbp, spo2, temp, cap`).
+
+- **`phase.tools[]` and `phase.meds[]` are removed** — id arrays are
+  derived from `Object.keys(actions.tools)` / `Object.keys(actions.meds)`
+  by the player. The orchestrator should not emit the top-level arrays.
+
+- **`reassessment.vitals` stays an object snapshot**, not an array.
+  It's a single end-state snapshot with no per-vital `_slotRef` and
+  no per-vital `why`; the array shape is only meaningful for
+  assess/intervene phases that the dispatcher fills.
+
+- **Top-level field names stay as-is.** The orchestrator design below
+  uses `patientCard`, `briefSection`, and `subtitle` in places, but
+  Phase 6.1 kept the current names (`patient`, `emsReport`,
+  `learnMore`, etc.) to preserve player compatibility. Phase 6.2 will
+  either update the orchestrator prompt to emit these names directly
+  or have `migrateLegacyScenario` translate at parse time.
+
+- **`debrief.keyTeaching[]` is canonical** for the post-scenario
+  teaching bullets; `debrief.explainers[]` is a deprecated legacy
+  fallback that the Debrief renderer still tolerates (synthesized
+  into `keyTeaching[]` by the migration helper for built-in
+  scenarios). The orchestrator should emit `keyTeaching[]` natively
+  in Phase 6.2 and skip `explainers[]` entirely.
+
+- **`debrief.physiologyDeepDive[]` is the deep-dive collection.**
+  Each entry: `{id, title, _slotRef, content: null}`. The dispatcher's
+  wave 5 fills the `content` field via Haiku.
+
 ## Purpose
 
 This document captures the locked design for the new Sonnet orchestrator prompt that replaces the current monolithic scenario generator. Under the new architecture, Sonnet plans the scenario skeleton and a separate Haiku worker fills in per-item explanation paragraphs (why and fb fields).

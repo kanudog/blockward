@@ -21,6 +21,10 @@
 // phase.assessItems is gone; vitals (object) / signs[] / labs[] are
 // walked directly. Curveball iteration is dropped — 5.4.1 doesn't
 // emit a curveball block in v1.
+// Phase 6.1: vitals is now an array of rich items; debrief carries
+// keyTeaching[] + physiologyDeepDive[] (explainers[] kept as a legacy
+// fallback). Validators stay defensive about the object vitals shape
+// so any pre-migration scenario that slips through reports cleanly.
 
 export function validateSchema(sc){
   var errs=[];
@@ -46,9 +50,25 @@ export function validateSchema(sc){
       if(!p||typeof p!=="object"){errs.push("phases["+i+"] is not an object");return;}
       if(!p.id)errs.push("phases["+i+"].id missing");
       if(!p.vitals)errs.push("phases["+i+"].vitals missing");
+      else if(typeof p.vitals!=="object")errs.push("phases["+i+"].vitals must be an array or object");
       if(p.signs&&!Array.isArray(p.signs))errs.push("phases["+i+"].signs must be an array when present");
       if(p.labs&&!Array.isArray(p.labs))errs.push("phases["+i+"].labs must be an array when present");
+      if(p.actions&&typeof p.actions==="object"){
+        if(p.actions.tools&&typeof p.actions.tools!=="object")errs.push("phases["+i+"].actions.tools must be an object keyed by id");
+        if(p.actions.meds&&typeof p.actions.meds!=="object")errs.push("phases["+i+"].actions.meds must be an object keyed by id");
+      }
     });
+  }
+  // Debrief is optional during generation but, when present, must be
+  // an object. keyTeaching and physiologyDeepDive must each be arrays
+  // when present; explainers stays valid as the legacy fallback.
+  if(sc.debrief){
+    if(typeof sc.debrief!=="object")errs.push("scenario.debrief must be an object");
+    else{
+      if(sc.debrief.keyTeaching&&!Array.isArray(sc.debrief.keyTeaching))errs.push("debrief.keyTeaching must be an array when present");
+      if(sc.debrief.physiologyDeepDive&&!Array.isArray(sc.debrief.physiologyDeepDive))errs.push("debrief.physiologyDeepDive must be an array when present");
+      if(sc.debrief.explainers&&!Array.isArray(sc.debrief.explainers))errs.push("debrief.explainers must be an array when present");
+    }
   }
   return errs;
 }
@@ -95,18 +115,35 @@ function parseThreshold(why){
 // across vitals / signs / labs without re-implementing the demux.
 function _iterPhaseItems(p) {
   var out = [];
-  if (p && p.vitals && typeof p.vitals === "object") {
-    Object.keys(p.vitals).forEach(function (k) {
-      var v = p.vitals[k];
-      if (!v || typeof v !== "object") return;
-      out.push({
-        id: v.id || k,
-        label: ((v.label || k) + " " + (v.value || "")).trim(),
-        why: v.why,
-        bad: !!v.bad,
-        _ref: v
+  if (p && p.vitals) {
+    if (Array.isArray(p.vitals)) {
+      // Phase 6.1: array shape under schema 5.4.1.
+      for (var vi = 0; vi < p.vitals.length; vi++) {
+        var v = p.vitals[vi];
+        if (!v || typeof v !== "object") continue;
+        out.push({
+          id: v.id || String(vi),
+          label: ((v.label || v.id || "") + " " + (v.value || "")).trim(),
+          why: v.why,
+          bad: !!v.bad,
+          _ref: v
+        });
+      }
+    } else if (typeof p.vitals === "object") {
+      // Legacy object shape — defensive; should not reach this branch
+      // post-migration.
+      Object.keys(p.vitals).forEach(function (k) {
+        var ov = p.vitals[k];
+        if (!ov || typeof ov !== "object") return;
+        out.push({
+          id: ov.id || k,
+          label: ((ov.label || k) + " " + (ov.value || "")).trim(),
+          why: ov.why,
+          bad: !!ov.bad,
+          _ref: ov
+        });
       });
-    });
+    }
   }
   if (Array.isArray(p && p.signs)) {
     p.signs.forEach(function (s) {
@@ -223,7 +260,13 @@ export function validateCounts(sc){
   if(!sc||!Array.isArray(sc.phases))return warnings;
   sc.phases.forEach(function(p,idx){
     if(idx!==0)return;
-    var vCount=p.vitals&&typeof p.vitals==="object"?Object.keys(p.vitals).length:0;
+    // Phase 6.1: vitals is an array under schema 5.4.1; object kept
+    // as defensive fallback for any non-migrated input.
+    var vCount=0;
+    if(p.vitals){
+      if(Array.isArray(p.vitals))vCount=p.vitals.length;
+      else if(typeof p.vitals==="object")vCount=Object.keys(p.vitals).length;
+    }
     var sCount=Array.isArray(p.signs)?p.signs.length:0;
     var lCount=Array.isArray(p.labs)?p.labs.length:0;
     var pname=p.name||p.id;

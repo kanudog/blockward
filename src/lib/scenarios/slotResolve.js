@@ -64,6 +64,22 @@ function _phaseFor(sc, slotRef) {
   return (sc.phases && sc.phases[slotRef.phaseIdx]) || null;
 }
 
+// Phase 6.1: locate a vital entry by id across both the new array
+// shape (schema 5.4.1 phase.vitals[]) and the legacy object shape
+// (built-ins / curveball snapshots / pre-migration input). Returns
+// null if no match.
+function _findVitalById(vitals, id) {
+  if (!vitals) return null;
+  if (Array.isArray(vitals)) {
+    for (var i = 0; i < vitals.length; i++) {
+      var v = vitals[i];
+      if (v && v.id === id) return v;
+    }
+    return null;
+  }
+  return vitals[id] || null;
+}
+
 // Phase-5.4.3a: transitional lookup helpers. Built-in scenarios mid-
 // migration may key signs[] by .label and labs[] by .name rather than
 // the new .id. Match .id first and fall back so both shapes resolve.
@@ -93,7 +109,7 @@ export function resolveSlotText(sc, slotRef) {
   if (!phase) return null;
   switch (slotRef.kind) {
     case "vital": {
-      var v = phase.vitals && phase.vitals[slotRef.indexOrId];
+      var v = _findVitalById(phase.vitals, slotRef.indexOrId);
       return (v && typeof v === "object" && v.why) || null;
     }
     case "lab": {
@@ -133,7 +149,7 @@ export function writeExplanationToSlot(sc, slotRef, text) {
   if (!phase) return false;
   switch (slotRef.kind) {
     case "vital": {
-      var v = phase.vitals && phase.vitals[slotRef.indexOrId];
+      var v = _findVitalById(phase.vitals, slotRef.indexOrId);
       if (v && typeof v === "object") { v.why = text; return true; }
       return false;
     }

@@ -6,12 +6,45 @@ import { vitalCanonicalId, signCanonicalId, labCanonicalId } from "../../lib/sce
 
 // Phase-5.4.3a: a phase has assessable items if any typed collection
 // is non-empty. Replaces the legacy ph.assessItems.length check.
+// Phase 6.1: vitals is now an array under schema 5.4.1, but the
+// helper stays defensive about object shape for any non-migrated
+// caller (the count produced is the same either way).
 function phaseHasAssessables(ph){
   if(!ph)return false;
-  var vCount=ph.vitals&&typeof ph.vitals==="object"?Object.keys(ph.vitals).length:0;
+  var vCount=0;
+  if(ph.vitals){
+    if(Array.isArray(ph.vitals))vCount=ph.vitals.length;
+    else if(typeof ph.vitals==="object")vCount=Object.keys(ph.vitals).length;
+  }
   var sCount=Array.isArray(ph.signs)?ph.signs.length:0;
   var lCount=Array.isArray(ph.labs)?ph.labs.length:0;
   return(vCount+sCount+lCount)>0;
+}
+
+// Phase 6.1: derive the tool/med id arrays from the actions map.
+// Schema 5.4.1 no longer carries top-level phase.tools[]/phase.meds[]
+// — they're computed from Object.keys(actions.tools/meds) where the
+// player needs them (currently: rendering ActionPanel tiles).
+function actionIds(actions){
+  return{
+    tools:actions&&actions.tools?Object.keys(actions.tools):[],
+    meds:actions&&actions.meds?Object.keys(actions.meds):[]
+  };
+}
+
+// Phase 6.1: lookup helper for code paths that need a single vital by
+// id (e.g., submit snapshotting). Tolerates the legacy object shape
+// defensively — should not be reached post-migration but keeps the
+// player robust against an unexpected raw input.
+function findVital(phase,id){
+  if(!phase||!phase.vitals)return null;
+  if(Array.isArray(phase.vitals)){
+    for(var i=0;i<phase.vitals.length;i++){
+      if(phase.vitals[i]&&phase.vitals[i].id===id)return phase.vitals[i];
+    }
+    return null;
+  }
+  return phase.vitals[id]||null;
 }
 import { usePlayerStore } from "../../stores/playerStore.js";
 import { guessAge, guessSex } from "../../lib/scenarios/age.js";
@@ -74,12 +107,22 @@ export function ScenarioPlayer(props){
     // Phase-4a: scoring removed. Per-item breakdown still captured for debrief.
     // Phase-5.4.3a: snapshot items come from typed collections directly.
     var snapshotItems=[];
-    if(ph.vitals&&typeof ph.vitals==="object"){
-      Object.keys(ph.vitals).forEach(function(vk){
-        var v=ph.vitals[vk];if(!v||typeof v!=="object")return;
-        var cid=vitalCanonicalId(vk);
-        snapshotItems.push({id:cid,label:v.label||vk,bad:!!v.bad,why:v.why||"",userFlagged:!!flags[cid]});
-      });
+    if(ph.vitals){
+      // Phase 6.1: vitals is an array under schema 5.4.1; object shape
+      // kept as a defensive fallback (should not occur post-migration).
+      if(Array.isArray(ph.vitals)){
+        for(var pvi=0;pvi<ph.vitals.length;pvi++){
+          var pva=ph.vitals[pvi];if(!pva||typeof pva!=="object")continue;
+          var pvCid=vitalCanonicalId(pva.id||"");
+          snapshotItems.push({id:pvCid,label:pva.label||pva.id,bad:!!pva.bad,why:pva.why||"",userFlagged:!!flags[pvCid]});
+        }
+      }else if(typeof ph.vitals==="object"){
+        Object.keys(ph.vitals).forEach(function(vk){
+          var v=ph.vitals[vk];if(!v||typeof v!=="object")return;
+          var cid=vitalCanonicalId(vk);
+          snapshotItems.push({id:cid,label:v.label||vk,bad:!!v.bad,why:v.why||"",userFlagged:!!flags[cid]});
+        });
+      }
     }
     if(Array.isArray(ph.signs)){
       ph.signs.forEach(function(s){
@@ -100,7 +143,11 @@ export function ScenarioPlayer(props){
     setShowFb(true);};
   var afterA=function(){setFlags({});setShowFb(false);if(pi<sc.phases.length-1){var n=pi+1;setPi(n);setVit(sc.phases[n].vitals);setStage("phase");}else setStage("debrief");};
   var afterAct=function(){if(!cbDone&&sc.curveball)trigCb();else setStage("reassess");};
-  var phaseHasIntervention=ph&&(ph.tools||ph.meds);;
+  // Phase 6.1: derive tool/med id arrays from actions for ActionPanel
+  // and intervention gating; phase.tools[]/phase.meds[] are no longer
+  // present after migration.
+  var phActionIds=actionIds(ph&&ph.actions);
+  var phaseHasIntervention=ph&&ph.actions&&(phActionIds.tools.length>0||phActionIds.meds.length>0);
   var BS={width:"100%",marginTop:12,padding:"12px 0",borderRadius:12,fontWeight:700,color:"white",fontSize:16,border:"none",cursor:"pointer"};
   var GR="linear-gradient(135deg,#4ECDC4,#44B09E)";var RD="linear-gradient(135deg,#FF4757,#c0392b)";var PP="linear-gradient(135deg,#a55eea,#8854d0)";
   var isCb=stage.startsWith("cb");
@@ -159,7 +206,7 @@ export function ScenarioPlayer(props){
       {stage==="phase"&&(<div className="slu">
         <div className="bw-split">
           <div className="bw-split-left">
-            <PatientView status={pSt()} rr={vit.rr} signs={[]} ageGroup={ageG} sex={sexG} visuals={scVisuals} emotion="sad"/>
+            <PatientView status={pSt()} rr={vit.rr&&typeof vit.rr==="object"?parseFloat(vit.rr.value)||0:vit.rr} signs={[]} ageGroup={ageG} sex={sexG} visuals={scVisuals} emotion="sad"/>
             <div style={{marginTop:12}}><VitalsDisplay vitals={vit}/></div>
           </div>
           <div className="bw-split-right">
@@ -195,7 +242,7 @@ export function ScenarioPlayer(props){
               <p style={{fontSize:14,fontWeight:700,color:"#4ECDC4",marginTop:0,marginBottom:4}}>Intervention Time</p>
               <p style={{fontSize:11,color:"#bbb",margin:0}}>Tap each tool and med. Find all correct actions to continue.</p>
             </div>
-            <ActionPanel tools={ph.tools} meds={ph.meds} actions={ph.actions} phaseIdx={pi} onDone={function(sel){recordAction({phaseId:ph.id,phaseName:ph.name||ph.id,tools:ph.tools||[],meds:ph.meds||[],actions:ph.actions||{},sel:sel||{}});afterAct();}} onSkip={function(m,sel){if(m&&m.length>0)addSkipped(m.map(function(x){return Object.assign({},x,{phase:ph.name||ph.id});}));recordAction({phaseId:ph.id,phaseName:ph.name||ph.id,tools:ph.tools||[],meds:ph.meds||[],actions:ph.actions||{},sel:sel||{}});afterAct();}}/>
+            <ActionPanel tools={phActionIds.tools} meds={phActionIds.meds} actions={ph.actions} phaseIdx={pi} onDone={function(sel){recordAction({phaseId:ph.id,phaseName:ph.name||ph.id,tools:phActionIds.tools,meds:phActionIds.meds,actions:ph.actions||{},sel:sel||{}});afterAct();}} onSkip={function(m,sel){if(m&&m.length>0)addSkipped(m.map(function(x){return Object.assign({},x,{phase:ph.name||ph.id});}));recordAction({phaseId:ph.id,phaseName:ph.name||ph.id,tools:phActionIds.tools,meds:phActionIds.meds,actions:ph.actions||{},sel:sel||{}});afterAct();}}/>
           </div>
         </div></div>)}
       {stage==="cb-alert"&&(<div className="slu">
@@ -207,7 +254,7 @@ export function ScenarioPlayer(props){
                 inside bw-split-left). Surface curveball signs through
                 BodySystemsView below — same pattern cb-act uses, full-width
                 systems list reads cleanly at any column width. */}
-            <PatientView status="critical" rr={vit.rr} signs={[]} ageGroup={ageG} sex={sexG} visuals={scVisuals}/>
+            <PatientView status="critical" rr={vit.rr&&typeof vit.rr==="object"?parseFloat(vit.rr.value)||0:vit.rr} signs={[]} ageGroup={ageG} sex={sexG} visuals={scVisuals}/>
             <div style={{marginTop:12}}><VitalsDisplay vitals={vit} flash={true}/></div>
             <BodySystemsView signs={sc.curveball?sc.curveball.signs:[]}/>
             <LabPanel labs={curLabs}/>
@@ -231,7 +278,10 @@ export function ScenarioPlayer(props){
               <div style={{borderTop:"1px solid rgba(255,71,87,0.15)",paddingTop:8,marginTop:8}}>
                 <p style={{fontSize:14,fontWeight:700,color:"#FF6B81",marginBottom:4}}>Critical Intervention</p>
                 <p style={{fontSize:11,color:"#bbb"}}>Find all correct actions.</p></div></div>
-            <ActionPanel tools={sc.curveball.tools} meds={sc.curveball.meds} actions={sc.curveball.actions} phaseIdx="curveball" onDone={function(sel){recordAction({phaseId:"curveball",phaseName:"Curveball: "+(sc.curveball.name||""),tools:sc.curveball.tools||[],meds:sc.curveball.meds||[],actions:sc.curveball.actions||{},sel:sel||{}});setStage("reassess");}} onSkip={function(m,sel){if(m&&m.length>0)addSkipped(m.map(function(x){return Object.assign({},x,{phase:"Curveball: "+(sc.curveball.name||"")});}));recordAction({phaseId:"curveball",phaseName:"Curveball: "+(sc.curveball.name||""),tools:sc.curveball.tools||[],meds:sc.curveball.meds||[],actions:sc.curveball.actions||{},sel:sel||{}});setStage("reassess");}}/>
+            {(function(){
+              var cbIds=actionIds(sc.curveball&&sc.curveball.actions);
+              return(<ActionPanel tools={cbIds.tools} meds={cbIds.meds} actions={sc.curveball.actions} phaseIdx="curveball" onDone={function(sel){recordAction({phaseId:"curveball",phaseName:"Curveball: "+(sc.curveball.name||""),tools:cbIds.tools,meds:cbIds.meds,actions:sc.curveball.actions||{},sel:sel||{}});setStage("reassess");}} onSkip={function(m,sel){if(m&&m.length>0)addSkipped(m.map(function(x){return Object.assign({},x,{phase:"Curveball: "+(sc.curveball.name||"")});}));recordAction({phaseId:"curveball",phaseName:"Curveball: "+(sc.curveball.name||""),tools:cbIds.tools,meds:cbIds.meds,actions:sc.curveball.actions||{},sel:sel||{}});setStage("reassess");}}/>);
+            })()}
           </div>
         </div></div>)}
       {stage==="reassess"&&(function(){

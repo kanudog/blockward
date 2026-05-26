@@ -34,23 +34,32 @@ function _flagFor(kind, bad) {
 }
 
 function _vitalEntryLines(phase) {
-  if (!phase || !phase.vitals || typeof phase.vitals !== "object") return [];
+  if (!phase || !phase.vitals) return [];
   var out = [];
-  Object.keys(phase.vitals).forEach(function (vk) {
-    var v = phase.vitals[vk];
+  // Phase 6.1: vitals is an array of rich items under schema 5.4.1.
+  // The object branch stays as defensive fallback for not-yet-migrated
+  // input.
+  function _emit(v, fallbackKey) {
     if (!v) return;
-    var label;
     if (typeof v === "object") {
       var val = v.value == null ? "" : String(v.value);
       var unit = v.unit ? " " + v.unit : "";
-      label = (v.label || vk) + (val ? " " + val : "") + unit;
+      var label = (v.label || v.id || fallbackKey) + (val ? " " + val : "") + unit;
       out.push("- " + label + " " + _flagFor("vital", !!v.bad));
     } else {
-      // Legacy scalar vital (shouldn't appear post-migrateLegacyScenario,
-      // but handle gracefully for in-flight callers).
-      out.push("- " + vk + " " + String(v));
+      out.push("- " + fallbackKey + " " + String(v));
     }
-  });
+  }
+  if (Array.isArray(phase.vitals)) {
+    for (var i = 0; i < phase.vitals.length; i++) {
+      var va = phase.vitals[i];
+      _emit(va, va && va.id ? va.id : String(i));
+    }
+  } else if (typeof phase.vitals === "object") {
+    Object.keys(phase.vitals).forEach(function (vk) {
+      _emit(phase.vitals[vk], vk);
+    });
+  }
   return out;
 }
 
@@ -104,7 +113,14 @@ function _patientBlock(scenario) {
 }
 
 function _findVitalItem(phase, id) {
-  if (!phase || !phase.vitals || typeof phase.vitals !== "object") return null;
+  if (!phase || !phase.vitals) return null;
+  // Phase 6.1: array shape under schema 5.4.1; object fallback.
+  if (Array.isArray(phase.vitals)) {
+    for (var i = 0; i < phase.vitals.length; i++) {
+      if (phase.vitals[i] && phase.vitals[i].id === id) return phase.vitals[i];
+    }
+    return null;
+  }
   return phase.vitals[id] || null;
 }
 

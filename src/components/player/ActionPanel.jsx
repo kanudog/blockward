@@ -7,6 +7,25 @@ import { fetchSingleSlot } from "../../lib/ai/dispatcher.js";
 import { resolveSlotText, SYNTHESIZED_FB_FALLBACK } from "../../lib/scenarios/slotResolve.js";
 import { useScenariosStore } from "../../stores/scenariosStore.js";
 
+// Phase 6.1: priority is a string enum under schema 5.4.1
+// ("correct" | "tied-correct" | "distractor-clinical" |
+// "distractor-pack" | "distractor-misc"). PRIORITY_RANK maps the
+// enum to the numeric ordering the player uses for display ("Priority
+// #N") and for sort. Legacy numeric priorities pass through unchanged
+// so any not-yet-migrated input still works.
+var PRIORITY_RANK = {
+  "correct": 1,
+  "tied-correct": 2,
+  "distractor-clinical": 3,
+  "distractor-pack": 4,
+  "distractor-misc": 5
+};
+function priorityRank(p) {
+  if (typeof p === "number") return p;
+  if (typeof p === "string" && PRIORITY_RANK[p] !== undefined) return PRIORITY_RANK[p];
+  return null;
+}
+
 // Phase-4b: tool/med entries come from the pack registry rather than the
 // pre-Phase-4b builtIn.js TOOLS / MEDS maps. Custom entries (id starts
 // with "customTool" or "customMed") read label and description from the
@@ -204,7 +223,14 @@ export function ActionPanel(props){
           <div style={{padding:"16px 20px 12px",borderBottom:"1px solid rgba(255,255,255,0.06)",flexShrink:0}}>
             <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8,flexWrap:"wrap"}}>
               <div style={{padding:"4px 12px",borderRadius:20,fontSize:11,fontWeight:900,background:pop.info.ok?"rgba(0,184,148,0.2)":"rgba(255,165,2,0.2)",color:pop.info.ok?"#00b894":"#ffa502",display:"flex",alignItems:"center",gap:4}}>{pop.info.ok?<><Check size={14}/> APPROPRIATE</>:<><X size={14}/> NOT INDICATED NOW</>}</div>
-              {pop.info.pri&&<div style={{padding:"4px 8px",borderRadius:20,fontSize:10,fontWeight:700,background:"rgba(78,205,196,0.15)",color:"#4ECDC4"}}>{"Priority #"+pop.info.pri}</div>}
+              {(function(){
+                // Phase 6.1: prefer the schema 5.4.1 string priority enum
+                // and translate to the display rank; fall back to legacy
+                // numeric pri for any not-yet-migrated input.
+                var rank=priorityRank(pop.info.priority||pop.info.pri);
+                if(!rank)return null;
+                return(<div style={{padding:"4px 8px",borderRadius:20,fontSize:10,fontWeight:700,background:"rgba(78,205,196,0.15)",color:"#4ECDC4"}}>{"Priority #"+rank}</div>);
+              })()}
             </div>
             <h4 style={{color:"white",fontWeight:700,marginTop:0,marginBottom:4}}>{meta?meta.label:pop.id}</h4>
             {meta&&meta.custom&&meta.description&&<p style={{fontSize:11,color:"#999",margin:0}}>{meta.description}</p>}

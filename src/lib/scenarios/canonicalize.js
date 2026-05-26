@@ -7,6 +7,29 @@
 // arrays of id-keyed items). buildBadMap iterates the typed collections
 // directly; the assessItems demux/cat-discriminator has been deleted.
 
+// Phase 6.1: normalize a vitals collection into an id-keyed lookup
+// regardless of whether the source is the new array shape (schema
+// 5.4.1 phase.vitals) or the legacy/snapshot object shape (built-in
+// vitals, curveball.vitals, reassessment.vitals). VitalsDisplay and
+// AssessPanel both read by id (.hr, .spo2, etc.) so storing the
+// player-store `vit` state in lookup form lets them stay agnostic.
+//
+// Defensive: returns null/undefined inputs as-is so call sites that
+// guard on truthiness keep working. Anything other than array/object
+// passes through unchanged.
+export function vitalsLookup(vitals) {
+  if (vitals == null) return vitals;
+  if (Array.isArray(vitals)) {
+    var lookup = {};
+    for (var i = 0; i < vitals.length; i++) {
+      var v = vitals[i];
+      if (v && v.id) lookup[v.id] = v;
+    }
+    return lookup;
+  }
+  return vitals;
+}
+
 // Map a vital-display label keyword to the vital field key used in
 // `phase.vitals`. Mirrors the heuristic that AssessPanel previously
 // kept inline. Returns null when no key matches.
@@ -47,13 +70,21 @@ export function signCanonicalId(sign) {
 export function buildBadMap(phase) {
   var map = {};
   if (!phase) return map;
-  if (phase.vitals && typeof phase.vitals === "object") {
-    Object.keys(phase.vitals).forEach(function (k) {
-      var v = phase.vitals[k];
-      // Skip the legacy scalar shape — only rich objects participate
-      // in bad/why lookups. Display code still tolerates either.
-      if (v && typeof v === "object") map[vitalCanonicalId(k)] = v;
-    });
+  if (phase.vitals) {
+    if (Array.isArray(phase.vitals)) {
+      // Phase 6.1: array shape from the migration helper / orchestrator.
+      for (var vi = 0; vi < phase.vitals.length; vi++) {
+        var va = phase.vitals[vi];
+        if (va && typeof va === "object" && va.id) map[vitalCanonicalId(va.id)] = va;
+      }
+    } else if (typeof phase.vitals === "object") {
+      // Legacy object shape — kept defensive for any non-migrated
+      // path that reaches this helper (e.g., raw curveball snapshots).
+      Object.keys(phase.vitals).forEach(function (k) {
+        var v = phase.vitals[k];
+        if (v && typeof v === "object") map[vitalCanonicalId(k)] = v;
+      });
+    }
   }
   if (Array.isArray(phase.signs)) {
     phase.signs.forEach(function (s) {

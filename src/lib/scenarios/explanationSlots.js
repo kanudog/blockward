@@ -45,21 +45,39 @@ export function collectMissingExplanationSlots(sc, phaseIdx) {
     out.push(item);
   }
 
-  // 1) Vitals — keyed object. Each entry is a rich object with
-  // .value, .bad, .why under schema 5.4.1.
-  if (phase.vitals && typeof phase.vitals === "object") {
-    Object.keys(phase.vitals).forEach(function (vk) {
-      var v = phase.vitals[vk];
-      if (!v || typeof v !== "object") return;
-      if (!_isMissingText(v.why)) return;
-      pushIfNew({
-        id: vitalCanonicalId(vk),
-        label: v.label || vk,
-        type: "vital",
-        context: { value: v.value, unit: v.unit, normalRef: sc.norms && sc.norms[vk] },
-        _slotRef: { kind: "vital", phaseIdx: phaseIdx, indexOrId: vk }
+  // 1) Vitals — array under schema 5.4.1 (Phase 6.1). Each entry is a
+  // rich object with .id, .value, .bad, .why. Object shape kept as a
+  // defensive fallback for any non-migrated input.
+  if (phase.vitals) {
+    if (Array.isArray(phase.vitals)) {
+      for (var pvi = 0; pvi < phase.vitals.length; pvi++) {
+        var pva = phase.vitals[pvi];
+        if (!pva || typeof pva !== "object") continue;
+        if (_isMissingText(pva.why)) {
+          var pvk = pva.id || String(pvi);
+          pushIfNew({
+            id: vitalCanonicalId(pvk),
+            label: pva.label || pvk,
+            type: "vital",
+            context: { value: pva.value, unit: pva.unit, normalRef: sc.norms && sc.norms[pvk] },
+            _slotRef: { kind: "vital", phaseIdx: phaseIdx, indexOrId: pvk }
+          });
+        }
+      }
+    } else if (typeof phase.vitals === "object") {
+      Object.keys(phase.vitals).forEach(function (vk) {
+        var v = phase.vitals[vk];
+        if (!v || typeof v !== "object") return;
+        if (!_isMissingText(v.why)) return;
+        pushIfNew({
+          id: vitalCanonicalId(vk),
+          label: v.label || vk,
+          type: "vital",
+          context: { value: v.value, unit: v.unit, normalRef: sc.norms && sc.norms[vk] },
+          _slotRef: { kind: "vital", phaseIdx: phaseIdx, indexOrId: vk }
+        });
       });
-    });
+    }
   }
 
   // 2) Signs — array of rich objects. id-keyed under 5.4.1; label
@@ -169,15 +187,26 @@ export function collectAllNullSlots(scenario) {
       var whyWave = phaseIdx === 0 ? 1 : 3;
       var fbWave = phaseIdx === 0 ? 2 : 4;
 
-      // Vitals — keyed object under schema 5.4.1.
-      if (phase.vitals && typeof phase.vitals === "object") {
-        Object.keys(phase.vitals).forEach(function (vk) {
-          var v = phase.vitals[vk];
-          if (!v || typeof v !== "object") return;
-          if (v.why !== null) return;
-          if (!_hasRef(v)) return;
-          out.push({ slotRefString: v._slotRef, wave: whyWave, kind: "per-item" });
-        });
+      // Vitals — array under schema 5.4.1 (Phase 6.1); object kept
+      // as defensive fallback for any non-migrated input.
+      if (phase.vitals) {
+        if (Array.isArray(phase.vitals)) {
+          for (var pvi2 = 0; pvi2 < phase.vitals.length; pvi2++) {
+            var pva2 = phase.vitals[pvi2];
+            if (!pva2 || typeof pva2 !== "object") continue;
+            if (pva2.why !== null) continue;
+            if (!_hasRef(pva2)) continue;
+            out.push({ slotRefString: pva2._slotRef, wave: whyWave, kind: "per-item" });
+          }
+        } else if (typeof phase.vitals === "object") {
+          Object.keys(phase.vitals).forEach(function (vk) {
+            var v = phase.vitals[vk];
+            if (!v || typeof v !== "object") return;
+            if (v.why !== null) return;
+            if (!_hasRef(v)) return;
+            out.push({ slotRefString: v._slotRef, wave: whyWave, kind: "per-item" });
+          });
+        }
       }
 
       // Signs — array of rich objects.

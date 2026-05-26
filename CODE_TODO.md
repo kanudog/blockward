@@ -6,6 +6,132 @@ Working notes on architectural decisions, in-flight phase work, and pending engi
 
 ---
 
+## 2026-05-26 — Phase 6.1 shipped (Player Shape Migration)
+
+The player and supporting code now consume the orchestrator's
+output shape (schema 5.4.1) natively. The orchestrator itself is
+still dormant — Phase 6.2 wires it in — but the shape contract is
+locked in code, validated by the dispatcher smoke test, and
+exercised end-to-end via `migrateLegacyScenario` for every
+built-in and every pre-migration localStorage scenario at load
+time.
+
+What changed:
+- `migrateLegacyScenario.js` — now multi-pass: assessItems → typed
+  collections (Phase 5.4.3a behavior, retained), vitals object →
+  array, numeric `.pri` → string `.priority` enum on action entries
+  (with `.pri` backfilled for legacy reads), drops top-level
+  `phase.tools[]`/`phase.meds[]` id arrays, synthesizes
+  `debrief.keyTeaching[]` from legacy `explainers[]`. Each step is
+  idempotent so orchestrator-shape input passes through unchanged.
+- `canonicalize.js` — added `vitalsLookup()` helper that normalizes
+  array-or-object vitals to id-keyed lookup form. `buildBadMap`
+  walks both shapes defensively.
+- `playerStore.js` — `vit` state is stored in lookup form via
+  `vitalsLookup()` at every entry point so VitalsDisplay /
+  AssessPanel keep reading `vit.hr` style accessors unchanged.
+- `ScenarioPlayer.jsx` — `findVital()` and `actionIds()` helpers;
+  Submit snapshotting walks the array form; ActionPanel call sites
+  (phase + curveball) derive id arrays from `actions.tools/meds`.
+- `ActionPanel.jsx` — `PRIORITY_RANK` + `priorityRank()` helper;
+  the popup priority badge prefers the string enum and falls back
+  to legacy numeric `.pri`.
+- `AssessPanel.jsx` — "Open Tool Belt" label now derives from
+  `ph.actions.tools` presence instead of the deleted `ph.tools[]`.
+- `Debrief.jsx` — new "Key Teaching" bullets block above the deep-
+  dive cards, populated from `sc.debrief.keyTeaching[]`. Renders
+  nothing when missing.
+- `validate.js` — schema check rewritten for array vitals + object
+  actions with string priority. `_iterPhaseItems` walks the array
+  shape. Debrief subfields validated (keyTeaching /
+  physiologyDeepDive arrays).
+- `slotResolve.js` — `_findVitalById()` resolves vital slot refs
+  against either array or object shape.
+- `explanationSlots.js` / `userMessages.js` — vital iteration paths
+  now array-first with object fallback.
+- `dispatcher-smoke-test.mjs` — hand-crafted fixture updated to new
+  shape (vitals as arrays, action entries with explicit string
+  priority + ok). Smoke test still passes 14 calls, 5 persists.
+
+Verification:
+- Dispatcher smoke test green (live Anthropic, 14 calls, 5
+  persists, cache pattern holds).
+- Manual walkthrough plan: built-ins SC1, SC4, SC5 (cover
+  respiratory / sepsis / trauma packs) plus a fresh AI scenario
+  via the legacy buildSystemPrompt path. The legacy Sonnet path
+  emits legacy shape, the migration helper upgrades it, the player
+  consumes the upgraded shape.
+- Grep confirmed: no live `phase.tools[]`/`phase.meds[]` reads
+  remain (only comments referencing them); no numeric priority
+  comparisons outside the defensive fallback in `priorityRank()`;
+  no `vit.<key>` style direct reads in player code outside the
+  `vit` state (always lookup form from playerStore) and the
+  reassessment snapshot.
+
+What's deferred:
+- Level 1 cross-model verification (formerly the Phase 5.4.4 /
+  Phase 6.1 entry below) needs to sit between the orchestrator's
+  per-item Haiku emission and slot persistence. With the
+  orchestrator still dormant, there's no per-item emission to
+  verify yet — so this is now correctly tagged Phase 6.2+.
+- **Built-ins still in legacy shape (Phase 6.3 cleanup).** SC1–SC6
+  are authored in the pre-Phase-6.1 shape (vitals object, numeric
+  pri, explainers[] without keyTeaching, no _slotRef on every item).
+  Phase 6.1's migration runs at playerStore.start() on every play,
+  converting them in-memory to the new shape. This works but has
+  three costs: (a) translation runs on every scenario load — small
+  but non-zero CPU; (b) translation quality is bounded by what the
+  helper can infer from legacy fields (e.g. lab-label matching for
+  parenthesized names like "pH (VBG)" fails to match the assessItem
+  with label "pH 7.24", losing why content for that play); (c) the
+  migration helper carries permanent legacy-shape branches that
+  exist solely for the built-ins after persisted custom scenarios
+  get re-saved.
+
+  Better timing: rewrite the built-ins after Phase 6.2 (orchestrator
+  wiring) lands. By then there will be many real orchestrator-shaped
+  AI scenarios in production to use as templates, and the new shape
+  will be production-validated. After the rewrite, the legacy-shape
+  branches of migrateLegacyScenario can be removed and the helper
+  can shrink to handling only edge cases.
+
+  Do this as six focused commits (one per built-in), each validated
+  against the player before commit. SC1 first as the simplest;
+  SC2-6 in order of complexity. The migration helper stays in place
+  during the work — built-ins not yet rewritten still get translated;
+  rewritten ones pass through unchanged via idempotency.
+- **Reassuring distractor labs have undefined `why` field, not
+  null (Phase 6.4 cleanup).** Legacy Sonnet's prompt only mandates
+  `why` for critical/abnormal labs. Normal labs (e.g., sodium,
+  potassium, blood culture pending) come back with no `why` field
+  at all. The migration helper builds `_slotRef` strings for them
+  but never sets `why: null`, so collectAllNullSlots (which checks
+  `item.why === null`) skips these slots. Net effect: the player's
+  "Why?" button on a reassuring lab shows nothing because the
+  dispatcher never fills it.
+
+  Fix: in migrateLegacyScenario, add `out.why = null` when the
+  source lab has neither a why field nor an assessItem with why.
+  Mirror for signs. One-line addition per collection. Defer to
+  Phase 6.4 cleanup commit alongside built-in rewrites.
+
+- **EXPLORED COUNTER OFF-BY-ONE confirmed in Phase 6.1
+  (not customMed-related).** Recurred in the Phase 6.1 sepsis test
+  scenario. The metronidazole-as-customMed issue is resolved this
+  run (Sonnet emitted a clean entry — likely non-deterministic),
+  but the counter still reads "17/18 explored" after every tool
+  and med was selected. The 18-item count is confirmed against
+  the scenario JSON (9 tools + 9 meds). This rules out the
+  customMed hypothesis as the root cause.
+
+  Suspect: ActionPanel `sel` state vs. the explored count
+  derivation in the player. The counter likely uses a derived
+  computation that doesn't track items consistently with the
+  selection set. Investigate the explored-count derivation in
+  ScenarioPlayer or wherever it's computed.
+
+---
+
 ## 2026-05-26 — Phase 6.0 manual test session findings
 
 Four observations from the first end-to-end manual test of the
@@ -98,7 +224,7 @@ do not act unless it recurs frequently after Phase 6.1 ships.
 
 ---
 
-## 2026-05-13 — Clinical verification gap, scheduled for Phase 5.4.4+ (Phase 6.1+)
+## 2026-05-13 — Clinical verification gap, scheduled for Phase 5.4.4+ (Phase 6.2+)
 
 Sebastian raised a real concern during Phase 5.4.3b prompt design
 work: AI-generated clinical content has no verification layer
@@ -117,7 +243,7 @@ wild.
 This is a known limitation acknowledged at commit time of Phase
 5.4.3b. Mitigation is scheduled as follows, in priority order:
 
-**Phase 5.4.4 (Phase 6.1) — Level 1 verification (cross-model check).**
+**Phase 5.4.4 (Phase 6.2) — Level 1 verification (cross-model check).**
 - Add a verification pass after Haiku emits an explanation or
   deep-dive containing numerical claims.
 - Use Sonnet as the verifier with a prompt like: "Identify any
@@ -216,7 +342,7 @@ verification layer is what catches this class of error.
 
 ## 2026-05-13 — Phase 5.4.3a observations for future cleanup
 
-Two pre-existing bugs surfaced during manual verification of the typed-collection migration. Both are not 5.4.3a regressions but should be addressed before Phase 5.4.4 (Phase 6.1) (or alongside it, before curveball is re-enabled).
+Two pre-existing bugs surfaced during manual verification of the typed-collection migration. Both are not 5.4.3a regressions but should be addressed before Phase 5.4.4 (Phase 6.2) (or alongside it, before curveball is re-enabled).
 
 Bug 1 — Mark-for-Review keying lacks phase context. The marked-entry id is type-prefixed but not phase-scoped (e.g., "tool:glucometer" rather than "tool:glucometer@phase[1]"). When the same tool or med id appears in two phases (notably curveball + regular), marking it in the first phase causes the same item to display as already-marked in the second. Proposed fix: include phaseIdx in the marked-entry id. Origin: Phase 2.6.3.
 
@@ -250,7 +376,7 @@ The existing player/library code reads from flat phase.assessItems[] with a cat 
 
 Two options:
 
-- Path A: Migrate read sites to typed-collection iteration. Cleaner long-term, removes demultiplexer logic, but expands Phase 5.4.4 (Phase 6.1) scope significantly.
+- Path A: Migrate read sites to typed-collection iteration. Cleaner long-term, removes demultiplexer logic, but expands Phase 5.4.4 (Phase 6.2) scope significantly.
 - Path B: Add a migrateLegacyAssessItems() adapter at load time. Faster to ship, but carries permanent legacy-shape tech debt.
 
 Decision deferred to next session. Both paths are technically viable.

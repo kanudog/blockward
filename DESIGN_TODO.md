@@ -31,7 +31,7 @@ A running list of visual, CSS, and styling issues to be addressed by Claude Desi
   paragraph with a parseable `**TL;DR:**` markdown prefix; player-
   side rendering decision is independent of prompt content.*
 
-### EMS report screen — wave 1 loading state (Phase 5.4.4) (Phase 6.1)
+### EMS report screen — wave 1 loading state (Phase 5.4.4) (Phase 6.2)
 
 - **"Assess" button gated on wave 1 completion** — When a
   fresh AI-generated scenario loads, the dispatcher fires wave
@@ -53,7 +53,7 @@ A running list of visual, CSS, and styling issues to be addressed by Claude Desi
   a no-op for the dispatcher; this loading state only appears
   on first play.*
 
-### Player chips — per-slot loading shimmer (Phase 5.4.4) (Phase 6.1)
+### Player chips — per-slot loading shimmer (Phase 5.4.4) (Phase 6.2)
 
 - **Per-chip shimmer for in-flight slots** — When the user
   advances to Phase 1 assess before wave 1 fully completes,

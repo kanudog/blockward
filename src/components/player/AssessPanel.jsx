@@ -131,7 +131,7 @@ export function AssessPanel(props){
       <BodySystemsView signs={curSigns} badMap={badMap} flags={flags} onFlag={flag} showFb={showFb} phaseIdx={phaseIdx}/>
       <LabPanel labs={curLabs} badMap={badMap} flags={flags} onFlag={flag} showFb={showFb} phaseIdx={phaseIdx}/>
       {!showFb?<button onClick={submit} style={Object.assign({},BS,{background:PP})}>Submit Assessment</button>
-        :<button onClick={afterA} style={Object.assign({},BS,{background:GR})}>{ph.tools?"Open Tool Belt":"Continue"}</button>}
+        :<button onClick={afterA} style={Object.assign({},BS,{background:GR})}>{ph&&ph.actions&&ph.actions.tools&&Object.keys(ph.actions.tools).length>0?"Open Tool Belt":"Continue"}</button>}
     </div>
     <WhyModal open={!!whyTarget} onClose={function(){setWhyTarget(null);}} title={whyTarget?whyTarget.label:""} body={whyTarget?whyTarget.why:""} accent={whyTarget&&whyTarget._abnormal?"#ff7675":"#4ECDC4"} item={whyTarget?(function(){
       // Phase-5.2.5: build slot-ref payload. The vital path uses cid="vital:<key>";

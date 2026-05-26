@@ -311,6 +311,26 @@ export function Debrief(props){
         </div>
       </div>);
     })()}
+    {/* Phase 6.1: Key Teaching bullets. Populated by the migration
+        helper from legacy explainers[] titles; Phase 6.2's orchestrator
+        will emit this field natively. Render nothing if empty so
+        scenarios without the field don't get a blank header. */}
+    {Array.isArray(sc.debrief.keyTeaching)&&sc.debrief.keyTeaching.length>0&&(<div style={{marginBottom:16}}>
+      <h3 style={{fontSize:17,fontWeight:700,color:"#4ECDC4",marginBottom:8}}>Key Teaching</h3>
+      <div className="bw-glass" style={{borderRadius:12,padding:12}}>
+        <ul style={{margin:0,paddingLeft:20,listStyle:"disc"}}>
+          {sc.debrief.keyTeaching.map(function(t,i){
+            // Inline **bold** parsing for any pivotal terms the
+            // orchestrator wraps in markdown asterisks.
+            var parts=String(t||"").split("**");
+            return(<li key={"kt"+i} style={{fontSize:13,color:"#ccc",lineHeight:1.6,marginBottom:i<sc.debrief.keyTeaching.length-1?4:0}}>{parts.map(function(p,pi){
+              if(pi%2===1)return(<strong key={"kt"+i+"-b-"+pi}>{p}</strong>);
+              return(<span key={"kt"+i+"-s-"+pi}>{p}</span>);
+            })}</li>);
+          })}
+        </ul>
+      </div>
+    </div>)}
     <h3 style={{fontSize:17,fontWeight:700,color:"#4ECDC4",marginBottom:12}}>Physiology Deep Dive</h3>
     {/* Phase 6.0: prefer the schema 5.4.1 physiologyDeepDive[] shape
         when present (AI scenarios generated post-orchestrator). Fall back

@@ -113,22 +113,23 @@ function buildFixture() {
         stageType: "assess",
         title: "Initial Assessment",
         narrative: "Six-month-old presenting with fever, lethargy, and poor perfusion after 24 hours of decreased intake. EMS established peripheral IV en route. Mother reports no urine output in 12 hours.",
-        vitals: {
-          hr: { id: "hr", label: "HR", value: "192", unit: "bpm", bad: true, _slotRef: "phase[0].vitals.hr.why", why: null },
-          spo2: { id: "spo2", label: "SpO2", value: "92", unit: "%", bad: true, _slotRef: "phase[0].vitals.spo2.why", why: null }
-        },
+        // Phase 6.1: vitals is an array under schema 5.4.1.
+        vitals: [
+          { id: "hr", label: "HR", value: "192", unit: "bpm", bad: true, cat: "vital", _slotRef: "phase[0].vitals.hr.why", why: null },
+          { id: "spo2", label: "SpO2", value: "92", unit: "%", bad: true, cat: "vital", _slotRef: "phase[0].vitals.spo2.why", why: null }
+        ],
         signs: [
-          { id: "mottling", label: "Mottling", finding: "Reticular purplish pattern across torso", pos: "body", sys: "Integumentary", bad: true, _slotRef: "phase[0].signs.mottling.why", why: null }
+          { id: "mottling", label: "Mottling", finding: "Reticular purplish pattern across torso", pos: "body", sys: "Integumentary", bad: true, cat: "clinical", _slotRef: "phase[0].signs.mottling.why", why: null }
         ],
         labs: [
-          { id: "lactate", name: "Lactate", value: "5.2", unit: "mmol/L", ref: "0.5-2.0", critical: true, bad: true, _slotRef: "phase[0].labs.lactate.why", why: null }
+          { id: "lactate", name: "Lactate", value: "5.2", unit: "mmol/L", ref: "0.5-2.0", critical: true, bad: true, cat: "lab", _slotRef: "phase[0].labs.lactate.why", why: null }
         ],
         actions: {
           tools: {
-            ioAccess: { id: "ioAccess", label: "Establish IO Access", priority: "correct", _slotRef: "phase[0].actions.tools.ioAccess.fb", fb: null }
+            ioAccess: { id: "ioAccess", label: "Establish IO Access", priority: "correct", ok: true, _slotRef: "phase[0].actions.tools.ioAccess.fb", fb: null }
           },
           meds: {
-            nsBolus: { id: "nsBolus", label: "NS 20 mL/kg bolus", priority: "correct", _slotRef: "phase[0].actions.meds.nsBolus.fb", fb: null }
+            nsBolus: { id: "nsBolus", label: "NS 20 mL/kg bolus", priority: "correct", ok: true, _slotRef: "phase[0].actions.meds.nsBolus.fb", fb: null }
           }
         }
       },
@@ -137,22 +138,22 @@ function buildFixture() {
         stageType: "intervene",
         title: "Escalation",
         narrative: "After initial fluid bolus, the patient remains tachycardic with persistent cool extremities. Lactate is rising; cap refill 4 seconds.",
-        vitals: {
-          hr: { id: "hr", label: "HR", value: "198", unit: "bpm", bad: true, _slotRef: "phase[1].vitals.hr.why", why: null },
-          sbp: { id: "sbp", label: "SBP", value: "62", unit: "mmHg", bad: true, _slotRef: "phase[1].vitals.sbp.why", why: null }
-        },
+        vitals: [
+          { id: "hr", label: "HR", value: "198", unit: "bpm", bad: true, cat: "vital", _slotRef: "phase[1].vitals.hr.why", why: null },
+          { id: "sbp", label: "SBP", value: "62", unit: "mmHg", bad: true, cat: "vital", _slotRef: "phase[1].vitals.sbp.why", why: null }
+        ],
         signs: [
-          { id: "capRefill", label: "Cap refill 4s", finding: "Capillary refill prolonged to 4 seconds", pos: "body", sys: "Cardiovascular", bad: true, _slotRef: "phase[1].signs.capRefill.why", why: null }
+          { id: "capRefill", label: "Cap refill 4s", finding: "Capillary refill prolonged to 4 seconds", pos: "body", sys: "Cardiovascular", bad: true, cat: "clinical", _slotRef: "phase[1].signs.capRefill.why", why: null }
         ],
         labs: [
-          { id: "ph", name: "Arterial pH", value: "7.18", unit: "", ref: "7.35-7.45", critical: true, bad: true, _slotRef: "phase[1].labs.ph.why", why: null }
+          { id: "ph", name: "Arterial pH", value: "7.18", unit: "", ref: "7.35-7.45", critical: true, bad: true, cat: "lab", _slotRef: "phase[1].labs.ph.why", why: null }
         ],
         actions: {
           tools: {
-            cardiacMonitor: { id: "cardiacMonitor", label: "Continuous cardiac monitor", priority: "correct", _slotRef: "phase[1].actions.tools.cardiacMonitor.fb", fb: null }
+            cardiacMonitor: { id: "cardiacMonitor", label: "Continuous cardiac monitor", priority: "correct", ok: true, _slotRef: "phase[1].actions.tools.cardiacMonitor.fb", fb: null }
           },
           meds: {
-            epiIV: { id: "epiIV", label: "Epinephrine IV infusion", priority: "correct", _slotRef: "phase[1].actions.meds.epiIV.fb", fb: null }
+            epiIV: { id: "epiIV", label: "Epinephrine IV infusion", priority: "correct", ok: true, _slotRef: "phase[1].actions.meds.epiIV.fb", fb: null }
           }
         }
       }

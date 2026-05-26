@@ -15,24 +15,36 @@ Mid-project phase renumbering. What was previously called "Phase
 5.4.3b Commit 2" through "Phase 5.4.6" has been rolled up under
 a Phase 6.x banner to reflect the larger architectural step:
 
-- **Phase 6.0 — Wave Dispatcher** (this commit). Builds
-  `src/lib/ai/dispatcher.js`, wires it into `playerStore.startDispatcher`,
-  fires on `ScenarioPlayer` mount, gates Assess on wave 1, renders
-  the schema-5.4.1 `debrief.physiologyDeepDive[]` shape in `Debrief.jsx`,
-  and deletes the Phase 5.2 / 5.3 lazy-fetch path
-  (`fetchExplanations`, `buildExplanationPrompt`,
-  `_explanationSingleCall`, etc.). Architecture amendment:
-  wave 5 now fires immediately after wave 4 in the same `.then()`
-  chain (see `08-dispatcher-architecture.md` Phase 6.0 amendment).
-- **Phase 6.1 — Orchestrator wiring** (was Phase 5.4.4). Wires
+- **Phase 6.0 — Wave Dispatcher** (shipped 2026-05-26). Built
+  `src/lib/ai/dispatcher.js`, wired it into
+  `playerStore.startDispatcher`, gated Assess on wave 1, rendered
+  the schema-5.4.1 `debrief.physiologyDeepDive[]` shape in
+  `Debrief.jsx`, deleted the Phase 5.2 / 5.3 lazy-fetch path. Wave 5
+  fires automatically after wave 4 in the same `.then()` chain (see
+  `08-dispatcher-architecture.md` Phase 6.0 amendment).
+- **Phase 6.1 — Player Shape Migration** (shipped 2026-05-26). The
+  player now consumes orchestrator-shape scenarios natively: vitals
+  as array, string priority enum on action entries, no top-level
+  `phase.tools[]`/`meds[]`, `debrief.keyTeaching[]` synthesized from
+  legacy `explainers[]`. `migrateLegacyScenario` remains the bridge
+  for built-ins SC1-SC6 and any pre-migration localStorage
+  scenarios. The orchestrator prompt itself is still dormant —
+  `generateScenario` continues to call `buildSystemPrompt` — that
+  wiring is now Phase 6.2.
+- **Phase 6.2 — Orchestrator wiring + verification + UX polish**
+  (was the original Phase 6.1 / Phase 5.4.4). Wires
   `buildOrchestratorPrompt()` into live generation, adds Level 1
   cross-model verification, per-chip shimmer, and the UX polish
-  enumerated in `DESIGN_TODO.md`.
-- **Phase 6.2 — Deep-dive migration to Haiku** (was Phase 5.4.5).
-  Mark-for-Review deep dives move from Sonnet to Haiku.
-- **Phase 6.3 — Cleanup** (was Phase 5.4.6). Delete remaining
-  legacy code paths; migrate built-ins to the
-  `debrief.physiologyDeepDive` shape.
+  enumerated in `DESIGN_TODO.md`. Renamed up from 6.1 to make room
+  for the shape-migration commit.
+- **Phase 6.3 — Deep-dive migration to Haiku** (was Phase 5.4.5 /
+  prior Phase 6.2). Mark-for-Review deep dives move from Sonnet
+  to Haiku.
+- **Phase 6.4 — Cleanup** (was Phase 5.4.6 / prior Phase 6.3).
+  Delete remaining legacy code paths; migrate built-ins to the
+  `debrief.physiologyDeepDive` shape; consider retiring
+  `migrateLegacyScenario` once everything emits orchestrator shape
+  natively.
 
 Historical phase markers in existing code comments (`Phase-5.2.5`,
 `Phase-5.3`, `Phase-5.4.3a`, etc.) are immutable history and remain

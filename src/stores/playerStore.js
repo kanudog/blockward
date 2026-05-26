@@ -13,6 +13,8 @@
 import { create } from "zustand";
 import { useScenariosStore } from "./scenariosStore.js";
 import { startDispatcher as runDispatcher, dispatcherShouldRun } from "../lib/ai/dispatcher.js";
+import { vitalsLookup } from "../lib/scenarios/canonicalize.js";
+import { migrateLegacyScenario } from "../lib/scenarios/migrateLegacyScenario.js";
 
 var initialState = {
   activeScenario: null,
@@ -69,6 +71,14 @@ export var usePlayerStore = create(function(set, get) {
       if (prev) {
         try { prev.abort(); } catch (e) { /* best-effort */ }
       }
+      // Phase 6.1: normalize to schema 5.4.1 shape. Built-ins reach
+      // the player without going through scenariosStore.hydrate, so
+      // this is the canonical chokepoint where every scenario (built-
+      // in, persisted custom, or freshly generated) is guaranteed to
+      // be on the array-vitals + string-priority shape the player
+      // consumes. migrateLegacyScenario is idempotent — already-
+      // migrated scenarios pass through untouched.
+      sc = sc ? migrateLegacyScenario(sc) : sc;
       set({
         activeScenario: sc,
         stage: "intro",
@@ -76,7 +86,7 @@ export var usePlayerStore = create(function(set, get) {
         flags: {},
         showFb: false,
         cbDone: false,
-        vitals: sc && sc.phases && sc.phases[0] ? sc.phases[0].vitals : null,
+        vitals: sc && sc.phases && sc.phases[0] ? vitalsLookup(sc.phases[0].vitals) : null,
         shake: false,
         skippedActions: [],
         assessHistory: [],
@@ -112,7 +122,7 @@ export var usePlayerStore = create(function(set, get) {
     },
     setShowFb: function(b) { set({ showFb: b }); },
     setCbDone: function(b) { set({ cbDone: b }); },
-    setVitals: function(v) { set({ vitals: v }); },
+    setVitals: function(v) { set({ vitals: vitalsLookup(v) }); },
     setShake: function(b) { set({ shake: b }); },
     addSkipped: function(items) {
       set(function(s) {

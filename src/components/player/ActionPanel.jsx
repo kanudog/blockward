@@ -2,8 +2,9 @@ import { useState, useEffect } from "react";
 import { Check, X, Minus } from "lucide-react";
 import { ALL_TOOLS, ALL_MEDS, isCustomTool, isCustomMed } from "../../lib/scenarios/packs/index.js";
 import { medColor, medType as lookupMedType } from "../../lib/scenarios/visualMeta.js";
-import { fetchExplanations, expandSingleMarkedItem } from "../../lib/ai/client.js";
-import { writeExplanationToSlot, SYNTHESIZED_FB_FALLBACK } from "../../lib/scenarios/slotResolve.js";
+import { expandSingleMarkedItem } from "../../lib/ai/client.js";
+import { fetchSingleSlot } from "../../lib/ai/dispatcher.js";
+import { resolveSlotText, SYNTHESIZED_FB_FALLBACK } from "../../lib/scenarios/slotResolve.js";
 import { useScenariosStore } from "../../stores/scenariosStore.js";
 
 // Phase-4b: tool/med entries come from the pack registry rather than the
@@ -79,37 +80,39 @@ export function ActionPanel(props){
       _slotRef:{kind:kind,phaseIdx:phaseIdx,indexOrId:pop.id}
     };
   }
-  // Phase-5.3 sub-step E: when popup opens with a synthesized-fallback
-  // fb, kick off a single-item lazy fetch and write the result back to
-  // the live scenario. Mark for Review stays disabled while loading so
-  // the user doesn't pin a placeholder. On error, show a Retry button.
+  // Phase-5.3 sub-step E (Phase 6.0 rewire): when popup opens with a
+  // synthesized-fallback fb, kick off a single-slot Haiku call via the
+  // dispatcher and read the populated fb back from the scenario.
+  // Mark for Review stays disabled while loading so the user doesn't
+  // pin a placeholder. On error, show a Retry button.
+  //
+  // Curveball phases don't yet have schema-5.4.1 slot-ref strings, so
+  // the single-slot fetch is skipped for them — the synthesized
+  // fallback remains visible. This narrow gap will close when curveball
+  // joins the typed-collection migration.
   useEffect(function(){
     if(!pop)return;
     if(!pop.info||pop.info.fb!==SYNTHESIZED_FB_FALLBACK)return;
+    if(typeof phaseIdx!=="number")return;
     setPopLoading(true);
     setPopError(null);
     var sc=usePlayerStore.getState().activeScenario;
     if(!sc){setPopLoading(false);return;}
-    var actionEntry=pop.ty==="t"?(actions&&actions.tools?actions.tools[pop.id]:null):(actions&&actions.meds?actions.meds[pop.id]:null);
-    var meta=pop.ty==="t"?lookupTool(pop.id,actionEntry):lookupMed(pop.id,actionEntry);
     var kind=pop.ty==="t"?"tool":"med";
-    var slotItem={
-      id:(pop.ty==="t"?"tool:":"med:")+pop.id,
-      label:meta?meta.label:pop.id,
-      type:kind,
-      context:{id:pop.id,ok:!!pop.info.ok,priority:pop.info.pri||null},
-      _slotRef:{kind:kind,phaseIdx:phaseIdx,indexOrId:pop.id}
-    };
+    var sub=kind==="tool"?"tools":"meds";
+    var slotRefString="phase["+phaseIdx+"].actions."+sub+"."+pop.id+".fb";
+    var slotRefObj={kind:kind,phaseIdx:phaseIdx,indexOrId:pop.id};
+    var popId=pop.id;
+    var popTy=pop.ty;
     var ctrl=new AbortController();
-    fetchExplanations(sc,[slotItem],ctrl.signal).then(function(map){
-      var text=map[slotItem.id];
+    fetchSingleSlot(sc,slotRefString,"per-item",ctrl.signal).then(function(){
+      var text=resolveSlotText(sc,slotRefObj);
       if(!text){setPopError("Couldn't load details — please try again.");setPopLoading(false);return;}
-      writeExplanationToSlot(sc,slotItem._slotRef,text);
       try{updateCustom(sc);}catch(e){}
       forceRefreshScenario();
       // Update local pop state so the popup body re-renders with the
       // freshly fetched text without waiting for a parent re-render.
-      setPop(function(p){if(!p||p.id!==slotItem.context.id)return p;return Object.assign({},p,{info:Object.assign({},p.info,{fb:text})});});
+      setPop(function(p){if(!p||p.id!==popId||p.ty!==popTy)return p;return Object.assign({},p,{info:Object.assign({},p.info,{fb:text})});});
       setPopLoading(false);
     }).catch(function(err){
       if(err&&err.name==="AbortError")return;

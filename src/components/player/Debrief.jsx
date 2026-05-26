@@ -11,6 +11,30 @@ import { resolveSlotText, kindToPromptType } from "../../lib/scenarios/slotResol
 var BS={width:"100%",marginTop:12,padding:"12px 0",borderRadius:12,fontWeight:700,color:"white",fontSize:16,border:"none",cursor:"pointer"};
 var GR="linear-gradient(135deg,#4ECDC4,#44B09E)";
 
+// Phase 6.0: parse a deep-dive content string into its three structural
+// parts. Input is the body emitted by buildDeepDivePrompt — a summary
+// paragraph, a bulleted list (lines starting with "- "), and a final
+// line beginning with "**TL;DR:**". Tolerant of extra blank lines and
+// missing TL;DR (returns tldr:"" in that case). Returns null on empty
+// input so the caller can decide whether to show a placeholder.
+function parseDeepDiveContent(text){
+  if(typeof text!=="string"||text.trim()==="")return null;
+  var lines=text.split("\n");
+  var tldrIdx=-1;
+  for(var i=0;i<lines.length;i++){
+    var t=lines[i].trim();
+    if(t.indexOf("**TL;DR:**")===0||t.indexOf("TL;DR:")===0){tldrIdx=i;break;}
+  }
+  var bodyLines=tldrIdx>=0?lines.slice(0,tldrIdx):lines.slice();
+  var bodyText=bodyLines.join("\n").trim();
+  var tldrText="";
+  if(tldrIdx>=0){
+    var tldrLines=lines.slice(tldrIdx).join("\n").trim();
+    tldrText=tldrLines.replace(/^\*\*TL;DR:\*\*\s*/,"").replace(/^TL;DR:\s*/,"").trim();
+  }
+  return{body:bodyText,tldr:tldrText};
+}
+
 export function Debrief(props){
   var sc=props.sc;var ageG=props.ageG;var sexG=props.sexG;var onDone=props.onDone;var onExit=props.onExit;
   var skippedActions=usePlayerStore(function(s){return s.skippedActions;});
@@ -288,17 +312,41 @@ export function Debrief(props){
       </div>);
     })()}
     <h3 style={{fontSize:17,fontWeight:700,color:"#4ECDC4",marginBottom:12}}>Physiology Deep Dive</h3>
-    {sc.debrief.explainers.map(function(e,i){return(<div key={i} className="bw-glass" style={{marginBottom:12,borderRadius:12,overflow:"hidden"}}>
-      <button onClick={function(){setExpI(expI===i?null:i);}} style={{width:"100%",textAlign:"left",padding:12,display:"flex",justifyContent:"space-between",background:"none",border:"none",cursor:"pointer",color:"white"}}>
-        <span style={{fontWeight:700,fontSize:13}}>{e.title}</span><span style={{color:"#4ECDC4"}}>{expI===i?<Minus size={16}/>:<Plus size={16}/>}</span></button>
-      {expI===i&&<div style={{padding:"0 12px 12px"}}>
-        <TextBlock text={e.content} style={{fontSize:13,color:"#ccc",lineHeight:1.6}}/>
-        {e.tldr&&<div style={{marginTop:8}}>
-          <button onClick={function(){toggleTldr("e"+i);}} style={{display:"flex",alignItems:"center",gap:6,background:"rgba(78,205,196,0.1)",border:"1px solid rgba(78,205,196,0.2)",borderRadius:8,padding:"4px 10px",cursor:"pointer",color:"#4ECDC4",fontSize:11,fontWeight:700}}>
-            <span>TLDR</span><span>{tldrOpen["e"+i]?"−":"+"}</span></button>
-          {tldrOpen["e"+i]&&<p style={{fontSize:12,color:"#FECA57",marginTop:6,lineHeight:1.5,fontWeight:600}}>{e.tldr}</p>}
-        </div>}
-      </div>}</div>);})}
+    {/* Phase 6.0: prefer the schema 5.4.1 physiologyDeepDive[] shape
+        when present (AI scenarios generated post-orchestrator). Fall back
+        to the legacy explainers[] shape for built-ins and pre-5.4.1
+        scenarios. Per dispatcher architecture F1. */}
+    {(Array.isArray(sc.debrief.physiologyDeepDive)&&sc.debrief.physiologyDeepDive.length>0)
+      ?sc.debrief.physiologyDeepDive.map(function(d,i){
+        var parsed=parseDeepDiveContent(d.content);
+        var hasBody=parsed&&parsed.body;
+        var hasTldr=parsed&&parsed.tldr;
+        return(<div key={"pdd"+i} className="bw-glass" style={{marginBottom:12,borderRadius:12,overflow:"hidden"}}>
+          <button onClick={function(){setExpI(expI==="pdd"+i?null:"pdd"+i);}} style={{width:"100%",textAlign:"left",padding:12,display:"flex",justifyContent:"space-between",background:"none",border:"none",cursor:"pointer",color:"white"}}>
+            <span style={{fontWeight:700,fontSize:13}}>{d.title||"Deep Dive"}</span><span style={{color:"#4ECDC4"}}>{expI==="pdd"+i?<Minus size={16}/>:<Plus size={16}/>}</span></button>
+          {expI==="pdd"+i&&<div style={{padding:"0 12px 12px"}}>
+            {hasBody
+              ?<TextBlock text={parsed.body} style={{fontSize:13,color:"#ccc",lineHeight:1.6}}/>
+              :<p style={{fontSize:12,color:"#888",fontStyle:"italic",lineHeight:1.5,margin:0}}>Generating...</p>}
+            {hasTldr&&<div style={{marginTop:8}}>
+              <button onClick={function(){toggleTldr("pdd"+i);}} style={{display:"flex",alignItems:"center",gap:6,background:"rgba(78,205,196,0.1)",border:"1px solid rgba(78,205,196,0.2)",borderRadius:8,padding:"4px 10px",cursor:"pointer",color:"#4ECDC4",fontSize:11,fontWeight:700}}>
+                <span>TL;DR</span><span>{tldrOpen["pdd"+i]?"−":"+"}</span></button>
+              {tldrOpen["pdd"+i]&&<p style={{fontSize:12,color:"#FECA57",marginTop:6,lineHeight:1.5,fontWeight:600}}>{parsed.tldr}</p>}
+            </div>}
+          </div>}
+        </div>);
+      })
+      :(Array.isArray(sc.debrief.explainers)?sc.debrief.explainers:[]).map(function(e,i){return(<div key={i} className="bw-glass" style={{marginBottom:12,borderRadius:12,overflow:"hidden"}}>
+        <button onClick={function(){setExpI(expI===i?null:i);}} style={{width:"100%",textAlign:"left",padding:12,display:"flex",justifyContent:"space-between",background:"none",border:"none",cursor:"pointer",color:"white"}}>
+          <span style={{fontWeight:700,fontSize:13}}>{e.title}</span><span style={{color:"#4ECDC4"}}>{expI===i?<Minus size={16}/>:<Plus size={16}/>}</span></button>
+        {expI===i&&<div style={{padding:"0 12px 12px"}}>
+          <TextBlock text={e.content} style={{fontSize:13,color:"#ccc",lineHeight:1.6}}/>
+          {e.tldr&&<div style={{marginTop:8}}>
+            <button onClick={function(){toggleTldr("e"+i);}} style={{display:"flex",alignItems:"center",gap:6,background:"rgba(78,205,196,0.1)",border:"1px solid rgba(78,205,196,0.2)",borderRadius:8,padding:"4px 10px",cursor:"pointer",color:"#4ECDC4",fontSize:11,fontWeight:700}}>
+              <span>TLDR</span><span>{tldrOpen["e"+i]?"−":"+"}</span></button>
+            {tldrOpen["e"+i]&&<p style={{fontSize:12,color:"#FECA57",marginTop:6,lineHeight:1.5,fontWeight:600}}>{e.tldr}</p>}
+          </div>}
+        </div>}</div>);})}
     {sc.curveball&&sc.curveball.teaches&&(<div><h3 style={{fontSize:17,fontWeight:700,color:"#FF6B81",marginTop:16,marginBottom:12}}>Curveball Deep Dive</h3>
       {sc.curveball.teaches.map(function(t,i){var k="c"+i;return(<div key={k} style={{marginBottom:12,borderRadius:12,overflow:"hidden",background:"rgba(255,71,87,0.08)",border:"1px solid rgba(255,71,87,0.15)"}}>
         <button onClick={function(){setExpI(expI===k?null:k);}} style={{width:"100%",textAlign:"left",padding:12,display:"flex",justifyContent:"space-between",background:"none",border:"none",cursor:"pointer",color:"white"}}>

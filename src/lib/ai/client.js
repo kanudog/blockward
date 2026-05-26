@@ -1,4 +1,4 @@
-import { buildSystemPrompt, buildMarkForReviewDeepDivePrompt, buildExplanationPrompt, MODEL_ID, HAIKU_MODEL_ID, MAX_TOKENS } from "./prompt.js";
+import { buildSystemPrompt, buildMarkForReviewDeepDivePrompt, MODEL_ID, MAX_TOKENS } from "./prompt.js";
 import { resolveSlotText, kindToPromptType } from "../scenarios/slotResolve.js";
 import { validateSchema, validateConsistency, validateCounts, applyAutocorrections } from "./validate.js";
 import { migrateLegacyScenario } from "../scenarios/migrateLegacyScenario.js";
@@ -169,7 +169,7 @@ export async function generateScenario(txt, cbMode, signal, onProgress){
 // to the legacy JSON parser path. On JSON failure we now log a
 // 200-char window AROUND the parse error position so future failures
 // pinpoint the exact character class breaking syntax.
-function parseDelimitedDeepDives(text){
+export function parseDelimitedDeepDives(text){
   // Match ###ITEM:<id>\n<body>\n###END for each item.
   // Tolerates extra whitespace around markers. id captured up to first newline.
   var rx=/###ITEM:\s*([^\r\n]+)[\r\n]+([\s\S]*?)[\r\n]+###END/g;
@@ -295,147 +295,3 @@ export async function expandSingleMarkedItem(scenario, markedItem, signal) {
   return map[markedItem.id] || "";
 }
 
-// Phase-5.2: lazy explanation fetch via Haiku 4.5.
-//
-// Used by Phase 5.3+ to populate `why` and `fb` fields on demand for
-// AI-generated scenarios. Built around three findings from the
-// investigation (docs/phase-5-lazy-generation/01-investigation.md §1.4):
-//
-//  - Each /api/generate call is a separate Vercel function invocation;
-//    there is no client-side queue or single-flight, so parallel fan-out
-//    works natively.
-//  - Anthropic's prompt cache is keyed by the exact system prompt prefix.
-//    A cold parallel fan-out of N identical-prompt calls causes every
-//    worker to race-write the cache (verified empirically as 12 writes
-//    in scripts/cache-test.mjs Scenario A).
-//  - A single awaited "warmup" call before the parallel batch reduces
-//    cache writes to ~1-3 across the whole batch (Scenario B), cutting
-//    cost ~62% vs pure parallel.
-//
-// Contract:
-//  scenario:  the live scenario object — used only for patient context
-//  items:     [{ id, label, type, context }, ...]
-//             type ∈ "vital" | "lab" | "sign" | "clinical" | "assessItem" |
-//                    "tool" | "med" | "intervention" | "action"
-//             context: arbitrary JSON-serializable finding-specific data
-//  signal:    optional AbortSignal
-//  onCallComplete: optional callback fired once per call with
-//                  { idx, item, durationMs, usage, body, error }
-//                  Errors thrown by the callback are swallowed.
-//
-// Returns: Promise<Record<id, explanationText>>. Items that fail to
-// fetch or parse are simply absent from the returned map; the caller
-// should treat absence as "still unfetched" and render a placeholder.
-// No throw on individual failures — callers depending on "all-or-none"
-// semantics should diff requested vs returned themselves.
-function _explanationSleep(ms){return new Promise(function(r){setTimeout(r,ms);});}
-
-function _buildExplanationUserMsg(scenario,item){
-  var p=scenario&&scenario.patient?scenario.patient:{};
-  var ctxJson;
-  try{ctxJson=item.context!==undefined?JSON.stringify(item.context):"(none)";}
-  catch(e){ctxJson="(unserializable context)";}
-  return (
-    "Patient: "+(p.ageLabel||"?")+" "+(p.sex||"")+", "+
-    (p.weightKg!=null?p.weightKg+" kg":"weight unknown")+".\n"+
-    "Chief complaint: "+(p.cc||"(unspecified)")+".\n"+
-    "Scenario title: "+(scenario&&scenario.title?scenario.title:"(untitled)")+".\n\n"+
-    "Item to explain:\n"+
-    "  id: "+item.id+"\n"+
-    "  type: "+item.type+"\n"+
-    "  label: "+item.label+"\n"+
-    "  finding-specific data: "+ctxJson+"\n\n"+
-    "Emit exactly one ###ITEM:"+item.id+" ... ###END block per the system prompt format. Echo the id verbatim. Do not produce any prose outside the markers."
-  );
-}
-
-async function _explanationSingleCall(item,scenario,signal,idx){
-  var t0=Date.now();
-  var body=JSON.stringify({
-    model:HAIKU_MODEL_ID,
-    max_tokens:8000,
-    mode:"explanation",
-    system:[{type:"text",text:buildExplanationPrompt(),cache_control:{type:"ephemeral"}}],
-    messages:[{role:"user",content:_buildExplanationUserMsg(scenario,item)}]
-  });
-  var resp;
-  for(var attempt=0;attempt<2;attempt++){
-    try{
-      resp=await fetch("/api/generate",{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        signal:signal,
-        body:body
-      });
-    }catch(e){
-      if(e&&e.name==="AbortError")throw e;
-      if(attempt===0){await _explanationSleep(1000);continue;}
-      throw e;
-    }
-    if(resp.ok)break;
-    var transient=resp.status>=500||resp.status===429;
-    if(transient&&attempt===0){await _explanationSleep(1000);continue;}
-    throw new Error("HTTP "+resp.status+" from /api/generate");
-  }
-  var raw=await resp.text();
-  var data;
-  try{data=JSON.parse(raw);}catch(je){throw new Error("Non-JSON response from /api/generate");}
-  if(data.error)throw new Error((data.error&&data.error.message)||"API error");
-  var text="";
-  (data.content||[]).forEach(function(b){if(b&&b.type==="text"&&b.text)text+=b.text;});
-  // Reuse parseDelimitedDeepDives — single block per call, take the first
-  // body regardless of which id was echoed (we know which id we asked for).
-  var parsed=parseDelimitedDeepDives(text);
-  var keys=Object.keys(parsed);
-  var parsedBody=keys.length>0?parsed[keys[0]]:null;
-  return {
-    idx:idx,
-    item:item,
-    durationMs:Date.now()-t0,
-    usage:data.usage||{},
-    body:parsedBody,
-    error:parsedBody?null:"no ###ITEM block in response"
-  };
-}
-
-export async function fetchExplanations(scenario,items,signal,onCallComplete){
-  if(!Array.isArray(items)||items.length===0)return {};
-  var result={};
-  function emit(callResult){
-    if(typeof onCallComplete==="function"){
-      try{onCallComplete(callResult);}catch(e){/* swallow callback errors */}
-    }
-    if(callResult.body)result[callResult.item.id]=callResult.body;
-    else console.warn("[fetchExplanations] omitting "+callResult.item.id+" — "+(callResult.error||"unknown"));
-  }
-  // Warmup: first call alone so the cache prefix is written once. The
-  // subsequent parallel batch sees cache hits (most of the time — see
-  // cache-test.mjs Scenario B for the residual race rate).
-  try{
-    var first=await _explanationSingleCall(items[0],scenario,signal,0);
-    emit(first);
-  }catch(err){
-    if(err&&err.name==="AbortError")throw err;
-    if(typeof onCallComplete==="function"){
-      try{onCallComplete({idx:0,item:items[0],durationMs:0,usage:{},body:null,error:err.message||String(err)});}catch(e){}
-    }
-    console.warn("[fetchExplanations] warmup call failed for "+items[0].id+" — "+(err.message||err)+" (continuing without cache benefit)");
-  }
-  if(items.length===1)return result;
-  // Parallel batch. .catch swallows non-abort errors so Promise.all
-  // resolves even if some calls fail; abort still propagates.
-  var rest=items.slice(1).map(function(item,i){
-    return _explanationSingleCall(item,scenario,signal,i+1)
-      .then(function(r){emit(r);return r;})
-      .catch(function(err){
-        if(err&&err.name==="AbortError")throw err;
-        if(typeof onCallComplete==="function"){
-          try{onCallComplete({idx:i+1,item:item,durationMs:0,usage:{},body:null,error:err.message||String(err)});}catch(e){}
-        }
-        console.warn("[fetchExplanations] call failed for "+item.id+" — "+(err.message||err));
-        return null;
-      });
-  });
-  await Promise.all(rest);
-  return result;
-}

@@ -132,3 +132,107 @@ export function collectMissingExplanationSlots(sc, phaseIdx) {
 
   return out;
 }
+
+// Phase 6.0: wave dispatcher walker. Returns a flat array of
+// {slotRefString, wave, kind} for every unfilled slot in the scenario.
+// Unlike collectMissingExplanationSlots (per-phase, item-id keyed,
+// shaped for the legacy fetchExplanations contract), this walker is
+// scenario-wide, slot-ref-string keyed, and tagged with wave + kind
+// so the dispatcher can group calls into priority waves.
+//
+// Wave mapping (per docs/phase-5-lazy-generation/08-dispatcher-architecture.md):
+//   wave 1: Phase 1 vital/sign/lab `why`         (per-item, Assess gate)
+//   wave 2: Phase 1 tool/med `fb`                (per-item, background)
+//   wave 3: Phase 2 vital/sign/lab `why`         (per-item, background)
+//   wave 4: Phase 2 tool/med `fb`                (per-item, background)
+//   wave 5: debrief.physiologyDeepDive `content` (deep-dive, background)
+//
+// Defensive: any item whose _slotRef is missing/empty/non-string is
+// skipped silently. Built-ins (sc.source !== "ai") gate out at the
+// caller; this walker just returns whatever slots qualify.
+//
+// Phase index resolution: prefers phase.phaseIndex (schema 5.4.1
+// authoritative field as emitted by the orchestrator); falls back to
+// the array index when absent (covers fixtures that omit it).
+export function collectAllNullSlots(scenario) {
+  if (!scenario) return [];
+  var out = [];
+
+  function _hasRef(item) {
+    return item && typeof item._slotRef === "string" && item._slotRef.length > 0;
+  }
+
+  if (Array.isArray(scenario.phases)) {
+    scenario.phases.forEach(function (phase, idx) {
+      if (!phase) return;
+      var phaseIdx = (typeof phase.phaseIndex === "number") ? phase.phaseIndex : idx;
+      var whyWave = phaseIdx === 0 ? 1 : 3;
+      var fbWave = phaseIdx === 0 ? 2 : 4;
+
+      // Vitals — keyed object under schema 5.4.1.
+      if (phase.vitals && typeof phase.vitals === "object") {
+        Object.keys(phase.vitals).forEach(function (vk) {
+          var v = phase.vitals[vk];
+          if (!v || typeof v !== "object") return;
+          if (v.why !== null) return;
+          if (!_hasRef(v)) return;
+          out.push({ slotRefString: v._slotRef, wave: whyWave, kind: "per-item" });
+        });
+      }
+
+      // Signs — array of rich objects.
+      if (Array.isArray(phase.signs)) {
+        phase.signs.forEach(function (s) {
+          if (!s) return;
+          if (s.why !== null) return;
+          if (!_hasRef(s)) return;
+          out.push({ slotRefString: s._slotRef, wave: whyWave, kind: "per-item" });
+        });
+      }
+
+      // Labs — array of rich objects.
+      if (Array.isArray(phase.labs)) {
+        phase.labs.forEach(function (l) {
+          if (!l) return;
+          if (l.why !== null) return;
+          if (!_hasRef(l)) return;
+          out.push({ slotRefString: l._slotRef, wave: whyWave, kind: "per-item" });
+        });
+      }
+
+      // Action fb — tools + meds keyed objects.
+      if (phase.actions) {
+        if (phase.actions.tools && typeof phase.actions.tools === "object") {
+          Object.keys(phase.actions.tools).forEach(function (tid) {
+            var entry = phase.actions.tools[tid];
+            if (!entry) return;
+            if (entry.fb !== null) return;
+            if (!_hasRef(entry)) return;
+            out.push({ slotRefString: entry._slotRef, wave: fbWave, kind: "per-item" });
+          });
+        }
+        if (phase.actions.meds && typeof phase.actions.meds === "object") {
+          Object.keys(phase.actions.meds).forEach(function (mid) {
+            var entry = phase.actions.meds[mid];
+            if (!entry) return;
+            if (entry.fb !== null) return;
+            if (!_hasRef(entry)) return;
+            out.push({ slotRefString: entry._slotRef, wave: fbWave, kind: "per-item" });
+          });
+        }
+      }
+    });
+  }
+
+  // Debrief deep dives — array of {id, title, content, _slotRef}.
+  if (scenario.debrief && Array.isArray(scenario.debrief.physiologyDeepDive)) {
+    scenario.debrief.physiologyDeepDive.forEach(function (entry) {
+      if (!entry) return;
+      if (entry.content !== null) return;
+      if (typeof entry._slotRef !== "string" || entry._slotRef.length === 0) return;
+      out.push({ slotRefString: entry._slotRef, wave: 5, kind: "deep-dive" });
+    });
+  }
+
+  return out;
+}

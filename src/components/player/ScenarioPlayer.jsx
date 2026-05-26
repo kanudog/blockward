@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Heart, Zap, Sparkles, Star, Trophy, Shield, Check } from "lucide-react";
 import { ALL_TOOLS, ALL_MEDS, isCustomTool, isCustomMed } from "../../lib/scenarios/packs/index.js";
 import { medType as lookupMedType } from "../../lib/scenarios/visualMeta.js";
@@ -14,10 +14,6 @@ function phaseHasAssessables(ph){
   return(vCount+sCount+lCount)>0;
 }
 import { usePlayerStore } from "../../stores/playerStore.js";
-import { useScenariosStore } from "../../stores/scenariosStore.js";
-import { fetchExplanations } from "../../lib/ai/client.js";
-import { collectMissingExplanationSlots } from "../../lib/scenarios/explanationSlots.js";
-import { writeExplanationToSlot } from "../../lib/scenarios/slotResolve.js";
 import { guessAge, guessSex } from "../../lib/scenarios/age.js";
 import { VitalsDisplay } from "./VitalsDisplay.jsx";
 import { PatientSVG } from "./PatientSVG.jsx";
@@ -43,52 +39,20 @@ export function ScenarioPlayer(props){
   var goBack=function(){if(prev)setStage(prev);};
   var _recStep=useState(0);var recStep=_recStep[0];var setRecStep=_recStep[1];
   var _learnOpen=useState(false);var learnOpen=_learnOpen[0];var setLearnOpen=_learnOpen[1];
-  // Phase-5.3: lazy explanation fetch state.
-  // isLazyFetching drives the small loading pill near the phase header.
-  // lazyAbortRef holds the controller for the in-flight fetch so we can
-  // abort on phase change or unmount.
-  var _isLazyFetching=useState(false);var isLazyFetching=_isLazyFetching[0];var setIsLazyFetching=_isLazyFetching[1];
-  var lazyAbortRef=useRef(null);
-  var markLazySlotFetched=usePlayerStore(function(s){return s.markLazySlotFetched;});
-  var lazyFetchedSlots=usePlayerStore(function(s){return s.lazyFetchedSlots;});
-  var forceRefreshScenario=usePlayerStore(function(s){return s.forceRefreshScenario;});
-  var updateCustom=useScenariosStore(function(s){return s.updateCustom;});
-  // Phase-5.3 sub-step C: fan out parallel Haiku calls for any
-  // why/fb fields still missing or carrying the synthesized fallback
-  // when the user enters Phase 2 or later. AI scenarios only — built-ins
-  // are a no-op early return. Phase 1 explanations stay in main
-  // generation by design (see investigation §1.7 / project hybrid choice).
+  // Phase 6.0: wave dispatcher state, read for the header loading pill
+  // and the Assess-button gate. The dispatcher itself is started from
+  // the mount-time useEffect below — it owns the controller, persistence,
+  // and re-render plumbing internally via playerStore.
+  var dispatcherState=usePlayerStore(function(s){return s.dispatcherState;});
+  var waveOneComplete=usePlayerStore(function(s){return s.waveOneComplete;});
+  // Phase 6.0: fire the wave dispatcher once per scenario mount. Replay
+  // of an already-populated scenario short-circuits inside startDispatcher
+  // via dispatcherShouldRun. Abort happens via playerStore.start when the
+  // user navigates to a different scenario.
   useEffect(function(){
-    if(!sc||sc.source!=="ai")return;            // built-in fast path
-    if(stage!=="phase"||pi<1)return;            // Phase 2+ entry only
-    var slots=collectMissingExplanationSlots(sc,pi);
-    var toFetch=slots.filter(function(s){return !lazyFetchedSlots[s.id];});
-    if(toFetch.length===0)return;
-    var controller=new AbortController();
-    lazyAbortRef.current=controller;
-    setIsLazyFetching(true);
-    function onCallComplete(info){
-      if(!info||!info.body||!info.item||!info.item._slotRef)return;
-      // Mark before write so a cancelled-then-resumed call doesn't double-fire.
-      markLazySlotFetched(info.item.id);
-      var hit=writeExplanationToSlot(sc,info.item._slotRef,info.body);
-      if(hit){
-        try{updateCustom(sc);}catch(e){/* persistence is best-effort */}
-        forceRefreshScenario();
-      }
-    }
-    fetchExplanations(sc,toFetch,controller.signal,onCallComplete).then(function(){
-      setIsLazyFetching(false);
-    }).catch(function(err){
-      if(err&&err.name==="AbortError")return;
-      setIsLazyFetching(false);
-      console.warn("[lazy fetch] phase entry error: "+(err&&err.message||err));
-    });
-    return function(){
-      controller.abort();
-      if(lazyAbortRef.current===controller)lazyAbortRef.current=null;
-    };
-  },[sc&&sc.id,stage,pi]);
+    if(!sc)return;
+    usePlayerStore.getState().startDispatcher();
+  },[sc&&sc.id]);
   var ph=sc.phases[pi];
   /* Build correct actions list for recovery screen (must be at top level for hook rules) */
   var correctActions=[];
@@ -157,7 +121,7 @@ export function ScenarioPlayer(props){
             in the right slot of the header row without expanding height
             or shifting the phase badge. Fades in/out smoothly. */}
         <div style={{display:"flex",alignItems:"center",justifyContent:"flex-end",minWidth:1}}>
-          {isLazyFetching&&<div className="bw-lazy-pill" style={{display:"inline-flex",alignItems:"center",gap:6,padding:"3px 10px",borderRadius:20,fontSize:10,fontWeight:700,background:"rgba(78,205,196,0.10)",color:"#4ECDC4",border:"1px solid rgba(78,205,196,0.28)"}}>
+          {(dispatcherState==="warming-up"||dispatcherState==="background")&&<div className="bw-lazy-pill" style={{display:"inline-flex",alignItems:"center",gap:6,padding:"3px 10px",borderRadius:20,fontSize:10,fontWeight:700,background:"rgba(78,205,196,0.10)",color:"#4ECDC4",border:"1px solid rgba(78,205,196,0.28)"}}>
             <span style={{width:6,height:6,borderRadius:"50%",background:"#4ECDC4",animation:"lazyPulse 1.4s ease-in-out infinite",flexShrink:0}}></span>
             <span>Loading details</span>
           </div>}
@@ -175,7 +139,19 @@ export function ScenarioPlayer(props){
           <TextBlock text={sc.emsReport||sc.patient.history} style={{fontSize:13,color:"#ddd",lineHeight:1.6}}/>
         </div>
         {sc.learnMore&&<button onClick={function(){setLearnOpen(true);}} style={{marginBottom:12,padding:"8px 16px",borderRadius:10,fontWeight:700,color:"#74b9ff",fontSize:12,background:"rgba(116,185,255,0.1)",border:"1px solid rgba(116,185,255,0.3)",cursor:"pointer"}}>Learn More</button>}
-        <button onClick={function(){var hasAssess=phaseHasAssessables(ph);setStage(hasAssess?"assess":(phaseHasIntervention?"act":"phase"));}} style={Object.assign({},BS,{background:GR})}>{phaseHasAssessables(ph)?"Assess":"Begin Intervention"}</button>
+        {(function(){
+          // Phase 6.0: gate the entry-point button on wave 1 of the
+          // dispatcher for AI scenarios. Built-ins skip the gate
+          // (their slots are pre-populated). The gate is active while
+          // the dispatcher is warming up or in early background and
+          // wave 1 hasn't yet flipped the flag.
+          var aiGate=sc.source==="ai"&&dispatcherState!=="idle"&&dispatcherState!=="complete"&&!waveOneComplete;
+          var hasAssess=phaseHasAssessables(ph);
+          var label=aiGate?"Loading details...":(hasAssess?"Assess":"Begin Intervention");
+          var style=Object.assign({},BS,{background:GR});
+          if(aiGate)style=Object.assign({},style,{opacity:0.6,cursor:"default"});
+          return(<button disabled={aiGate} onClick={function(){if(aiGate)return;setStage(hasAssess?"assess":(phaseHasIntervention?"act":"phase"));}} style={style}>{label}</button>);
+        })()}
         <Modal open={learnOpen} onClose={function(){setLearnOpen(false);}} title="Background" accent="#74b9ff">
           <TextBlock text={sc.learnMore||""} style={{fontSize:13,color:"#ddd",lineHeight:1.6}}/>
         </Modal>

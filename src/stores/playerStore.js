@@ -4,8 +4,15 @@
 //
 // Created in isolation at Checkpoint 2; wired into ScenarioPlayer in
 // Checkpoint 3.
+//
+// Phase 6.0: wave dispatcher state lives here. start(sc) aborts any
+// in-flight dispatcher before installing the new scenario; startDispatcher
+// builds the controller, persistence callback, and refresh callback then
+// hands off to src/lib/ai/dispatcher.js.
 
 import { create } from "zustand";
+import { useScenariosStore } from "./scenariosStore.js";
+import { startDispatcher as runDispatcher, dispatcherShouldRun } from "../lib/ai/dispatcher.js";
 
 var initialState = {
   activeScenario: null,
@@ -30,16 +37,38 @@ var initialState = {
   // falls back to the existing batch fetch only for items not yet here.
   // Cleared on start() (per-scenario lifetime).
   deepDiveCache: {},
-  // Phase-5.3: idempotency guard for lazy explanation fetch. Stores
-  // canonical slot ids that have already been fetched (or are in flight)
-  // to prevent re-firing on remount or back navigation. Cleared on
-  // start() — fresh per-scenario.
-  lazyFetchedSlots: {}
+  // Phase 6.0: wave dispatcher state.
+  //
+  // dispatcherFiredSlots — slot-ref-string-keyed map of slots that have
+  // been handed to the dispatcher in this scenario lifetime. Replaces the
+  // prior item-id-keyed lazyFetchedSlots from Phase 5.3.
+  // dispatcherState — "idle" → "warming-up" → "background" → "complete"
+  // (or "aborted" on cancellation).
+  // waveOneComplete — gates the Assess button until wave 1's Phase 1
+  // why slots have been filled.
+  // dispatcherAbortController — controller for the in-flight dispatcher.
+  // Aborted by start(newSc) and by explicit teardown.
+  // perItemCacheWarmed / deepDiveCacheWarmed — tracked here for
+  // observability (the dispatcher itself owns its cache state internally).
+  dispatcherFiredSlots: {},
+  dispatcherState: "idle",
+  waveOneComplete: false,
+  dispatcherAbortController: null,
+  perItemCacheWarmed: false,
+  deepDiveCacheWarmed: false
 };
 
 export var usePlayerStore = create(function(set, get) {
   return Object.assign({}, initialState, {
     start: function(sc) {
+      // Phase 6.0: abort any in-flight dispatcher from the previous
+      // scenario before installing the new one. The dispatcher's
+      // per-call fetches receive the abort signal and propagate
+      // AbortError through their Promise chain.
+      var prev = get().dispatcherAbortController;
+      if (prev) {
+        try { prev.abort(); } catch (e) { /* best-effort */ }
+      }
       set({
         activeScenario: sc,
         stage: "intro",
@@ -55,11 +84,20 @@ export var usePlayerStore = create(function(set, get) {
         markedForReview: [],
         // Phase-5.2.5: fresh per-scenario cache.
         deepDiveCache: {},
-        // Phase-5.3: fresh per-scenario fetch guard.
-        lazyFetchedSlots: {}
+        // Phase 6.0: fresh per-scenario dispatcher state.
+        dispatcherFiredSlots: {},
+        dispatcherState: "idle",
+        waveOneComplete: false,
+        dispatcherAbortController: null,
+        perItemCacheWarmed: false,
+        deepDiveCacheWarmed: false
       });
     },
     reset: function() {
+      var prev = get().dispatcherAbortController;
+      if (prev) {
+        try { prev.abort(); } catch (e) {}
+      }
       set(initialState);
     },
     setStage: function(s) { set({ stage: s }); },
@@ -142,13 +180,66 @@ export var usePlayerStore = create(function(set, get) {
       if (!sc) return;
       set({ activeScenario: Object.assign({}, sc) });
     },
-    // Phase-5.3: mark a slot id as fetched (or in-flight). Idempotent.
-    markLazySlotFetched: function(slotId) {
-      if (!slotId) return;
-      if (get().lazyFetchedSlots[slotId]) return;
-      var next = Object.assign({}, get().lazyFetchedSlots);
-      next[slotId] = true;
-      set({ lazyFetchedSlots: next });
+    // Phase 6.0: dispatcher actions.
+    //
+    // markDispatcherSlot — record that a slot has been handed to the
+    // dispatcher in this scenario lifetime. Idempotent. Useful for
+    // dedup if startDispatcher is called more than once (mount cycling).
+    markDispatcherSlot: function(slotRefString) {
+      if (!slotRefString) return;
+      if (get().dispatcherFiredSlots[slotRefString]) return;
+      var next = Object.assign({}, get().dispatcherFiredSlots);
+      next[slotRefString] = true;
+      set({ dispatcherFiredSlots: next });
+    },
+    setWaveOneComplete: function(b) { set({ waveOneComplete: !!b }); },
+    setDispatcherState: function(s) { set({ dispatcherState: s }); },
+    // Mount-time entry point called by ScenarioPlayer once per scenario.
+    // Sets up the controller and persistence callbacks, then hands off
+    // to the dispatcher module. Idempotent — replays of an already-
+    // populated scenario short-circuit via dispatcherShouldRun.
+    startDispatcher: async function() {
+      var sc = get().activeScenario;
+      if (!sc) return;
+      if (!dispatcherShouldRun(sc)) {
+        set({ dispatcherState: "complete", waveOneComplete: true });
+        return;
+      }
+      // Tear down any prior controller (defensive — start(sc) usually
+      // handles this, but a remount cycle could land us here twice).
+      var prev = get().dispatcherAbortController;
+      if (prev) {
+        try { prev.abort(); } catch (e) {}
+      }
+      var controller = new AbortController();
+      set({
+        dispatcherAbortController: controller,
+        dispatcherState: "warming-up",
+        waveOneComplete: false
+      });
+      var updateCustom = useScenariosStore.getState().updateCustom;
+      var forceRefreshScenario = get().forceRefreshScenario;
+      var hooks = {
+        onWaveOneComplete: function() {
+          set({ waveOneComplete: true, dispatcherState: "background" });
+        },
+        onAllWavesComplete: function() {
+          set({ dispatcherState: "complete" });
+        },
+        onAbort: function() {
+          set({ dispatcherState: "aborted" });
+        }
+      };
+      try {
+        await runDispatcher(sc, controller, updateCustom, forceRefreshScenario, hooks);
+      } catch (err) {
+        if (err && err.name === "AbortError") {
+          set({ dispatcherState: "aborted" });
+          return;
+        }
+        console.warn("[playerStore.startDispatcher] wave 1 failed: " + (err && err.message || err));
+        set({ dispatcherState: "aborted" });
+      }
     }
   });
 });

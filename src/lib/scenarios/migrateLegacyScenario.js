@@ -243,17 +243,18 @@ function migratePhase(phase, phaseIdxLabel) {
     newVitals = enriched;
   }
 
+  // Phase 6.2b.3: spread-then-override on signs so orchestrator-emitted
+  // fields (finding, pos, and any future additions) pass through. The
+  // prior constructor-literal pattern silently dropped any field not
+  // listed in the literal — and the 6.2b.1 prompt amendment temporarily
+  // had signs emit value/unit, which the literal dropped, surfacing as
+  // empty body text in BodySystemsView.
   var newSigns = Array.isArray(phase.signs) ? phase.signs.map(function (s) {
     if (!s) return s;
     var ai = bySignLabel[(s.label || "").toLowerCase()];
     var id = s.id || kebab(s.label);
-    var out = {
-      id: id,
-      label: s.label,
-      finding: s.finding,
-      pos: s.pos
-    };
-    if (s.sys) out.sys = s.sys;
+    var out = Object.assign({}, s);
+    out.id = id;
     out.bad = ai ? !!ai.bad : !!s.bad;
     var why = s.why || (ai && ai.why);
     if (why) out.why = why;
@@ -263,19 +264,18 @@ function migratePhase(phase, phaseIdxLabel) {
     return out;
   }) : phase.signs;
 
+  // Phase 6.2b.3: same spread-then-override on labs. Today every lab
+  // field is explicitly named below, but adding forward-compat costs
+  // nothing and prevents the silent-drop class of bug if the
+  // orchestrator schema grows.
   var newLabs = Array.isArray(phase.labs) ? phase.labs.map(function (l) {
     if (!l) return l;
     var ai = byLabName[(l.name || "").toLowerCase()];
     var id = l.id || kebab(l.name);
-    var out = {
-      id: id,
-      name: l.name,
-      value: l.value,
-      unit: l.unit,
-      ref: l.ref,
-      critical: !!l.critical,
-      bad: ai ? !!ai.bad : !!l.bad
-    };
+    var out = Object.assign({}, l);
+    out.id = id;
+    out.critical = !!l.critical;
+    out.bad = ai ? !!ai.bad : !!l.bad;
     var why = l.why || (ai && ai.why);
     if (why) out.why = why;
     else if (!Object.prototype.hasOwnProperty.call(l, "why")) out.why = null;
@@ -283,6 +283,34 @@ function migratePhase(phase, phaseIdxLabel) {
     out._slotRef = l._slotRef || ("phase[" + phaseIdxLabel + "].labs." + id + ".why");
     return out;
   }) : phase.labs;
+
+  // Phase 6.2b.2: orchestrator-shape input emits why: null literally,
+  // but the per-entry logic above silently drops the field. The
+  // constructor object literal doesn't include `why`, and the
+  // else-if guard skips because hasOwnProperty(s, "why") is true
+  // (the key IS present, just with null value). Backfill explicitly:
+  // any entry that has a _slotRef (the dispatcher expects to fill
+  // this slot) but lacks the why key on output gets why: null set.
+  // Idempotent: gates on key presence, not value — re-runs see the
+  // key already there and skip.
+  if (Array.isArray(newSigns)) {
+    newSigns.forEach(function (o) {
+      if (o && typeof o === "object"
+          && typeof o._slotRef === "string"
+          && !Object.prototype.hasOwnProperty.call(o, "why")) {
+        o.why = null;
+      }
+    });
+  }
+  if (Array.isArray(newLabs)) {
+    newLabs.forEach(function (o) {
+      if (o && typeof o === "object"
+          && typeof o._slotRef === "string"
+          && !Object.prototype.hasOwnProperty.call(o, "why")) {
+        o.why = null;
+      }
+    });
+  }
 
   // Step 2: actions — normalize each entry to carry the string
   // priority enum, slotRef, and derived ok.
@@ -308,6 +336,81 @@ function migratePhase(phase, phaseIdxLabel) {
     else if (k === "actions") out.actions = newActions;
     else out[k] = phase[k];
   });
+  return out;
+}
+
+// Phase 6.2b.2: orchestrator output uses different top-level field
+// names than the player consumes. The design doc keeps `patientCard`
+// and `presentation` because they're structured forms; the player
+// reads `patient`, `emsReport`, `learnMore`. Translate at the
+// migration boundary so the orchestrator design-doc shape contract
+// stays intact while the player keeps consuming its existing field
+// names without per-callsite changes.
+//
+// Each translation is idempotency-gated on the TARGET field's
+// presence — if the player-shape field already exists (built-ins,
+// or a second pass through this migrator), the translation is a
+// no-op. Source fields are preserved (not deleted) so downstream
+// inspection / future code can still read them.
+function _migrateTopLevel(sc) {
+  if (!sc || typeof sc !== "object") return sc;
+  var out = sc;
+  function _cloneOnce() { if (out === sc) out = Object.assign({}, sc); }
+
+  // Translation A: patientCard → patient with subfield rename.
+  // patientCard.{name,ageLabel,weightKg,sex,cc} → patient.{...}.
+  // Forward-compat: any other patientCard field passes through too.
+  if (sc.patientCard && !sc.patient && typeof sc.patientCard === "object") {
+    _cloneOnce();
+    var src = sc.patientCard;
+    var patient = {};
+    Object.keys(src).forEach(function (k) { patient[k] = src[k]; });
+    // The five canonical fields are already covered by the
+    // forward-compat copy above; listed here for documentation.
+    if (src.name !== undefined) patient.name = src.name;
+    if (src.ageLabel !== undefined) patient.ageLabel = src.ageLabel;
+    if (src.weightKg !== undefined) patient.weightKg = src.weightKg;
+    if (src.sex !== undefined) patient.sex = src.sex;
+    if (src.cc !== undefined) patient.cc = src.cc;
+    out.patient = patient;
+  }
+
+  // Translation B: presentation.{report,learnMore} → top-level.
+  // presentation.routeOfPresentation is intentionally not consumed
+  // by the player today; it passes through nested.
+  if (sc.presentation && typeof sc.presentation === "object") {
+    var pres = sc.presentation;
+    if (typeof pres.report === "string" && sc.emsReport === undefined) {
+      _cloneOnce();
+      out.emsReport = pres.report;
+    }
+    if (typeof pres.learnMore === "string" && sc.learnMore === undefined) {
+      _cloneOnce();
+      out.learnMore = pres.learnMore;
+    }
+  }
+
+  // Translation C: reassessment.stabilizationSummary lifted to top
+  // level for the validator and recovery screen. The nested copy
+  // stays in place — the reassessment renderer may want it locally.
+  if (sc.reassessment && typeof sc.reassessment === "object"
+      && typeof sc.reassessment.stabilizationSummary === "string"
+      && sc.stabilizationSummary === undefined) {
+    _cloneOnce();
+    out.stabilizationSummary = sc.reassessment.stabilizationSummary;
+  }
+
+  // Translation D: visuals default. PatientSVG.jsx line 42 calls
+  // .some() on sc.visuals — needs an array, not an object. Phase
+  // 6.2b.3 manual smoke test surfaced the runtime crash. Coerce any
+  // non-array shape (including the {} that the broken 6.2b.2 version
+  // wrote) to [] so this is self-healing for scenarios that got
+  // saved to localStorage during the broken window.
+  if (!Array.isArray(sc.visuals)) {
+    _cloneOnce();
+    out.visuals = [];
+  }
+
   return out;
 }
 
@@ -344,5 +447,10 @@ export function migrateLegacyScenario(sc) {
   if (sc.debrief) {
     out.debrief = _migrateDebrief(sc.debrief);
   }
+  // Phase 6.2b.2: top-level field translation for orchestrator output.
+  // Runs after phase/curveball/debrief so it sees the structurally-
+  // migrated children. Idempotency-gated per translation on target
+  // field presence — see _migrateTopLevel for details.
+  out = _migrateTopLevel(out);
   return out;
 }

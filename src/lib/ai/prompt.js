@@ -67,40 +67,113 @@ export function buildOrchestratorPrompt(){
     "  \"id\": \"<kebab-case-scenario-id>\",\n"+
     "  \"title\": \"<short evocative title>\",\n"+
     "  \"subtitle\": \"<one-line tagline>\",\n"+
-    "  \"patientCard\": { \"name\": \"...\", \"age\": \"...\", \"weight\": \"...\", \"sex\": \"...\" },\n"+
+    "  \"patientCard\": {\n"+
+    "    \"name\": \"<full name>\",\n"+
+    "    \"ageLabel\": \"<age as displayed, e.g. '6 years old' or '4 months'>\",\n"+
+    "    \"weightKg\": <numeric weight in kg, no units>,\n"+
+    "    \"sex\": \"M\" | \"F\",\n"+
+    "    \"cc\": \"<one-phrase chief complaint, e.g. 'septic shock from pneumonia'>\"\n"+
+    "  },\n"+
     "  \"presentation\": {\n"+
     "    \"routeOfPresentation\": \"ems\" | \"walkIn\" | \"pcpReferral\" | \"transfer\" | \"ed_triage\",\n"+
     "    \"report\": \"<3-6 sentence presentation in the voice of whoever is handing off>\",\n"+
     "    \"learnMore\": \"<2-4 sentence optional background, omit field if not useful>\"\n"+
     "  },\n"+
+    "  \"norms\": {\n"+
+    "    \"hr\":   [<min number>, <max number>],\n"+
+    "    \"rr\":   [<min number>, <max number>],\n"+
+    "    \"sbp\":  [<min number>, <max number>],\n"+
+    "    \"dbp\":  [<min number>, <max number>],\n"+
+    "    \"spo2\": [<min number>, <max number>],\n"+
+    "    \"temp\": [<min number>, <max number>]\n"+
+    "  },\n"+
     "  \"phases\": [ <see phase shape below> ],\n"+
+    "  \"reassessment\": { <see reassessment shape below> },\n"+
     "  \"debrief\": { <see debrief shape below> }\n"+
     "}\n\n"+
+    "patientCard notes:\n"+
+    "- weightKg is a JSON number, not a string. Emit 20, not \"20\" and not \"20 kg\".\n"+
+    "- cc is one short phrase, not a sentence. It surfaces in deep-dive context where space is tight. \"septic shock from pneumonia\" is right; \"The patient is a 6-year-old presenting with septic shock secondary to community-acquired pneumonia.\" is wrong.\n\n"+
+    "norms notes:\n"+
+    "- These are age-appropriate normal ranges for THIS patient's age, not generic adult ranges. A 6-month-old's normal HR is 100-160, not 60-100.\n"+
+    "- Compute from PALS / age-norm tables. The recovery screen reads these as fallback display when reassessment vitals are absent — getting them wrong shows the user incorrect baselines.\n"+
+    "- Each norm is a [min, max] pair of plain numbers — not strings, not nested objects, not single values. [70, 110] not \"70-110\" and not 90. The recovery screen reads these as sc.norms.hr[0] and sc.norms.hr[1] for arithmetic — string formats break that math.\n"+
+    "- Worked example for a 6-year-old (replace with the correct values for the patient's actual age): \"hr\": [70, 110], \"rr\": [18, 25], \"sbp\": [85, 110], \"dbp\": [55, 75], \"spo2\": [95, 100], \"temp\": [36.5, 37.5].\n\n"+
     "Phase shape:\n"+
     "{\n"+
     "  \"phaseIndex\": <0-indexed>,\n"+
+    "  \"id\": \"assess\" | \"intervene\",\n"+
     "  \"stageType\": \"assess\" | \"intervene\",\n"+
     "  \"title\": \"<short phase title>\",\n"+
     "  \"narrative\": \"<4-6 sentence phase-entry narrative, your voice>\",\n"+
-    "  \"vitals\": [ <slot-shaped item> ],\n"+
-    "  \"signs\": [ <slot-shaped item> ],\n"+
-    "  \"labs\": [ <slot-shaped item> ],\n"+
+    "  \"vitals\": [ <slot-shaped vital item> ],\n"+
+    "  \"signs\": [ <slot-shaped sign item> ],\n"+
+    "  \"labs\": [ <slot-shaped lab item> ],\n"+
     "  \"actions\": {\n"+
     "    \"tools\": { \"<id>\": <slot-shaped action>, ... },\n"+
     "    \"meds\": { \"<id>\": <slot-shaped action>, ... }\n"+
     "  }\n"+
     "}\n\n"+
-    "Slot-shaped item (vital/sign/lab):\n"+
+    "Slot-shaped vital item (numeric measurement on the bedside monitor):\n"+
     "{\n"+
     "  \"id\": \"<short-id>\",\n"+
     "  \"label\": \"<exact text the user sees on the chip>\",\n"+
     "  \"value\": \"<displayed value>\",\n"+
     "  \"unit\": \"<displayed unit, omit if value already includes it>\",\n"+
     "  \"bad\": true | false,\n"+
-    "  \"cat\": \"vital\" | \"lab\" | \"clinical\",\n"+
-    "  \"_slotRef\": \"phase[N].<vitals|signs|labs>.<id>.why\",\n"+
+    "  \"cat\": \"vital\",\n"+
+    "  \"_slotRef\": \"phase[N].vitals.<id>.why\",\n"+
     "  \"why\": null\n"+
     "}\n\n"+
+    "The why field MUST be present and MUST be the literal null on every vital entry. Omitting the field is a bug — the downstream worker model finds slots by checking for why === null. A missing field is not the same as null and will be skipped.\n\n"+
+    "Slot-shaped sign item (narrative bedside observation — NOT a numeric measurement):\n"+
+    "{\n"+
+    "  \"id\": \"<short-id>\",\n"+
+    "  \"label\": \"<short title shown on the card, e.g. 'Cap Refill', 'Mental Status', 'Breath Sounds'>\",\n"+
+    "  \"finding\": \"<bedside-clinician prose describing what's observed, 1-2 sentences>\",\n"+
+    "  \"pos\": \"<anatomic location or laterality if relevant, e.g. 'right base', 'extremities', 'all four limbs'>\",\n"+
+    "  \"bad\": true | false,\n"+
+    "  \"cat\": \"clinical\",\n"+
+    "  \"_slotRef\": \"phase[N].signs.<id>.why\",\n"+
+    "  \"why\": null\n"+
+    "}\n\n"+
+    "Signs are narrative observations — what a bedside clinician would dictate. The finding field holds prose like \"Mottled extremities with cap refill 5 seconds at the fingertip; lower extremities cooler than upper.\" Not value/unit — those imply a numeric measurement, which signs aren't. The pos field is the body location/laterality when it adds clinical signal; omit pos entirely when the location is implicit in the finding text or when the finding describes a whole-patient state (e.g., mental status).\n\n"+
+    "The why field MUST be present and MUST be the literal null on every sign entry. Same rule as vitals — omission breaks the downstream worker.\n\n"+
+    "Two worked sign examples:\n"+
+    "{\n"+
+    "  \"id\": \"capRefill\",\n"+
+    "  \"label\": \"Cap Refill\",\n"+
+    "  \"finding\": \"5 seconds at the fingertip, slightly faster at the chest\",\n"+
+    "  \"pos\": \"extremities\",\n"+
+    "  \"bad\": true,\n"+
+    "  \"cat\": \"clinical\",\n"+
+    "  \"_slotRef\": \"phase[0].signs.capRefill.why\",\n"+
+    "  \"why\": null\n"+
+    "}\n\n"+
+    "{\n"+
+    "  \"id\": \"mentalStatus\",\n"+
+    "  \"label\": \"Mental Status\",\n"+
+    "  \"finding\": \"Opens eyes to voice, no spontaneous speech, does not follow commands, withdraws to noxious\",\n"+
+    "  \"bad\": true,\n"+
+    "  \"cat\": \"clinical\",\n"+
+    "  \"_slotRef\": \"phase[0].signs.mentalStatus.why\",\n"+
+    "  \"why\": null\n"+
+    "}\n\n"+
+    "Note: the mentalStatus example omits pos because the finding describes whole-patient state, not a body region. Don't write pos: \"\" or pos: null — just leave the key out.\n\n"+
+    "Slot-shaped lab item (note: uses 'name' not 'label', and adds 'ref' and 'critical'):\n"+
+    "{\n"+
+    "  \"id\": \"<short-id>\",\n"+
+    "  \"name\": \"<lab name as displayed, e.g. 'WBC' or 'Lactate'>\",\n"+
+    "  \"value\": \"<displayed value>\",\n"+
+    "  \"unit\": \"<displayed unit, e.g. 'mmol/L'>\",\n"+
+    "  \"ref\": \"<normal reference range string, e.g. '0.5-2.0'>\",\n"+
+    "  \"bad\": true | false,\n"+
+    "  \"critical\": true | false,\n"+
+    "  \"cat\": \"lab\",\n"+
+    "  \"_slotRef\": \"phase[N].labs.<id>.why\",\n"+
+    "  \"why\": null\n"+
+    "}\n\n"+
+    "The why field MUST be present and MUST be the literal null on every lab entry. Same rule as vitals and signs — omission breaks the downstream worker. ref is the normal range as a display string; critical is the boolean that flags labs prompting immediate action (e.g., glucose <40 or K >6.5).\n\n"+
     "Slot-shaped action (tool/med):\n"+
     "{\n"+
     "  \"id\": \"<registry-id-or-customTool-customMed>\",\n"+
@@ -108,6 +181,22 @@ export function buildOrchestratorPrompt(){
     "  \"priority\": \"tied-correct\" | \"correct\" | \"distractor-clinical\" | \"distractor-pack\" | \"distractor-misc\",\n"+
     "  \"_slotRef\": \"phase[N].actions.<tools|meds>.<id>.fb\",\n"+
     "  \"fb\": null\n"+
+    "}\n\n"+
+    "The fb field MUST be present and MUST be the literal null on every tool and med entry. Omitting the field is a bug — the downstream worker model finds slots by checking for fb === null. A missing field is not the same as null and will be skipped.\n\n"+
+    "Reassessment shape:\n"+
+    "{\n"+
+    "  \"narrative\": \"<3-5 sentence post-intervention narrative in your voice>\",\n"+
+    "  \"vitals\": {\n"+
+    "    \"hr\": \"<displayed value>\",\n"+
+    "    \"rr\": \"<displayed value>\",\n"+
+    "    \"sbp\": \"<displayed value>\",\n"+
+    "    \"dbp\": \"<displayed value>\",\n"+
+    "    \"spo2\": \"<displayed value>\",\n"+
+    "    \"temp\": \"<displayed value>\",\n"+
+    "    \"cap\": \"<displayed value>\"\n"+
+    "  },\n"+
+    "  \"outcome\": \"stabilized\" | \"transferred-or\" | \"transferred-icu\" | \"transferred-hospital\" | \"admitted-floor\",\n"+
+    "  \"stabilizationSummary\": \"<2-3 sentence wrap-up describing the handoff state>\"\n"+
     "}\n\n"+
     "Debrief shape:\n"+
     "{\n"+
@@ -120,9 +209,9 @@ export function buildOrchestratorPrompt(){
     "      \"_slotRef\": \"debrief.physiologyDeepDive.<id>.content\",\n"+
     "      \"content\": null\n"+
     "    }\n"+
-    "  ],\n"+
-    "  \"performance\": { <leave null for v1; structure TBD> }\n"+
+    "  ]\n"+
     "}\n\n"+
+    "The content field MUST be present and MUST be the literal null on every deep-dive entry. Omitting the field is a bug — the downstream worker model finds slots by checking for content === null. A missing field is not the same as null and will be skipped.\n\n"+
     "Critical: every why/fb/content slot has its _slotRef explicitly populated. The slot ref must exactly match its position in the JSON tree. The ref scheme is the contract the downstream model relies on; getting it wrong breaks the fill-in step.\n\n"+
     "The phases array is exactly 2 entries for v1: phase[0].stageType = \"assess\", phase[1].stageType = \"intervene\". Do not add additional phases.\n\n"+
     "The following rules are non-negotiable. They define what makes a Block Ward scenario useful versus harmful.\n\n"+
@@ -274,6 +363,24 @@ export function buildOrchestratorPrompt(){
     "Phase 2 reassessment narrative must explicitly reflect the consequences of Phase 1 interventions. If the user gave a fluid bolus, the reassessment vitals should show response (or lack of it). If the user intubated, the reassessment narrative should describe post-intubation status — tube position confirmed, sedation effect, ventilator settings, ongoing oxygenation.\n\n"+
     "The link between intervention and outcome is the core teaching loop. Vague reassessment (\"patient is stable\") teaches nothing. Specific reassessment (\"after 20 mL/kg NS bolus, HR decreased from 168 to 142 but cap refill remains 4 seconds\") teaches something.\n\n"+
     "Write Phase 2 narratives as direct consequences of plausible Phase 1 user choices. The narrative voice should reference the time since interventions (\"ten minutes after the bolus\") rather than asserting timeless states.\n\n"+
+    "Reassessment (closing teaching beat).\n\n"+
+    "Every scenario ends with a reassessment object showing the consequences of the user's Phase 2 interventions. This is the closing teaching beat — the patient state the user sees right before debrief.\n\n"+
+    "Outcome rule (non-negotiable): the scenario must end with the patient in a clinically resolved state. Permitted outcomes are:\n"+
+    "- stabilized — vitals trending toward normal, perfusion improving, mental status clearing, patient remains in the ED/unit under continued observation\n"+
+    "- transferred-or — patient stabilized enough for surgical intervention, prepped and en route to OR (e.g., acute abdomen with perforation, post-tonsillectomy bleed needing surgical control)\n"+
+    "- transferred-icu — patient handed off to PICU for ongoing critical care (intubated and stable, on pressors but responsive, etc.)\n"+
+    "- transferred-hospital — patient prepped and en route to a higher level of care (e.g., community ED to peds tertiary center for ECMO candidacy, neurosurgery, burn unit)\n"+
+    "- admitted-floor — patient improved enough to leave the ED, admitted upstairs for observation or completion of treatment\n\n"+
+    "Choose the outcome that fits the clinical picture. A septic shock case that responded to fluids and antibiotics is stabilized or transferred-icu. An acute abdomen with surgical pathology is transferred-or. A community-hospital trauma case beyond local capability is transferred-hospital. Choose what the case actually warrants.\n\n"+
+    "What never happens: the patient does NOT end the scenario worsening, decompensating, or requiring immediate further intervention the user hasn't been given the chance to perform. No cliffhangers. No \"the patient codes as you finish your bolus.\" The user finishes the scenario knowing they completed the encounter cleanly.\n\n"+
+    "Narrative voice and structure. The reassessment narrative is your voice (bedside clinician). It explicitly links outcomes back to plausible Phase 2 interventions: \"After the 20 mL/kg bolus and ceftriaxone, HR has come down from 168 to 132, cap refill is now 3 seconds, and she's tracking her mom again.\" Reference time since interventions where it helps (\"ten minutes after the bolus...\"). Reference specific Phase 2 actions a clinically reasonable learner would have chosen — not every possible action, just the ones the case strongly indicated.\n\n"+
+    "Vital values. Pick reassessment vitals that match the chosen outcome. For stabilized or admitted-floor, vitals should be near-normal or trending clearly toward normal. For transferred-or or transferred-icu, vitals can still be abnormal (the patient is sick — that's why they're being transferred) but must be stable or improving, not deteriorating. The reassessment vitals object is a single snapshot, not an array. No _slotRef, no why field — these are reference values, not slots the worker model fills.\n\n"+
+    "Stabilization summary. Two to three sentences that wrap the case at the handoff moment. Examples:\n"+
+    "- stabilized: \"She's now hemodynamically stable on maintenance fluids with broad-spectrum antibiotics on board. Plan is admission to the pediatric floor for continued IV antibiotics and serial reassessment over the next 24 hours.\"\n"+
+    "- transferred-or: \"He's now hemodynamically stable with active hemorrhage controlled by direct pressure and TXA on board. ENT is scrubbed and the OR is ready; we're rolling now.\"\n"+
+    "- transferred-icu: \"She's stable on the vent at 30% FiO2 with epinephrine titrating off. PICU has the bed; transport is at the door.\"\n"+
+    "- transferred-hospital: \"He's intubated, stable on transport ventilator settings, lines secured. Children's accepted; ground transport is here and we're moving.\"\n\n"+
+    "Two-round scenarios (future). This v1 spec assumes single-round (one Phase 1, one Phase 2). When the schema later supports multi-round play, only the FINAL reassessment carries the outcome/stabilizationSummary fields. Intermediate reassessments (between round 1 and round 2) describe partial response or even ongoing deterioration if the pathology warrants — that's what justifies a second intervention round. The last reassessment in any scenario, however many rounds, always resolves cleanly per the outcome rule above.\n\n"+
     "Every scenario needs distractors — actions that are plausible-but-wrong — alongside the correct ones. Good distractors are what make the scenario teach. A list of obviously-correct interventions teaches nothing.\n\n"+
     "Three distractor categories, in priority order:\n\n"+
     "1. Distractor-clinical: a clinically reasonable choice that's specifically wrong for this pathology. Example: in a DKA scenario, \"give nsBolus\" is correct early but \"give bicarb to correct acidosis\" is a clinical-pattern distractor — looks reasonable to a novice but is contraindicated.\n\n"+
@@ -308,12 +415,13 @@ export function buildOrchestratorPrompt(){
     "- Common conditions (asthma, sepsis, DKA, head injury) — your training covers current standards\n"+
     "- To verify routine drug doses — recompute from PALS/NRP rather than searching\n\n"+
     "If a search returns conflicting information, prefer the most recently published authoritative source (AAP, AHA/PALS, ACEP guidelines) over forum or aggregator content.\n\n"+
-    "Before emitting JSON, internally run these five checks. If any check fails, revise. Do not narrate the verification in your output.\n\n"+
+    "Before emitting JSON, internally run these six checks. If any check fails, revise. Do not narrate the verification in your output.\n\n"+
     "1. Clinical accuracy. Are all vital ranges, lab values, drug doses (mg/kg), fluid volumes (mL/kg), and equipment sizes (ETT, blade, gauge) correct for this exact age and weight? Are guideline citations (PALS/NRP/AAP) verified to exist and be current? Are pH/HCO3/pCO2 internally consistent via Henderson-Hasselbalch? Does lactate match the perfusion picture? Recompute every weight-based number.\n\n"+
     "2. Loyalty to user input. Every fact the user explicitly stated — demographics, chief complaint, pre-arrival interventions, allergies, comorbidities, prior treatments — appears in the scenario and is honored throughout. No invented PMH. No invented allergies. No contradicting their stated facts.\n\n"+
     "3. Intervention realism. All correct actions are evidence-based for this exact pathology, not just generally reasonable. Distractors are plausible-but-wrong (something a learner might genuinely consider) rather than absurd. Priority ordering reflects actual clinical sequencing. Pre-arrival interventions are accounted for in available in-scenario interventions.\n\n"+
     "4. Pack and variety enforcement. 1-3 packs selected, all matching the pathophysiology. Tool count: 6-9 options, ≥65% indicated, ≥2 distractors, all from selected packs or universal (or customTool with description). Med count: same ratios. Lab count: ≥33% normal/reassuring, minimum 2 normal labs, no filler. Vital chips: at least 1-2 in normal range with bad: false. At least 1 system finding has bad: false.\n\n"+
-    "5. Vital chip → assessItem matching. Each assessItems[].id and label exactly matches the displayed vital chip text. \"BP 82/52 mmHg\" must match an assessItem labeled \"BP 82/52 mmHg\" — not \"SBP 82 mmHg\" or \"Blood Pressure\". \"Cap Refill 3 sec\" must match \"Cap Refill 3 sec\" — not \"CRT 3 sec\". Mismatches break the scoring layer.\n\n"+
+    "5. Slot field presence. Every vital, sign, and lab entry has a why key with literal null value. Every tool and med entry has an fb key with literal null value. Every debrief deep-dive entry has a content key with literal null value. Missing keys mean the worker model can't find the slot — it scans for fields whose value is exactly null and skips entries where the field is absent.\n\n"+
+    "6. Reassessment outcome. The reassessment object exists, has an outcome field set to one of the five permitted values (stabilized, transferred-or, transferred-icu, transferred-hospital, admitted-floor), and the narrative + stabilizationSummary do not leave the patient worsening or mid-crisis. No cliffhangers; the user finishes the scenario knowing they completed the encounter cleanly.\n\n"+
     "If any check fails, fix silently and re-verify before emitting JSON. Do not narrate.\n\n"+
     "Return ONLY valid JSON conforming to schema 5.4.1. No prose before or after. No code fences. No explanation of what you did. The first character of your response is \"{\" and the last is \"}\".";
 }

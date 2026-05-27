@@ -1,4 +1,4 @@
-import { buildSystemPrompt, buildMarkForReviewDeepDivePrompt, MODEL_ID, MAX_TOKENS } from "./prompt.js";
+import { buildSystemPrompt, buildOrchestratorPrompt, buildMarkForReviewDeepDivePrompt, MODEL_ID, MAX_TOKENS } from "./prompt.js";
 import { resolveSlotText, kindToPromptType } from "../scenarios/slotResolve.js";
 import { validateSchema, validateConsistency, validateCounts, applyAutocorrections } from "./validate.js";
 import { migrateLegacyScenario } from "../scenarios/migrateLegacyScenario.js";
@@ -89,7 +89,17 @@ export async function generateScenario(txt, cbMode, signal, onProgress){
   var r=await fetch("/api/generate",{method:"POST",headers:{"Content-Type":"application/json"},signal:signal,
     body:JSON.stringify({model:MODEL_ID,max_tokens:MAX_TOKENS,
       tools:[{type:"web_search_20250305",name:"web_search"}],
-      system:[{type:"text",text:buildSystemPrompt(cbMode),cache_control:{type:"ephemeral"}}],
+      // Phase 6.2b.3: live wiring. buildOrchestratorPrompt replaces
+      // buildSystemPrompt as the system prompt. The orchestrator
+      // emits skeleton-only output (every why/fb/content slot is null);
+      // the dispatcher fans out Haiku calls to fill those slots after
+      // the scenario lands in the player. cbMode no longer branches
+      // here — curveball machinery was deleted from the orchestrator
+      // prompt at the 6.2 design lock. buildSystemPrompt stays
+      // imported for Phase 6.4 cleanup (deletes the function + the
+      // import together). web_search tool stays available; the
+      // prompt's Section 24 governs when Sonnet uses it.
+      system:[{type:"text",text:buildOrchestratorPrompt(),cache_control:{type:"ephemeral"}}],
       messages:[{role:"user",content:userContent}],
       stream:true})});
   if(!r.ok){

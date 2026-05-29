@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Heart, Zap, Sparkles, Star, Trophy, Shield, Check } from "lucide-react";
+import { Heart, Zap, Sparkles, Star, Trophy, Shield, Check, Circle } from "lucide-react";
 import { ALL_TOOLS, ALL_MEDS, isCustomTool, isCustomMed } from "../../lib/scenarios/packs/index.js";
 import { medType as lookupMedType } from "../../lib/scenarios/visualMeta.js";
 import { vitalCanonicalId, signCanonicalId, labCanonicalId } from "../../lib/scenarios/canonicalize.js";
@@ -87,21 +87,66 @@ export function ScenarioPlayer(props){
     usePlayerStore.getState().startDispatcher();
   },[sc&&sc.id]);
   var ph=sc.phases[pi];
-  /* Build correct actions list for recovery screen (must be at top level for hook rules) */
+  /* Phase 6.2b.5: "What Saved This Patient" list. Pull only Phase 1
+     (intervene) actions with priority "tied-correct" — the must-haves.
+     Curveball is excluded (curveball machinery is dormant in the
+     orchestrator pipeline). For each must-have, mark whether the user
+     selected it during Phase 1 by looking up the action-history snapshot
+     for that phase. Must be at top level for hook rules. */
+  var actionHistoryForRecovery=usePlayerStore(function(s){return s.actionHistory;});
+  function _findP1Selections(history,phase1){
+    if(!Array.isArray(history))return{};
+    var p1Id=phase1&&(phase1.id||phase1.stageType);
+    for(var hi=0;hi<history.length;hi++){
+      var snap=history[hi];
+      if(!snap)continue;
+      if(snap.phaseId===p1Id||snap.phaseId==="intervene"||snap.phaseId==="escalation"){
+        return snap.sel||{};
+      }
+    }
+    return{};
+  }
+  var phase1=sc.phases&&sc.phases[1]?sc.phases[1]:null;
+  var p1Sel=_findP1Selections(actionHistoryForRecovery,phase1);
   var correctActions=[];
-  sc.phases.forEach(function(p){
-    if(!p.actions)return;
-    if(p.actions.tools){Object.entries(p.actions.tools).forEach(function(e){if(e[1].ok&&e[1].pri){var label=isCustomTool(e[0])?(e[1].label||e[0]):(ALL_TOOLS[e[0]]?ALL_TOOLS[e[0]].label:e[0]);correctActions.push({name:label,toolId:e[0],medType:null,fb:e[1].fb?e[1].fb.split(".")[0]+".":"",pri:e[1].pri,type:"tool"});}});}
-    if(p.actions.meds){Object.entries(p.actions.meds).forEach(function(e){if(e[1].ok&&e[1].pri){var label=isCustomMed(e[0])?(e[1].label||e[0]):(ALL_MEDS[e[0]]?ALL_MEDS[e[0]].label:e[0]);correctActions.push({name:label,toolId:null,medType:lookupMedType(e[0]),fb:e[1].fb?e[1].fb.split(".")[0]+".":"",pri:e[1].pri,type:"med"});}});}
-  });
-  if(sc.curveball&&sc.curveball.actions){
-    if(sc.curveball.actions.tools){Object.entries(sc.curveball.actions.tools).forEach(function(e){if(e[1].ok&&e[1].pri){var label=isCustomTool(e[0])?(e[1].label||e[0]):(ALL_TOOLS[e[0]]?ALL_TOOLS[e[0]].label:e[0]);correctActions.push({name:label,toolId:e[0],medType:null,fb:e[1].fb?e[1].fb.split(".")[0]+".":"",pri:e[1].pri,type:"tool"});}});}
-    if(sc.curveball.actions.meds){Object.entries(sc.curveball.actions.meds).forEach(function(e){if(e[1].ok&&e[1].pri){var label=isCustomMed(e[0])?(e[1].label||e[0]):(ALL_MEDS[e[0]]?ALL_MEDS[e[0]].label:e[0]);correctActions.push({name:label,toolId:null,medType:lookupMedType(e[0]),fb:e[1].fb?e[1].fb.split(".")[0]+".":"",pri:e[1].pri,type:"med"});}});}
+  if(phase1&&phase1.actions){
+    if(phase1.actions.tools){
+      Object.entries(phase1.actions.tools).forEach(function(e){
+        if(e[1]&&e[1].priority==="tied-correct"){
+          var label=isCustomTool(e[0])?(e[1].label||e[0]):(ALL_TOOLS[e[0]]?ALL_TOOLS[e[0]].label:e[0]);
+          correctActions.push({
+            name:label,
+            toolId:e[0],
+            medType:null,
+            fb:e[1].fb?e[1].fb.split(".")[0]+".":"",
+            pri:e[1].pri,
+            type:"tool",
+            userSelected:!!p1Sel[e[0]]
+          });
+        }
+      });
+    }
+    if(phase1.actions.meds){
+      Object.entries(phase1.actions.meds).forEach(function(e){
+        if(e[1]&&e[1].priority==="tied-correct"){
+          var label=isCustomMed(e[0])?(e[1].label||e[0]):(ALL_MEDS[e[0]]?ALL_MEDS[e[0]].label:e[0]);
+          correctActions.push({
+            name:label,
+            toolId:null,
+            medType:lookupMedType(e[0]),
+            fb:e[1].fb?e[1].fb.split(".")[0]+".":"",
+            pri:e[1].pri,
+            type:"med",
+            userSelected:!!p1Sel[e[0]]
+          });
+        }
+      });
+    }
   }
   correctActions.sort(function(a,b){return(a.pri||99)-(b.pri||99);});
   useEffect(function(){if(stage!=="recovery")return;setRecStep(0);var iv=setInterval(function(){setRecStep(function(p){if(p>=correctActions.length)return p;return p+1;});},1200);return function(){clearInterval(iv);};},[stage]);
   var pSt=function(){if(stage.startsWith("cb"))return"critical";if(pi>=1||stage==="act")return"declining";return"stable";};
-  var trigCb=useCallback(function(){setShake(true);setTimeout(function(){setShake(false);},800);setVit(sc.curveball.vitals);setStage("cb-alert");setCbDone(true);},[sc]);
+  var trigCb=useCallback(function(){setShake(true);setTimeout(function(){setShake(false);},800);setVit(sc.curveball.vitals,sc.curveball&&sc.curveball.signs);setStage("cb-alert");setCbDone(true);},[sc]);
   var flag=function(id){if(!showFb)toggleFlag(id);};
   var submit=function(){
     // Phase-4a: scoring removed. Per-item breakdown still captured for debrief.
@@ -141,7 +186,7 @@ export function ScenarioPlayer(props){
     }
     recordAssess({phaseId:ph.id,phaseName:ph.name||ph.id,items:snapshotItems});
     setShowFb(true);};
-  var afterA=function(){setFlags({});setShowFb(false);if(pi<sc.phases.length-1){var n=pi+1;setPi(n);setVit(sc.phases[n].vitals);setStage("phase");}else setStage("debrief");};
+  var afterA=function(){setFlags({});setShowFb(false);if(pi<sc.phases.length-1){var n=pi+1;setPi(n);setVit(sc.phases[n].vitals,sc.phases[n].signs);setStage("phase");}else setStage("debrief");};
   var afterAct=function(){if(!cbDone&&sc.curveball)trigCb();else setStage("reassess");};
   // Phase 6.1: derive tool/med id arrays from actions for ActionPanel
   // and intervention gating; phase.tools[]/phase.meds[] are no longer
@@ -332,7 +377,20 @@ export function ScenarioPlayer(props){
               var re=sc.reassessment&&sc.reassessment.vitals;
               var hrV=re?re.hr:(sc.norms?Math.round((sc.norms.hr[0]+sc.norms.hr[1])/2):"--");
               var spV=re?re.spo2+"%":(sc.norms?"99%":"--");
-              var bpV=re?(re.sbp+"/"+re.dbp):(sc.norms?Math.round((sc.norms.sbp[0]+sc.norms.sbp[1])/2)+"/"+Math.round((sc.norms.dbp[0]+sc.norms.dbp[1])/2):"--");
+              // Phase 6.2b.4-fixup: orchestrator emits reassessment
+              // BP as a single combined `bp` field; built-ins still
+              // emit split sbp/dbp. Try unified first, fall back to
+              // combining the split keys, then norms midpoint.
+              var bpV;
+              if(re&&re.bp!==undefined&&re.bp!==null&&re.bp!==""){
+                bpV=re.bp;
+              }else if(re&&re.sbp!==undefined&&re.dbp!==undefined){
+                bpV=re.sbp+"/"+re.dbp;
+              }else if(sc.norms&&Array.isArray(sc.norms.sbp)&&Array.isArray(sc.norms.dbp)){
+                bpV=Math.round((sc.norms.sbp[0]+sc.norms.sbp[1])/2)+"/"+Math.round((sc.norms.dbp[0]+sc.norms.dbp[1])/2);
+              }else{
+                bpV="--";
+              }
               var tempV=re?(typeof re.temp==="number"?re.temp.toFixed(1)+"°C":re.temp+"°C"):"37.0°C";
               return [{l:"HR",v:hrV,c:"#55efc4"},{l:"SpO₂",v:spV,c:"#fdcb6e"},{l:"BP",v:bpV,c:"#74b9ff"},{l:"Temp",v:tempV,c:"#fab1a0"}].map(function(vi,i){return(<div key={i} className="bw-vn" style={{animationDelay:(0.2+i*0.15)+"s",padding:"8px 14px",borderRadius:12,background:"rgba(85,239,196,0.08)",border:"1px solid rgba(85,239,196,0.15)"}}>
                 <div style={{fontSize:10,color:"#999",fontWeight:700,textTransform:"uppercase"}}>{vi.l}</div>
@@ -351,7 +409,12 @@ export function ScenarioPlayer(props){
                   <div style={{fontSize:13,fontWeight:700,color:"white"}}>{act.name}</div>
                   {visible&&act.fb&&<p style={{fontSize:11,color:"#aaa",marginTop:2,lineHeight:1.4}}>{act.fb}</p>}
                 </div>
-                {visible&&<div style={{flexShrink:0,marginTop:2}}><Check size={18} color="#55efc4"/></div>}
+                {/* Phase 6.2b.5: selection marker. Filled check = user
+                    picked it; empty circle = must-have user missed.
+                    Subtle distinction — same size, no warning colors.
+                    Only renders on revealed rows so the timeline reveal
+                    animation continues to work. */}
+                {visible&&<div style={{flexShrink:0,marginTop:2}}>{act.userSelected?<Check size={18} color="#55efc4" style={{opacity:0.9}}/>:<Circle size={18} color="#9ca3af" style={{opacity:0.5}}/>}</div>}
               </div>);
             })}
           </div>

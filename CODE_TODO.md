@@ -6,6 +6,53 @@ Working notes on architectural decisions, in-flight phase work, and pending engi
 
 ---
 
+## 2026-05-29 — Per-item why-text clinical inconsistency (found in bug-sweep smoke)
+
+During the bug-sweep Batch 1 smoke (6yo septic shock from CAP,
+"Nizhoni Runningwater"; scratch copy at `nizhoni-sepsis-smoke.json`),
+the orchestrator's `bad` flags were all consistent, but the Haiku-
+generated `why` paragraphs contradicted each other on the same patient:
+
+- phase[0] **BP** why (correct): "76 mmHg is 6 points below the
+  hypotension threshold of 70 + (2 × 6) = **82** … decompensated shock."
+- phase[0] **Cap Refill** why (wrong formula): "hypotension in a 6yo is
+  **<90 + 2×6 = <102** mmHg." Right conclusion, wrong threshold formula.
+- phase[1] **Skin & Perfusion** why (contradiction): "her BP **still
+  being above** the hypotension threshold (76 mmHg is above 70 + 2×6)" —
+  76 < 82, so she is hypotensive; this says compensated, contradicting
+  the BP card.
+
+Correct, unambiguous: pediatric hypotension threshold (1–10y) =
+70 + (2 × age); for a 6yo that's 82 mmHg; 76 < 82 → decompensated.
+The "90 + 2×age" form is the ~50th-percentile/normal SBP, not the
+hypotension threshold — the two got conflated.
+
+This is the per-item (`why`/`fb`) generation consistency gap, not a
+player or orchestrator-skeleton bug. It is the failure class already
+logged for the deferred cross-model verification layer (see the
+2026-05-13 "Clinical verification gap" entry, Level 1). Two mitigation
+paths, in increasing cost:
+- **Prompt-level (cheap):** add an explicit rule to the Haiku per-item
+  prompt — "pediatric hypotension threshold = 70 + (2 × age in years);
+  classify compensated vs decompensated consistently against it; do not
+  use 90 + 2×age as a hypotension cutoff." Also instruct that per-item
+  reasoning must not contradict the scenario-wide perfusion state.
+- **Structural (Level 1 verifier):** the deferred Sonnet cross-check
+  between Haiku emission and slot persistence would catch this class.
+
+Deliberately kept OUT of the current bug sweep to avoid scope creep.
+Track here; tackle alongside the Level 1 verification work.
+
+---
+
+## 2026-05-27 — Phase 6.2b.3 shipped
+
+Orchestrator live in production. Generation time confirmed ~95s
+(was ~280s). 6.2b.4 queued for content fixes: BP shape, lab
+variety, pediatric refs, why-card formatting.
+
+---
+
 ## 2026-05-26 — Phase 6.1 shipped (Player Shape Migration)
 
 The player and supporting code now consume the orchestrator's

@@ -53,6 +53,36 @@ smoke test. Specifics of the shape as actually implemented:
   Each entry: `{id, title, _slotRef, content: null}`. The dispatcher's
   wave 5 fills the `content` field via Haiku.
 
+## Phase 6.2 bug-sweep amendment (2026-05-29) — top-level `visuals`
+
+The orchestrator now emits a top-level `"visuals"` array (string
+keywords) that drives accessories on the patient avatar (`PatientSVG`).
+Previously the orchestrator never emitted the field and
+`migrateLegacyScenario` defaulted it to `[]`, so the avatar never showed
+casts, oxygen equipment, hives, c-collars, etc. The plumbing (prop chain
+`ScenarioPlayer → PatientView → PatientSVG`, and the migration
+pass-through for a real array) already existed; only the prompt + schema
+needed the field.
+
+- Schema: `"visuals"` is a top-level sibling of `phases`/`debrief`, an
+  array of zero or more recognized keyword strings. Empty `[]` is valid
+  and expected for cases with no visible accessory.
+- The prompt enumerates the EXACT vocabulary `PatientSVG` matches
+  (substring, case-insensitive): `cast left arm`, `cast right arm`,
+  `cast leg`, `head bandage`, `c-collar`, `arm sling`, `eye patch`,
+  `nasal cannula`, `oxygen mask`, `hives`, `wheelchair`, `flushed`,
+  `diaphoretic`, `lip swelling`, `petechiae`, `wound dressing`,
+  `crutches`. Novel phrasings render nothing, so the keyword list is the
+  contract. (`petechiae` takes precedence over `hives` — a petechial rash
+  should use `petechiae`, not `hives`.)
+- Guidance: emit only what is visibly true at presentation; do not
+  pre-apply equipment the learner still has to choose in Phase 1.
+
+Also rebalanced the patient-name rule in the same pass: it had
+over-corrected to almost exclusively non-Western names. It now asks for a
+realistic US clinic mix — common Anglophone names as a plurality
+alongside steady, natural diversity.
+
 ## Purpose
 
 This document captures the locked design for the new Sonnet orchestrator prompt that replaces the current monolithic scenario generator. Under the new architecture, Sonnet plans the scenario skeleton and a separate Haiku worker fills in per-item explanation paragraphs (why and fb fields).

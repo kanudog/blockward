@@ -43,7 +43,16 @@ export function AssessPanel(props){
     if(vitObj.hr!==undefined)t.push({key:"hr",label:"HR",value:vVal(vitObj.hr),unit:vUnit(vitObj.hr,"bpm")});
     if(vitObj.spo2!==undefined)t.push({key:"spo2",label:"SpO₂",value:vVal(vitObj.spo2),unit:vUnit(vitObj.spo2,"%")});
     if(vitObj.rr!==undefined)t.push({key:"rr",label:"RR",value:vVal(vitObj.rr),unit:vUnit(vitObj.rr,"/min")});
-    if(vitObj.sbp!==undefined&&vitObj.dbp!==undefined)t.push({key:"sbp",label:"BP",value:vVal(vitObj.sbp)+"/"+vVal(vitObj.dbp),unit:vUnit(vitObj.sbp,"mmHg")});
+    // Phase 6.2b.4-fixup: prefer unified `bp` vital (orchestrator
+    // shape); fall back to combining sbp/dbp (built-in shape).
+    // Bug-sweep: the tile key must equal the vital's real id so its
+    // canonical id (vitalCanonicalId(key)) matches buildBadMap and the
+    // submit snapshot. The unified vital's id is "bp"; using the legacy
+    // "sbp" key here meant the BP tile never found its bad flag (always
+    // read as normal) and the flag was stored under a cid the snapshot
+    // never checked (always read as missed). Split built-ins keep "sbp".
+    if(vitObj.bp!==undefined)t.push({key:"bp",label:"BP",value:vVal(vitObj.bp),unit:vUnit(vitObj.bp,"mmHg")});
+    else if(vitObj.sbp!==undefined&&vitObj.dbp!==undefined)t.push({key:"sbp",label:"BP",value:vVal(vitObj.sbp)+"/"+vVal(vitObj.dbp),unit:vUnit(vitObj.sbp,"mmHg")});
     if(vitObj.temp!==undefined)t.push({key:"temp",label:"Temp",value:tempStr(vitObj.temp),unit:vUnit(vitObj.temp,"°C")});
     if(vitObj.cap!==undefined)t.push({key:"cap",label:"Cap Refill",value:vVal(vitObj.cap),unit:vUnit(vitObj.cap,"sec")});
     return t;
@@ -53,10 +62,13 @@ export function AssessPanel(props){
   // monitor's per-key coloring. sbp tap also reveals dbp since they're
   // shown as a single BP reading.
   var revealMap={};
-  if(showFb){revealMap={hr:true,spo2:true,rr:true,sbp:true,dbp:true,temp:true,cap:true};}
+  if(showFb){revealMap={hr:true,spo2:true,rr:true,sbp:true,dbp:true,bp:true,temp:true,cap:true};}
   else{
-    ["hr","spo2","rr","sbp","temp","cap"].forEach(function(k){
-      if(flags[vitalCanonicalId(k)]){revealMap[k]=true;if(k==="sbp")revealMap.dbp=true;}
+    // Bug-sweep: BP may be flagged under "bp" (unified) or "sbp" (split).
+    // VitalsDisplay colors the BP row via reveal key "sbp", so map either
+    // flag onto revealMap.sbp/.dbp to keep monitor coloring working.
+    ["hr","spo2","rr","sbp","bp","temp","cap"].forEach(function(k){
+      if(flags[vitalCanonicalId(k)]){revealMap[k]=true;if(k==="sbp"||k==="bp"){revealMap.sbp=true;revealMap.dbp=true;}}
     });
   }
   return(<div className="slu">
@@ -139,11 +151,14 @@ export function AssessPanel(props){
       // vital cid is present.
       var cid=whyTarget.cid;
       var vk=cid&&cid.indexOf(":")>=0?cid.split(":")[1]:null;
+      // Bug-sweep: phase-scope the mark id (see ActionPanel popMarkItem).
+      // Same vital/assess id across phases must not collide in
+      // markedForReview dedup or deepDiveCache. The id is opaque downstream.
       if(vk){
-        return{id:cid,kind:"vital",phaseIdx:phaseIdx,label:whyTarget.label,_slotRef:{kind:"vital",phaseIdx:phaseIdx,indexOrId:vk}};
+        return{id:cid+"@p"+phaseIdx,kind:"vital",phaseIdx:phaseIdx,label:whyTarget.label,_slotRef:{kind:"vital",phaseIdx:phaseIdx,indexOrId:vk}};
       }
       var aiId=whyTarget._match?whyTarget._match.id:whyTarget.label;
-      return{id:"assess:"+aiId,kind:"assessItem",phaseIdx:phaseIdx,label:whyTarget.label,_slotRef:{kind:"assessItem",phaseIdx:phaseIdx,indexOrId:aiId}};
+      return{id:"assess:"+aiId+"@p"+phaseIdx,kind:"assessItem",phaseIdx:phaseIdx,label:whyTarget.label,_slotRef:{kind:"assessItem",phaseIdx:phaseIdx,indexOrId:aiId}};
     })():null}/>
   </div>);
 }

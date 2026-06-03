@@ -11,6 +11,13 @@ export function guessAge(sc) {
     return "child";
   }
   var n = parseInt(m[1]);
+  // A child whose age is measured in days or weeks is an infant. Checked
+  // before the month/year branches, which only match "month"/"mo"/"year"/
+  // "yr"/"yo" and would otherwise fall through to the bare-number branch
+  // and mis-bucket (e.g. "3 weeks old" -> toddler).
+  if (label.indexOf("week") >= 0 || label.indexOf("wk") >= 0 || label.indexOf("day") >= 0) {
+    return "infant";
+  }
   if (label.indexOf("month") >= 0 || label.indexOf("mo") >= 0) {
     if (n <= 12) return "infant";
     if (n <= 36) return "toddler";

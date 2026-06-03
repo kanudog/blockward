@@ -14,20 +14,55 @@
 // AssessPanel both read by id (.hr, .spo2, etc.) so storing the
 // player-store `vit` state in lookup form lets them stay agnostic.
 //
+// Phase 6.2b.4-fixup: optional second argument `signs` lets us
+// backfill capillary refill into the vitals lookup when Sonnet
+// emits it as a sign (with prose `finding`) rather than as a vital.
+// The orchestrator prompt is being tightened to emit cap as a vital
+// going forward, but in-flight scenarios generated under earlier
+// prompt iterations still have cap in signs[] — VitalsDisplay's
+// monitor reads from the vitals lookup only, so we synthesize a
+// `cap` entry here when missing.
+//
 // Defensive: returns null/undefined inputs as-is so call sites that
 // guard on truthiness keep working. Anything other than array/object
-// passes through unchanged.
-export function vitalsLookup(vitals) {
+// passes through unchanged. Signs argument is fully optional — call
+// sites that don't have signs available (e.g., reassessment vitals
+// snapshot) simply omit it.
+export function vitalsLookup(vitals, signs) {
   if (vitals == null) return vitals;
+  var lookup;
   if (Array.isArray(vitals)) {
-    var lookup = {};
+    lookup = {};
     for (var i = 0; i < vitals.length; i++) {
       var v = vitals[i];
       if (v && v.id) lookup[v.id] = v;
     }
-    return lookup;
+  } else {
+    lookup = vitals;
   }
-  return vitals;
+  // Cap refill backfill from signs. Only fires when the vitals
+  // lookup lacks a cap entry AND signs is a non-empty array.
+  if (Array.isArray(signs) && !lookup.cap) {
+    for (var si = 0; si < signs.length; si++) {
+      var s = signs[si];
+      if (!s) continue;
+      if (s.id === "cap" || s.id === "capRefill") {
+        // Synthesize a vital-shaped entry. The sign's finding is
+        // prose; VitalsDisplay's vStr() extracts .value, so we use
+        // .finding as .value here. Unit empty because cap refill
+        // text typically includes the unit inline ("4 sec").
+        lookup.cap = {
+          id: "cap",
+          label: s.label || "Cap Refill",
+          value: s.finding || s.value || "",
+          unit: "",
+          bad: !!s.bad
+        };
+        break;
+      }
+    }
+  }
+  return lookup;
 }
 
 // Map a vital-display label keyword to the vital field key used in

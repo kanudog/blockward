@@ -7,6 +7,30 @@ import { useRef, useEffect } from "react";
 function vNum(v){if(v==null)return 0;if(typeof v==="object")return parseFloat(v.value)||0;return Number(v)||0;}
 function vStr(v){if(v==null)return "";if(typeof v==="object")return v.value;return v;}
 
+// Phase 6.2b.4-fixup: orchestrator emits BP as a single combined
+// vital (id: "bp", value: "84/52") instead of split sbp/dbp. Built-in
+// scenarios still emit split sbp/dbp. Read the unified shape first,
+// fall back to combining the split keys for backward compat. Returns
+// {value, unit, bad} or null if neither shape is present.
+function _getBpDisplay(vitals){
+  if(!vitals)return null;
+  var bpVital=vitals.bp;
+  if(bpVital&&typeof bpVital==="object"){
+    return{value:vStr(bpVital),unit:bpVital.unit||"mmHg",bad:!!bpVital.bad};
+  }
+  var sbp=vitals.sbp;
+  var dbp=vitals.dbp;
+  if(sbp&&dbp){
+    var sv=vStr(sbp);var dv=vStr(dbp);
+    if(sv==null||sv==="")return null;
+    var sbpBad=typeof sbp==="object"?!!sbp.bad:false;
+    var dbpBad=typeof dbp==="object"?!!dbp.bad:false;
+    var sbpUnit=typeof sbp==="object"?(sbp.unit||"mmHg"):"mmHg";
+    return{value:sv+"/"+dv,unit:sbpUnit,bad:sbpBad||dbpBad};
+  }
+  return null;
+}
+
 function ecgPt(t,hr){var p=60/hr,x=(t%p)/p;if(x<.06)return 0;if(x<.08)return Math.sin((x-.06)/.02*Math.PI)*0.05;if(x<.10)return(x-.08)/.02*1.0;if(x<.12)return 1.0-(x-.10)/.02*1.0;if(x<.14)return 0;if(x<.30)return Math.sin((x-.14)/.16*Math.PI)*0.08;return 0;}
 function plPt(t,hr){var p=60/hr,x=(t%p)/p;return(Math.sin(x*Math.PI*2-Math.PI/2)+1)/2*0.8;}
 // reveal prop (phase-2.6 group E):
@@ -38,11 +62,22 @@ export function VitalsDisplay(props){
   var bColor=flash?"#FF4757":"#555";
   var tempStr=(function(){var t=vStr(vitals.temp);if(t===""||t==null)return "";var n=parseFloat(t);return isNaN(n)?t:n.toFixed(1);})();
   var tempNum=vNum(vitals.temp);
+  // Phase 6.2b.4-fixup: BP via unified _getBpDisplay (handles both
+  // orchestrator "bp" and built-in sbp/dbp). The BP row key stays
+  // "sbp" for the reveal-map keyed lookup that AssessPanel uses to
+  // gate per-vital coloring — the canonical id system pre-dates the
+  // unified bp shape and would touch too many call sites to rename.
+  var bp=_getBpDisplay(vitals);
+  var bpValue=bp?bp.value:"";
+  var bpUnit=bp?bp.unit:"mmHg";
+  // Cap refill may be missing if Sonnet emitted it as a sign and no
+  // backfill ran (defensive — playerStore should always supply it).
+  // vStr returns "" for undefined; the chip just renders empty.
   var vs=[
     {l:"HR",k:"hr",v:vStr(vitals.hr),u:"bpm"},
     {l:"SpO2",k:"spo2",v:vStr(vitals.spo2),u:"%"},
     {l:"RR",k:"rr",v:vStr(vitals.rr),u:"/min"},
-    {l:"BP",k:"sbp",v:vStr(vitals.sbp)+"/"+vStr(vitals.dbp),u:"mmHg"},
+    {l:"BP",k:"sbp",v:bpValue,u:bpUnit},
     {l:"Temp",k:"temp",v:tempStr,u:"C",_num:tempNum},
     {l:"Cap Refill",k:"cap",v:vStr(vitals.cap),u:"sec"}
   ];

@@ -30,12 +30,19 @@ export function WhyModal(props){
     var transition=toggle(item);
     if(transition!=="added")return;
     // Eager deep-dive — unawaited; result lands in playerStore.deepDiveCache.
-    var sc=usePlayerStore.getState().activeScenario;
+    var store=usePlayerStore.getState();
+    var sc=store.activeScenario;
     if(!sc||!item._slotRef)return;
+    // Bug-sweep: skip if already fetched, or if a fetch for this id is in
+    // flight (rapid mark→unmark→mark). Release the slot when it settles.
+    if(store.deepDiveCache[item.id])return;
+    if(!store.beginDeepDive(item.id))return;
     expandSingleMarkedItem(sc,item).then(function(text){
       if(text)usePlayerStore.getState().setDeepDive(item.id,text);
     }).catch(function(err){
       console.warn("[eager deep-dive] "+item.id+" — "+(err&&err.message||err));
+    }).finally(function(){
+      usePlayerStore.getState().endDeepDive(item.id);
     });
   }
   // Phase-2.6.5 change 1: Mark for Review moved out of children and

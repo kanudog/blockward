@@ -152,7 +152,7 @@ export function Debrief(props){
   var wrongPicks=interventions.filter(function(x){return x.selected&&!x.ok;});
   return(<div style={{minHeight:"100vh",padding:16,background:"linear-gradient(135deg,#0a0e1a,#1a1a3e)",color:"#fff"}}><div className="bw-container" style={{maxWidth:480,margin:"0 auto"}}>
     <div style={{textAlign:"center",marginBottom:16}}>
-      <div style={{width:100,margin:"0 auto"}}><PatientSVG status="stable" rr={20} ageGroup={ageG} sex={sexG} emotion="happy"/></div>
+      <div style={{width:100,margin:"0 auto"}}><PatientSVG status="stable" rr={20} ageGroup={ageG} sex={sexG} emotion="happy" seed={sc.patient&&sc.patient.name}/></div>
     </div>
     <div style={{textAlign:"center",marginBottom:24}}><h2 style={{fontSize:24,fontWeight:900}}>Scenario Complete</h2></div>
     <div className="bw-glass" style={{borderRadius:16,padding:16,marginBottom:16}}><TextBlock text={sc.debrief.summary} style={{fontSize:13,color:"#ccc",lineHeight:1.6}}/></div>

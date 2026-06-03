@@ -1,0 +1,524 @@
+{
+  "id": "opioid-overdose-adolescent-naloxone",
+  "title": "Unresponsive at the Party",
+  "packs": ["respiratoryAirway", "toxicologyAntidotes", "cardiac"],
+  "tier": 2,
+  "icon": "💊",
+  "tagline": "Pinpoint pupils, partial response — the clock is running out on his reversal.",
+  "description": "A 14-year-old male is brought in by EMS after being found unresponsive at a house party. Friends administered one dose of intranasal naloxone before EMS arrived with partial response. Opioid toxidrome is suspected. Airway protection, re-reversal, and vigilance for re-narcotization are the priorities.",
+  "visuals": [],
+  "patient": {
+    "ageLabel": "14 years",
+    "weightKg": 50,
+    "sex": "Male",
+    "cc": "Unresponsive, suspected opioid overdose",
+    "history": "Wren Okafor is a 14-year-old male with no known past medical history and no known drug allergies. He was found unresponsive at a high school party approximately 40 minutes prior to ED arrival. Witnesses state he may have taken a pill offered by another partygoer — type unknown, possibly counterfeit pressed tablet. One dose of Narcan 4 mg intranasal was administered by a peer approximately 20 minutes before EMS arrived. EMS reports a partial response: he opened his eyes briefly but remained somnolent, with GCS 8 (E2V2M4) and a respiratory rate of 8 on scene. No alcohol bottles near him. No seizure activity witnessed."
+  },
+  "emsReport": "14-year-old male transported by BLS unit from a residential address after being found unresponsive at a party. Friends administered one dose of intranasal naloxone (4 mg) approximately 20 minutes prior to EMS arrival with partial improvement in responsiveness. EMS placed him on a non-rebreather mask at 15 L/min en route and established a peripheral IV in the right antecubital fossa. He remains minimally responsive on arrival.",
+  "learnMore": "Illicitly manufactured fentanyl, increasingly found in counterfeit pills distributed at social gatherings, accounts for the majority of adolescent opioid overdose deaths. Intranasal naloxone (4 mg) may be insufficient to fully reverse high-potency synthetic opioids, and re-narcotization is a serious risk because naloxone's duration of action (30–70 min) is shorter than most opioids. Adolescents with partial naloxone response should be treated as potentially opioid-naive with respect to withdrawal risk, warranting careful titration of additional naloxone to avoid precipitating acute withdrawal or agitation.",
+  "norms": {
+    "hr": [60, 100],
+    "rr": [12, 20],
+    "sbp": [90, 120],
+    "dbp": [60, 80],
+    "spo2": [95, 100],
+    "temp": [36.5, 37.5]
+  },
+  "phases": [
+    {
+      "id": "triage",
+      "name": "Triage",
+      "narrative": "Wren is brought in on the EMS stretcher, supine, and minimally responsive to painful stimuli. He is wearing jeans and a hoodie, and smells faintly of cigarette smoke but not alcohol. He has not vomited. His skin is pale and slightly clammy. His breathing is slow and shallow — audible as infrequent, inadequate inspiratory efforts. His pupils are 1–2 mm bilaterally and non-reactive to light. The right antecubital IV established by EMS is patent, with a 20-gauge catheter. The non-rebreather mask placed by EMS is in position but his tidal volumes appear diminished despite the supplemental oxygen. GCS is currently 8 (E2V2M4). There is no evidence of trauma, rash, or focal neurologic deficit on rapid survey.",
+      "vitals": {
+        "hr": 58,
+        "rr": 8,
+        "sbp": 98,
+        "dbp": 64,
+        "spo2": 89,
+        "temp": 36.2,
+        "cap": 3
+      },
+      "signs": [
+        {
+          "label": "Pupils",
+          "finding": "1–2 mm bilaterally, symmetric, non-reactive to direct light",
+          "pos": "face",
+          "sys": "neurological",
+          "why": "Bilateral miosis is the hallmark of opioid toxidrome.\n\n- **Mu-opioid receptors** in the Edinger-Westphal nucleus of the oculomotor nerve are activated by opioids, causing unopposed parasympathetic tone to the iris sphincter\n- Result is **pinpoint pupils** (1–2 mm) that are non-reactive even in bright light\n- Unlike metabolic encephalopathy or pontine hemorrhage, which can also cause miosis, opioid miosis is **rapidly reversible** with naloxone\n- Non-reactive pupils in this context strongly suggest **opioid receptor saturation** — partial naloxone reversal was insufficient to displace all agonist binding"
+        },
+        {
+          "label": "Respiratory Effort",
+          "finding": "Rate 8/min, shallow tidal volumes, no use of accessory muscles, intermittent periods of apnea lasting 5–8 seconds",
+          "pos": "body",
+          "sys": "respiratory",
+          "why": "Opioids cause dose-dependent suppression of the central respiratory drive.\n\n- **Mu-opioid receptors** in the pre-Bötzinger complex and nucleus tractus solitarius in the brainstem are the primary targets for opioid-induced respiratory depression\n- Result is decreased **respiratory rate**, diminished **tidal volume**, and impaired hypercapnic ventilatory response\n- RR of 8 with intermittent apnea in a 50 kg adolescent represents **critical hypoventilation** — CO2 is rising and O2 reserve is depleting\n- Shallow tidal volumes compound hypoxia despite supplemental O2, because **minute ventilation** (RR × TV) is insufficient to clear CO2 or sustain alveolar oxygenation"
+        },
+        {
+          "label": "Level of Consciousness",
+          "finding": "GCS 8 (E2V2M4): opens eyes to pain, moaning, localizes to pain; does not follow commands or speak words",
+          "pos": "head",
+          "sys": "neurological",
+          "why": "Opioids produce CNS depression through mu-receptor agonism across the cortex, limbic system, and brainstem.\n\n- **GCS 8** defines moderate-severe impairment and signals a patient who **cannot protect their own airway**\n- A score of 8 or below is the traditional threshold for intubation consideration in airway protection\n- The partial improvement from baseline unresponsiveness reflects the **incomplete reversal** by the prior intranasal dose\n- **Re-narcotization** is expected as intranasal naloxone (given ~20 min prior) approaches its 30–70 min duration limit"
+        },
+        {
+          "label": "Skin Assessment",
+          "finding": "Pale, cool, slightly diaphoretic; capillary refill 3 seconds; no cyanosis, no rash, no track marks visible",
+          "pos": "body",
+          "sys": "cardiovascular",
+          "why": "Opioids cause peripheral vasodilation and histamine release, contributing to cool, pale, and clammy skin.\n\n- **Pallor and diaphoresis** reflect sympathoadrenal response to hypoxia combined with opioid-induced peripheral vasodilation\n- **Cap refill 3 sec** is mildly prolonged (normal < 2 sec) — consistent with reduced peripheral perfusion from opioid-mediated bradycardia and vasodilation\n- Absence of **cyanosis** is reassuring against frank tissue hypoxia at the periphery, though central oxygenation is compromised (SpO2 89%)\n- Absence of **track marks** does not exclude IV drug use; counterfeit pill ingestion is the most common exposure in this demographic"
+        },
+        {
+          "label": "Lung Auscultation",
+          "finding": "Breath sounds equal bilaterally; no wheezes, crackles, or stridor; air entry reduced globally due to shallow tidal volumes",
+          "pos": "body",
+          "sys": "respiratory",
+          "why": "Equal bilateral breath sounds with reduced air entry globally is reassuring against focal pathology.\n\n- **Equal bilateral sounds** rule out pneumothorax, hemothorax, or main-stem intubation — important to confirm before airway intervention\n- **No wheezing or crackles** argues against bronchospasm or aspiration pneumonitis at this time — aspiration risk remains elevated given depressed mental status\n- Globally reduced air entry is consistent with **central hypoventilation** rather than obstructive or restrictive lung disease\n- **Trachea is midline** — no mediastinal shift"
+        },
+        {
+          "label": "Cardiac Auscultation",
+          "finding": "Bradycardic, regular rhythm; S1 and S2 present; no murmurs, gallops, or rubs",
+          "pos": "body",
+          "sys": "cardiovascular",
+          "why": "Opioid-induced bradycardia is expected; structural cardiac findings are absent.\n\n- **HR 58** is below the normal adolescent range (60–100 bpm) and reflects mu-receptor mediated reduction in sinoatrial node automaticity and enhanced vagal tone\n- **Regular rhythm** and absent murmur or gallop are reassuring against arrhythmia or structural cardiac disease\n- Bradycardia in opioid overdose is typically **responsive to naloxone** — treating the underlying toxidrome is preferred over atropine unless there is hemodynamic compromise\n- The regular rhythm argues against co-ingestion of a QT-prolonging agent as a primary driver, though an ECG is warranted"
+        }
+      ],
+      "assessItems": [
+        {
+          "id": "hr",
+          "label": "HR 58 bpm",
+          "bad": true,
+          "why": "Bradycardia in a 14-year-old is below the normal resting range of 60–100 bpm.\n\n- **Mu-opioid receptor** activation increases vagal tone and reduces sinoatrial node automaticity, producing bradycardia\n- HR 58 represents **opioid-mediated suppression** of the sympathetic nervous system rather than primary cardiac pathology\n- Bradycardia in this context is reversible with **naloxone** — no atropine or pacing indicated unless hemodynamically unstable\n- Should be monitored continuously; may worsen as partial naloxone reversal wanes",
+          "cat": "vital"
+        },
+        {
+          "id": "rr",
+          "label": "RR 8/min",
+          "bad": true,
+          "why": "A respiratory rate of 8 is critically low for a 14-year-old (normal: 12–20/min).\n\n- **Central respiratory depression** via mu-opioid receptors in the pre-Bötzinger complex reduces both rate and tidal volume\n- RR 8 with shallow effort means **minute ventilation** is severely compromised — CO2 is accumulating and hypoxia is worsening\n- This finding, combined with SpO2 89%, defines **impending respiratory failure** requiring immediate intervention\n- Naloxone re-dosing AND ventilatory support are both required — do not choose one over the other",
+          "cat": "vital"
+        },
+        {
+          "id": "sbp",
+          "label": "BP 98/64 mmHg",
+          "bad": false,
+          "why": "A blood pressure of 98/64 mmHg is within normal limits for a 14-year-old male.\n\n- Normal **SBP** for adolescent males: 90–120 mmHg; 98 is acceptable and does not suggest hemodynamic instability\n- Opioids cause peripheral vasodilation and can lower BP, but in this case perfusion pressure remains adequate\n- This is a **reassuring distractor** — the clinical emergency is respiratory, not cardiovascular collapse\n- Do not anchor on BP as the primary concern; **airway and ventilation** take priority",
+          "cat": "vital"
+        },
+        {
+          "id": "spo2",
+          "label": "SpO2 89%",
+          "bad": true,
+          "why": "SpO2 of 89% represents clinically significant hypoxemia even on supplemental oxygen via non-rebreather mask.\n\n- Normal SpO2 ≥95%; 89% on 15 L/min non-rebreather indicates **ventilation-perfusion mismatch** driven by hypoventilation\n- Insufficient respiratory rate and tidal volume means CO2 is displacing O2 in alveoli — **alveolar hypoventilation equation**: PAO2 = FiO2 × (Patm − PH2O) − PaCO2/RQ\n- Supplemental O2 blunts the SpO2 signal — the patient's **CO2** is likely severely elevated even when SpO2 seems borderline\n- Immediate action: **bag-mask ventilation** to augment tidal volume, plus naloxone re-dosing",
+          "cat": "vital"
+        },
+        {
+          "id": "temp",
+          "label": "Temp 36.2°C",
+          "bad": false,
+          "why": "Temperature of 36.2°C is at the low-normal range and is not clinically concerning in isolation.\n\n- Normal pediatric temperature: **36.5–37.5°C**; 36.2°C is borderline but does not constitute hypothermia (< 36.0°C)\n- Slight cooling may reflect **opioid-induced vasodilation** and reduced metabolic rate, but does not require intervention\n- Absence of fever argues against an **infectious co-morbidity** (e.g., meningitis, sepsis) as the primary driver of altered mental status\n- This is a **reassuring finding** — do not anchor on temperature as the key abnormality here",
+          "cat": "vital"
+        },
+        {
+          "id": "cap",
+          "label": "Cap Refill 3 sec",
+          "bad": true,
+          "why": "Capillary refill of 3 seconds is mildly prolonged beyond the normal upper limit of 2 seconds.\n\n- Prolonged cap refill reflects **reduced peripheral perfusion** from opioid-mediated vasodilation and bradycardia\n- In combination with pallor and cool, diaphoretic skin, this indicates **compromised microcirculatory flow**\n- The finding is mild — not the primary emergency — but it contributes to the overall **toxidrome picture**\n- Expected to normalize rapidly with **naloxone reversal** and restoration of normal heart rate and vascular tone",
+          "cat": "vital"
+        },
+        {
+          "id": "pupils",
+          "label": "Pupils",
+          "bad": true,
+          "why": "Bilateral 1–2 mm non-reactive pupils are the pathognomonic finding of opioid toxidrome.\n\n- **Mu-opioid receptor** activation in the Edinger-Westphal nucleus produces sustained, unopposed parasympathetic miosis\n- This finding is bilateral and symmetric — distinguishing it from **herniation** (unilateral, fixed, dilated) or pontine hemorrhage (bilateral pinpoint but with other brainstem signs)\n- Non-reactivity confirms **opioid receptor saturation** not yet reversed by prior intranasal naloxone dose\n- Will normalize to mid-position reactive pupils after adequate **naloxone re-dosing**",
+          "cat": "clinical"
+        },
+        {
+          "id": "respiratory-effort",
+          "label": "Respiratory Effort",
+          "bad": true,
+          "why": "RR 8/min with shallow tidal volumes and intermittent apnea is a critical finding demanding immediate airway intervention.\n\n- **Central hypoventilation** driven by mu-opioid receptor suppression of the pre-Bötzinger complex in the medulla\n- Intermittent apnea of 5–8 seconds signals **impending respiratory arrest** — the partial naloxone reversal is waning\n- Shallow tidal volumes mean even the documented respiratory rate overstates effective **alveolar ventilation**\n- Requires **assisted ventilation** (BVM) immediately while naloxone is re-dosed IV",
+          "cat": "clinical"
+        },
+        {
+          "id": "loc",
+          "label": "Level of Consciousness",
+          "bad": true,
+          "why": "GCS 8 defines an inability to protect the airway and signals significant CNS depression.\n\n- **GCS ≤ 8** is the classic threshold for evaluating need for definitive airway management\n- In opioid overdose, CNS depression reflects mu-receptor-mediated suppression across cortex, limbic system, and brainstem reticular activating system\n- GCS 8 here (E2V2M4) shows the **partial effect** of prior naloxone — GCS was presumably lower at the scene before the intranasal dose\n- Clinical priority: re-dose **naloxone IV** to avoid intubation if reversal can be achieved rapidly",
+          "cat": "clinical"
+        },
+        {
+          "id": "skin",
+          "label": "Skin Assessment",
+          "bad": true,
+          "why": "Pale, cool, diaphoretic skin with cap refill 3 sec reflects impaired peripheral perfusion and opioid-mediated vasomotor changes.\n\n- **Pallor and diaphoresis** result from sympathoadrenal activation in response to hypoxia, combined with opioid-induced peripheral vasodilation\n- Cap refill 3 sec (normal: < 2 sec) confirms **reduced microcirculatory flow**\n- Absence of cyanosis is the one reassuring element — overt peripheral hypoxia has not yet supervened\n- Absence of rash or track marks is clinically relevant: rules out anaphylaxis, informs likely **route of ingestion** (oral pill)",
+          "cat": "clinical"
+        },
+        {
+          "id": "lung-auscultation",
+          "label": "Lung Auscultation",
+          "bad": false,
+          "why": "Equal bilateral breath sounds without wheezing or crackles is a reassuring finding in this clinical context.\n\n- **Equal air entry bilaterally** confirms no pneumothorax, hemothorax, or main-stem intubation — critical to establish before BVM or RSI\n- No crackles argues against **aspiration pneumonitis** at this time, though risk remains elevated with GCS 8\n- No wheezing excludes **bronchospasm** as a contributor to the hypoxemia — this is pure central hypoventilation\n- Midline trachea is confirmed — no mediastinal shift",
+          "cat": "clinical"
+        },
+        {
+          "id": "cardiac-auscultation",
+          "label": "Cardiac Auscultation",
+          "bad": false,
+          "why": "Bradycardic but regular rhythm with normal heart sounds is reassuring against structural and arrhythmic pathology.\n\n- **Regular rhythm** without murmur, gallop, or rub argues against primary cardiac disease or co-ingested QT-prolonging agent as the driver\n- S1/S2 present and normal — no structural lesion causing the presentation\n- The bradycardia (HR 58) is flagged separately under vitals as the opioid-mediated element\n- This compound finding as a whole is **not flagworthy for structural concern** — the rate elevation is the only actionable element and is captured in the HR vital",
+          "cat": "clinical"
+        },
+        {
+          "id": "glucose",
+          "label": "Glucose",
+          "bad": false,
+          "why": "A blood glucose of 88 mg/dL is normal and rules out hypoglycemia as a contributor to altered mental status.\n\n- Normal fasting glucose: **70–99 mg/dL**; 88 mg/dL falls squarely within range\n- **Hypoglycemia** (< 60 mg/dL) must always be excluded in any altered mental status — it is rapidly reversible and potentially fatal if missed\n- Normal glucose here directs clinical attention toward the **opioid toxidrome** rather than metabolic encephalopathy\n- No dextrose bolus required",
+          "cat": "lab"
+        },
+        {
+          "id": "venous-ph",
+          "label": "Venous pH",
+          "bad": true,
+          "why": "Venous pH of 7.22 indicates significant acidemia, consistent with respiratory acidosis from hypoventilation.\n\n- Normal venous pH: **7.32–7.40**; 7.22 reflects accumulation of CO2 driving carbonic acid formation\n- In opioid-induced hypoventilation, **PaCO2 rises** as alveolar ventilation falls, shifting the Henderson-Hasselbalch equilibrium toward acidemia\n- This is a **respiratory acidosis** — the primary derangement is elevated CO2, not metabolic acid production\n- Elevated lactate (see below) suggests a superimposed **metabolic acidosis** component from tissue hypoxia",
+          "cat": "lab"
+        },
+        {
+          "id": "venous-co2",
+          "label": "Venous pCO2",
+          "bad": true,
+          "why": "Venous pCO2 of 72 mmHg is markedly elevated, confirming severe hypoventilation.\n\n- Normal venous pCO2: **41–51 mmHg**; 72 mmHg represents **hypercapnic respiratory failure**\n- Rising CO2 is the direct consequence of inadequate minute ventilation (RR 8 × shallow tidal volumes)\n- **CO2 narcosis** can deepen CNS depression independently of opioid effect — worsening the hypoventilation cycle\n- Reversal of this requires **improved ventilation** (BVM-assisted breaths) AND naloxone re-dosing",
+          "cat": "lab"
+        },
+        {
+          "id": "bicarb",
+          "label": "Bicarbonate",
+          "bad": false,
+          "why": "Bicarbonate of 22 mEq/L is within normal limits, confirming an acute rather than chronic respiratory acidosis.\n\n- Normal serum bicarbonate: **22–26 mEq/L**; 22 mEq/L is low-normal\n- In **acute** respiratory acidosis, renal compensation has not yet occurred — kidneys require 24–48 hours to retain bicarbonate\n- The normal bicarb with low pH and high pCO2 confirms this is an **uncompensated acute respiratory acidosis**, not a chronic process\n- This pattern is reassuring that the acidosis is **reversible** with prompt ventilatory support — no base deficit requiring bicarbonate administration",
+          "cat": "lab"
+        },
+        {
+          "id": "lactate",
+          "label": "Lactate",
+          "bad": true,
+          "why": "Lactate of 3.8 mmol/L is elevated above the upper limit of normal (2.0 mmol/L), indicating tissue hypoperfusion.\n\n- Elevated lactate reflects a shift to **anaerobic metabolism** in tissues inadequately supplied with oxygen\n- In this case, the cause is **hypoxia from hypoventilation** (SpO2 89%) rather than distributive shock or cardiac failure\n- Lactate 3.8 mmol/L is in the intermediate range — not yet critically elevated (> 4 mmol/L) but indicates **oxygen delivery is failing**\n- Expected to fall rapidly with restoration of adequate ventilation and naloxone-mediated reversal",
+          "cat": "lab"
+        },
+        {
+          "id": "acetaminophen",
+          "label": "Acetaminophen Level",
+          "bad": false,
+          "why": "Undetectable acetaminophen level in an adolescent with altered mental status after possible pill ingestion is a reassuring finding.\n\n- Counterfeit pills frequently contain **fentanyl** or other adulterants, but co-ingestion of **acetaminophen** (Tylenol) is an important co-toxin to exclude, especially in intentional overdoses\n- Undetectable level rules out **occult acetaminophen toxicity**, which can cause delayed hepatic failure even without early symptoms\n- This is a **required exclusionary test** in all adolescent overdose presentations regardless of the suspected agent\n- Negative result directs treatment focus entirely toward **opioid reversal**",
+          "cat": "lab"
+        },
+        {
+          "id": "etoh",
+          "label": "Ethanol Level",
+          "bad": false,
+          "why": "Undetectable ethanol level removes alcohol as a co-intoxicant in the differential diagnosis.\n\n- **Ethanol** acts as a CNS depressant via GABA-A potentiation and NMDA inhibition and frequently co-occurs at adolescent parties\n- Undetectable level (< 10 mg/dL) argues against ethanol as a **significant contributor** to his current CNS and respiratory depression\n- This is reassuring: the clinical picture is consistent with a **pure opioid toxidrome**, simplifying treatment strategy\n- Naloxone remains the correct antidote — no change in approach needed",
+          "cat": "lab"
+        }
+      ],
+      "labs": [
+        {
+          "name": "Glucose",
+          "value": "88",
+          "unit": "mg/dL",
+          "ref": "70–99",
+          "critical": false,
+          "why": null
+        },
+        {
+          "name": "Venous pH",
+          "value": "7.22",
+          "unit": "",
+          "ref": "7.32–7.40",
+          "critical": true,
+          "why": "Venous pH of 7.22 reflects acute respiratory acidosis from opioid-induced hypoventilation.\n\n- CO2 accumulates as **minute ventilation** (RR × tidal volume) falls below the threshold needed to clear metabolic CO2 production\n- CO2 + H2O → H2CO3 → H+ + HCO3⁻: excess carbonic acid dissociation drives **pH down**\n- The normal bicarbonate (22 mEq/L) confirms this is an **acute, uncompensated** acidosis — no time for renal HCO3 retention\n- Superimposed **lactic acidosis** from hypoxic tissue metabolism adds to the acid burden"
+        },
+        {
+          "name": "Venous pCO2",
+          "value": "72",
+          "unit": "mmHg",
+          "ref": "41–51",
+          "critical": true,
+          "why": "Venous pCO2 of 72 mmHg confirms severe hypercapnia from opioid-induced central respiratory depression.\n\n- Normal CO2 clearance requires adequate **alveolar ventilation**; RR 8 with shallow effort is grossly insufficient\n- Rising pCO2 causes cerebral vasodilation, increasing **intracranial pressure** — which worsens CNS depression further\n- **CO2 narcosis** can independently suppress respiratory drive, creating a self-reinforcing cycle\n- Immediate assisted ventilation and naloxone are both required to break this cycle"
+        },
+        {
+          "name": "Bicarbonate",
+          "value": "22",
+          "unit": "mEq/L",
+          "ref": "22–26",
+          "critical": false,
+          "why": null
+        },
+        {
+          "name": "Lactate",
+          "value": "3.8",
+          "unit": "mmol/L",
+          "ref": "0.5–2.0",
+          "critical": true,
+          "why": "Lactate of 3.8 mmol/L indicates anaerobic metabolism from hypoxia-driven tissue oxygen debt.\n\n- **Pyruvate** cannot enter the TCA cycle without oxygen; it is instead reduced to lactate by lactate dehydrogenase\n- Elevated lactate here is the result of **hypoventilation-induced hypoxia** rather than circulatory failure\n- Level 3.8 mmol/L indicates meaningful oxygen debt — expected to normalize rapidly with **ventilatory reversal**\n- A persistently elevated or rising lactate after intervention would prompt investigation for **aspiration, sepsis, or co-ingestion**"
+        },
+        {
+          "name": "Acetaminophen Level",
+          "value": "< 10",
+          "unit": "mcg/mL",
+          "ref": "< 10 (non-toxic)",
+          "critical": false,
+          "why": null
+        },
+        {
+          "name": "Ethanol Level",
+          "value": "< 10",
+          "unit": "mg/dL",
+          "ref": "< 10 (undetectable)",
+          "critical": false,
+          "why": null
+        }
+      ],
+      "tools": null,
+      "meds": null,
+      "actions": null
+    },
+    {
+      "id": "escalation",
+      "name": "Escalation",
+      "narrative": "Wren remains minimally responsive with GCS 8, respiratory rate of 8/min, SpO2 89% on the non-rebreather mask, and intermittent apneic episodes. His pupils remain pinpoint bilaterally. Breath sounds are equal bilaterally with the trachea midline — no focal lung pathology on auscultation. Peripheral perfusion is diminished with cap refill 3 seconds. The right antecubital 20-gauge IV established by EMS is confirmed patent. His blood gas confirms severe hypercapnia (pCO2 72) and mixed acidosis (pH 7.22), consistent with ongoing hypoventilation from incomplete opioid reversal. The intranasal naloxone given approximately 20–25 minutes ago is approaching the end of its effective duration, and re-narcotization is imminent. The toxicology team is on the phone. Your team must act now to support his airway and ventilation and administer additional naloxone before he becomes apneic.",
+      "vitals": {
+        "hr": 58,
+        "rr": 8,
+        "sbp": 98,
+        "dbp": 64,
+        "spo2": 89,
+        "temp": 36.2,
+        "cap": 3
+      },
+      "signs": [
+        {
+          "label": "Airway Patency",
+          "finding": "Airway patent with jaw thrust maintained; oropharynx clear; no vomitus, secretions, or foreign body visualized; mild snoring on expiration",
+          "pos": "head",
+          "sys": "respiratory",
+          "why": "Airway patency is maintained but at risk due to loss of oropharyngeal muscle tone from CNS depression.\n\n- **Opioid CNS depression** reduces tone in genioglossus and pharyngeal muscles, producing partial upper airway obstruction\n- The **snoring sound** indicates posterior tongue displacement partially occluding the hypopharynx\n- Airway is currently maintainable with jaw thrust — **nasopharyngeal airway adjunct** would reduce ongoing obstruction without requiring intubation\n- Clear oropharynx (no vomitus) is reassuring against **aspiration** at this moment, but risk remains high with GCS 8"
+        },
+        {
+          "label": "Ventilatory Response",
+          "finding": "Spontaneous respiratory effort present but rate 8/min with tidal volumes visually estimated at < 200 mL; no response to sternal rub; SpO2 89% on non-rebreather",
+          "pos": "body",
+          "sys": "respiratory",
+          "why": "Insufficient spontaneous ventilation demands active augmentation while antidote takes effect.\n\n- Estimated tidal volume < 200 mL is far below the normal **6–8 mL/kg** (300–400 mL for 50 kg) required for adequate alveolar gas exchange\n- **Minute ventilation** = RR × TV ≈ 8 × 200 mL = 1,600 mL/min — severely reduced from normal ~5–6 L/min\n- BVM-assisted breaths at 12–15/min would augment CO2 clearance and improve SpO2 while naloxone takes effect\n- This finding justifies **BVM ventilation** as a bridge to naloxone reversal rather than proceeding directly to RSI"
+        },
+        {
+          "label": "Pupillary Response",
+          "finding": "Pupils 1–2 mm bilaterally, still non-reactive to penlight; unchanged from triage",
+          "pos": "face",
+          "sys": "neurological",
+          "why": "Persistent pinpoint non-reactive pupils confirm ongoing opioid receptor saturation despite prior naloxone dose.\n\n- Prior intranasal naloxone is metabolized or redistributed; **mu-receptor occupancy** by the ingested opioid persists\n- No pupillary improvement signals **inadequate naloxone effect** — the original IN dose was insufficient for the likely high-potency synthetic opioid\n- Pupil normalization (4–5 mm, reactive) is a reliable clinical endpoint for **adequate naloxone reversal**\n- Monitor pupils closely: response within 2–3 minutes of IV naloxone confirms reversal; absence suggests **high-potency opioid** requiring repeat or infusion dosing"
+        },
+        {
+          "label": "ETCO2 Waveform",
+          "finding": "End-tidal CO2 68 mmHg with normal square waveform morphology; no plateau abnormality or shark-fin pattern",
+          "pos": "body",
+          "sys": "respiratory",
+          "why": "ETCO2 of 68 mmHg confirms severe alveolar hypoventilation without bronchospasm.\n\n- **Normal square waveform** morphology (no shark-fin) excludes obstructive airway disease (asthma, bronchospasm) as a contributor\n- ETCO2 68 mmHg correlates closely with the venous pCO2 of 72 mmHg — consistent internal validation\n- Serial ETCO2 monitoring provides real-time feedback on ventilatory response to **BVM assistance and naloxone**\n- A falling ETCO2 toward 35–45 mmHg confirms effective treatment; a rising ETCO2 despite BVM signals need for **definitive airway management**"
+        },
+        {
+          "label": "IV Access",
+          "finding": "Right antecubital 20-gauge peripheral IV, established by EMS; confirmed patent with blood return and 10 mL saline flush; no infiltration",
+          "pos": "body",
+          "sys": "vascular",
+          "why": "Patent peripheral IV access is essential for immediate IV naloxone delivery.\n\n- A **20-gauge IV** in the antecubital fossa is appropriate for rapid drug administration in this clinical scenario\n- IV route for naloxone provides **onset within 1–2 minutes**, compared to 3–5 minutes for intranasal and faster than IM\n- Confirmed patency and absence of infiltration means IV naloxone can be pushed **immediately without delay for new access**\n- IO access should be available as backup if this IV fails — opioid reversal cannot be delayed for difficult access"
+        }
+      ],
+      "assessItems": [
+        {
+          "id": "airway-patency",
+          "label": "Airway Patency",
+          "bad": true,
+          "why": "Airway patency maintained only with jaw thrust and at risk of complete obstruction — oropharyngeal muscle tone is lost from CNS depression.\n\n- **Snoring respirations** indicate posterior tongue displacement obstructing the hypopharynx\n- GCS 8 means protective airway reflexes are compromised — risk of **aspiration** if vomiting occurs\n- An **NPA** or **OPA** adjunct should be placed to maintain airway patency while naloxone takes effect\n- Clear oropharynx is reassuring now but does not guarantee future airway safety with ongoing CNS depression",
+          "cat": "clinical"
+        },
+        {
+          "id": "ventilatory-response",
+          "label": "Ventilatory Response",
+          "bad": true,
+          "why": "Tidal volumes < 200 mL with RR 8/min define critically inadequate minute ventilation requiring immediate assisted breathing.\n\n- **Minute ventilation** ≈ 1,600 mL/min — far below the 5–6 L/min needed for normal CO2 clearance\n- Continuing to watch without BVM assistance risks **progressive CO2 narcosis**, cardiac arrhythmia from hypoxia, and respiratory arrest\n- BVM at 12–15 breaths/min with tidal volume targeting **6–8 mL/kg (300–400 mL)** corrects this while naloxone reversal begins\n- ETCO2 monitoring guides adequacy of manual ventilation in real time",
+          "cat": "clinical"
+        },
+        {
+          "id": "pupillary-response",
+          "label": "Pupillary Response",
+          "bad": true,
+          "why": "Unchanged pinpoint pupils confirm active opioid receptor saturation and inadequate reversal from prior naloxone dose.\n\n- Persistent **miosis** means opioid agonist continues to dominate mu-receptor binding — the IN naloxone dose was insufficient\n- Pupil normalization to **4–5 mm reactive** is a reliable, objective endpoint for adequate naloxone reversal\n- Absence of pupillary response after IV naloxone should prompt consideration of **high-potency synthetic opioid** (fentanyl analog) requiring repeat or infusion dosing\n- Pupil check every 2–3 min post-naloxone is a low-tech, high-yield monitoring tool",
+          "cat": "clinical"
+        },
+        {
+          "id": "etco2",
+          "label": "ETCO2 Waveform",
+          "bad": true,
+          "why": "ETCO2 68 mmHg confirms severe hypercapnia from alveolar hypoventilation and demands immediate ventilatory augmentation.\n\n- **Normal waveform morphology** excludes bronchospasm — the etiology is pure **central hypoventilation**\n- ETCO2 68 is consistent with venous pCO2 72 — internally coherent confirmation of hypercapnic respiratory failure\n- Rising ETCO2 despite BVM support would be an indication to move toward **definitive airway (RSI)** rather than continued BVM bridging\n- Falling ETCO2 toward 40 mmHg during treatment confirms adequate ventilatory response",
+          "cat": "clinical"
+        },
+        {
+          "id": "iv-access",
+          "label": "IV Access",
+          "bad": false,
+          "why": "Patent right antecubital 20-gauge IV confirmed with blood return and flush — access is established and ready for immediate drug delivery.\n\n- **IV access confirmed patent** means there is no barrier to immediate naloxone administration\n- This is a **reassuring finding** — the most time-critical bottleneck in opioid reversal (access for IV naloxone) is already resolved by EMS\n- No need for IO placement or additional IV attempts at this moment; focus on using existing access for drug delivery\n- If IV fails during resuscitation, IO in proximal tibia is the **immediate backup**",
+          "cat": "clinical"
+        }
+      ],
+      "labs": [],
+      "tools": ["bvm", "etco2", "npa", "pulseOx", "defib", "intubationKit", "o2Mask", "ecg12Lead", "gastricLavage"],
+      "meds": ["naloxone", "ketamine", "dextroseBolus", "lorazepam", "flumazenil", "activatedCharcoal", "nsBolus", "fentanyl"],
+      "actions": {
+        "tools": {
+          "bvm": {
+            "ok": true,
+            "priority": 1,
+            "fb": "Excellent first move. BVM ventilation at 12–15 breaths/min with a correctly sized mask provides assisted tidal volumes of 300–400 mL (6–8 mL/kg), augmenting minute ventilation and beginning to clear the accumulated CO2. This is the bridge intervention while IV naloxone takes effect — SpO2 and ETCO2 will both trend toward normal. In opioid overdose, BVM is preferred over immediate intubation because naloxone can restore spontaneous ventilation within minutes, avoiding the risks of RSI in a potentially difficult airway. If ETCO2 rises despite good BVM technique or GCS does not improve after repeat naloxone, then RSI is indicated."
+          },
+          "etco2": {
+            "ok": true,
+            "priority": 2,
+            "fb": "Good clinical thinking. Continuous ETCO2 monitoring provides real-time capnography to assess the adequacy of assisted ventilation and guide naloxone response. The waveform's normal morphology confirms this is hypoventilation, not bronchospasm — you can target ETCO2 of 35–45 mmHg as you BVM and re-dose naloxone. A falling ETCO2 trend confirms effective treatment; a plateau or rise despite BVM signals impending need for RSI. This tool should stay connected throughout the resuscitation."
+          },
+          "npa": {
+            "ok": true,
+            "priority": 3,
+            "fb": "Good adjunct choice. A nasopharyngeal airway (size 6.5–7.0 for a 50 kg adolescent, approximately nares-to-earlobe measurement) maintains hypopharyngeal patency by stenting the nasopharynx open, preventing posterior tongue obstruction without stimulating a gag reflex. This is preferred over an OPA in a patient with GCS 8 who still has some gag reflex and may become more responsive after naloxone. Apply water-soluble lubricant, insert gently through the right naris, and confirm patency by feeling airflow. This buys time for naloxone to work without requiring intubation."
+          },
+          "ecg12Lead": {
+            "ok": true,
+            "priority": 4,
+            "fb": "Appropriate. A 12-lead ECG is indicated in any adolescent with suspected drug ingestion — particularly to screen for QTc prolongation from opioids themselves (methadone is well-known for this) or from adulterants and co-ingestants. It also identifies any arrhythmia contributing to his bradycardia (e.g., heart block, Brugada pattern). A normal sinus rhythm with normal QTc is reassuring; a prolonged QTc (> 460 ms in adolescents) would change management toward closer monitoring and avoidance of QT-prolonging adjuncts."
+          },
+          "pulseOx": {
+            "ok": true,
+            "priority": 4,
+            "fb": "Continuous pulse oximetry is standard monitoring in any patient with respiratory compromise. In opioid overdose, SpO2 trending toward ≥ 95% confirms effective ventilatory augmentation. Keep in mind that supplemental O2 can mask worsening hypoventilation — SpO2 may stay acceptable even as CO2 rises, which is why ETCO2 is the superior real-time monitor here. Both are complementary and should run simultaneously."
+          },
+          "defib": {
+            "ok": false,
+            "priority": null,
+            "fb": "Not indicated right now — Wren is bradycardic but perfusing. Opioid-induced bradycardia (HR 58) does not warrant defibrillation or pacing; it reflects vagal predominance from mu-receptor activation and will respond to naloxone reversal. The defibrillator should be at bedside and pads applied for monitoring, but keep those paddles holstered. If you shock a patient in sinus bradycardia, you may get a very different rhythm in response — and not a better one. Cardioversion and defibrillation are for shockable rhythms: VF and pulseless VT."
+          },
+          "intubationKit": {
+            "ok": false,
+            "priority": null,
+            "fb": "Not the right first move, but keep it staged. Endotracheal intubation is indicated if: (1) GCS does not improve with IV naloxone, (2) ETCO2 continues rising despite BVM, (3) the patient vomits and aspirates, or (4) airway cannot be maintained with adjuncts. However, proceeding directly to RSI before attempting IV naloxone wastes the opportunity for a medication to reverse the problem entirely — plus naloxone avoidance is not a benefit of intubation. Have the kit ready; do not use it yet. RSI agents (ketamine + rocuronium) should be drawn up and ready if BVM + naloxone fails."
+          },
+          "o2Mask": {
+            "ok": false,
+            "priority": null,
+            "fb": "Wren arrived on a non-rebreather mask at 15 L/min — swapping to a plain face mask would reduce his FiO2 at a moment when he needs maximum supplemental oxygen. The correct move is to take the mask OFF and replace it with a BVM connected to high-flow O2, so you can actively ventilate rather than passively deliver O2 he isn't breathing deeply enough to use. Passive O2 delivery via mask alone is not adequate when tidal volumes are critically reduced."
+          },
+          "gastricLavage": {
+            "ok": false,
+            "priority": null,
+            "fb": "Gastric lavage is contraindicated in this patient. With GCS 8 and impaired airway reflexes, lavage without a cuffed endotracheal tube in place carries a high risk of aspiration — potentially causing aspiration pneumonitis or pneumonia that would compound his respiratory failure. Furthermore, opioid ingestion more than 1–2 hours prior (estimated 40+ minutes since found, plus unknown time before that) is unlikely to benefit from GI decontamination. Activated charcoal is also contraindicated for the same airway protection reason. Lavage is appropriate in alert, cooperative patients with very recent toxic ingestion of certain agents — not here."
+          }
+        },
+        "meds": {
+          "naloxone": {
+            "ok": true,
+            "priority": 1,
+            "fb": "Correct antidote — and the most time-critical decision in this case. For a 50 kg adolescent with suspected high-potency synthetic opioid exposure and prior partial IN response, administer naloxone 0.1 mg/kg IV with a maximum of 2 mg per bolus dose. Give 2 mg IV, reassess in 2–3 minutes, and repeat to a maximum of 10 mg if needed. Use a titrated IV approach rather than a full reversal bolus to avoid precipitating acute opioid withdrawal with agitation — which can be dangerous in this age group. Onset is within 1–2 minutes IV. If pupil response and respiratory rate improve, switch to a naloxone infusion (two-thirds of the effective bolus dose per hour) to prevent re-narcotization, as the opioid's duration exceeds naloxone's 30–70 minute window."
+          },
+          "dextroseBolus": {
+            "ok": false,
+            "priority": null,
+            "fb": "Glucose was checked and is 88 mg/dL (normal), so a dextrose bolus is not clinically indicated here. Empiric dextrose is a reasonable consideration in altered mental status when a glucose result is not yet available — in a scenario without a glucometer, giving D10W at 2 mL/kg is appropriate. Since glucose is confirmed normal in this case, administering dextrose would cause hyperglycemia without benefit. The teaching point is that hypoglycemia must always be excluded in altered mental status, but once excluded, dextrose adds no value."
+          },
+          "nsBolus": {
+            "ok": true,
+            "priority": 3,
+            "fb": "A modest normal saline bolus (10–20 mL/kg) is reasonable for mildly reduced peripheral perfusion (cap refill 3 sec, HR 58, BP 98/64). Opioids cause peripheral vasodilation and may reduce effective circulating volume. However, his BP of 98/64 is within normal limits for age — he is not in shock. Hydration support is appropriate and low-risk, but fluid resuscitation is not the primary treatment here. Naloxone and ventilatory support are the priority interventions. Do not delay antidote administration to hang fluids."
+          },
+          "lorazepam": {
+            "ok": false,
+            "priority": null,
+            "fb": "Contraindicated in this setting. Lorazepam is a GABA-A potentiating benzodiazepine — administering it to a patient with opioid-induced CNS and respiratory depression would cause additive sedation and worsen his respiratory failure and GCS. Lorazepam would be appropriate for active seizure management (0.1 mg/kg IV) or procedural sedation — neither of which applies here. The ethanol level is undetectable, ruling out alcohol withdrawal seizures as an indication. This medication could be fatal in this clinical context."
+          },
+          "ketamine": {
+            "ok": false,
+            "priority": null,
+            "fb": "Not indicated here. Ketamine is an NMDA receptor antagonist used for dissociative analgesia and as an RSI induction agent. In an opioid overdose with CNS and respiratory depression, adding a dissociative anesthetic would not treat the underlying mu-receptor toxidrome and would impair consciousness further — the opposite of what's needed. Ketamine would be appropriate as an induction agent if RSI becomes necessary after naloxone failure, but it is not the correct choice as an initial intervention. Reserve it for the RSI kit if needed."
+          },
+          "flumazenil": {
+            "ok": false,
+            "priority": null,
+            "fb": "Flumazenil is a competitive benzodiazepine antagonist at the GABA-A receptor — it is the antidote for benzodiazepine overdose, not opioid overdose. Ethanol level is undetectable and there is no evidence of benzodiazepine ingestion in this case. Administering flumazenil without evidence of benzo toxicity provides no benefit and carries risk: in a patient with occult benzodiazepine dependence (which can occur in adolescents with substance use disorders), flumazenil can precipitate acute withdrawal seizures. This is a classic 'sounds similar, wrong mechanism' distractor — naloxone is the correct antidote here."
+          },
+          "activatedCharcoal": {
+            "ok": false,
+            "priority": null,
+            "fb": "Activated charcoal is contraindicated in Wren's current state. With GCS 8 and impaired airway reflexes, he cannot safely swallow activated charcoal without risking aspiration — and pulmonary aspiration of activated charcoal causes severe chemical pneumonitis. Activated charcoal is appropriate for alert, cooperative patients who present within 1 hour of a toxic ingestion of a charcoal-adsorbable substance (opioids are charcoal-adsorbable, but the window has likely passed, and airway safety is the paramount concern). Never administer charcoal to a patient who cannot protect their own airway without a cuffed ETT in place."
+          },
+          "fentanyl": {
+            "ok": false,
+            "priority": null,
+            "fb": "Absolutely contraindicated. Fentanyl is a high-potency synthetic mu-opioid agonist — administering it to a patient already in opioid-induced respiratory failure would deepen CNS depression, worsen hypoventilation, and could cause respiratory arrest. This is the wrong direction entirely. Fentanyl is appropriate for procedural analgesia or RSI co-induction in patients with intact airway reflexes and normal respiratory drive — not in an opioid-overdosed, hypoventilating patient. If you see pinpoint pupils and RR 8: give naloxone, not more opioids."
+          }
+        }
+      }
+    }
+  ],
+  "reassessment": {
+    "narrative": "Three minutes after IV naloxone 2 mg (titrated bolus, repeated once) and bag-mask ventilation at 14 breaths/min, Wren begins to show meaningful improvement. His eyes open spontaneously and he attempts to pull off the BVM mask — a promising sign of returning protective reflexes. Pupils have opened to 3 mm bilaterally and are now sluggishly reactive to light. Respiratory rate has increased to 14/min with improved tidal volumes, and SpO2 has risen to 97% on supplemental oxygen. ETCO2 has fallen from 68 to 44 mmHg, confirming effective CO2 clearance. Heart rate has normalized to 76 bpm. He is now vocalizing incoherently and moving all four extremities purposefully — GCS has improved to 12 (E3V3M6). A naloxone infusion at 1.5 mg/hr has been initiated (two-thirds of the effective bolus dose) to prevent re-narcotization, as the suspected fentanyl analog will outlast any single IV bolus. Capillary refill has improved to 2 seconds bilaterally.",
+    "vitals": {
+      "hr": 76,
+      "rr": 14,
+      "sbp": 108,
+      "dbp": 70,
+      "spo2": 97,
+      "temp": 36.4,
+      "cap": 2
+    },
+    "signs": [
+      {
+        "label": "Pupillary Response",
+        "finding": "Pupils 3 mm bilaterally, sluggishly reactive to light — improved from 1–2 mm non-reactive",
+        "pos": "face",
+        "sys": "neurological"
+      },
+      {
+        "label": "Ventilatory Response",
+        "finding": "Spontaneous respiratory rate 14/min with improved tidal volumes; BVM assistance now supplemental rather than primary; SpO2 97%",
+        "pos": "body",
+        "sys": "respiratory"
+      },
+      {
+        "label": "Level of Consciousness",
+        "finding": "GCS 12 (E3V3M6): opens eyes spontaneously, vocalizing incoherently, purposeful movement; attempting to remove mask",
+        "pos": "head",
+        "sys": "neurological"
+      },
+      {
+        "label": "Skin Assessment",
+        "finding": "Skin warmer and less diaphoretic; capillary refill 2 seconds; mild flushing noted — consistent with naloxone-mediated vasomotor reversal",
+        "pos": "body",
+        "sys": "cardiovascular"
+      }
+    ]
+  },
+  "stabilizationSummary": "IV naloxone (titrated 2 mg bolus × 2) competitively displaced opioid agonist from mu-receptors, restoring central respiratory drive and reversing CNS depression — evidenced by improved GCS from 8 to 12, respiratory rate from 8 to 14/min, and pupillary dilation from 1–2 mm to 3 mm reactive. Bag-mask ventilation at 14 breaths/min bridged the gap during naloxone onset, clearing the CO2 burden (ETCO2 68 → 44 mmHg) and correcting hypoxemia (SpO2 89% → 97%). A naloxone infusion was initiated at two-thirds the effective bolus dose per hour to prevent re-narcotization, recognizing that the suspected synthetic opioid's duration exceeds any single IV bolus of naloxone.",
+  "debrief": {
+    "summary": "Wren presented in opioid toxidrome — the clinical triad of miosis, CNS depression (GCS 8), and respiratory depression (RR 8, pCO2 72) following a suspected counterfeit pill ingestion at a party. A prior intranasal naloxone dose produced partial reversal but was insufficient to fully displace high-affinity synthetic opioid from mu-receptors. The critical management priorities were: (1) immediate ventilatory support via bag-mask ventilation to bridge the CO2 burden and hypoxemia while (2) IV naloxone was titrated to restore spontaneous ventilation, avoiding both re-narcotization and precipitated withdrawal. ETCO2 monitoring provided real-time guidance and confirmed treatment efficacy. A naloxone infusion was essential given the expected opioid duration exceeding that of naloxone.",
+    "explainers": [
+      {
+        "title": "Naloxone Dosing in High-Potency Synthetic Opioid Overdose",
+        "content": "Naloxone is a competitive mu-opioid receptor antagonist with a duration of action of 30–70 minutes — shorter than most opioids, including fentanyl analogs commonly found in counterfeit pills.\n\n- **Standard IV dose**: 0.1 mg/kg (maximum 2 mg per bolus) — repeated every 2–3 minutes to a total of 10 mg if needed for high-potency synthetic opioids\n- **Titrated dosing** in opioid-tolerant adolescents: start with 0.04–0.1 mg IV to avoid precipitating acute withdrawal (agitation, vomiting, seizure) in opioid-dependent patients\n- **Re-narcotization risk**: single bolus lasts 30–70 min; fentanyl analogs may last 1–3+ hours — a **continuous infusion** at two-thirds of the effective bolus dose per hour prevents relapse\n- **Intranasal naloxone (4 mg)**: effective for pure fentanyl but may be insufficient for carfentanil or nitazenes due to extremely high receptor affinity\n- **Route hierarchy**: IV > IM > IN for onset speed; IV is preferred when access exists",
+        "tldr": "IV naloxone 0.1 mg/kg titrated bolus; repeat every 2–3 min; start infusion at 2/3 effective dose/hr to prevent re-narcotization."
+      },
+      {
+        "title": "BVM Before Intubation in Opioid Overdose",
+        "content": "Bag-mask ventilation is the preferred airway intervention in opioid overdose when the patient has any spontaneous respiratory effort and IV naloxone is immediately available.\n\n- **Why not RSI first?** Intubation commits the patient to mechanical ventilation, sedation, and ICU admission — all avoidable if naloxone restores spontaneous ventilation within 2–5 minutes of IV dosing\n- **BVM targets**: rate 12–15/min, tidal volume 6–8 mL/kg (300–400 mL for 50 kg), peak pressure < 20 cmH2O to minimize gastric insufflation\n- **When to escalate to RSI**: ETCO2 rising despite effective BVM, GCS not improving after repeat naloxone, aspiration event, airway that cannot be maintained with adjuncts\n- **NPA adjunct**: preferred over OPA in partially responsive patients — maintains hypopharyngeal patency without stimulating gag reflex\n- **ETCO2 is the guide**: a falling ETCO2 trend during BVM confirms CO2 clearance; a plateau or rise signals inadequate ventilation or need for definitive airway",
+        "tldr": "BVM bridges to naloxone reversal. Target ETCO2 35–45 mmHg. Escalate to RSI only if reversal fails or airway cannot be maintained."
+      },
+      {
+        "title": "Re-Narcotization and the Naloxone Infusion",
+        "content": "Re-narcotization occurs when naloxone's effect wanes while the opioid agonist remains bound to or redistributed back to mu-receptors, causing relapse of CNS and respiratory depression.\n\n- **Mechanism**: naloxone is metabolized hepatically (half-life ~60–90 min); if the opioid's half-life exceeds this, free opioid re-occupies receptors after naloxone is cleared\n- **High-risk agents**: methadone (t½ 24–48 hrs), extended-release oxycodone, fentanyl analogs (carfentanil), and nitazenes all outlast naloxone boluses\n- **Infusion protocol**: administer two-thirds of the total effective bolus dose (the dose that produced reversal) per hour as a continuous IV infusion; titrate to maintain adequate respiratory rate and level of consciousness without precipitating withdrawal\n- **Monitoring window**: patients receiving naloxone for suspected synthetic opioid overdose should be observed for a **minimum of 4–6 hours** after the last dose of naloxone, or admitted to a monitored bed\n- **Withdrawal signs during infusion**: agitation, diaphoresis, vomiting, hypertension, tachycardia — reduce infusion rate if these emerge",
+        "tldr": "Start naloxone infusion at 2/3 effective bolus dose/hr. Observe 4–6 hrs minimum. Watch for withdrawal signs vs. re-narcotization."
+      }
+    ]
+  }
+}

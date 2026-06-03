@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>PatientSVG — gown color + short sleeves + hairstyle ideas</title>
+<style>
+  body{margin:0;background:#0a0e1a;color:#e8eefb;font-family:-apple-system,Segoe UI,Roboto,sans-serif;padding:24px}
+  h1{font-size:20px;font-weight:800;margin:0 0 4px}
+  h3{font-size:14px;color:#cfe0ff;margin:18px 0 8px}
+  p.sub{color:#9fb0d0;font-size:13px;margin:0 0 12px;max-width:860px;line-height:1.5}
+  .row{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:16px}
+  .card{background:linear-gradient(135deg,#0d1430,#1a1a3e);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:12px;box-shadow:0 6px 20px rgba(0,0,0,0.35)}
+  .fig{width:170px}
+  .hairc{width:120px}
+  .card h2{font-size:11px;font-weight:700;letter-spacing:.3px;margin:0 0 6px;color:#fdcb6e}
+  .fig svg{width:150px;height:220px;display:block;margin:0 auto}
+  .hairc svg{width:96px;height:112px;display:block;margin:0 auto}
+  .legend{color:#9fb0d0;font-size:12px;line-height:1.6;max-width:860px;border-top:1px solid rgba(255,255,255,0.08);padding-top:14px;margin-top:8px}
+  .legend b{color:#e8eefb}
+</style>
+</head>
+<body>
+<h1>Gown color + short sleeves, and hairstyle ideas</h1>
+<p class="sub">Gown is now short-sleeved (cap at the shoulder, skin forearm + C-hand) and colored by sex — <b style="color:#74b9ff">blue for boys</b>, <b style="color:#f48fb5">pink for girls</b>. Below the figures is a hairstyle gallery drawn in the LEGO line style from your samples.</p>
+
+<h3>Figures — boy (blue) &amp; girl (pink)</h3>
+<div class="row" id="figs"></div>
+
+<h3>Hairstyle ideas</h3>
+<p class="sub">Pick the ones you want in the rotation. I can assign them by sex and vary them per patient (hashed from the name) so different patients look different but stay stable across replays.</p>
+<div class="row" id="hair"></div>
+
+<h3>Hair colors</h3>
+<div class="row" id="colors"></div>
+
+<div class="legend">
+<b>Suggested assignment:</b> boys → short, side-part, spiky, curly, quiff; girls → long, side-bang, bun, ponytail; either → short/curly. Hair color could also vary (brown/blonde/black/auburn) by the same name hash.<br/>
+<b>Tell me:</b> which styles to keep, whether to vary by name, and any color preferences. Then I port the figure + your chosen hair set into PatientSVG across all ages.
+</div>
+
+<script>
+function spec(age){
+  if(age==='infant') return {headW:56,headH:50,neck:5,torsoH:30,shW:38,hipW:48,legH:15,legW:15,armLen:17,foot:5};
+  if(age==='toddler')return {headW:50,headH:47,neck:5,torsoH:38,shW:40,hipW:50,legH:24,legW:16,armLen:21,foot:5};
+  if(age==='teen')   return {headW:42,headH:42,neck:6,torsoH:52,shW:46,hipW:56,legH:46,legW:18,armLen:27,foot:6};
+  return {headW:48,headH:46,neck:6,torsoH:44,shW:43,hipW:54,legH:32,legW:17,armLen:24,foot:6};
+}
+function skin(status){ return status==='critical'?'#dbb8b8':status==='declining'?'#f0ccb0':'#ffcc99'; }
+var ST='#d8a86a', SOCK='#eef4fd', HC='#5b3a22';
+
+/* ---------------- hairstyles ---------------- */
+function hair(style,hx,hy,hw,hh,col,col2){
+  col=col||HC; col2=col2||'#3f2817';
+  var cx=hx+hw/2, vt=hy-5, side=hy+hh*0.44, fore=hy+hh*0.30;
+  function cap(dip){ // basic rounded cap; dip = hairline depth factor
+    var hl=hy+hh*dip;
+    return '<path d="M'+(hx-2)+' '+side+' Q'+(hx-4)+' '+vt+' '+cx+' '+(vt-2)+' Q'+(hx+hw+4)+' '+vt+' '+(hx+hw+2)+' '+side+' Q'+cx+' '+hl+' '+(hx-2)+' '+side+' Z" fill="'+col+'"/>'; }
+  if(style==='short')   return cap(0.30);
+  if(style==='sidePart')return cap(0.27)
+    + '<path d="M'+(hx+hw*0.30)+' '+(hy+hh*0.10)+' Q'+(hx+hw*0.62)+' '+(hy+hh*0.02)+' '+(hx+hw*0.66)+' '+(hy+hh*0.30)+'" fill="none" stroke="'+col2+'" stroke-width="1.4"/>';
+  if(style==='swoop')   return '<path d="M'+(hx-2)+' '+side+' Q'+(hx-4)+' '+vt+' '+(hx+hw*0.45)+' '+(vt-3)+' Q'+(hx+hw+4)+' '+vt+' '+(hx+hw+2)+' '+side+' L'+(hx+hw*0.58)+' '+fore+' Q'+(hx+hw*0.28)+' '+(hy+hh*0.40)+' '+(hx-2)+' '+side+' Z" fill="'+col+'"/>';
+  if(style==='spiky'){
+    var sideS=hy+hh*0.32;
+    var xs=[0.06,0.16,0.27,0.38,0.50,0.62,0.73,0.84,0.94];var up=true;
+    var p='M'+hx+' '+sideS+' L'+hx+' '+(hy+hh*0.12);
+    for(var i=0;i<xs.length;i++){ p+=' L'+(hx+hw*xs[i])+' '+(up?(vt-13):(hy+hh*0.03)); up=!up; }
+    p+=' L'+(hx+hw)+' '+(hy+hh*0.12)+' L'+(hx+hw)+' '+sideS+' Q'+cx+' '+(hy+hh*0.24)+' '+hx+' '+sideS+' Z';
+    return '<path d="'+p+'" fill="'+col+'"/>';
+  }
+  if(style==='curly'){
+    var p2='M'+(hx-2)+' '+side;var bx=[0.05,0.2,0.38,0.56,0.74,0.92];
+    for(var j=0;j<bx.length;j++){ p2+=' A6 6 0 0 1 '+(hx+hw*bx[j])+' '+(vt-1); }
+    p2+=' Q'+(hx+hw+3)+' '+vt+' '+(hx+hw+2)+' '+side+' Q'+cx+' '+(hy+hh*0.32)+' '+(hx-2)+' '+side+' Z';
+    return '<path d="'+p2+'" fill="'+col+'"/>';
+  }
+  if(style==='quiff')   return cap(0.26)
+    + '<path d="M'+(hx+hw*0.18)+' '+(hy+hh*0.06)+' Q'+(hx+hw*0.4)+' '+(vt-8)+' '+(hx+hw*0.72)+' '+(hy)+' Q'+(hx+hw*0.45)+' '+(vt-2)+' '+(hx+hw*0.18)+' '+(hy+hh*0.06)+' Z" fill="'+col+'"/>';
+  if(style==='long')    return cap(0.30)
+    + '<path d="M'+(hx-2)+' '+side+' Q'+(hx-8)+' '+(hy+hh*0.8)+' '+(hx+1)+' '+(hy+hh*1.15)+' L'+(hx+hw*0.22)+' '+(hy+hh*1.08)+' Q'+(hx+hw*0.16)+' '+(hy+hh*0.7)+' '+(hx+hw*0.20)+' '+side+' Z" fill="'+col+'"/>'
+    + '<path d="M'+(hx+hw+2)+' '+side+' Q'+(hx+hw+8)+' '+(hy+hh*0.8)+' '+(hx+hw-1)+' '+(hy+hh*1.15)+' L'+(hx+hw*0.78)+' '+(hy+hh*1.08)+' Q'+(hx+hw*0.84)+' '+(hy+hh*0.7)+' '+(hx+hw*0.80)+' '+side+' Z" fill="'+col+'"/>';
+  if(style==='bun')     return cap(0.30)
+    + '<circle cx="'+cx+'" cy="'+(vt-5)+'" r="'+(hw*0.17)+'" fill="'+col+'"/>'
+    + '<rect x="'+(cx-hw*0.10)+'" y="'+(vt-3)+'" width="'+(hw*0.20)+'" height="4" rx="2" fill="'+col2+'"/>';
+  if(style==='ponytail')return cap(0.30)
+    + '<path d="M'+(hx+hw+1)+' '+(hy+hh*0.30)+' Q'+(hx+hw+12)+' '+(hy+hh*0.5)+' '+(hx+hw+6)+' '+(hy+hh*0.95)+' Q'+(hx+hw+1)+' '+(hy+hh*0.7)+' '+(hx+hw-2)+' '+(hy+hh*0.42)+' Z" fill="'+col+'"/>';
+  return '';
+}
+
+/* ---------------- face ---------------- */
+function face(hx,hy,hw,hh,status,happy){
+  var hcx=hx+hw/2, eyeY=hy+hh*0.46, eyeLX=hcx-hw*0.18, eyeRX=hcx+hw*0.18, mY=hy+hh*0.72;
+  var f='';
+  f += '<path d="M'+(eyeLX-5)+' '+(eyeY-7)+' Q'+eyeLX+' '+(eyeY-10)+' '+(eyeLX+5)+' '+(eyeY-7)+'" fill="none" stroke="#1a1a1a" stroke-width="2.2" stroke-linecap="round"/>';
+  f += '<path d="M'+(eyeRX-5)+' '+(eyeY-7)+' Q'+eyeRX+' '+(eyeY-10)+' '+(eyeRX+5)+' '+(eyeY-7)+'" fill="none" stroke="#1a1a1a" stroke-width="2.2" stroke-linecap="round"/>';
+  f += '<ellipse cx="'+eyeLX+'" cy="'+eyeY+'" rx="2.7" ry="3.4" fill="#1a1a1a"/><circle cx="'+(eyeLX-0.8)+'" cy="'+(eyeY-1.3)+'" r="0.9" fill="#fff"/>';
+  f += '<ellipse cx="'+eyeRX+'" cy="'+eyeY+'" rx="2.7" ry="3.4" fill="#1a1a1a"/><circle cx="'+(eyeRX-0.8)+'" cy="'+(eyeY-1.3)+'" r="0.9" fill="#fff"/>';
+  if(happy){
+    f += '<path d="M'+(hcx-9)+' '+(mY-1)+' L'+(hcx+9)+' '+(mY-1)+' Q'+(hcx+9)+' '+(mY+9)+' '+hcx+' '+(mY+9)+' Q'+(hcx-9)+' '+(mY+9)+' '+(hcx-9)+' '+(mY-1)+' Z" fill="#c0392b"/>';
+    f += '<rect x="'+(hcx-7.5)+'" y="'+(mY-1)+'" width="15" height="3.4" rx="1" fill="#fff"/>';
+  } else {
+    f += '<path d="M'+(hcx-6)+' '+(mY+3)+' Q'+hcx+' '+(mY-2)+' '+(hcx+6)+' '+(mY+3)+'" fill="none" stroke="#2d3436" stroke-width="1.8" stroke-linecap="round"/>';
+  }
+  return f;
+}
+
+/* ---------------- figure ---------------- */
+function minifig(age,status,mood,sex,hairStyle,hairCol,hairCol2){
+  var s=spec(age), sk=skin(status), cx=100;
+  var GOWN = sex==='female' ? '#f4b8d0' : '#bcd9f2';
+  var GOWN2= sex==='female' ? '#e58fb5' : '#93b9e0';
+  var total=s.headH+s.neck+s.torsoH+s.legH+s.foot, top=Math.round((220-total)/2);
+  var headTop=top, headBot=top+s.headH, torsoTop=headBot+s.neck, torsoBot=torsoTop+s.torsoH;
+  var legTop=torsoBot, legBot=legTop+s.legH, headX=cx-s.headW/2, headY=headTop, hcx=cx;
+  var jump=(mood==='jump'), happy=(mood==='happy'||mood==='jump');
+
+  var legGap=3, splay=jump?12:0, lLegX=cx-legGap-s.legW, rLegX=cx+legGap;
+  function leg(x,sign){var inn='<rect x="'+x+'" y="'+legTop+'" width="'+s.legW+'" height="'+s.legH+'" rx="5" fill="'+sk+'" stroke="'+ST+'" stroke-width="0.7"/><rect x="'+(x-1)+'" y="'+(legBot-1)+'" width="'+(s.legW+2)+'" height="'+s.foot+'" rx="3" fill="'+SOCK+'" stroke="'+GOWN2+'" stroke-width="0.6"/>';return splay?'<g transform="rotate('+(sign*splay)+' '+(x+s.legW/2)+' '+legTop+')">'+inn+'</g>':inn;}
+  var legs=leg(lLegX,-1)+leg(rLegX,1);
+
+  var SLx=cx-s.shW/2, SRx=cx+s.shW/2, SY=torsoTop+3, laAng=jump?135:16, raAng=jump?-135:-16;
+  function arm(x,ang,sign){var ax=sign<0?x-9:x;return '<g transform="rotate('+ang+' '+x+' '+SY+')">'
+     + '<rect x="'+ax+'" y="'+SY+'" width="9" height="'+s.armLen+'" rx="4" fill="'+sk+'" stroke="'+ST+'" stroke-width="0.7"/>'
+     + '<rect x="'+(ax-0.5)+'" y="'+(SY-0.5)+'" width="10" height="9" rx="4" fill="'+GOWN+'" stroke="'+GOWN2+'" stroke-width="0.6"/>'
+     + '<circle cx="'+(sign<0?x-4.5:x+4.5)+'" cy="'+(SY+s.armLen+3)+'" r="4" fill="none" stroke="'+sk+'" stroke-width="3"/></g>';}
+  var arms=arm(SLx,laAng,-1)+arm(SRx,raAng,1);
+
+  var shH=s.shW/2, hpH=s.hipW/2;
+  var torso='<path d="M'+(cx-shH)+' '+torsoTop+' L'+(cx+shH)+' '+torsoTop+' L'+(cx+hpH)+' '+(torsoBot-4)+' Q'+(cx+hpH)+' '+(torsoBot+2)+' '+(cx+hpH-5)+' '+(torsoBot+2)+' Q'+cx+' '+(torsoBot+6)+' '+(cx-hpH+5)+' '+(torsoBot+2)+' Q'+(cx-hpH)+' '+(torsoBot+2)+' '+(cx-hpH)+' '+(torsoBot-4)+' Z" fill="'+GOWN+'" stroke="'+GOWN2+'" stroke-width="0.8" stroke-linejoin="round"/>';
+  var vy=torsoTop;
+  torso += '<path d="M'+(cx-9)+' '+vy+' L'+cx+' '+(vy+10)+' L'+(cx+9)+' '+vy+' Z" fill="'+sk+'"/><path d="M'+(cx-9)+' '+vy+' L'+cx+' '+(vy+10)+' L'+(cx+9)+' '+vy+'" fill="none" stroke="'+GOWN2+'" stroke-width="1.2"/>'
+    + '<circle cx="'+(cx-7)+'" cy="'+(vy+s.torsoH*0.5)+'" r="1.5" fill="'+GOWN2+'"/><circle cx="'+(cx+7)+'" cy="'+(vy+s.torsoH*0.66)+'" r="1.5" fill="'+GOWN2+'"/>';
+
+  var neckStud='<rect x="'+(cx-s.headW*0.16)+'" y="'+(headBot-3)+'" width="'+(s.headW*0.32)+'" height="6" rx="2" fill="'+sk+'" stroke="'+ST+'" stroke-width="0.5"/>';
+  var head='<rect x="'+(hcx-s.headW*0.16)+'" y="'+(headY-7)+'" width="'+(s.headW*0.32)+'" height="8" rx="3" fill="'+sk+'" stroke="'+ST+'" stroke-width="0.6"/><rect x="'+headX+'" y="'+headY+'" width="'+s.headW+'" height="'+s.headH+'" rx="13" fill="'+sk+'" stroke="'+ST+'" stroke-width="0.8"/>';
+
+  return '<g class="fig">'+legs+torso+arms+neckStud+head+hair(hairStyle,headX,headY,s.headW,s.headH,hairCol,hairCol2)+face(headX,headY,s.headW,s.headH,status,happy)+'</g>';
+}
+
+/* ---------------- gallery head ---------------- */
+function headCell(style,col,col2){
+  var hw=70,hh=66,hx=(120-hw)/2,hy=26,hcx=hx+hw/2,sk='#ffcc99';
+  var stud='<rect x="'+(hcx-hw*0.16)+'" y="'+(hy-8)+'" width="'+(hw*0.32)+'" height="9" rx="3" fill="'+sk+'" stroke="'+ST+'" stroke-width="0.6"/>';
+  var h='<rect x="'+hx+'" y="'+hy+'" width="'+hw+'" height="'+hh+'" rx="18" fill="'+sk+'" stroke="'+ST+'" stroke-width="0.8"/>';
+  var neck='<rect x="'+(hcx-hw*0.18)+'" y="'+(hy+hh-2)+'" width="'+(hw*0.36)+'" height="9" rx="3" fill="'+sk+'" stroke="'+ST+'" stroke-width="0.6"/>';
+  return stud+h+neck+hair(style,hx,hy,hw,hh,col,col2)+face(hx,hy,hw,hh,'stable',true);
+}
+
+function svg(inner,vb){ return '<svg viewBox="0 0 '+vb+'">'+inner+'</svg>'; }
+function fcard(t,inner){ return '<div class="card fig"><h2>'+t+'</h2>'+svg(inner,'200 220')+'</div>'; }
+function hcard(t,style,col,col2){ return '<div class="card hairc"><h2>'+t+'</h2>'+svg(headCell(style,col,col2),'120 130')+'</div>'; }
+
+var PAL={black:['#2b2b2b','#111111'],brown:['#5b3a22','#3f2817'],blonde:['#d9a441','#b07e26'],red:['#a8431f','#7d2f12']};
+
+document.getElementById('figs').innerHTML =
+  fcard('Boy — blue, happy', minifig('child','stable','happy','male','swoop',PAL.brown[0],PAL.brown[1])) +
+  fcard('Girl — pink, happy', minifig('child','stable','happy','female','long',PAL.black[0],PAL.black[1])) +
+  fcard('Boy — jumping', minifig('child','stable','jump','male','spiky',PAL.blonde[0],PAL.blonde[1])) +
+  fcard('Girl — jumping', minifig('teen','stable','jump','female','ponytail',PAL.red[0],PAL.red[1]));
+
+var styles=[['short','Short'],['sidePart','Side part'],['swoop','Swoop'],['spiky','Spiky'],['curly','Curly'],['quiff','Quiff'],['long','Long'],['bun','Bun'],['ponytail','Ponytail']];
+document.getElementById('hair').innerHTML = styles.map(function(s){return hcard(s[1],s[0],PAL.brown[0],PAL.brown[1]);}).join('');
+
+var cols=[['black','Black'],['brown','Brown'],['blonde','Blonde'],['red','Red']];
+document.getElementById('colors').innerHTML = cols.map(function(c){return hcard(c[1],'swoop',PAL[c[0]][0],PAL[c[0]][1]);}).join('');
+</script>
+</body>
+</html>

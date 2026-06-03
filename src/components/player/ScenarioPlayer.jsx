@@ -64,7 +64,7 @@ import { replaceIdsWithLabels } from "../../lib/scenarios/labels.js";
 
 export function ScenarioPlayer(props){
   var sc=props.sc;var onExit=props.onExit;var onDone=props.onDone;
-  var ageG=guessAge(sc);var sexG=guessSex(sc);var scVisuals=sc.visuals||[];
+  var ageG=guessAge(sc);var sexG=guessSex(sc);var scVisuals=sc.visuals||[];var pSeed=sc.patient?sc.patient.name:"";
   var stage=usePlayerStore(function(s){return s.stage;});var pi=usePlayerStore(function(s){return s.phaseIndex;});var flags=usePlayerStore(function(s){return s.flags;});var showFb=usePlayerStore(function(s){return s.showFb;});var cbDone=usePlayerStore(function(s){return s.cbDone;});var shake=usePlayerStore(function(s){return s.shake;});var vit=usePlayerStore(function(s){return s.vitals;});
   var _ps=usePlayerStore.getState();var setStage=_ps.setStage;var setPi=_ps.setPhaseIndex;var setFlags=_ps.setFlags;var toggleFlag=_ps.toggleFlag;var setShowFb=_ps.setShowFb;var setCbDone=_ps.setCbDone;var setShake=_ps.setShake;var setVit=_ps.setVitals;var addSkipped=_ps.addSkipped;var recordAssess=_ps.recordAssess;var recordAction=_ps.recordAction;
   function prevStageFor(s){if(s==="phase")return"intro";if(s==="assess")return"intro";if(s==="act")return"phase";if(s==="cb-alert")return"act";if(s==="cb-act")return"cb-alert";if(s==="reassess")return null;return null;}
@@ -219,7 +219,7 @@ export function ScenarioPlayer(props){
           </div>}
         </div></div>
       {stage==="intro"&&(<div className="slu" style={{textAlign:"center"}}>
-        <PatientView status="stable" rr={30} signs={[]} ageGroup={ageG} sex={sexG} visuals={scVisuals} emotion="sad"/>
+        <PatientView status="stable" rr={30} signs={[]} ageGroup={ageG} sex={sexG} visuals={scVisuals} emotion="sad" seed={pSeed}/>
         <h2 style={{fontSize:24,fontWeight:900,marginTop:12,marginBottom:8}}>{sc.title}</h2>
         <div className="bw-glass" style={{borderRadius:16,padding:16,marginBottom:12,textAlign:"left"}}>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:12,fontSize:13}}>
@@ -251,7 +251,7 @@ export function ScenarioPlayer(props){
       {stage==="phase"&&(<div className="slu">
         <div className="bw-split">
           <div className="bw-split-left">
-            <PatientView status={pSt()} rr={vit.rr&&typeof vit.rr==="object"?parseFloat(vit.rr.value)||0:vit.rr} signs={[]} ageGroup={ageG} sex={sexG} visuals={scVisuals} emotion="sad"/>
+            <PatientView status={pSt()} rr={vit.rr&&typeof vit.rr==="object"?parseFloat(vit.rr.value)||0:vit.rr} signs={[]} ageGroup={ageG} sex={sexG} visuals={scVisuals} emotion="sad" seed={pSeed}/>
             <div style={{marginTop:12}}><VitalsDisplay vitals={vit}/></div>
           </div>
           <div className="bw-split-right">
@@ -299,7 +299,7 @@ export function ScenarioPlayer(props){
                 inside bw-split-left). Surface curveball signs through
                 BodySystemsView below — same pattern cb-act uses, full-width
                 systems list reads cleanly at any column width. */}
-            <PatientView status="critical" rr={vit.rr&&typeof vit.rr==="object"?parseFloat(vit.rr.value)||0:vit.rr} signs={[]} ageGroup={ageG} sex={sexG} visuals={scVisuals}/>
+            <PatientView status="critical" rr={vit.rr&&typeof vit.rr==="object"?parseFloat(vit.rr.value)||0:vit.rr} signs={[]} ageGroup={ageG} sex={sexG} visuals={scVisuals} seed={pSeed}/>
             <div style={{marginTop:12}}><VitalsDisplay vitals={vit} flash={true}/></div>
             <BodySystemsView signs={sc.curveball?sc.curveball.signs:[]}/>
             <LabPanel labs={curLabs}/>
@@ -341,7 +341,7 @@ export function ScenarioPlayer(props){
             <div style={{display:"inline-block",padding:"4px 14px",borderRadius:20,fontSize:11,fontWeight:800,letterSpacing:1,textTransform:"uppercase",background:"rgba(85,239,196,0.12)",color:"#55efc4",border:"1px solid rgba(85,239,196,0.3)"}}>Reassessment</div>
           </div>
           <div style={{maxWidth:200,margin:"0 auto 16px"}}>
-            <PatientSVG status="stable" rr={reVitals.rr||20} ageGroup={ageG} sex={sexG} emotion="happy"/>
+            <PatientSVG status="stable" rr={reVitals.rr||20} ageGroup={ageG} sex={sexG} emotion="happy" seed={pSeed}/>
           </div>
           <div className="bw-glass" style={{borderRadius:16,padding:12,marginBottom:12}}>
             <TextBlock text={replaceIdsWithLabels(reNarrative)} style={{fontSize:13,color:"#ddd",lineHeight:1.6}}/>
@@ -363,7 +363,7 @@ export function ScenarioPlayer(props){
         return(<div className="slu" style={{textAlign:"center"}}>
           <style>{"@keyframes bounce{0%,100%{transform:translateY(0)}30%{transform:translateY(-18px)}50%{transform:translateY(-10px)}70%{transform:translateY(-14px)}}.bw-bounce{animation:bounce 1s ease-in-out infinite}@keyframes confetti{0%{opacity:1;transform:translateY(0) rotate(0deg)}100%{opacity:0;transform:translateY(120px) rotate(360deg)}}.bw-confetti{animation:confetti 2s ease-out both}@keyframes vitalsNorm{from{opacity:0;transform:scale(0.8)}to{opacity:1;transform:scale(1)}}.bw-vn{animation:vitalsNorm .5s ease-out both}"}</style>
           <div style={{marginBottom:20}}>
-            <div className="bw-bounce" style={{width:120,margin:"0 auto"}}><PatientSVG status="stable" rr={22} ageGroup={ageG} sex={sexG} emotion="happy"/></div>
+            <div style={{width:120,margin:"0 auto"}}><PatientSVG status="stable" rr={22} ageGroup={ageG} sex={sexG} emotion="happy" seed={pSeed} pose="jump"/></div>
             {/* Celebration sparkles */}
             <div style={{position:"relative",height:40,overflow:"hidden",marginTop:-10}}>
               {[<Sparkles/>,<Star/>,<Heart/>,<Trophy/>,<Zap/>,<Shield/>,<Sparkles/>].map(function(e,i){return(<span key={i} className="bw-confetti" style={{position:"absolute",left:(10+i*13)+"%",color:"#FECA57",animationDelay:(i*0.15)+"s"}}>{e}</span>);})}

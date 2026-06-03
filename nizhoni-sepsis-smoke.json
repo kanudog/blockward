@@ -1,0 +1,136 @@
+{
+  "schemaVersion": "5.4.1",
+  "id": "septic-shock-cap-6yo",
+  "title": "Not Waking Up Right",
+  "subtitle": "A feverish six-year-old who's gone quiet — and not in a good way",
+  "patientCard": {
+    "name": "Nizhoni Runningwater",
+    "ageLabel": "6 years old",
+    "weightKg": 22,
+    "sex": "F",
+    "cc": "septic shock from community-acquired pneumonia"
+  },
+  "presentation": {
+    "routeOfPresentation": "ems",
+    "report": "Medic 7 rolling in with a 6-year-old female, Nizhoni, brought in by her parents for two days of fever and cough that got a whole lot worse this morning — she stopped responding to her name about 45 minutes ago. En route she's been lethargic but rousable to voice, no seizure activity witnessed. BP was 78 palp in the field, we got one large-bore peripheral IV in the right antecubital — it's patent. No medications given pre-arrival, no known allergies, no PMH per mom.",
+    "learnMore": "Community-acquired pneumonia is the most common infectious trigger for septic shock in previously healthy school-age children. When a child with CAP tips into shock, the culprit is usually Streptococcus pneumoniae or, less commonly, Staphylococcus aureus — both capable of provoking a vasodilatory, high-output shock state that can deteriorate fast. The window between 'sick-looking' and 'crashing' is narrower than it looks."
+  },
+  "norms": {
+    "hr": [70, 110],
+    "rr": [18, 25],
+    "sbp": [85, 110],
+    "dbp": [55, 75],
+    "spo2": [95, 100],
+    "temp": [36.5, 37.5]
+  },
+  "phases": [
+    {
+      "phaseIndex": 0,
+      "id": "assess",
+      "stageType": "assess",
+      "title": "First Look",
+      "narrative": "Nizhoni arrives on the stretcher, eyes half-open, looking through you rather than at you. Her skin is mottled from the knees down and her lips have a dusky tinge. She's breathing fast and shallow, and you can see intercostal retractions with each breath. Her parents are at the bedside — mom says she hasn't spoken a full sentence since breakfast. The right antecubital IV placed by EMS is intact and running at a KVO rate.",
+      "vitals": [
+        {"id": "hr", "label": "Heart Rate", "value": "168", "unit": "bpm", "bad": true, "cat": "vital", "_slotRef": "phase[0].vitals.hr.why", "why": "(redacted in scratch copy — see live scenario for full why text)"},
+        {"id": "rr", "label": "Resp Rate", "value": "36", "unit": "br/min", "bad": true, "cat": "vital", "_slotRef": "phase[0].vitals.rr.why", "why": "(redacted)"},
+        {"id": "bp", "label": "Blood Pressure", "value": "76/42", "unit": "mmHg", "bad": true, "cat": "vital", "_slotRef": "phase[0].vitals.bp.why", "why": "At 6 years old, Nizhoni's systolic BP of 76 mmHg is 6 points below the hypotension threshold of 70 + (2 × 6) = 82 mmHg — she has crossed into decompensated shock."},
+        {"id": "spo2", "label": "SpO₂", "value": "91", "unit": "%", "bad": true, "cat": "vital", "_slotRef": "phase[0].vitals.spo2.why", "why": "(redacted)"},
+        {"id": "temp", "label": "Temperature", "value": "39.8", "unit": "°C", "bad": true, "cat": "vital", "_slotRef": "phase[0].vitals.temp.why", "why": "(redacted)"},
+        {"id": "cap", "label": "Cap Refill", "value": "5 sec", "unit": "", "bad": true, "cat": "vital", "_slotRef": "phase[0].vitals.cap.why", "why": "FLAG: this why uses 'hypotension in a 6yo is <90 + 2×6 = <102 mmHg' — wrong formula; conflicts with the bp why which correctly uses 70 + 2×6 = 82."}
+      ],
+      "signs": [
+        {"id": "mentalStatus", "label": "Mental Status", "finding": "Opens eyes to voice but does not track faces; no spontaneous speech; withdraws purposefully to noxious stimulus; does not follow commands.", "bad": true, "cat": "clinical", "_slotRef": "phase[0].signs.mentalStatus.why", "why": "(redacted)"},
+        {"id": "skinPerfusion", "label": "Skin & Perfusion", "finding": "Mottled discoloration from mid-thigh to feet bilaterally; lower extremities cool to touch, upper extremities warm.", "pos": "extremities", "bad": true, "cat": "clinical", "_slotRef": "phase[0].signs.skinPerfusion.why", "why": "(redacted)"},
+        {"id": "breathSounds", "label": "Breath Sounds", "finding": "Decreased air entry at the right base with dullness to percussion; coarse crackles in the right middle lobe; left lung clear throughout.", "pos": "bilateral", "bad": true, "cat": "clinical", "_slotRef": "phase[0].signs.breathSounds.why", "why": "(redacted)"},
+        {"id": "workOfBreathing", "label": "Work of Breathing", "finding": "Intercostal and subcostal retractions with each breath; mild nasal flaring; trachea midline.", "bad": true, "cat": "clinical", "_slotRef": "phase[0].signs.workOfBreathing.why", "why": "(redacted)"},
+        {"id": "pulseQuality", "label": "Pulse Quality", "finding": "Central pulse (femoral, carotid) palpable but weak; peripheral pulses at the wrist and dorsalis pedis are thready and difficult to locate.", "bad": true, "cat": "clinical", "_slotRef": "phase[0].signs.pulseQuality.why", "why": "(redacted)"},
+        {"id": "abdomen", "label": "Abdomen", "finding": "Soft, non-distended, non-tender to palpation; no organomegaly appreciated; bowel sounds present.", "bad": false, "cat": "clinical", "_slotRef": "phase[0].signs.abdomen.why", "why": "(redacted)"}
+      ],
+      "labs": [
+        {"id": "wbc", "name": "WBC", "value": "22.4", "unit": "×10³/µL", "ref": "5-13", "bad": true, "critical": false, "cat": "lab", "_slotRef": "phase[0].labs.wbc.why", "why": "(redacted)"},
+        {"id": "hgb", "name": "Hemoglobin", "value": "11.2", "unit": "g/dL", "ref": "10.5-14.0", "bad": false, "critical": false, "cat": "lab", "_slotRef": "phase[0].labs.hgb.why", "why": "(redacted)"},
+        {"id": "plt", "name": "Platelets", "value": "148", "unit": "×10³/µL", "ref": "150-400", "bad": true, "critical": false, "cat": "lab", "_slotRef": "phase[0].labs.plt.why", "why": "(redacted)"},
+        {"id": "glucose", "name": "Glucose", "value": "98", "unit": "mg/dL", "ref": "60-140", "bad": false, "critical": false, "cat": "lab", "_slotRef": "phase[0].labs.glucose.why", "why": "(redacted)"},
+        {"id": "lactate", "name": "Lactate", "value": "6.2", "unit": "mmol/L", "ref": "0.5-2.0", "bad": true, "critical": true, "cat": "lab", "_slotRef": "phase[0].labs.lactate.why", "why": "(redacted)"},
+        {"id": "creatinine", "name": "Creatinine", "value": "0.6", "unit": "mg/dL", "ref": "0.3-0.7", "bad": false, "critical": false, "cat": "lab", "_slotRef": "phase[0].labs.creatinine.why", "why": "(redacted)"},
+        {"id": "ph", "name": "pH", "value": "7.21", "unit": "", "ref": "7.35-7.45", "bad": true, "critical": true, "cat": "lab", "_slotRef": "phase[0].labs.ph.why", "why": "(redacted)"},
+        {"id": "pco2", "name": "pCO₂", "value": "28", "unit": "mmHg", "ref": "35-45", "bad": true, "critical": false, "cat": "lab", "_slotRef": "phase[0].labs.pco2.why", "why": "(redacted)"},
+        {"id": "hco3", "name": "HCO₃⁻", "value": "11", "unit": "mEq/L", "ref": "20-26", "bad": true, "critical": true, "cat": "lab", "_slotRef": "phase[0].labs.hco3.why", "why": "(redacted)"}
+      ],
+      "actions": {"tools": {}, "meds": {}}
+    },
+    {
+      "phaseIndex": 1,
+      "id": "intervene",
+      "stageType": "intervene",
+      "title": "Resuscitate",
+      "narrative": "You've got the full picture now: septic shock, almost certainly pneumonia as the source, with a pressure that needs fixing right now. SpO₂ is 91% on room air, she has increased work of breathing, and her mental status is deteriorating. The IV is patent in the right AC and you have the team at bedside. Breath sounds are decreased at the right base with crackles in the right middle lobe — left lung is clear. Trachea is midline. Her abdomen remains soft. She needs oxygen, volume, and antibiotics — in that order, simultaneously if you can manage it.",
+      "vitals": [
+        {"id": "hr", "label": "Heart Rate", "value": "168", "unit": "bpm", "bad": true, "cat": "vital", "_slotRef": "phase[1].vitals.hr.why", "why": "(redacted)"},
+        {"id": "rr", "label": "Resp Rate", "value": "36", "unit": "br/min", "bad": true, "cat": "vital", "_slotRef": "phase[1].vitals.rr.why", "why": "(redacted)"},
+        {"id": "bp", "label": "Blood Pressure", "value": "76/42", "unit": "mmHg", "bad": true, "cat": "vital", "_slotRef": "phase[1].vitals.bp.why", "why": "(redacted) — correctly uses 82 threshold."},
+        {"id": "spo2", "label": "SpO₂", "value": "91", "unit": "%", "bad": true, "cat": "vital", "_slotRef": "phase[1].vitals.spo2.why", "why": "(redacted)"},
+        {"id": "temp", "label": "Temperature", "value": "39.8", "unit": "°C", "bad": true, "cat": "vital", "_slotRef": "phase[1].vitals.temp.why", "why": "(redacted)"},
+        {"id": "cap", "label": "Cap Refill", "value": "5 sec", "unit": "", "bad": true, "cat": "vital", "_slotRef": "phase[1].vitals.cap.why", "why": "(redacted)"}
+      ],
+      "signs": [
+        {"id": "mentalStatus", "label": "Mental Status", "finding": "Opens eyes to voice but does not track faces; no spontaneous speech; withdraws purposefully to noxious stimulus; does not follow commands.", "bad": true, "cat": "clinical", "_slotRef": "phase[1].signs.mentalStatus.why", "why": "(redacted)"},
+        {"id": "skinPerfusion", "label": "Skin & Perfusion", "finding": "Mottled discoloration from mid-thigh to feet bilaterally; lower extremities cool to touch, upper extremities warm.", "pos": "extremities", "bad": true, "cat": "clinical", "_slotRef": "phase[1].signs.skinPerfusion.why", "why": "FLAG: this why says '76 mmHg is above the hypotension threshold (76 is above 70+2×6)' — but 76 < 82, so she IS hypotensive. Contradicts the bp why (decompensated)."},
+        {"id": "breathSounds", "label": "Breath Sounds", "finding": "Decreased air entry at the right base with dullness to percussion; coarse crackles in the right middle lobe; left lung clear throughout.", "pos": "bilateral", "bad": true, "cat": "clinical", "_slotRef": "phase[1].signs.breathSounds.why", "why": "(redacted)"},
+        {"id": "workOfBreathing", "label": "Work of Breathing", "finding": "Intercostal and subcostal retractions with each breath; mild nasal flaring; trachea midline.", "bad": true, "cat": "clinical", "_slotRef": "phase[1].signs.workOfBreathing.why", "why": "(redacted)"},
+        {"id": "pulseQuality", "label": "Pulse Quality", "finding": "Central pulse (femoral, carotid) palpable but weak; peripheral pulses at the wrist and dorsalis pedis are thready and difficult to locate.", "bad": true, "cat": "clinical", "_slotRef": "phase[1].signs.pulseQuality.why", "why": "(redacted)"},
+        {"id": "abdomen", "label": "Abdomen", "finding": "Soft, non-distended, non-tender to palpation; no organomegaly appreciated; bowel sounds present.", "bad": false, "cat": "clinical", "_slotRef": "phase[1].signs.abdomen.why", "why": "(redacted)"}
+      ],
+      "labs": [
+        {"id": "wbc", "name": "WBC", "value": "22.4", "unit": "×10³/µL", "ref": "5-13", "bad": true, "critical": false, "cat": "lab", "_slotRef": "phase[1].labs.wbc.why", "why": "(redacted)"},
+        {"id": "hgb", "name": "Hemoglobin", "value": "11.2", "unit": "g/dL", "ref": "10.5-14.0", "bad": false, "critical": false, "cat": "lab", "_slotRef": "phase[1].labs.hgb.why", "why": "(redacted)"},
+        {"id": "plt", "name": "Platelets", "value": "148", "unit": "×10³/µL", "ref": "150-400", "bad": true, "critical": false, "cat": "lab", "_slotRef": "phase[1].labs.plt.why", "why": "(redacted)"},
+        {"id": "glucose", "name": "Glucose", "value": "98", "unit": "mg/dL", "ref": "60-140", "bad": false, "critical": false, "cat": "lab", "_slotRef": "phase[1].labs.glucose.why", "why": "(redacted)"},
+        {"id": "lactate", "name": "Lactate", "value": "6.2", "unit": "mmol/L", "ref": "0.5-2.0", "bad": true, "critical": true, "cat": "lab", "_slotRef": "phase[1].labs.lactate.why", "why": "(redacted)"},
+        {"id": "creatinine", "name": "Creatinine", "value": "0.6", "unit": "mg/dL", "ref": "0.3-0.7", "bad": false, "critical": false, "cat": "lab", "_slotRef": "phase[1].labs.creatinine.why", "why": "(redacted)"},
+        {"id": "ph", "name": "pH", "value": "7.21", "unit": "", "ref": "7.35-7.45", "bad": true, "critical": true, "cat": "lab", "_slotRef": "phase[1].labs.ph.why", "why": "(redacted)"},
+        {"id": "pco2", "name": "pCO₂", "value": "28", "unit": "mmHg", "ref": "35-45", "bad": true, "critical": false, "cat": "lab", "_slotRef": "phase[1].labs.pco2.why", "why": "(redacted)"},
+        {"id": "hco3", "name": "HCO₃⁻", "value": "11", "unit": "mEq/L", "ref": "20-26", "bad": true, "critical": true, "cat": "lab", "_slotRef": "phase[1].labs.hco3.why", "why": "(redacted)"}
+      ],
+      "actions": {
+        "tools": {
+          "vsMonitor": {"id": "vsMonitor", "label": "Connect to Vital Signs Monitor", "priority": "correct", "_slotRef": "phase[1].actions.tools.vsMonitor.fb", "fb": "(redacted)", "pri": 1, "ok": true},
+          "o2Mask": {"id": "o2Mask", "label": "Apply high-flow O₂ via non-rebreather mask", "priority": "tied-correct", "_slotRef": "phase[1].actions.tools.o2Mask.fb", "fb": "(redacted)", "pri": 2, "ok": true},
+          "stethoscope": {"id": "stethoscope", "label": "Auscultate lung and heart fields", "priority": "correct", "_slotRef": "phase[1].actions.tools.stethoscope.fb", "fb": "(redacted)", "pri": 1, "ok": true},
+          "bloodCultures": {"id": "bloodCultures", "label": "Draw blood cultures", "priority": "correct", "_slotRef": "phase[1].actions.tools.bloodCultures.fb", "fb": "(redacted)", "pri": 1, "ok": true},
+          "chestXray": {"id": "chestXray", "label": "Order portable chest X-ray", "priority": "correct", "_slotRef": "phase[1].actions.tools.chestXray.fb", "fb": "(redacted)", "pri": 1, "ok": true},
+          "vbgKit": {"id": "vbgKit", "label": "Send venous blood gas", "priority": "correct", "_slotRef": "phase[1].actions.tools.vbgKit.fb", "fb": "(redacted)", "pri": 1, "ok": true},
+          "lumbarPuncture": {"id": "lumbarPuncture", "label": "Perform lumbar puncture", "priority": "distractor-clinical", "_slotRef": "phase[1].actions.tools.lumbarPuncture.fb", "fb": "(redacted)", "pri": 3, "ok": false},
+          "ioAccess": {"id": "ioAccess", "label": "Place intraosseous access", "priority": "distractor-clinical", "_slotRef": "phase[1].actions.tools.ioAccess.fb", "fb": "(redacted)", "pri": 3, "ok": false}
+        },
+        "meds": {
+          "nsBolus": {"id": "nsBolus", "label": "Give NS 20 mL/kg IV bolus (440 mL)", "priority": "tied-correct", "_slotRef": "phase[1].actions.meds.nsBolus.fb", "fb": "(redacted)", "pri": 2, "ok": true},
+          "ceftriaxone": {"id": "ceftriaxone", "label": "Give ceftriaxone 50 mg/kg IV (1,100 mg)", "priority": "tied-correct", "_slotRef": "phase[1].actions.meds.ceftriaxone.fb", "fb": "(redacted)", "pri": 2, "ok": true},
+          "vancomycin": {"id": "vancomycin", "label": "Give vancomycin 15 mg/kg IV (330 mg)", "priority": "tied-correct", "_slotRef": "phase[1].actions.meds.vancomycin.fb", "fb": "(redacted)", "pri": 2, "ok": true},
+          "epiIV": {"id": "epiIV", "label": "Start epinephrine infusion 0.05–0.3 mcg/kg/min IV", "priority": "tied-correct", "_slotRef": "phase[1].actions.meds.epiIV.fb", "fb": "(redacted)", "pri": 2, "ok": true},
+          "acetaminophen": {"id": "acetaminophen", "label": "Give acetaminophen 15 mg/kg IV (330 mg)", "priority": "correct", "_slotRef": "phase[1].actions.meds.acetaminophen.fb", "fb": "(redacted)", "pri": 1, "ok": true},
+          "sodiumBicarb": {"id": "sodiumBicarb", "label": "Give sodium bicarbonate IV push", "priority": "distractor-clinical", "_slotRef": "phase[1].actions.meds.sodiumBicarb.fb", "fb": "(redacted)", "pri": 3, "ok": false},
+          "dexamethasone": {"id": "dexamethasone", "label": "Give dexamethasone IV", "priority": "distractor-pack", "_slotRef": "phase[1].actions.meds.dexamethasone.fb", "fb": "(redacted)", "pri": 4, "ok": false},
+          "adenosine": {"id": "adenosine", "label": "Give adenosine IV for tachycardia", "priority": "distractor-misc", "_slotRef": "phase[1].actions.meds.adenosine.fb", "fb": "(redacted)", "pri": 5, "ok": false}
+        }
+      }
+    }
+  ],
+  "reassessment": {
+    "narrative": "Fifteen minutes after the NS bolus, high-flow O₂, ceftriaxone, and vancomycin, Nizhoni is starting to look more like a child and less like a mannequin. Her SpO₂ has climbed to 97% on the non-rebreather and the retractions have softened noticeably. Heart rate has come down to 138 and her BP is now 92/56 — still not perfect, but the pressure is moving in the right direction. Cap refill has improved to 3 seconds at the fingertip and she squeezed her mom's hand on command about two minutes ago. Epinephrine infusion is running at 0.1 mcg/kg/min via the AC line pending central access; the PICU team has been notified and is preparing a bed.",
+    "vitals": {"hr": "138", "rr": "28", "bp": "92/56", "spo2": "97", "temp": "39.1", "cap": "3 sec"},
+    "outcome": "transferred-icu",
+    "stabilizationSummary": "Nizhoni has responded to initial resuscitation with fluids, broad-spectrum antibiotics, and vasoactive support — hemodynamics are improving and she's regaining purposeful responsiveness. She's being transferred to the PICU for ongoing epinephrine titration, serial lactate monitoring, and definitive management of her right-sided pneumonia."
+  },
+  "patient": {
+    "name": "Nizhoni Runningwater",
+    "ageLabel": "6 years old",
+    "weightKg": 22,
+    "sex": "F",
+    "cc": "septic shock from community-acquired pneumonia"
+  },
+  "visuals": [],
+  "curveball": null,
+  "source": "ai",
+  "_note": "Scratch copy for the 2026-05-28 bug-sweep smoke test. why/fb deep-dive bodies redacted for size; two FLAG entries mark clinical inconsistencies found on review (see chat). Full untrimmed copy was provided in the conversation."
+}

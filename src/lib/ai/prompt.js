@@ -89,11 +89,30 @@ export function buildOrchestratorPrompt(){
     "  },\n"+
     "  \"phases\": [ <see phase shape below> ],\n"+
     "  \"reassessment\": { <see reassessment shape below> },\n"+
-    "  \"debrief\": { <see debrief shape below> }\n"+
+    "  \"debrief\": { <see debrief shape below> },\n"+
+    "  \"visuals\": [ <zero or more avatar keyword strings — see Patient avatar visuals below> ]\n"+
     "}\n\n"+
     "patientCard notes:\n"+
     "- weightKg is a JSON number, not a string. Emit 20, not \"20\" and not \"20 kg\".\n"+
     "- cc is one short phrase, not a sentence. It surfaces in deep-dive context where space is tight. \"septic shock from pneumonia\" is right; \"The patient is a 6-year-old presenting with septic shock secondary to community-acquired pneumonia.\" is wrong.\n\n"+
+    "Patient avatar visuals. The top-level \"visuals\" array holds zero or more keyword strings that drive accessories on the patient avatar (the cartoon figure on the intro and assessment screens). The renderer matches these EXACT keywords (case-insensitive substring), so use the wording below verbatim — a novel phrasing renders nothing. Emit only what is visibly true of the patient AT PRESENTATION, and emit an empty array [] when nothing applies (most metabolic, toxicologic, and undifferentiated-shock cases have no visible accessory — that is correct, not a gap).\n\n"+
+    "Recognized keywords (use these exact strings):\n"+
+    "- \"cast left arm\", \"cast right arm\", \"cast leg\" — a visible cast on that limb (fracture).\n"+
+    "- \"head bandage\" — head wrap or dressing (head injury/laceration).\n"+
+    "- \"c-collar\" — cervical collar in place (suspected c-spine injury).\n"+
+    "- \"arm sling\" — an arm supported in a sling.\n"+
+    "- \"eye patch\" — patch or dressing over one eye.\n"+
+    "- \"nasal cannula\" — low-flow nasal oxygen already on the patient.\n"+
+    "- \"oxygen mask\" — a simple or non-rebreather face mask already on the patient.\n"+
+    "- \"hives\" — urticarial rash (allergic reaction / anaphylaxis).\n"+
+    "- \"wheelchair\" — the patient presents seated in a wheelchair (this replaces the bed in the avatar).\n"+
+    "- \"flushed\" — flushed, febrile cheeks (fever).\n"+
+    "- \"diaphoretic\" — visible sweating / sweat beads (shock, hypoglycemia, severe distress).\n"+
+    "- \"lip swelling\" — swollen lips / angioedema (anaphylaxis).\n"+
+    "- \"petechiae\" — pinpoint non-blanching purple spots (meningococcemia / purpura). Use this, NOT \"hives\", for a petechial or purpuric rash.\n"+
+    "- \"wound dressing\" — a taped gauze dressing over a wound or laceration.\n"+
+    "- \"crutches\" — the patient uses forearm crutches (e.g., an isolated leg injury).\n\n"+
+    "Match visuals to the presentation the narrative establishes: anaphylaxis with urticaria → [\"hives\"]; a forearm fracture → [\"cast left arm\"] or [\"cast right arm\"]; multisystem trauma with a collar and a splinted leg → [\"c-collar\", \"cast leg\"]; a child who arrived already on low-flow O2 → [\"nasal cannula\"]. Two rules: (1) do not emit a visual for something the narrative doesn't establish, and (2) do not pre-apply equipment the learner hasn't placed yet — if EMS already had a mask on at arrival, [\"oxygen mask\"] is fair; if oxygen is a Phase 1 intervention the user still has to choose, leave it out. When in doubt, emit [].\n\n"+
     "norms notes:\n"+
     "- These are age-appropriate normal ranges for THIS patient's age, not generic adult ranges. A 6-month-old's normal HR is 100-160, not 60-100.\n"+
     "- Compute from PALS / age-norm tables. The recovery screen reads these as fallback display when reassessment vitals are absent — getting them wrong shows the user incorrect baselines.\n"+
@@ -247,7 +266,7 @@ export function buildOrchestratorPrompt(){
     "- Pre-arrival interventions show their expected effect on presenting vitals. A single epinephrine dose pre-arrival leaves residual but waning effect — not full resolution, not no effect.\n"+
     "- The chosen pathology, the abnormal findings, the labs, and the correct interventions all point to the same diagnosis.\n\n"+
     "If you find yourself generating a value that doesn't fit the picture, fix the value — don't rationalize it.\n\n"+
-    "Use a wide variety of first and last names across cultures, regions, and origins. The pediatric population in this app's user base is diverse; the scenarios should reflect that. Avoid defaulting to common Western names for every scenario.\n\n"+
+    "Patient names should reflect a realistic contemporary American pediatric population. That population is genuinely diverse — Anglo, Hispanic/Latino, Black/African-American, East and South Asian, Middle Eastern, and Indigenous names all belong — but common, familiar American names must appear regularly too, not only foreign-sounding ones. Across scenarios, a plurality of patients should carry ordinary Anglophone names (e.g. Emma, Liam, Olivia, Noah, Jacob, Ava, Mason, Sophia, Ethan, Mia) alongside the full range of other origins. Vary the register from scenario to scenario; do not default to an exotic or unusual name every single time. The target is a roster that feels like a real US clinic — mostly common names, with steady, natural diversity — not one where every patient's name is unfamiliar.\n\n"+
     "Etiology (the underlying disease or mechanism) is what your scenario is about; presentation (the surface signs and vitals) is how the patient looks at the bedside. Keep these distinct.\n\n"+
     "A scenario about myocarditis presents as: tachycardia, gallop rhythm, hepatomegaly, poor perfusion. A scenario about septic shock can present similarly but the etiology is different and the labs/interventions differ.\n\n"+
     "When you write the narrative and select findings, write to the presentation — what a learner can see and assess. The etiology is yours to know but not to spell out at the top of the scenario; that's what the case is teaching.\n\n"+

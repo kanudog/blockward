@@ -92,7 +92,12 @@ export function ActionPanel(props){
     // receives the resolved fb directly via expandSingleMarkedItem.
     var kind=pop.ty==="t"?"tool":"med";
     return{
-      id:(pop.ty==="t"?"tool:":"med:")+pop.id,
+      // Bug-sweep: phase-scope the mark id. Without "@p"+phaseIdx the same
+      // tool/med id marked in two phases (e.g. curveball + phase 1) collides
+      // in markedForReview dedup and deepDiveCache. The id is opaque
+      // downstream (dedup, setDeepDive, Debrief all key on it as-is), so the
+      // suffix is safe end-to-end.
+      id:(pop.ty==="t"?"tool:":"med:")+pop.id+"@p"+phaseIdx,
       kind:kind,
       phaseIdx:phaseIdx,
       label:label,
@@ -149,12 +154,24 @@ export function ActionPanel(props){
     setPop(function(p){if(!p)return p;return Object.assign({},p,{info:Object.assign({},p.info,{fb:SYNTHESIZED_FB_FALLBACK})});});
   }
   var popMarked=(function(){var it=popMarkItem();return it?markedForReview.some(function(x){return x.id===it.id;}):false;})();
-  var rT=Object.entries(actions&&actions.tools?actions.tools:{}).filter(function(e){return e[1].ok;}).map(function(e){return e[0];});
-  var rM=Object.entries(actions&&actions.meds?actions.meds:{}).filter(function(e){return e[1].ok;}).map(function(e){return e[0];});
+  // Bug-sweep (explored counter / soft-lock): only ids that resolve to a
+  // registry or custom entry render a clickable tile — the grid maps the
+  // id list and bails with `if(!t)return null` for anything lookupTool/
+  // lookupMed can't resolve. An off-registry id Sonnet occasionally emits
+  // is therefore unclickable but was still counted in `total`, leaving the
+  // explored counter permanently short and, if the bad id was a correct
+  // action, blocking the Continue gate forever. Derive a renderable id list
+  // up front and drive the grid, the total, and the completion gate from it.
+  var renderTools=(tools||[]).filter(function(id){return !!lookupTool(id,actions&&actions.tools?actions.tools[id]:null);});
+  var renderMeds=(meds||[]).filter(function(id){return !!lookupMed(id,actions&&actions.meds?actions.meds[id]:null);});
+  var renderToolSet={};renderTools.forEach(function(id){renderToolSet[id]=true;});
+  var renderMedSet={};renderMeds.forEach(function(id){renderMedSet[id]=true;});
+  var rT=Object.entries(actions&&actions.tools?actions.tools:{}).filter(function(e){return e[1].ok&&renderToolSet[e[0]];}).map(function(e){return e[0];});
+  var rM=Object.entries(actions&&actions.meds?actions.meds:{}).filter(function(e){return e[1].ok&&renderMedSet[e[0]];}).map(function(e){return e[0];});
   var totalCorrect=rT.length+rM.length;
   var allF=totalCorrect>0&&rT.concat(rM).every(function(id){return sel[id];});
   var explored=Object.keys(sel).length;
-  var total=(tools?tools.length:0)+(meds?meds.length:0);
+  var total=renderTools.length+renderMeds.length;
   var pick=function(id,ty){
     var src=ty==="t"?(actions&&actions.tools):(actions&&actions.meds);
     var info=src?src[id]:null;
@@ -198,13 +215,13 @@ export function ActionPanel(props){
           Phase 2 share visual rhythm. Same gap (6), same padding (10),
           same borderRadius (12), same minHeight (78). */}
       <style>{"@keyframes popIn{from{opacity:0;transform:scale(.92) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}@keyframes lazyPulse{0%,100%{opacity:.4}50%{opacity:1}}@media(min-width:768px){.bw-action-grid{grid-template-columns:repeat(3,1fr) !important}}@media(min-width:1024px){.bw-action-grid{grid-template-columns:repeat(4,1fr) !important}}"}</style>
-      {tools&&tools.length>0&&(<div style={{marginBottom:16}}><div style={{fontSize:10,textTransform:"uppercase",letterSpacing:2,color:"#999",fontWeight:700,marginBottom:8}}>Tool Belt</div>
-        <div className="bw-action-grid" style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:6}}>{tools.map(function(id){var t=lookupTool(id,actions&&actions.tools?actions.tools[id]:null);if(!t)return null;var u=!!sel[id];var o=actions&&actions.tools&&actions.tools[id]?actions.tools[id].ok:false;
+      {renderTools&&renderTools.length>0&&(<div style={{marginBottom:16}}><div style={{fontSize:10,textTransform:"uppercase",letterSpacing:2,color:"#999",fontWeight:700,marginBottom:8}}>Tool Belt</div>
+        <div className="bw-action-grid" style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:6}}>{renderTools.map(function(id){var t=lookupTool(id,actions&&actions.tools?actions.tools[id]:null);if(!t)return null;var u=!!sel[id];var o=actions&&actions.tools&&actions.tools[id]?actions.tools[id].ok:false;
           return(<button key={id} onClick={function(){pick(id,"t");}} className="bw-tap" style={{position:"relative",display:"flex",flexDirection:"column",alignItems:"center",gap:6,padding:10,borderRadius:12,minHeight:78,background:tbg(u,o),border:tbd(u,o),cursor:"pointer",color:"white"}}>
             <ToolIcon name={id} size={26} color={u?(o?"#55efc4":"#FECA57"):"#4ECDC4"}/><span style={{fontSize:11,color:"#ccc",fontWeight:600,textAlign:"center",lineHeight:1.2}}>{t.label}</span>
             {u&&<span style={{position:"absolute",top:6,right:6}}>{o?<Check size={12} color="#55efc4"/>:<Minus size={12} color="#FECA57"/>}</span>}</button>);})}</div></div>)}
-      {meds&&meds.length>0&&(<div style={{marginBottom:16}}><div style={{fontSize:10,textTransform:"uppercase",letterSpacing:2,color:"#999",fontWeight:700,marginBottom:8}}>Med Cart</div>
-        <div className="bw-action-grid" style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:6}}>{meds.map(function(id){var m=lookupMed(id,actions&&actions.meds?actions.meds[id]:null);if(!m)return null;var u=!!sel[id];var o=actions&&actions.meds&&actions.meds[id]?actions.meds[id].ok:false;
+      {renderMeds&&renderMeds.length>0&&(<div style={{marginBottom:16}}><div style={{fontSize:10,textTransform:"uppercase",letterSpacing:2,color:"#999",fontWeight:700,marginBottom:8}}>Med Cart</div>
+        <div className="bw-action-grid" style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:6}}>{renderMeds.map(function(id){var m=lookupMed(id,actions&&actions.meds?actions.meds[id]:null);if(!m)return null;var u=!!sel[id];var o=actions&&actions.meds&&actions.meds[id]?actions.meds[id].ok:false;
           return(<button key={id} onClick={function(){pick(id,"m");}} className="bw-tap" style={{position:"relative",display:"flex",flexDirection:"column",alignItems:"center",gap:6,padding:10,borderRadius:12,minHeight:78,background:tbg(u,o),border:tbd(u,o),cursor:"pointer",color:"white"}}>
             <div style={{width:26,height:32,borderRadius:6,display:"flex",alignItems:"center",justifyContent:"center",background:medColor(id),fontSize:16,color:"white"}}><MedIcon type={lookupMedType(id)} size={18} color="white"/></div>
             <span style={{fontSize:11,color:"#ccc",fontWeight:600,textAlign:"center",lineHeight:1.2}}>{m.label}</span>
@@ -267,12 +284,19 @@ export function ActionPanel(props){
               if(!it)return;
               var transition=toggleMark(it);
               if(transition!=="added")return;
-              var sc=usePlayerStore.getState().activeScenario;
+              var store=usePlayerStore.getState();
+              var sc=store.activeScenario;
               if(!sc)return;
+              // Bug-sweep: skip if already fetched or a fetch for this id is
+              // in flight (rapid mark→unmark→mark); release when it settles.
+              if(store.deepDiveCache[it.id])return;
+              if(!store.beginDeepDive(it.id))return;
               expandSingleMarkedItem(sc,it).then(function(text){
                 if(text)usePlayerStore.getState().setDeepDive(it.id,text);
               }).catch(function(err){
                 console.warn("[eager deep-dive] "+it.id+" — "+(err&&err.message||err));
+              }).finally(function(){
+                usePlayerStore.getState().endDeepDive(it.id);
               });
             }} style={{width:"100%",padding:"8px 12px",borderRadius:10,fontSize:12,fontWeight:700,cursor:popLoading?"not-allowed":"pointer",background:popMarked?"rgba(254,202,87,0.2)":"rgba(255,255,255,0.06)",border:"1px solid "+(popMarked?"rgba(254,202,87,0.55)":"rgba(255,255,255,0.18)"),color:popMarked?"#FECA57":"#ddd",opacity:popLoading?0.45:1}}>{popMarked?"✓ Marked for Review":"Mark for Review"}</button>
             <p style={{fontSize:10,color:"#888",marginTop:6,marginBottom:10,textAlign:"center",lineHeight:1.4}}>{popLoading?"Available once details finish loading.":popMarked?"Will appear in the debrief with an expanded deep dive.":"Save this intervention for a deeper review at the end."}</p>

@@ -39,6 +39,11 @@ var initialState = {
   // falls back to the existing batch fetch only for items not yet here.
   // Cleared on start() (per-scenario lifetime).
   deepDiveCache: {},
+  // Bug-sweep: per-id in-flight guard for the eager deep-dive fetch.
+  // Without it, rapid mark→unmark→mark on the same item double-fires
+  // expandSingleMarkedItem. beginDeepDive(id) claims the slot; endDeepDive(id)
+  // releases it. Keyed by the (now phase-scoped) marked-item id.
+  deepDiveInFlight: {},
   // Phase 6.0: wave dispatcher state.
   //
   // dispatcherFiredSlots — slot-ref-string-keyed map of slots that have
@@ -86,7 +91,7 @@ export var usePlayerStore = create(function(set, get) {
         flags: {},
         showFb: false,
         cbDone: false,
-        vitals: sc && sc.phases && sc.phases[0] ? vitalsLookup(sc.phases[0].vitals) : null,
+        vitals: sc && sc.phases && sc.phases[0] ? vitalsLookup(sc.phases[0].vitals, sc.phases[0].signs) : null,
         shake: false,
         skippedActions: [],
         assessHistory: [],
@@ -94,6 +99,7 @@ export var usePlayerStore = create(function(set, get) {
         markedForReview: [],
         // Phase-5.2.5: fresh per-scenario cache.
         deepDiveCache: {},
+        deepDiveInFlight: {},
         // Phase 6.0: fresh per-scenario dispatcher state.
         dispatcherFiredSlots: {},
         dispatcherState: "idle",
@@ -122,7 +128,7 @@ export var usePlayerStore = create(function(set, get) {
     },
     setShowFb: function(b) { set({ showFb: b }); },
     setCbDone: function(b) { set({ cbDone: b }); },
-    setVitals: function(v) { set({ vitals: vitalsLookup(v) }); },
+    setVitals: function(v, signs) { set({ vitals: vitalsLookup(v, signs) }); },
     setShake: function(b) { set({ shake: b }); },
     addSkipped: function(items) {
       set(function(s) {
@@ -181,6 +187,26 @@ export var usePlayerStore = create(function(set, get) {
       var next = Object.assign({}, get().deepDiveCache);
       next[itemId] = text;
       set({ deepDiveCache: next });
+    },
+    // Bug-sweep: claim the in-flight slot for an eager deep-dive fetch.
+    // Returns false if a fetch for this id is already running (caller
+    // should skip), true if the slot was free (caller proceeds).
+    beginDeepDive: function(itemId) {
+      if (!itemId) return false;
+      if (get().deepDiveInFlight[itemId]) return false;
+      var next = Object.assign({}, get().deepDiveInFlight);
+      next[itemId] = true;
+      set({ deepDiveInFlight: next });
+      return true;
+    },
+    // Release the in-flight slot once the eager fetch settles (success or
+    // failure), so a later mark of a still-unfilled item can retry.
+    endDeepDive: function(itemId) {
+      if (!itemId) return;
+      if (!get().deepDiveInFlight[itemId]) return;
+      var next = Object.assign({}, get().deepDiveInFlight);
+      delete next[itemId];
+      set({ deepDiveInFlight: next });
     },
     // Phase-5.3: bump activeScenario's top-level reference to force a
     // React re-render after in-place mutation (lazy explanation fetch

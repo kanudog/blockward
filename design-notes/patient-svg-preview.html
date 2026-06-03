@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>PatientSVG — preview v3</title>
+<style>
+  body{margin:0;background:#0a0e1a;color:#e8eefb;font-family:-apple-system,Segoe UI,Roboto,sans-serif;padding:24px}
+  h1{font-size:20px;font-weight:800;margin:0 0 4px}
+  p.sub{color:#9fb0d0;font-size:13px;margin:0 0 24px;max-width:780px;line-height:1.5}
+  .row{display:flex;flex-wrap:wrap;gap:20px;margin-bottom:28px}
+  .card{background:linear-gradient(135deg,#0d1430,#1a1a3e);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:14px;width:230px;box-shadow:0 6px 20px rgba(0,0,0,0.35)}
+  .card h2{font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin:0 0 10px}
+  .cur h2{color:#ff9a9f}
+  .pro h2{color:#55efc4}
+  .card svg{width:200px;height:260px;display:block;margin:0 auto;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.25))}
+  .legend{color:#9fb0d0;font-size:12px;line-height:1.6;max-width:780px;border-top:1px solid rgba(255,255,255,0.08);padding-top:14px}
+  .legend b{color:#e8eefb}
+</style>
+</head>
+<body>
+<h1>PatientSVG — v3 (v1 bed look + v2 crib)</h1>
+<p class="sub">Left = current, right = proposed. This version keeps the <b>v1 bed</b> for the child (visible mattress + blanket band + side rails) with the pillow removed and the mattress raised to the hip line so the child sits on it. The <b>crib</b> is unchanged from v2 (tall back rail, dropped front rail). Teddy and IV are the v2 versions.</p>
+
+<div class="row" id="row-child"></div>
+<div class="row" id="row-infant"></div>
+
+<div class="legend">
+<b>v3:</b><br/>
+• <b>Child bed:</b> back to the v1 look — mattress lip, a blanket band with a folded cuff, and side rails — pillow removed, mattress top aligned to the child's hips so the body meets the bed.<br/>
+• <b>Crib:</b> unchanged from v2 (approved) — tall back rail + corner posts/finials behind the baby, near rail dropped low.<br/>
+• <b>Teddy / IV:</b> v2 versions — teddy with a body on the bed surface; floor-standing IV pole with the bag above head height and tubing to the forearm.
+</div>
+
+<script>
+function dims(age){
+  if(age==='infant') return {headW:60,headH:55,headX:30,headY:112,headRx:18,bodyW:50,bodyH:30,bodyX:35,bodyY:165};
+  return {headW:52,headH:48,headX:34,headY:98,headRx:15,bodyW:58,bodyH:38,bodyX:31,bodyY:144};
+}
+var SK='#ffcc99', EB='#e0b878';
+function sitLine(d){ return d.bodyY + d.bodyH; }
+function patient(d){
+  var armLX=d.bodyX-8, armRX=d.bodyX+d.bodyW+2, armY=d.bodyY+4;
+  var eyeY=d.headY+d.headH*0.45, eyeLX=d.headX+d.headW*0.28, eyeRX=d.headX+d.headW*0.72, eyeR=4.5;
+  var mY=d.headY+d.headH*0.72, mX=d.headX+d.headW*0.5;
+  return ''
+   + '<rect x="'+d.bodyX+'" y="'+d.bodyY+'" width="'+d.bodyW+'" height="'+d.bodyH+'" rx="10" fill="'+SK+'"/>'
+   + '<rect x="'+armLX+'" y="'+armY+'" width="10" height="20" rx="4" fill="'+SK+'"/>'
+   + '<rect x="'+armRX+'" y="'+armY+'" width="10" height="20" rx="4" fill="'+SK+'"/>'
+   + '<rect x="'+d.headX+'" y="'+d.headY+'" width="'+d.headW+'" height="'+d.headH+'" rx="'+d.headRx+'" fill="'+SK+'" stroke="'+EB+'" stroke-width="0.8"/>'
+   + '<circle cx="'+eyeLX+'" cy="'+eyeY+'" r="'+eyeR+'" fill="#fff"/><circle cx="'+eyeRX+'" cy="'+eyeY+'" r="'+eyeR+'" fill="#fff"/>'
+   + '<circle cx="'+(eyeLX+1)+'" cy="'+eyeY+'" r="'+(eyeR*0.6)+'" fill="#2d3436"/><circle cx="'+(eyeRX+1)+'" cy="'+eyeY+'" r="'+(eyeR*0.6)+'" fill="#2d3436"/>'
+   + '<path d="M'+(mX-7)+' '+mY+' Q'+mX+' '+(mY+6)+' '+(mX+7)+' '+mY+'" fill="none" stroke="#c08060" stroke-width="1.5"/>';
+}
+
+/* ---------- CURRENT ---------- */
+function bedCurrent(){
+  return ''
+   + '<rect x="10" y="188" width="180" height="58" rx="14" fill="#5B86E5"/>'
+   + '<rect x="15" y="192" width="170" height="50" rx="10" fill="#E8F0FE"/>'
+   + '<rect x="20" y="196" width="55" height="38" rx="8" fill="white"/>'
+   + '<rect x="60" y="201" width="120" height="32" rx="8" fill="#FF6B81" opacity="0.75"/>';
+}
+function ivCurrent(d){
+  return ''
+   + '<line x1="'+(d.bodyX+d.bodyW)+'" y1="'+(d.bodyY+5)+'" x2="145" y2="'+(d.headY-10)+'" stroke="#70a0d0" stroke-width="1.5" stroke-dasharray="4,3"/>'
+   + '<rect x="140" y="'+(d.headY-30)+'" width="14" height="28" rx="3" fill="#70a0d0" opacity="0.5"/>';
+}
+function teddyCurrent(){
+  return '<g transform="translate(130,208) scale(0.4)">'
+   + '<circle cx="20" cy="20" r="15" fill="#FFD93D"/>'
+   + '<circle cx="12" cy="15" r="3" fill="#2d3436"/><circle cx="28" cy="15" r="3" fill="#2d3436"/>'
+   + '<ellipse cx="20" cy="24" rx="4" ry="2.5" fill="#FF9F43"/>'
+   + '<circle cx="8" cy="6" r="7" fill="#FFD93D"/><circle cx="32" cy="6" r="7" fill="#FFD93D"/></g>';
+}
+
+/* ---------- CHILD BED (v1 look, no pillow, seated) ---------- */
+function bedBack(d){
+  var matTop=sitLine(d)-2;
+  return ''
+   + '<rect x="4" y="'+(matTop+16)+'" width="192" height="'+(260-(matTop+16))+'" rx="12" fill="#3f63b8"/>'
+   + '<rect x="8" y="'+matTop+'" width="184" height="22" rx="10" fill="#eef4fd"/>'
+   + '<rect x="2" y="'+(matTop-8)+'" width="9" height="36" rx="4" fill="#5B86E5"/>'
+   + '<rect x="189" y="'+(matTop-8)+'" width="9" height="36" rx="4" fill="#5B86E5"/>';
+}
+function bedBlanket(d){
+  var top=(sitLine(d)-2)+10;
+  return ''
+   + '<rect x="10" y="'+top+'" width="180" height="'+(260-top)+'" rx="12" fill="#6e93de"/>'
+   + '<rect x="10" y="'+top+'" width="180" height="10" rx="5" fill="#a9c2ee"/>';
+}
+
+/* ---------- CRIB (v2, approved) ---------- */
+function cribBack(d){
+  var s=sitLine(d);
+  var topY=d.headY-14;
+  var slats='';
+  for(var x=24;x<=176;x+=16){ slats += '<rect x="'+x+'" y="'+(topY+8)+'" width="3" height="'+((s-10)-(topY+8))+'" rx="1.5" fill="#5B86E5" opacity="0.5"/>'; }
+  return ''
+   + '<rect x="6" y="'+(s-4)+'" width="188" height="'+(260-(s-4))+'" rx="12" fill="#3f63b8"/>'
+   + '<rect x="10" y="'+(s-8)+'" width="180" height="16" rx="8" fill="#eef4fd"/>'
+   + slats
+   + '<rect x="8" y="'+topY+'" width="184" height="8" rx="4" fill="#5B86E5"/>'
+   + '<rect x="6" y="'+topY+'" width="9" height="'+((s+12)-topY)+'" rx="4" fill="#5B86E5"/>'
+   + '<rect x="185" y="'+topY+'" width="9" height="'+((s+12)-topY)+'" rx="4" fill="#5B86E5"/>'
+   + '<circle cx="10.5" cy="'+topY+'" r="6" fill="#6f97e8"/>'
+   + '<circle cx="189.5" cy="'+topY+'" r="6" fill="#6f97e8"/>';
+}
+function cribBlanket(d){
+  var top=Math.round(d.bodyY + d.bodyH*0.55);
+  return ''
+   + '<rect x="9" y="'+top+'" width="182" height="'+(260-top)+'" rx="12" fill="#6e93de"/>'
+   + '<rect x="9" y="'+top+'" width="182" height="10" rx="5" fill="#a9c2ee"/>';
+}
+function cribFront(d){
+  var s=sitLine(d);
+  var railY=s+16;
+  var sl='';
+  for(var x=26;x<=174;x+=18){ sl += '<rect x="'+x+'" y="'+(railY+6)+'" width="3" height="26" rx="1.5" fill="#7ba0ec"/>'; }
+  return '<rect x="8" y="'+railY+'" width="184" height="7" rx="3" fill="#7ba0ec"/>' + sl;
+}
+
+/* ---------- IV + TEDDY (v2) ---------- */
+function ivProposed(d){
+  var poleX=181, bagTop=34, bagX=poleX-22;
+  var dripCx=poleX-12, dripTop=bagTop+36, dripBot=dripTop+10;
+  var insX=d.bodyX+d.bodyW+7, insY=d.bodyY+14;
+  return ''
+   + '<rect x="'+(poleX-1)+'" y="30" width="4" height="222" rx="2" fill="#b8c2cf"/>'
+   + '<rect x="'+(poleX-9)+'" y="248" width="20" height="5" rx="2" fill="#9aa5b1"/>'
+   + '<path d="M'+(poleX+1)+' 30 q0 -8 -10 -8" fill="none" stroke="#b8c2cf" stroke-width="3"/>'
+   + '<rect x="'+bagX+'" y="'+bagTop+'" width="20" height="34" rx="5" fill="#e8f2fd" stroke="#9bb8de" stroke-width="1"/>'
+   + '<rect x="'+(bagX+2)+'" y="'+(bagTop+13)+'" width="16" height="19" rx="3" fill="#bcd8f5"/>'
+   + '<rect x="'+(bagX+7)+'" y="'+(bagTop-4)+'" width="6" height="6" rx="1" fill="#9bb8de"/>'
+   + '<rect x="'+(dripCx-3)+'" y="'+dripTop+'" width="6" height="10" rx="2" fill="#eaf3fd" stroke="#9bb8de" stroke-width="0.8"/>'
+   + '<circle cx="'+dripCx+'" cy="'+(dripTop+5)+'" r="1.2" fill="#74b9ff"/>'
+   + '<path d="M'+dripCx+' '+dripBot+' C '+(dripCx-8)+' '+(dripBot+55)+', '+(insX+44)+' '+(insY-26)+', '+insX+' '+insY+'" fill="none" stroke="#9bb8de" stroke-width="1.8"/>'
+   + '<rect x="'+(insX-4)+'" y="'+(insY-4)+'" width="10" height="8" rx="2" fill="#ffffff" opacity="0.92" stroke="#cdd8e6" stroke-width="0.6"/>'
+   + '<line x1="'+(insX+5)+'" y1="'+insY+'" x2="'+(insX-4)+'" y2="'+insY+'" stroke="#9bb8de" stroke-width="1.4"/>';
+}
+function teddyProposed(d){
+  var ty=sitLine(d)-43;
+  return '<g transform="translate(120,'+ty+')">'
+   + '<ellipse cx="20" cy="27" rx="13" ry="14" fill="#d9a45b"/>'
+   + '<ellipse cx="13" cy="39" rx="5" ry="4" fill="#cf9850"/><ellipse cx="27" cy="39" rx="5" ry="4" fill="#cf9850"/>'
+   + '<ellipse cx="8" cy="25" rx="4.5" ry="6" fill="#cf9850"/><ellipse cx="32" cy="25" rx="4.5" ry="6" fill="#cf9850"/>'
+   + '<circle cx="20" cy="10" r="10" fill="#d9a45b"/>'
+   + '<circle cx="12" cy="3" r="4" fill="#d9a45b"/><circle cx="28" cy="3" r="4" fill="#d9a45b"/>'
+   + '<circle cx="12" cy="3" r="2" fill="#cf9850"/><circle cx="28" cy="3" r="2" fill="#cf9850"/>'
+   + '<ellipse cx="20" cy="13" rx="5" ry="4" fill="#f0d2a0"/>'
+   + '<circle cx="20" cy="12" r="1.6" fill="#5b3d2e"/>'
+   + '<circle cx="16" cy="8" r="1.6" fill="#2d3436"/><circle cx="24" cy="8" r="1.6" fill="#2d3436"/>'
+   + '</g>';
+}
+
+function svg(inner){ return '<svg viewBox="0 0 200 260">'+inner+'</svg>'; }
+
+function sceneChildCurrent(){ var d=dims('child'); return svg( bedCurrent() + patient(d) + ivCurrent(d) + teddyCurrent() ); }
+function sceneChildProposed(){ var d=dims('child'); return svg( bedBack(d) + patient(d) + bedBlanket(d) + teddyProposed(d) + ivProposed(d) ); }
+function sceneInfantCurrent(){ var d=dims('infant'); return svg( bedCurrent() + patient(d) + ivCurrent(d) + teddyCurrent() ); }
+function sceneInfantProposed(){ var d=dims('infant'); return svg( cribBack(d) + patient(d) + cribBlanket(d) + cribFront(d) + teddyProposed(d) + ivProposed(d) ); }
+
+function card(cls,title,inner){ return '<div class="card '+cls+'"><h2>'+title+'</h2>'+inner+'</div>'; }
+
+document.getElementById('row-child').innerHTML =
+  card('cur','Child — current', sceneChildCurrent()) +
+  card('pro','Child — proposed (v1 bed)', sceneChildProposed());
+document.getElementById('row-infant').innerHTML =
+  card('cur','Infant — current (no crib)', sceneInfantCurrent()) +
+  card('pro','Infant — proposed (crib)', sceneInfantProposed());
+</script>
+</body>
+</html>

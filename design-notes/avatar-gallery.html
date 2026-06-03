@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Avatar galleries</title>
+<style>
+  body{margin:0;background:#0a0e1a;color:#e8eefb;font-family:-apple-system,Segoe UI,Roboto,sans-serif}
+  header{padding:14px 20px;border-bottom:1px solid rgba(255,255,255,.1)}
+  h1{font-size:16px;margin:0 0 4px}
+  p{margin:0;color:#9fb0d0;font-size:12px}
+  .tabs{display:flex;gap:8px;padding:10px 20px}
+  .tabs button{background:#1a1a3e;color:#cfe0ff;border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer}
+  .tabs button.active{background:#4ECDC4;color:#06231f;border-color:#4ECDC4}
+  iframe{width:100%;height:calc(100vh - 120px);border:0;background:#0a0e1a;display:none}
+  iframe.active{display:block}
+</style>
+</head>
+<body>
+<header>
+  <h1>Block Ward — patient avatar galleries</h1>
+  <p>Server-rendered straight from the real PatientSVG component. Use the tabs to switch views.</p>
+</header>
+<div class="tabs">
+  <button id="t-acc" class="active" onclick="show('acc')">Accessories (across ages/genders)</button>
+  <button id="t-all" onclick="show('all')">Full set (ages · status · recovery · hair)</button>
+</div>
+<iframe id="f-acc" class="active" src="http://localhost:3000/design-notes/avatar-accessories-preview.html"></iframe>
+<iframe id="f-all" src="http://localhost:3000/design-notes/avatar-final-preview.html"></iframe>
+<script>
+function show(which){
+  var a=which==='acc';
+  document.getElementById('f-acc').className=a?'active':'';
+  document.getElementById('f-all').className=a?'':'active';
+  document.getElementById('t-acc').className=a?'active':'';
+  document.getElementById('t-all').className=a?'':'active';
+}
+</script>
+</body>
+</html>

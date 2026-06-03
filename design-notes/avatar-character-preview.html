@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>PatientSVG — character redesign options</title>
+<style>
+  body{margin:0;background:#0a0e1a;color:#e8eefb;font-family:-apple-system,Segoe UI,Roboto,sans-serif;padding:24px}
+  h1{font-size:20px;font-weight:800;margin:0 0 4px}
+  p.sub{color:#9fb0d0;font-size:13px;margin:0 0 22px;max-width:820px;line-height:1.5}
+  .row{display:flex;flex-wrap:wrap;gap:20px;margin-bottom:26px}
+  .card{background:linear-gradient(135deg,#0d1430,#1a1a3e);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:14px;width:200px;box-shadow:0 6px 20px rgba(0,0,0,0.35)}
+  .card h2{font-size:12px;font-weight:700;letter-spacing:.5px;margin:0 0 8px}
+  .cur h2{color:#ff9a9f}
+  .a h2{color:#55efc4}
+  .b h2{color:#74b9ff}
+  .card svg{width:170px;height:210px;display:block;margin:0 auto}
+  .legend{color:#9fb0d0;font-size:12px;line-height:1.6;max-width:820px;border-top:1px solid rgba(255,255,255,0.08);padding-top:14px}
+  .legend b{color:#e8eefb}
+</style>
+</head>
+<body>
+<h1>PatientSVG — character redesign options</h1>
+<p class="sub">Character shown on its own (no bed/IV/teddy) so the figure itself is the focus. <b style="color:#ff9a9f">Current</b> vs <b style="color:#55efc4">Option A (refined)</b> vs <b style="color:#74b9ff">Option B (gowned)</b>. Row 2 shows Option A across ages. All status cues (pallor, dusky/cyanotic lips, eyes-closed when critical) and accessory overlays (hives, casts, mask, c-collar…) still layer on top of whichever base you pick.</p>
+
+<div class="row" id="row1"></div>
+<div class="row" id="row2"></div>
+
+<div class="legend">
+<b>Option A — refined (recommended):</b> rounder head, short neck, ears, eyebrows + nose, hands on the arms, fuller hair. Torso stays skin, so pallor/mottling/cyanosis keep working as-is. Low risk.<br/>
+<b>Option B — gowned:</b> hospital gown (V-neck, sleeves, ties) + hands; face and hands carry the skin/status color. More polished, but the torso skin is covered — mottling/pallor cues would need to move to face/hands/legs (more rework).
+</div>
+
+<script>
+function dims(age){
+  if(age==='infant') return {headW:60,headH:55,headX:30,headY:62,headRx:18,bodyW:50,bodyH:30,bodyX:35,bodyY:115,eyeR:5};
+  if(age==='toddler')return {headW:56,headH:52,headX:32,headY:55,headRx:16,bodyW:54,bodyH:34,bodyX:33,bodyY:108,eyeR:5};
+  if(age==='teen')   return {headW:50,headH:50,headX:35,headY:42,headRx:14,bodyW:65,bodyH:45,bodyX:28,bodyY:90,eyeR:4.5};
+  return {headW:52,headH:48,headX:34,headY:48,headRx:15,bodyW:58,bodyH:38,bodyX:31,bodyY:94,eyeR:4.5}; // child
+}
+var SK='#ffcc99', EB='#e0b878', CH='#ff9999', HAIR='#b8860b', GOWN='#7ec8c0', GOWN2='#69b6ad';
+
+function faceCommon(d,withBrowsNose){
+  var eyeY=d.headY+d.headH*0.45, eyeLX=d.headX+d.headW*0.30, eyeRX=d.headX+d.headW*0.70;
+  var mY=d.headY+d.headH*0.74, mX=d.headX+d.headW*0.5;
+  var cx=d.headX+d.headW/2;
+  var s=''
+   + '<circle cx="'+(d.headX+d.headW*0.20)+'" cy="'+(eyeY+5)+'" r="'+(d.eyeR+1)+'" fill="'+CH+'" opacity="0.4"/>'
+   + '<circle cx="'+(d.headX+d.headW*0.80)+'" cy="'+(eyeY+5)+'" r="'+(d.eyeR+1)+'" fill="'+CH+'" opacity="0.4"/>'
+   + '<circle cx="'+eyeLX+'" cy="'+eyeY+'" r="'+d.eyeR+'" fill="#fff"/><circle cx="'+eyeRX+'" cy="'+eyeY+'" r="'+d.eyeR+'" fill="#fff"/>'
+   + '<circle cx="'+(eyeLX+1)+'" cy="'+eyeY+'" r="'+(d.eyeR*0.6)+'" fill="#2d3436"/><circle cx="'+(eyeRX+1)+'" cy="'+eyeY+'" r="'+(d.eyeR*0.6)+'" fill="#2d3436"/>'
+   + '<circle cx="'+(eyeLX+1.5)+'" cy="'+(eyeY-1)+'" r="1" fill="#fff"/><circle cx="'+(eyeRX+1.5)+'" cy="'+(eyeY-1)+'" r="1" fill="#fff"/>';
+  if(withBrowsNose){
+    s += '<path d="M'+(eyeLX-5)+' '+(eyeY-7)+' Q'+eyeLX+' '+(eyeY-9)+' '+(eyeLX+5)+' '+(eyeY-7)+'" fill="none" stroke="#8a6a3a" stroke-width="1.4" stroke-linecap="round"/>'
+       + '<path d="M'+(eyeRX-5)+' '+(eyeY-7)+' Q'+eyeRX+' '+(eyeY-9)+' '+(eyeRX+5)+' '+(eyeY-7)+'" fill="none" stroke="#8a6a3a" stroke-width="1.4" stroke-linecap="round"/>'
+       + '<path d="M'+(cx-2)+' '+(eyeY+9)+' Q'+cx+' '+(eyeY+12)+' '+(cx+2)+' '+(eyeY+9)+'" fill="none" stroke="#d3a06f" stroke-width="1.3" stroke-linecap="round"/>';
+  }
+  s += '<path d="M'+(mX-7)+' '+mY+' Q'+mX+' '+(mY+6)+' '+(mX+7)+' '+mY+'" fill="none" stroke="#c08060" stroke-width="1.5" stroke-linecap="round"/>';
+  return s;
+}
+function hairCap(d){
+  var cx=d.headX+d.headW/2;
+  return '<path d="M'+(d.headX+1)+' '+(d.headY+d.headH*0.34)+' Q'+cx+' '+(d.headY-10)+' '+(d.headX+d.headW-1)+' '+(d.headY+d.headH*0.34)
+       + ' Q'+cx+' '+(d.headY+d.headH*0.12)+' '+(d.headX+1)+' '+(d.headY+d.headH*0.34)+' Z" fill="'+HAIR+'"/>';
+}
+
+/* ---------- CURRENT ---------- */
+function avatarCurrent(d){
+  var armLX=d.bodyX-8, armRX=d.bodyX+d.bodyW+2, armY=d.bodyY+4;
+  var eyeY=d.headY+d.headH*0.45, eyeLX=d.headX+d.headW*0.28, eyeRX=d.headX+d.headW*0.72;
+  var mY=d.headY+d.headH*0.72, mX=d.headX+d.headW*0.5;
+  return ''
+   + '<rect x="'+d.bodyX+'" y="'+d.bodyY+'" width="'+d.bodyW+'" height="'+d.bodyH+'" rx="10" fill="'+SK+'"/>'
+   + '<rect x="'+(d.bodyX+2)+'" y="'+(d.bodyY+2)+'" width="'+(d.bodyW-4)+'" height="'+(d.bodyH-4)+'" rx="8" fill="#E8F0FE" opacity="0.4"/>'
+   + '<rect x="'+armLX+'" y="'+armY+'" width="10" height="20" rx="4" fill="'+SK+'"/>'
+   + '<rect x="'+armRX+'" y="'+armY+'" width="10" height="20" rx="4" fill="'+SK+'"/>'
+   + '<rect x="'+d.headX+'" y="'+d.headY+'" width="'+d.headW+'" height="'+d.headH+'" rx="'+d.headRx+'" fill="'+SK+'" stroke="'+EB+'" stroke-width="0.8"/>'
+   + '<rect x="'+(d.headX+2)+'" y="'+(d.headY-2)+'" width="'+(d.headW-4)+'" height="'+(d.headH*0.3)+'" rx="'+(d.headRx-2)+'" fill="'+HAIR+'" opacity="0.85"/>'
+   + '<circle cx="'+(d.headX+d.headW*0.2)+'" cy="'+(d.headY+d.headH*0.65)+'" r="5" fill="'+CH+'" opacity="0.4"/>'
+   + '<circle cx="'+(d.headX+d.headW*0.8)+'" cy="'+(d.headY+d.headH*0.65)+'" r="5" fill="'+CH+'" opacity="0.4"/>'
+   + '<circle cx="'+eyeLX+'" cy="'+eyeY+'" r="'+d.eyeR+'" fill="#fff"/><circle cx="'+eyeRX+'" cy="'+eyeY+'" r="'+d.eyeR+'" fill="#fff"/>'
+   + '<circle cx="'+(eyeLX+1)+'" cy="'+eyeY+'" r="'+(d.eyeR*0.6)+'" fill="#2d3436"/><circle cx="'+(eyeRX+1)+'" cy="'+eyeY+'" r="'+(d.eyeR*0.6)+'" fill="#2d3436"/>'
+   + '<path d="M'+(mX-7)+' '+mY+' Q'+mX+' '+(mY+6)+' '+(mX+7)+' '+mY+'" fill="none" stroke="#c08060" stroke-width="1.5"/>';
+}
+
+/* ---------- OPTION A — refined (torso stays skin) ---------- */
+function avatarRefined(d){
+  var cx=d.headX+d.headW/2, cy=d.headY+d.headH/2;
+  var armLX=d.bodyX-8, armRX=d.bodyX+d.bodyW+2, armY=d.bodyY+4;
+  var eyeY=d.headY+d.headH*0.45;
+  return ''
+   // neck
+   + '<rect x="'+(cx-7)+'" y="'+(d.headY+d.headH-8)+'" width="14" height="14" rx="5" fill="'+SK+'"/>'
+   // torso (skin) + soft gown collar hint
+   + '<rect x="'+d.bodyX+'" y="'+d.bodyY+'" width="'+d.bodyW+'" height="'+d.bodyH+'" rx="13" fill="'+SK+'"/>'
+   + '<path d="M'+(cx-10)+' '+d.bodyY+' L'+cx+' '+(d.bodyY+9)+' L'+(cx+10)+' '+d.bodyY+'" fill="none" stroke="#eab87f" stroke-width="1.4"/>'
+   // arms + hands
+   + '<rect x="'+armLX+'" y="'+armY+'" width="10" height="18" rx="5" fill="'+SK+'"/>'
+   + '<rect x="'+armRX+'" y="'+armY+'" width="10" height="18" rx="5" fill="'+SK+'"/>'
+   + '<circle cx="'+(armLX+5)+'" cy="'+(armY+19)+'" r="5" fill="'+SK+'"/>'
+   + '<circle cx="'+(armRX+5)+'" cy="'+(armY+19)+'" r="5" fill="'+SK+'"/>'
+   // ears
+   + '<ellipse cx="'+d.headX+'" cy="'+eyeY+'" rx="3.5" ry="5" fill="'+SK+'" stroke="'+EB+'" stroke-width="0.6"/>'
+   + '<ellipse cx="'+(d.headX+d.headW)+'" cy="'+eyeY+'" rx="3.5" ry="5" fill="'+SK+'" stroke="'+EB+'" stroke-width="0.6"/>'
+   // round head
+   + '<ellipse cx="'+cx+'" cy="'+cy+'" rx="'+(d.headW/2)+'" ry="'+(d.headH/2)+'" fill="'+SK+'" stroke="'+EB+'" stroke-width="0.8"/>'
+   + hairCap(d)
+   + faceCommon(d,true);
+}
+
+/* ---------- OPTION B — gowned ---------- */
+function avatarGowned(d){
+  var cx=d.headX+d.headW/2, cy=d.headY+d.headH/2;
+  var armLX=d.bodyX-8, armRX=d.bodyX+d.bodyW+2, armY=d.bodyY+4;
+  var eyeY=d.headY+d.headH*0.45;
+  var gx=d.bodyX-3, gw=d.bodyW+6;  // gown a touch wider than torso
+  return ''
+   + '<rect x="'+(cx-7)+'" y="'+(d.headY+d.headH-8)+'" width="14" height="14" rx="5" fill="'+SK+'"/>'
+   // gown body (trapezoid-ish via wide rounded rect)
+   + '<path d="M'+(gx+6)+' '+d.bodyY+' L'+(gx+gw-6)+' '+d.bodyY+' L'+(gx+gw)+' '+(d.bodyY+d.bodyH)+' L'+gx+' '+(d.bodyY+d.bodyH)+' Z" rx="10" fill="'+GOWN+'"/>'
+   + '<rect x="'+gx+'" y="'+(d.bodyY+d.bodyH-6)+'" width="'+gw+'" height="8" rx="4" fill="'+GOWN2+'"/>'
+   // V-neck
+   + '<path d="M'+(cx-11)+' '+d.bodyY+' L'+cx+' '+(d.bodyY+11)+' L'+(cx+11)+' '+d.bodyY+'" fill="'+SK+'" stroke="'+GOWN2+'" stroke-width="1"/>'
+   // gown ties
+   + '<circle cx="'+(cx-7)+'" cy="'+(d.bodyY+d.bodyH*0.55)+'" r="1.6" fill="'+GOWN2+'"/>'
+   + '<circle cx="'+(cx+7)+'" cy="'+(d.bodyY+d.bodyH*0.55)+'" r="1.6" fill="'+GOWN2+'"/>'
+   // short sleeves (gown) over upper arm, then skin forearm + hand
+   + '<rect x="'+(armLX-1)+'" y="'+(armY-1)+'" width="12" height="9" rx="4" fill="'+GOWN+'"/>'
+   + '<rect x="'+(armRX-1)+'" y="'+(armY-1)+'" width="12" height="9" rx="4" fill="'+GOWN+'"/>'
+   + '<rect x="'+armLX+'" y="'+(armY+8)+'" width="10" height="11" rx="5" fill="'+SK+'"/>'
+   + '<rect x="'+armRX+'" y="'+(armY+8)+'" width="10" height="11" rx="5" fill="'+SK+'"/>'
+   + '<circle cx="'+(armLX+5)+'" cy="'+(armY+19)+'" r="5" fill="'+SK+'"/>'
+   + '<circle cx="'+(armRX+5)+'" cy="'+(armY+19)+'" r="5" fill="'+SK+'"/>'
+   + '<ellipse cx="'+d.headX+'" cy="'+eyeY+'" rx="3.5" ry="5" fill="'+SK+'" stroke="'+EB+'" stroke-width="0.6"/>'
+   + '<ellipse cx="'+(d.headX+d.headW)+'" cy="'+eyeY+'" rx="3.5" ry="5" fill="'+SK+'" stroke="'+EB+'" stroke-width="0.6"/>'
+   + '<ellipse cx="'+cx+'" cy="'+cy+'" rx="'+(d.headW/2)+'" ry="'+(d.headH/2)+'" fill="'+SK+'" stroke="'+EB+'" stroke-width="0.8"/>'
+   + hairCap(d)
+   + faceCommon(d,true);
+}
+
+function svg(inner){ return '<svg viewBox="0 0 200 210">'+inner+'</svg>'; }
+function card(cls,title,inner){ return '<div class="card '+cls+'"><h2>'+title+'</h2>'+svg(inner)+'</div>'; }
+
+document.getElementById('row1').innerHTML =
+  card('cur','Child — current', avatarCurrent(dims('child'))) +
+  card('a','Child — Option A (refined)', avatarRefined(dims('child'))) +
+  card('b','Child — Option B (gowned)', avatarGowned(dims('child')));
+document.getElementById('row2').innerHTML =
+  card('a','Infant — Option A', avatarRefined(dims('infant'))) +
+  card('a','Toddler — Option A', avatarRefined(dims('toddler'))) +
+  card('a','Teen — Option A', avatarRefined(dims('teen')));
+</script>
+</body>
+</html>

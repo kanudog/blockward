@@ -9,1697 +9,1838 @@
 // collections during the one-shot Phase 5.4.3a built-in rewrite.
 
 export var SC1 = {
-  id: "fussy-infant",
-  source: "builtin",
-  title: "The Fussy Infant",
-  tier: 1,
-  icon: "👶",
-  tagline: "6-month-old - Fussiness and Fever",
-  description: "A 6-month-old male brought in for increasing fussiness and fever.",
-  patient: {
-    ageLabel: "6 months",
-    weightKg: 7.5,
-    sex: "Male",
-    cc: "Fussiness and fever x 12 hours",
-    history: "Previously healthy. Decreased oral intake, fewer wet diapers today. No sick contacts. Immunizations up to date. Born full-term, no NICU stay."
+  "id": "fussy-infant",
+  "source": "builtin",
+  "schemaVersion": "5.4.1",
+  "title": "The Fussy Infant",
+  "tier": 1,
+  "icon": "👶",
+  "tagline": "6-month-old - Fussiness and Fever",
+  "description": "A 6-month-old male brought in for increasing fussiness and fever.",
+  "visuals": [
+    "flushed"
+  ],
+  "patient": {
+    "ageLabel": "6 months",
+    "weightKg": 7.5,
+    "sex": "Male",
+    "cc": "Fussiness and fever x 12 hours",
+    "history": "Previously healthy. Decreased oral intake, fewer wet diapers today. No sick contacts. Immunizations up to date. Born full-term, no NICU stay."
   },
-  emsReport: "EMS brought in a 6-month-old male for a 12-hour history of fever and fussiness. Mother reports two episodes of non-bloody emesis and decreased wet diapers. Acetaminophen was given approximately one hour ago. Field vitals showed HR 175 and rectal temp 39.1C. EMS established a 22g IV in the left hand with NS KVO.",
-  learnMore: "Fever in infants under 3 months is treated urgently because of the risk of occult bacteremia and serious bacterial illness. Between 3-6 months, fever workup is guided by clinical appearance, immunization status, and focal findings. At 6 months, a well-appearing infant with a clear viral source may not need a full septic workup, but fussiness, feeding changes, and dehydration are red flags for deeper investigation.",
-  norms: {
-    hr: [
+  "emsReport": "EMS brought in a 6-month-old male for a 12-hour history of fever and fussiness. Mother reports two episodes of non-bloody emesis and decreased wet diapers. Acetaminophen was given approximately one hour ago. Field vitals showed HR 175 and rectal temp 39.1C. EMS established a 22g IV in the left hand with NS KVO.",
+  "learnMore": "Fever in infants under 3 months is treated urgently because of the risk of occult bacteremia and serious bacterial illness. Between 3-6 months, fever workup is guided by clinical appearance, immunization status, and focal findings. At 6 months, a well-appearing infant with a clear viral source may not need a full septic workup, but fussiness, feeding changes, and dehydration are red flags for deeper investigation.",
+  "norms": {
+    "hr": [
       100,
       160
     ],
-    rr: [
+    "rr": [
       25,
       40
     ],
-    sbp: [
+    "sbp": [
       70,
       90
     ],
-    dbp: [
+    "dbp": [
       40,
       60
     ],
-    spo2: [
+    "spo2": [
       95,
       100
     ],
-    temp: [
+    "temp": [
       36.5,
       37.5
     ]
   },
-  phases: [
+  "phases": [
     {
-      id: "triage",
-      name: "Triage",
-      narrative: "EMS delivers a six-month-old male with a 12-hour history of fever and fussiness. He is previously healthy with no significant past medical history and immunizations are up to date. His mother reports two episodes of non-bloody emesis and decreased wet diapers since this morning. She administered acetaminophen approximately one hour ago. EMS established a 22-gauge IV in the left hand with a normal saline keep-open drip. Field vitals showed a heart rate of 175 and a rectal temperature of 39.1 degrees Celsius. On your initial assessment, the infant appears flushed and warm but is alert and consolable with a pacifier.",
-      vitals: {
-        hr: {
-          id: "hr",
-          label: "HR",
-          value: "178",
-          unit: "bpm",
-          bad: true,
-          _slotRef: "phase[0].vitals.hr.why",
-          why: "Elevated (normal 100-160) but proportional to fever. ~10 bpm per 1C above normal. Infants are rate-dependent for cardiac output."
-        },
-        rr: {
-          id: "rr",
-          label: "RR",
-          value: "42",
-          unit: "/min",
-          bad: true,
-          _slotRef: "phase[0].vitals.rr.why",
-          why: "Mildly elevated (normal 25-40). Fever increases CO2 production driving ventilatory rate up."
-        },
-        sbp: {
-          id: "sbp",
-          label: "BP",
-          value: "72",
-          unit: "mmHg",
-          bad: false,
-          _slotRef: "phase[0].vitals.sbp.why",
-          why: "Normal for age. Maintained BP does NOT rule out early shock - children vasoconstrict aggressively."
-        },
-        dbp: {
-          id: "dbp",
-          label: "BP",
-          value: "45",
-          unit: "mmHg",
-          bad: false,
-          _slotRef: "phase[0].vitals.dbp.why",
-          why: null
-        },
-        spo2: {
-          id: "spo2",
-          label: "SpO2",
-          value: "98",
-          unit: "%",
-          bad: false,
-          _slotRef: "phase[0].vitals.spo2.why",
-          why: "Normal. Fetal hemoglobin shifts curve LEFT so sats stay high."
-        },
-        temp: {
-          id: "temp",
-          label: "Temp",
-          value: "39.2",
-          unit: "C",
-          bad: true,
-          _slotRef: "phase[0].vitals.temp.why",
-          why: "Febrile. Needs workup for UTI, bacteremia, meningitis at 6 months."
-        },
-        cap: {
-          id: "cap",
-          label: "Cap Refill",
-          value: "2.5",
-          unit: "sec",
-          bad: false,
-          _slotRef: "phase[0].vitals.cap.why",
-          why: "Borderline (normal < 3s). Worth trending - earliest shock marker."
-        }
-      },
-      signs: [
+      "phaseIndex": 0,
+      "id": "assess",
+      "stageType": "assess",
+      "title": "Triage",
+      "narrative": "EMS delivers a six-month-old male with a 12-hour history of fever and fussiness. He is previously healthy with no significant past medical history and immunizations are up to date. His mother reports two episodes of non-bloody emesis and decreased wet diapers since this morning. She administered acetaminophen approximately one hour ago. EMS established a 22-gauge IV in the left hand with a normal saline keep-open drip. Field vitals showed a heart rate of 175 and a rectal temperature of 39.1 degrees Celsius. On your initial assessment, the infant appears flushed and warm but is alert and consolable with a pacifier.",
+      "vitals": [
         {
-          id: "skin",
-          label: "Skin",
-          finding: "Flushed, warm, generalized erythema",
-          pos: "body",
-          sys: "Integumentary",
-          bad: false,
-          why: "Fever-induced cutaneous vasodilation carries heat to the skin surface for radiative cooling. Pyrogens reset the hypothalamic set point; the body compensates with peripheral dilation and sweating. Warm, pink, dry skin with fever suggests early warm septic shock - distinct from the cold, mottled skin of late decompensated shock.",
-          _slotRef: "phase[0].signs.skin.why"
+          "id": "hr",
+          "label": "HR",
+          "value": "178",
+          "unit": "bpm",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[0].vitals.hr.why",
+          "why": "Elevated (normal 100-160) but proportional to fever. ~10 bpm per 1C above normal. Infants are rate-dependent for cardiac output."
         },
         {
-          id: "fontanelle",
-          label: "Fontanelle",
-          finding: "Flat and soft",
-          pos: "head",
-          sys: "Neuro",
-          bad: false,
-          why: "A flat, soft anterior fontanelle in a febrile infant is a quick negative check for two dangerous possibilities: a bulging fontanelle would suggest meningitis or raised ICP, while a sunken fontanelle would suggest significant dehydration. Flat and soft means neither is currently present, but does not rule them out on re-assessment.",
-          _slotRef: "phase[0].signs.fontanelle.why"
+          "id": "rr",
+          "label": "RR",
+          "value": "42",
+          "unit": "/min",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[0].vitals.rr.why",
+          "why": "Mildly elevated (normal 25-40). Fever increases CO2 production driving ventilatory rate up."
         },
         {
-          id: "mucous-membranes",
-          label: "Mucous membranes",
-          finding: "Moist",
-          pos: "face",
-          sys: "GI/Hydration",
-          bad: false,
-          _slotRef: "phase[0].signs.mucous-membranes.why"
+          "id": "bp",
+          "label": "BP",
+          "value": "72/45",
+          "unit": "mmHg",
+          "bad": false,
+          "cat": "vital",
+          "_slotRef": "phase[0].vitals.bp.why",
+          "why": "Normal for age. Maintained BP does NOT rule out early shock - children vasoconstrict aggressively."
         },
         {
-          id: "behavior",
-          label: "Behavior",
-          finding: "Irritable but consolable with pacifier",
-          pos: "head",
-          sys: "Neuro",
-          bad: false,
-          _slotRef: "phase[0].signs.behavior.why"
+          "id": "spo2",
+          "label": "SpO2",
+          "value": "98",
+          "unit": "%",
+          "bad": false,
+          "cat": "vital",
+          "_slotRef": "phase[0].vitals.spo2.why",
+          "why": "Normal. Fetal hemoglobin shifts curve LEFT so sats stay high."
         },
         {
-          id: "heart-sounds",
-          label: "Heart sounds",
-          finding: "Tachycardic, regular rhythm, no murmur, no gallop",
-          pos: "body",
-          sys: "Cardiovascular",
-          bad: false,
-          _slotRef: "phase[0].signs.heart-sounds.why"
+          "id": "temp",
+          "label": "Temp",
+          "value": "39.2",
+          "unit": "C",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[0].vitals.temp.why",
+          "why": "Febrile. Needs workup for UTI, bacteremia, meningitis at 6 months."
         },
         {
-          id: "lungs",
-          label: "Lungs",
-          finding: "Clear bilaterally, equal air entry, no crackles or wheeze",
-          pos: "body",
-          sys: "Respiratory",
-          bad: false,
-          _slotRef: "phase[0].signs.lungs.why"
+          "id": "cap",
+          "label": "Cap Refill",
+          "value": "2.5",
+          "unit": "sec",
+          "bad": false,
+          "cat": "vital",
+          "_slotRef": "phase[0].vitals.cap.why",
+          "why": "Borderline (normal < 3s). Worth trending - earliest shock marker."
         }
       ],
-      labs: [
+      "signs": [
         {
-          id: "wbc",
-          name: "WBC",
-          value: "18.2",
-          unit: "K/uL",
-          ref: "6.0-17.5",
-          critical: true,
-          bad: true,
-          why: "Leukocytosis with elevated WBC indicates the bone marrow is releasing white cells in response to infection. The body is mounting an immune response, producing and deploying neutrophils to fight the invading pathogen.",
-          _slotRef: "phase[0].labs.wbc.why"
+          "id": "skin",
+          "label": "Skin",
+          "finding": "Flushed, warm, generalized erythema",
+          "pos": "body",
+          "sys": "Integumentary",
+          "bad": false,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.skin.why",
+          "why": "Fever-induced cutaneous vasodilation carries heat to the skin surface for radiative cooling. Pyrogens reset the hypothalamic set point; the body compensates with peripheral dilation and sweating. Warm, pink, dry skin with fever suggests early warm septic shock - distinct from the cold, mottled skin of late decompensated shock."
         },
         {
-          id: "hgb",
-          name: "Hgb",
-          value: "11.8",
-          unit: "g/dL",
-          ref: "10.0-14.0",
-          critical: false,
-          bad: false,
-          _slotRef: "phase[0].labs.hgb.why"
+          "id": "fontanelle",
+          "label": "Fontanelle",
+          "finding": "Flat and soft",
+          "pos": "head",
+          "sys": "Neuro",
+          "bad": false,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.fontanelle.why",
+          "why": "A flat, soft anterior fontanelle in a febrile infant is a quick negative check for two dangerous possibilities: a bulging fontanelle would suggest meningitis or raised ICP, while a sunken fontanelle would suggest significant dehydration. Flat and soft means neither is currently present, but does not rule them out on re-assessment."
         },
         {
-          id: "platelets",
-          name: "Platelets",
-          value: "245",
-          unit: "K/uL",
-          ref: "150-400",
-          critical: false,
-          bad: false,
-          _slotRef: "phase[0].labs.platelets.why"
+          "id": "mucous-membranes",
+          "label": "Mucous membranes",
+          "finding": "Moist",
+          "pos": "face",
+          "sys": "GI/Hydration",
+          "bad": false,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.mucous-membranes.why",
+          "why": "Moist mucous membranes are a reassuring hydration check in a febrile infant with reported decreased intake.\n\n- **Moist membranes** argue against significant dehydration at this moment, even with fewer wet diapers reported\n- They do **not** rule out early shock — perfusion can fail while hydration still looks adequate\n- Re-examine after any deterioration; membranes dry out as volume status worsens"
         },
         {
-          id: "glucose",
-          name: "Glucose",
-          value: "72",
-          unit: "mg/dL",
-          ref: ">45",
-          critical: false,
-          bad: false,
-          why: "Normal (>45 mg/dL). Adequate for now, but must be trended in a febrile infant with poor intake. Glycogen stores can deplete rapidly.",
-          _slotRef: "phase[0].labs.glucose.why"
+          "id": "behavior",
+          "label": "Behavior",
+          "finding": "Irritable but consolable with pacifier",
+          "pos": "head",
+          "sys": "Neuro",
+          "bad": false,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.behavior.why",
+          "why": "Irritable but consolable is a reassuring neurologic sign in a febrile infant — a sick-but-not-toxic appearance.\n\n- **Consolability** means cortical function and the infant–caregiver response loop are intact\n- An inconsolable or lethargic, unconsolable infant is far more concerning for sepsis or meningitis\n- This is a baseline to trend — loss of consolability is an early red flag"
         },
         {
-          id: "na",
-          name: "Na+",
-          value: "138",
-          unit: "mEq/L",
-          ref: "135-145",
-          critical: false,
-          bad: false,
-          _slotRef: "phase[0].labs.na.why"
+          "id": "heart-sounds",
+          "label": "Heart sounds",
+          "finding": "Tachycardic, regular rhythm, no murmur, no gallop",
+          "pos": "body",
+          "sys": "Cardiovascular",
+          "bad": false,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.heart-sounds.why",
+          "why": "The tachycardia is the flagworthy element; the rhythm and absent murmur or gallop are reassuring against structural or rhythm disease.\n\n- **Tachycardia at 178** exceeds the infant range (100–160) and signals physiologic stress\n- **Regular rhythm** argues against a primary tachyarrhythmia like SVT\n- **No murmur or gallop** argues against structural disease or volume overload as the driver"
         },
         {
-          id: "lactate",
-          name: "Lactate",
-          value: "2.8",
-          unit: "mmol/L",
-          ref: "0.5-2.0",
-          critical: true,
-          bad: false,
-          why: "Mildly elevated. Lactate rises when tissues switch to anaerobic metabolism due to inadequate oxygen delivery. At 2.8, this suggests early tissue hypoperfusion. Trending this value is critical - a rising lactate confirms worsening shock.",
-          _slotRef: "phase[0].labs.lactate.why"
-        },
-        {
-          id: "crp",
-          name: "CRP",
-          value: "8.4",
-          unit: "mg/dL",
-          ref: "<0.5",
-          critical: true,
-          bad: false,
-          why: "Markedly elevated C-reactive protein. CRP is an acute-phase reactant produced by the liver in response to IL-6 from macrophages during infection. A value this high in a 6-month-old strongly suggests significant bacterial infection rather than a simple viral illness.",
-          _slotRef: "phase[0].labs.crp.why"
-        },
-        {
-          id: "bands",
-          name: "Bands",
-          value: "14%",
-          unit: "",
-          ref: "<5%",
-          critical: true,
-          bad: false,
-          why: "Bandemia (elevated band neutrophils) indicates a left shift - the bone marrow is releasing immature neutrophils into circulation because mature neutrophil demand exceeds supply. This is a hallmark of acute bacterial infection and suggests the immune system is under significant stress.",
-          _slotRef: "phase[0].labs.bands.why"
+          "id": "lungs",
+          "label": "Lungs",
+          "finding": "Clear bilaterally, equal air entry, no crackles or wheeze",
+          "pos": "body",
+          "sys": "Respiratory",
+          "bad": false,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.lungs.why",
+          "why": "Clear, equal breath sounds are a reassuring respiratory exam that helps localize the source away from the chest.\n\n- **Clear lungs** make pneumonia a less likely source for this fever, redirecting the workup\n- Equal air entry argues against a focal process or effusion\n- Tachypnea here is more likely fever-driven or a compensatory response than primary lung disease"
         }
       ],
-      tools: null,
-      meds: null,
-      actions: null
+      "labs": [
+        {
+          "id": "wbc",
+          "name": "WBC",
+          "value": "18.2",
+          "unit": "K/uL",
+          "ref": "6.0-17.5",
+          "bad": true,
+          "critical": true,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.wbc.why",
+          "why": "Leukocytosis with elevated WBC indicates the bone marrow is releasing white cells in response to infection. The body is mounting an immune response, producing and deploying neutrophils to fight the invading pathogen."
+        },
+        {
+          "id": "hgb",
+          "name": "Hgb",
+          "value": "11.8",
+          "unit": "g/dL",
+          "ref": "10.0-14.0",
+          "bad": false,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.hgb.why",
+          "why": "A normal hemoglobin is reassuring against anemia contributing to the picture and is a useful baseline before resuscitation.\n\n- **Hgb 11.8** is within the infant range and argues against blood loss or hemolysis as a driver\n- Establishes a baseline before fluid boluses, which will hemodilute later values\n- Normal oxygen-carrying capacity means hypoxia, if it develops, is a delivery problem, not a content problem"
+        },
+        {
+          "id": "platelets",
+          "name": "Platelets",
+          "value": "245",
+          "unit": "K/uL",
+          "ref": "150-400",
+          "bad": false,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.platelets.why",
+          "why": "A normal platelet count is reassuring early, but it must be trended — sepsis can consume platelets as it progresses.\n\n- **Platelets 245** is normal and argues against DIC or marrow suppression at this moment\n- Falling platelets is one of the earliest lab signs of evolving sepsis-associated coagulopathy\n- A normal value now does not exclude later consumption; recheck if the infant deteriorates"
+        },
+        {
+          "id": "glucose",
+          "name": "Glucose",
+          "value": "72",
+          "unit": "mg/dL",
+          "ref": ">45",
+          "bad": false,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.glucose.why",
+          "why": "Normal (>45 mg/dL). Adequate for now, but must be trended in a febrile infant with poor intake. Glycogen stores can deplete rapidly."
+        },
+        {
+          "id": "na",
+          "name": "Na+",
+          "value": "138",
+          "unit": "mEq/L",
+          "ref": "135-145",
+          "bad": false,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.na.why",
+          "why": "A normal sodium is reassuring against a significant electrolyte derangement as a seizure or altered-mental-status cause.\n\n- **Na 138** is mid-range and argues against hyponatremic or hypernatremic causes of irritability\n- Useful baseline before large-volume isotonic resuscitation shifts electrolytes\n- Normal sodium keeps the differential focused on infection rather than a primary metabolic derangement"
+        },
+        {
+          "id": "lactate",
+          "name": "Lactate",
+          "value": "2.8",
+          "unit": "mmol/L",
+          "ref": "0.5-2.0",
+          "bad": true,
+          "critical": true,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.lactate.why",
+          "why": "Mildly elevated. Lactate rises when tissues switch to anaerobic metabolism due to inadequate oxygen delivery. At 2.8, this suggests early tissue hypoperfusion. Trending this value is critical - a rising lactate confirms worsening shock."
+        },
+        {
+          "id": "crp",
+          "name": "CRP",
+          "value": "8.4",
+          "unit": "mg/dL",
+          "ref": "<0.5",
+          "bad": true,
+          "critical": true,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.crp.why",
+          "why": "Markedly elevated C-reactive protein. CRP is an acute-phase reactant produced by the liver in response to IL-6 from macrophages during infection. A value this high in a 6-month-old strongly suggests significant bacterial infection rather than a simple viral illness."
+        },
+        {
+          "id": "bands",
+          "name": "Bands",
+          "value": "14%",
+          "unit": "",
+          "ref": "<5%",
+          "bad": true,
+          "critical": true,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.bands.why",
+          "why": "Bandemia (elevated band neutrophils) indicates a left shift - the bone marrow is releasing immature neutrophils into circulation because mature neutrophil demand exceeds supply. This is a hallmark of acute bacterial infection and suggests the immune system is under significant stress."
+        }
+      ],
+      "actions": {
+        "tools": {},
+        "meds": {}
+      }
     },
     {
-      id: "escalation",
-      name: "Escalation",
-      narrative: "Twenty minutes after antipyretic administration, the infant's temperature has decreased to 39.0 degrees Celsius. However, his clinical appearance has deteriorated noticeably. He is no longer tracking faces or reaching for objects and responds only sluggishly to tactile stimulation. His extremities are cool to the touch despite persistent core fever, and you observe a new reticular mottling pattern across both lower extremities that was not present on initial assessment. The charge nurse passes the bedside, pauses, and states that the infant does not look right. Your reassessment confirms a significant change from baseline.",
-      vitals: {
-        hr: {
-          id: "hr",
-          label: "HR",
-          value: "192",
-          unit: "bpm",
-          bad: true,
-          _slotRef: "phase[1].vitals.hr.why",
-          why: "Temp DOWN but HR UP. Dissociation = compensatory tachycardia for septic shock, not fever."
-        },
-        rr: {
-          id: "rr",
-          label: "RR",
-          value: "52",
-          unit: "/min",
-          bad: true,
-          _slotRef: "phase[1].vitals.rr.why",
-          why: "Compensatory tachypnea for metabolic acidosis from anaerobic metabolism."
-        },
-        sbp: {
-          id: "sbp",
-          label: "BP",
-          value: "68",
-          unit: "mmHg",
-          bad: true,
-          _slotRef: "phase[1].vitals.sbp.why",
-          why: "Below normal. Hypotension is LATE. 25-30% volume lost. Decompensated shock."
-        },
-        dbp: {
-          id: "dbp",
-          label: "BP",
-          value: "40",
-          unit: "mmHg",
-          bad: false,
-          _slotRef: "phase[1].vitals.dbp.why",
-          why: null
-        },
-        spo2: {
-          id: "spo2",
-          label: "SpO2",
-          value: "97",
-          unit: "%",
-          bad: false,
-          _slotRef: "phase[1].vitals.spo2.why",
-          why: "Deceptive. Saturation not delivery. Poor CO means inadequate O2 delivery."
-        },
-        temp: {
-          id: "temp",
-          label: "Temp",
-          value: "39",
-          unit: "C",
-          bad: false,
-          _slotRef: "phase[1].vitals.temp.why",
-          why: null
-        },
-        cap: {
-          id: "cap",
-          label: "Cap Refill",
-          value: "4",
-          unit: "sec",
-          bad: true,
-          _slotRef: "phase[1].vitals.cap.why",
-          why: "Prolonged. Intense vasoconstriction and tissue ischemia."
-        }
-      },
-      signs: [
+      "phaseIndex": 1,
+      "id": "intervene",
+      "stageType": "intervene",
+      "title": "Escalation",
+      "narrative": "Twenty minutes after antipyretic administration, the infant's temperature has decreased to 39.0 degrees Celsius. However, his clinical appearance has deteriorated noticeably. He is no longer tracking faces or reaching for objects and responds only sluggishly to tactile stimulation. His extremities are cool to the touch despite persistent core fever, and you observe a new reticular mottling pattern across both lower extremities that was not present on initial assessment. The charge nurse passes the bedside, pauses, and states that the infant does not look right. Your reassessment confirms a significant change from baseline.",
+      "vitals": [
         {
-          id: "mottling",
-          label: "Mottling",
-          finding: "Reticular purplish pattern, bilateral lower extremities",
-          pos: "body",
-          sys: "Integumentary",
-          bad: false,
-          why: "Mottling reflects severe peripheral vasoconstriction as the body shunts blood from skin and muscle to preserve perfusion of vital organs. The reticular pattern appears when capillaries alternate between constriction and dilation under sympathetic overdrive. In a septic infant this is a late and ominous sign of decompensated shock.",
-          _slotRef: "phase[1].signs.mottling.why"
+          "id": "hr",
+          "label": "HR",
+          "value": "192",
+          "unit": "bpm",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[1].vitals.hr.why",
+          "why": "Temp DOWN but HR UP. Dissociation = compensatory tachycardia for septic shock, not fever."
         },
         {
-          id: "pulses",
-          label: "Pulses",
-          finding: "Weak and thready peripherally, central palpable",
-          pos: "body",
-          sys: "Cardiovascular",
-          bad: false,
-          why: "Preserved central pulses with weak peripheral pulses is the hallmark of compensated-to-decompensated shock transition. Stroke volume is dropping; the body prioritizes brain and heart at the expense of extremities. Loss of central pulses is imminent arrest.",
-          _slotRef: "phase[1].signs.pulses.why"
+          "id": "rr",
+          "label": "RR",
+          "value": "52",
+          "unit": "/min",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[1].vitals.rr.why",
+          "why": "Compensatory tachypnea for metabolic acidosis from anaerobic metabolism."
         },
         {
-          id: "mental-status",
-          label: "Mental status",
-          finding: "Sluggish to voice, not tracking faces",
-          pos: "head",
-          sys: "Neuro",
-          bad: false,
-          _slotRef: "phase[1].signs.mental-status.why"
+          "id": "bp",
+          "label": "BP",
+          "value": "68/40",
+          "unit": "mmHg",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[1].vitals.bp.why",
+          "why": "Below normal. Hypotension is LATE. 25-30% volume lost. Decompensated shock."
         },
         {
-          id: "extremities",
-          label: "Extremities",
-          finding: "Cool and clammy hands and feet",
-          pos: "body",
-          sys: "Cardiovascular",
-          bad: false,
-          why: "Cool clammy extremities with a febrile core signals cold septic shock. The sympathetic nervous system clamps down peripheral vessels to redirect flow centrally. Capillary refill lengthens, skin feels cold distal to warm proximal - this gradient marks the perfusion boundary.",
-          _slotRef: "phase[1].signs.extremities.why"
+          "id": "spo2",
+          "label": "SpO2",
+          "value": "97",
+          "unit": "%",
+          "bad": false,
+          "cat": "vital",
+          "_slotRef": "phase[1].vitals.spo2.why",
+          "why": "Deceptive. Saturation not delivery. Poor CO means inadequate O2 delivery."
         },
         {
-          id: "abdomen",
-          label: "Abdomen",
-          finding: "Soft, hypoactive bowel sounds",
-          pos: "body",
-          sys: "GI",
-          bad: false,
-          _slotRef: "phase[1].signs.abdomen.why"
+          "id": "temp",
+          "label": "Temp",
+          "value": "39",
+          "unit": "C",
+          "bad": false,
+          "cat": "vital",
+          "_slotRef": "phase[1].vitals.temp.why",
+          "why": null
         },
         {
-          id: "urine-output",
-          label: "Urine output",
-          finding: "One concentrated diaper in six hours",
-          pos: "body",
-          sys: "Renal",
-          bad: false,
-          _slotRef: "phase[1].signs.urine-output.why"
+          "id": "cap",
+          "label": "Cap Refill",
+          "value": "4",
+          "unit": "sec",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[1].vitals.cap.why",
+          "why": "Prolonged. Intense vasoconstriction and tissue ischemia."
         }
       ],
-      labs: [
+      "signs": [
         {
-          id: "wbc",
-          name: "WBC",
-          value: "22.4",
-          unit: "K/uL",
-          ref: "6.0-17.5",
-          critical: true,
-          bad: false,
-          why: "Rising from 18.2 - the infection is progressing and the bone marrow is working harder. Worsening leukocytosis in sepsis correlates with increasing bacterial burden and inflammatory response.",
-          _slotRef: "phase[1].labs.wbc.why"
+          "id": "mottling",
+          "label": "Mottling",
+          "finding": "Reticular purplish pattern, bilateral lower extremities",
+          "pos": "body",
+          "sys": "Integumentary",
+          "bad": false,
+          "cat": "clinical",
+          "_slotRef": "phase[1].signs.mottling.why",
+          "why": "Mottling reflects severe peripheral vasoconstriction as the body shunts blood from skin and muscle to preserve perfusion of vital organs. The reticular pattern appears when capillaries alternate between constriction and dilation under sympathetic overdrive. In a septic infant this is a late and ominous sign of decompensated shock."
         },
         {
-          id: "lactate",
-          name: "Lactate",
-          value: "5.8",
-          unit: "mmol/L",
-          ref: "0.5-2.0",
-          critical: true,
-          bad: true,
-          why: "Doubled from 2.8 to 5.8. Cells are starving for oxygen and generating lactate through anaerobic glycolysis. Above 4 mmol/L in pediatric sepsis is associated with significantly increased mortality and indicates severe tissue hypoperfusion requiring aggressive fluid resuscitation.",
-          _slotRef: "phase[1].labs.lactate.why"
+          "id": "pulses",
+          "label": "Pulses",
+          "finding": "Weak and thready peripherally, central palpable",
+          "pos": "body",
+          "sys": "Cardiovascular",
+          "bad": false,
+          "cat": "clinical",
+          "_slotRef": "phase[1].signs.pulses.why",
+          "why": "Preserved central pulses with weak peripheral pulses is the hallmark of compensated-to-decompensated shock transition. Stroke volume is dropping; the body prioritizes brain and heart at the expense of extremities. Loss of central pulses is imminent arrest."
         },
         {
-          id: "glucose",
-          name: "Glucose",
-          value: "48",
-          unit: "mg/dL",
-          ref: ">45",
-          critical: true,
-          bad: true,
-          why: "Borderline low and dropping from 72. Glycogen stores are depleting rapidly under the metabolic stress of sepsis. If this falls below 45, neuronal function fails and seizure risk skyrockets. Must be monitored closely and treated immediately if it drops further.",
-          _slotRef: "phase[1].labs.glucose.why"
+          "id": "mental-status",
+          "label": "Mental status",
+          "finding": "Sluggish to voice, not tracking faces",
+          "pos": "head",
+          "sys": "Neuro",
+          "bad": false,
+          "cat": "clinical",
+          "_slotRef": "phase[1].signs.mental-status.why",
+          "why": "Declining mental status is one of the most sensitive bedside markers that perfusion is failing — the brain is an early casualty of shock.\n\n- **Sluggish response and loss of face-tracking** signal cerebral hypoperfusion as autoregulation nears its limit\n- Mental-status change often precedes hypotension in children, who compensate BP until late\n- A formerly consolable infant who stops tracking is decompensating until proven otherwise"
         },
         {
-          id: "na",
-          name: "Na+",
-          value: "136",
-          unit: "mEq/L",
-          ref: "135-145",
-          critical: false,
-          bad: false,
-          _slotRef: "phase[1].labs.na.why"
+          "id": "extremities",
+          "label": "Extremities",
+          "finding": "Cool and clammy hands and feet",
+          "pos": "body",
+          "sys": "Cardiovascular",
+          "bad": false,
+          "cat": "clinical",
+          "_slotRef": "phase[1].signs.extremities.why",
+          "why": "Cool clammy extremities with a febrile core signals cold septic shock. The sympathetic nervous system clamps down peripheral vessels to redirect flow centrally. Capillary refill lengthens, skin feels cold distal to warm proximal - this gradient marks the perfusion boundary."
         },
         {
-          id: "k",
-          name: "K+",
-          value: "4.2",
-          unit: "mEq/L",
-          ref: "3.5-5.5",
-          critical: false,
-          bad: false,
-          _slotRef: "phase[1].labs.k.why"
+          "id": "abdomen",
+          "label": "Abdomen",
+          "finding": "Soft, hypoactive bowel sounds",
+          "pos": "body",
+          "sys": "GI",
+          "bad": false,
+          "cat": "clinical",
+          "_slotRef": "phase[1].signs.abdomen.why",
+          "why": "A soft abdomen with hypoactive bowel sounds is the expected, non-surgical finding of shunted splanchnic perfusion.\n\n- **Hypoactive bowel sounds** reflect blood diverted away from the gut to vital organs in shock\n- A **soft, non-distended** abdomen argues against a surgical abdomen or obstruction as the source\n- This is a downstream sign of hypoperfusion, not a primary GI problem"
         },
         {
-          id: "ph",
-          name: "pH",
-          value: "7.24",
-          unit: "",
-          ref: "7.35-7.45",
-          critical: true,
-          bad: false,
-          why: "Acidotic. The accumulating lactate from anaerobic metabolism is driving the pH down. A pH below 7.25 indicates severe metabolic acidosis. The body attempts to compensate by increasing respiratory rate (blowing off CO2), which is why this infant is tachypneic at 52/min.",
-          _slotRef: "phase[1].labs.ph.why"
-        },
-        {
-          id: "hco3",
-          name: "HCO3-",
-          value: "14",
-          unit: "mEq/L",
-          ref: "22-26",
-          critical: true,
-          bad: false,
-          why: "Low bicarbonate confirms metabolic acidosis. Bicarb is being consumed as it buffers the excess hydrogen ions from lactic acid production. The base deficit of -12 tells you how much bicarb has been used up.",
-          _slotRef: "phase[1].labs.hco3.why"
-        },
-        {
-          id: "base-deficit",
-          name: "Base deficit",
-          value: "-12",
-          unit: "",
-          ref: "-2 to +2",
-          critical: true,
-          bad: false,
-          why: "Severely negative. Base deficit quantifies the total acid load the body is carrying. A value of -12 means the body has consumed 12 mEq/L of buffer capacity trying to neutralize the acid produced by poor perfusion. This correlates directly with the severity and duration of tissue oxygen debt.",
-          _slotRef: "phase[1].labs.base-deficit.why"
+          "id": "urine-output",
+          "label": "Urine output",
+          "finding": "One concentrated diaper in six hours",
+          "pos": "body",
+          "sys": "Renal",
+          "bad": false,
+          "cat": "clinical",
+          "_slotRef": "phase[1].signs.urine-output.why",
+          "why": "Oliguria is a hard endpoint of hypoperfusion — the kidney stops making urine when renal blood flow drops below the filtration threshold.\n\n- **One concentrated diaper in six hours** signals renal perfusion has fallen below the GFR threshold\n- Urine output is a real-time gauge of end-organ perfusion and a resuscitation target\n- Improving output after fluids is one of the clearest signs your resuscitation is working"
         }
       ],
-      tools: [
-        "ivKit",
-        "stethoscope",
-        "capRefill",
-        "glucometer",
-        "thermometer",
-        "defib"
+      "labs": [
+        {
+          "id": "wbc",
+          "name": "WBC",
+          "value": "22.4",
+          "unit": "K/uL",
+          "ref": "6.0-17.5",
+          "bad": true,
+          "critical": true,
+          "cat": "lab",
+          "_slotRef": "phase[1].labs.wbc.why",
+          "why": "Rising from 18.2 - the infection is progressing and the bone marrow is working harder. Worsening leukocytosis in sepsis correlates with increasing bacterial burden and inflammatory response."
+        },
+        {
+          "id": "lactate",
+          "name": "Lactate",
+          "value": "5.8",
+          "unit": "mmol/L",
+          "ref": "0.5-2.0",
+          "bad": true,
+          "critical": true,
+          "cat": "lab",
+          "_slotRef": "phase[1].labs.lactate.why",
+          "why": "Doubled from 2.8 to 5.8. Cells are starving for oxygen and generating lactate through anaerobic glycolysis. Above 4 mmol/L in pediatric sepsis is associated with significantly increased mortality and indicates severe tissue hypoperfusion requiring aggressive fluid resuscitation."
+        },
+        {
+          "id": "glucose",
+          "name": "Glucose",
+          "value": "48",
+          "unit": "mg/dL",
+          "ref": ">45",
+          "bad": false,
+          "critical": true,
+          "cat": "lab",
+          "_slotRef": "phase[1].labs.glucose.why",
+          "why": "Borderline low and dropping from 72. Glycogen stores are depleting rapidly under the metabolic stress of sepsis. If this falls below 45, neuronal function fails and seizure risk skyrockets. Must be monitored closely and treated immediately if it drops further."
+        },
+        {
+          "id": "na",
+          "name": "Na+",
+          "value": "136",
+          "unit": "mEq/L",
+          "ref": "135-145",
+          "bad": false,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[1].labs.na.why",
+          "why": "Sodium remains normal — reassuring that the acidosis is driven by lactate, not a mixed electrolyte derangement.\n\n- **Na 136** stays within range as the metabolic picture worsens\n- A normal sodium keeps the anion-gap acidosis attributable to lactate from hypoperfusion\n- Watch it across large-volume resuscitation, which can shift sodium either direction"
+        },
+        {
+          "id": "k",
+          "name": "K+",
+          "value": "4.2",
+          "unit": "mEq/L",
+          "ref": "3.5-5.5",
+          "bad": false,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[1].labs.k.why",
+          "why": "Potassium is normal now, but acidosis and the coming resuscitation make it a value to watch closely.\n\n- **K 4.2** is mid-range despite the acidosis that would tend to push potassium out of cells\n- A normal-to-low K in acidosis hints at a real total-body deficit that fluids and correction can unmask\n- Recheck after resuscitation — potassium can drop as acidosis resolves and cells take it back up"
+        },
+        {
+          "id": "ph",
+          "name": "pH",
+          "value": "7.24",
+          "unit": "",
+          "ref": "7.35-7.45",
+          "bad": true,
+          "critical": true,
+          "cat": "lab",
+          "_slotRef": "phase[1].labs.ph.why",
+          "why": "Acidotic. The accumulating lactate from anaerobic metabolism is driving the pH down. A pH below 7.25 indicates severe metabolic acidosis. The body attempts to compensate by increasing respiratory rate (blowing off CO2), which is why this infant is tachypneic at 52/min."
+        },
+        {
+          "id": "hco3",
+          "name": "HCO3-",
+          "value": "14",
+          "unit": "mEq/L",
+          "ref": "22-26",
+          "bad": true,
+          "critical": true,
+          "cat": "lab",
+          "_slotRef": "phase[1].labs.hco3.why",
+          "why": "Low bicarbonate confirms metabolic acidosis. Bicarb is being consumed as it buffers the excess hydrogen ions from lactic acid production. The base deficit of -12 tells you how much bicarb has been used up."
+        },
+        {
+          "id": "base-deficit",
+          "name": "Base deficit",
+          "value": "-12",
+          "unit": "",
+          "ref": "-2 to +2",
+          "bad": false,
+          "critical": true,
+          "cat": "lab",
+          "_slotRef": "phase[1].labs.base-deficit.why",
+          "why": "Severely negative. Base deficit quantifies the total acid load the body is carrying. A value of -12 means the body has consumed 12 mEq/L of buffer capacity trying to neutralize the acid produced by poor perfusion. This correlates directly with the severity and duration of tissue oxygen debt."
+        }
       ],
-      meds: [
-        "nsBolus",
-        "ceftriaxone",
-        "acetaminophen",
-        "epiIV",
-        "albuterol",
-        "dextroseBolus"
-      ],
-      actions: {
-        tools: {
-          ivKit: {
-            ok: true,
-            pri: 1,
-            fb: "Essential. You need IV access for fluids and antibiotics. In a vasoconstricted infant, target saphenous or antecubital veins. Two attempts at peripheral access, then go IO at the proximal tibia (1-2 cm below tibial tuberosity, flat medial surface). IO provides equivalent flow rates to central access."
+      "actions": {
+        "tools": {
+          "ivKit": {
+            "id": "ivKit",
+            "priority": "correct",
+            "ok": true,
+            "_slotRef": "phase[1].actions.tools.ivKit.fb",
+            "fb": "Essential. You need IV access for fluids and antibiotics. In a vasoconstricted infant, target saphenous or antecubital veins. Two attempts at peripheral access, then go IO at the proximal tibia (1-2 cm below tibial tuberosity, flat medial surface). IO provides equivalent flow rates to central access."
           },
-          stethoscope: {
-            ok: true,
-            pri: null,
-            fb: "Auscultate before pushing fluid. Establish baseline: clear lungs (crackles suggest pneumonia or edema), regular rhythm (irregular rhythm changes approach), no murmur (new murmur raises endocarditis concern), no S3 gallop (volume overload marker). Re-auscultate lungs after each bolus for developing crackles."
+          "stethoscope": {
+            "id": "stethoscope",
+            "priority": "correct",
+            "ok": true,
+            "_slotRef": "phase[1].actions.tools.stethoscope.fb",
+            "fb": "Auscultate before pushing fluid. Establish baseline: clear lungs (crackles suggest pneumonia or edema), regular rhythm (irregular rhythm changes approach), no murmur (new murmur raises endocarditis concern), no S3 gallop (volume overload marker). Re-auscultate lungs after each bolus for developing crackles."
           },
-          capRefill: {
-            ok: true,
-            pri: null,
-            fb: "Best real-time perfusion tracker in pediatrics. Press nail bed 5 seconds, release, count. Currently 4 seconds (normal <2). After each 20 mL/kg bolus, recheck. Improvement toward 2-3 seconds = effective resuscitation. No improvement after 40-60 mL/kg = consider vasopressors or alternative etiology."
+          "capRefill": {
+            "id": "capRefill",
+            "priority": "correct",
+            "ok": true,
+            "_slotRef": "phase[1].actions.tools.capRefill.fb",
+            "fb": "Best real-time perfusion tracker in pediatrics. Press nail bed 5 seconds, release, count. Currently 4 seconds (normal <2). After each 20 mL/kg bolus, recheck. Improvement toward 2-3 seconds = effective resuscitation. No improvement after 40-60 mL/kg = consider vasopressors or alternative etiology."
           },
-          glucometer: {
-            ok: true,
-            pri: 2,
-            fb: "Check immediately. A 6-month-old has only 3-4g hepatic glycogen (vs 70-100g adults). After 12 hours of illness with poor intake, stores may be depleted. Sepsis accelerates glucose consumption due to activated immune cell demand. Hypoglycemia <45 mg/dL causes seizures and brain injury. If low: D10W 2-4 mL/kg IV."
+          "glucometer": {
+            "id": "glucometer",
+            "priority": "correct",
+            "ok": true,
+            "_slotRef": "phase[1].actions.tools.glucometer.fb",
+            "fb": "Check immediately. A 6-month-old has only 3-4g hepatic glycogen (vs 70-100g adults). After 12 hours of illness with poor intake, stores may be depleted. Sepsis accelerates glucose consumption due to activated immune cell demand. Hypoglycemia <45 mg/dL causes seizures and brain injury. If low: D10W 2-4 mL/kg IV."
           },
-          thermometer: {
-            ok: false,
-            pri: null,
-            fb: "Temp is 39.0C and trending down from 39.2C. Rechecking provides no new information. The problem is cardiovascular collapse, not fever. Temperature management comes after ABCs are stabilized and resuscitation is underway."
+          "thermometer": {
+            "id": "thermometer",
+            "priority": "distractor-misc",
+            "ok": false,
+            "_slotRef": "phase[1].actions.tools.thermometer.fb",
+            "fb": "Temp is 39.0C and trending down from 39.2C. Rechecking provides no new information. The problem is cardiovascular collapse, not fever. Temperature management comes after ABCs are stabilized and resuscitation is underway."
           },
-          defib: {
-            ok: false,
-            pri: null,
-            fb: "You just shocked a baby in sinus tachycardia. The baby did not appreciate that. The rhythm is sinus tach - a normal compensatory response to sepsis. There is no shockable rhythm here. Defibrillation is for ventricular fibrillation or pulseless ventricular tachycardia only. Please put the paddles down and go give this child some fluid."
+          "defib": {
+            "id": "defib",
+            "priority": "distractor-misc",
+            "ok": false,
+            "_slotRef": "phase[1].actions.tools.defib.fb",
+            "fb": "You just shocked a baby in sinus tachycardia. The baby did not appreciate that. The rhythm is sinus tach - a normal compensatory response to sepsis. There is no shockable rhythm here. Defibrillation is for ventricular fibrillation or pulseless ventricular tachycardia only. Please put the paddles down and go give this child some fluid."
           }
         },
-        meds: {
-          nsBolus: {
-            ok: true,
-            pri: 1,
-            fb: "First-line intervention. Push 20 mL/kg (150 mL) of 0.9% NS via push-pull technique over 5 minutes. Sepsis causes vasodilation and capillary leak, depleting effective circulating volume. Crystalloid restores preload, increasing stroke volume via Frank-Starling mechanism. Reassess after each bolus. Repeat up to 60 mL/kg total. No improvement = fluid-refractory shock, start vasopressors."
+        "meds": {
+          "nsBolus": {
+            "id": "nsBolus",
+            "priority": "tied-correct",
+            "ok": true,
+            "_slotRef": "phase[1].actions.meds.nsBolus.fb",
+            "fb": "First-line intervention. Push 20 mL/kg (150 mL) of 0.9% NS via push-pull technique over 5 minutes. Sepsis causes vasodilation and capillary leak, depleting effective circulating volume. Crystalloid restores preload, increasing stroke volume via Frank-Starling mechanism. Reassess after each bolus. Repeat up to 60 mL/kg total. No improvement = fluid-refractory shock, start vasopressors."
           },
-          ceftriaxone: {
-            ok: true,
-            pri: 2,
-            fb: "Broad-spectrum antibiotics must begin within 60 minutes of recognizing sepsis. Ceftriaxone 50 mg/kg IV covers S. pneumoniae, N. meningitidis, E. coli, and H. influenzae. Binds penicillin-binding proteins, inhibiting peptidoglycan crosslinking, leading to bacterial cell wall rupture. Draw cultures first if quick (<5 min), but never delay antibiotics for cultures. Each hour of delay increases mortality 4-8%."
+          "ceftriaxone": {
+            "id": "ceftriaxone",
+            "priority": "tied-correct",
+            "ok": true,
+            "_slotRef": "phase[1].actions.meds.ceftriaxone.fb",
+            "fb": "Broad-spectrum antibiotics must begin within 60 minutes of recognizing sepsis. Ceftriaxone 50 mg/kg IV covers S. pneumoniae, N. meningitidis, E. coli, and H. influenzae. Binds penicillin-binding proteins, inhibiting peptidoglycan crosslinking, leading to bacterial cell wall rupture. Draw cultures first if quick (<5 min), but never delay antibiotics for cultures. Each hour of delay increases mortality 4-8%."
           },
-          acetaminophen: {
-            ok: false,
-            pri: null,
-            fb: "Already given 20 minutes ago and within therapeutic window. The tachycardia is NOT fever-driven anymore - HR-temp dissociation proves compensatory shock physiology. Fever itself is a beneficial immune response up to 39.5C (enhances neutrophil chemotaxis and antibody production). The cardiovascular collapse is the emergency, not the temperature."
+          "acetaminophen": {
+            "id": "acetaminophen",
+            "priority": "distractor-clinical",
+            "ok": false,
+            "_slotRef": "phase[1].actions.meds.acetaminophen.fb",
+            "fb": "Already given 20 minutes ago and within therapeutic window. The tachycardia is NOT fever-driven anymore - HR-temp dissociation proves compensatory shock physiology. Fever itself is a beneficial immune response up to 39.5C (enhances neutrophil chemotaxis and antibody production). The cardiovascular collapse is the emergency, not the temperature."
           },
-          epiIV: {
-            ok: false,
-            pri: null,
-            fb: "Wrong timing. Epinephrine stimulates alpha-1, beta-1, and beta-2 receptors and IS appropriate for fluid-refractory septic shock. But no fluid has been given yet. Vasopressors on an empty vascular tree produces high SVR with dangerously low CO - BP number may transiently improve while tissue perfusion worsens. Algorithm: volume first (up to 60 mL/kg), then epi 0.05-0.3 mcg/kg/min if still hypotensive."
+          "epiIV": {
+            "id": "epiIV",
+            "priority": "distractor-clinical",
+            "ok": false,
+            "_slotRef": "phase[1].actions.meds.epiIV.fb",
+            "fb": "Wrong timing. Epinephrine stimulates alpha-1, beta-1, and beta-2 receptors and IS appropriate for fluid-refractory septic shock. But no fluid has been given yet. Vasopressors on an empty vascular tree produces high SVR with dangerously low CO - BP number may transiently improve while tissue perfusion worsens. Algorithm: volume first (up to 60 mL/kg), then epi 0.05-0.3 mcg/kg/min if still hypotensive."
           },
-          albuterol: {
-            ok: false,
-            pri: null,
-            fb: "No airway pathology present. Albuterol is a beta-2 agonist for bronchospasm. The tachypnea here is metabolic acidosis compensation - poor perfusion causes lactic acid buildup, stimulating central chemoreceptors to increase RR. Adding albuterol causes unnecessary tachycardia without addressing the perfusion deficit. Fix the volume and the tachypnea resolves."
+          "albuterol": {
+            "id": "albuterol",
+            "priority": "distractor-misc",
+            "ok": false,
+            "_slotRef": "phase[1].actions.meds.albuterol.fb",
+            "fb": "No airway pathology present. Albuterol is a beta-2 agonist for bronchospasm. The tachypnea here is metabolic acidosis compensation - poor perfusion causes lactic acid buildup, stimulating central chemoreceptors to increase RR. Adding albuterol causes unnecessary tachycardia without addressing the perfusion deficit. Fix the volume and the tachypnea resolves."
           },
-          dextroseBolus: {
-            ok: false,
-            pri: null,
-            fb: "Check glucose FIRST, do not give empirically. If glucose is normal, empiric dextrose causes iatrogenic hyperglycemia. In sepsis, hyperglycemia worsens outcomes through osmotic diuresis, impaired neutrophil bactericidal function, and pro-inflammatory AGE production. Measure, then treat if <45 mg/dL."
+          "dextroseBolus": {
+            "id": "dextroseBolus",
+            "priority": "distractor-clinical",
+            "ok": false,
+            "_slotRef": "phase[1].actions.meds.dextroseBolus.fb",
+            "fb": "Check glucose FIRST, do not give empirically. If glucose is normal, empiric dextrose causes iatrogenic hyperglycemia. In sepsis, hyperglycemia worsens outcomes through osmotic diuresis, impaired neutrophil bactericidal function, and pro-inflammatory AGE production. Measure, then treat if <45 mg/dL."
           }
         }
       }
     }
   ],
-  curveball: {
-    name: "Seizure During Resuscitation",
-    narrative: "During active fluid resuscitation at approximately 90 mL into the first normal saline bolus, the infant abruptly develops generalized tonic-clonic seizure activity. Both upper and lower extremities exhibit rhythmic, synchronized flexion-extension movements with truncal rigidity. The SpO2 begins to fall rapidly on the monitor as the heart rate climbs. You observe perioral cyanosis developing and note that the infant is not generating effective respiratory effort between the tonic-clonic phases. The eyes are deviated upward and to the right. The respiratory therapist arrives with the crash cart and multiple team members converge at the bedside.",
-    vitals: {
-      hr: {
-        id: "hr",
-        label: "HR",
-        value: "210",
-        unit: "bpm",
-        bad: false,
-        _slotRef: "phase[curveball].vitals.hr.why",
-        why: null
-      },
-      rr: {
-        id: "rr",
-        label: "RR",
-        value: "8",
-        unit: "/min",
-        bad: false,
-        _slotRef: "phase[curveball].vitals.rr.why",
-        why: null
-      },
-      sbp: {
-        id: "sbp",
-        label: "BP",
-        value: "62",
-        unit: "mmHg",
-        bad: false,
-        _slotRef: "phase[curveball].vitals.sbp.why",
-        why: null
-      },
-      dbp: {
-        id: "dbp",
-        label: "BP",
-        value: "35",
-        unit: "mmHg",
-        bad: false,
-        _slotRef: "phase[curveball].vitals.dbp.why",
-        why: null
-      },
-      spo2: {
-        id: "spo2",
-        label: "SpO2",
-        value: "83",
-        unit: "%",
-        bad: false,
-        _slotRef: "phase[curveball].vitals.spo2.why",
-        why: null
-      },
-      temp: {
-        id: "temp",
-        label: "Temp",
-        value: "39",
-        unit: "C",
-        bad: false,
-        _slotRef: "phase[curveball].vitals.temp.why",
-        why: null
-      },
-      cap: {
-        id: "cap",
-        label: "Cap Refill",
-        value: "5",
-        unit: "sec",
-        bad: false,
-        _slotRef: "phase[curveball].vitals.cap.why",
-        why: null
-      }
-    },
-    signs: [
+  "curveball": {
+    "name": "Seizure During Resuscitation",
+    "narrative": "During active fluid resuscitation at approximately 90 mL into the first normal saline bolus, the infant abruptly develops generalized tonic-clonic seizure activity. Both upper and lower extremities exhibit rhythmic, synchronized flexion-extension movements with truncal rigidity. The SpO2 begins to fall rapidly on the monitor as the heart rate climbs. You observe perioral cyanosis developing and note that the infant is not generating effective respiratory effort between the tonic-clonic phases. The eyes are deviated upward and to the right. The respiratory therapist arrives with the crash cart and multiple team members converge at the bedside.",
+    "vitals": [
       {
-        id: "motor",
-        label: "Motor",
-        finding: "Generalized tonic-clonic activity, all extremities",
-        pos: "body",
-        bad: false,
-        _slotRef: "phase[curveball].signs.motor.why"
+        "id": "hr",
+        "label": "HR",
+        "value": "210",
+        "unit": "bpm",
+        "bad": false,
+        "cat": "vital",
+        "_slotRef": "phase[curveball].vitals.hr.why",
+        "why": null
       },
       {
-        id: "cyanosis",
-        label: "Cyanosis",
-        finding: "Perioral and circumoral, dusky blue",
-        pos: "face",
-        bad: false,
-        _slotRef: "phase[curveball].signs.cyanosis.why"
+        "id": "rr",
+        "label": "RR",
+        "value": "8",
+        "unit": "/min",
+        "bad": false,
+        "cat": "vital",
+        "_slotRef": "phase[curveball].vitals.rr.why",
+        "why": null
       },
       {
-        id: "breathing",
-        label: "Breathing",
-        finding: "Apneic pauses between tonic-clonic phases",
-        pos: "body",
-        bad: false,
-        _slotRef: "phase[curveball].signs.breathing.why"
+        "id": "bp",
+        "label": "BP",
+        "value": "62/35",
+        "unit": "mmHg",
+        "bad": false,
+        "cat": "vital",
+        "_slotRef": "phase[curveball].vitals.bp.why",
+        "why": null
       },
       {
-        id: "eyes",
-        label: "Eyes",
-        finding: "Deviated upward and to the right, pupils dilated",
-        pos: "head",
-        bad: false,
-        _slotRef: "phase[curveball].signs.eyes.why"
+        "id": "spo2",
+        "label": "SpO2",
+        "value": "83",
+        "unit": "%",
+        "bad": false,
+        "cat": "vital",
+        "_slotRef": "phase[curveball].vitals.spo2.why",
+        "why": null
+      },
+      {
+        "id": "temp",
+        "label": "Temp",
+        "value": "39",
+        "unit": "C",
+        "bad": false,
+        "cat": "vital",
+        "_slotRef": "phase[curveball].vitals.temp.why",
+        "why": null
+      },
+      {
+        "id": "cap",
+        "label": "Cap Refill",
+        "value": "5",
+        "unit": "sec",
+        "bad": false,
+        "cat": "vital",
+        "_slotRef": "phase[curveball].vitals.cap.why",
+        "why": null
       }
     ],
-    labs: [
+    "signs": [
       {
-        id: "glucose",
-        name: "Glucose",
-        value: "32",
-        unit: "mg/dL",
-        ref: ">45",
-        critical: true,
-        bad: false,
-        why: "Critically low. This is the most likely cause of the seizure. Glycogen stores are exhausted and the brain has lost its primary fuel source. Neurons cannot generate ATP, the Na/K pump fails, membranes depolarize, and seizure results. D10W 2-4 mL/kg is potentially curative.",
-        _slotRef: "phase[curveball].labs.glucose.why"
+        "id": "motor",
+        "label": "Motor",
+        "finding": "Generalized tonic-clonic activity, all extremities",
+        "pos": "body",
+        "bad": false,
+        "cat": "clinical",
+        "_slotRef": "phase[curveball].signs.motor.why",
+        "why": null
       },
       {
-        id: "lactate",
-        name: "Lactate",
-        value: "8.1",
-        unit: "mmol/L",
-        ref: "0.5-2.0",
-        critical: true,
-        bad: false,
-        why: "Severely elevated from 5.8 - the seizure itself is generating massive lactate. Sustained muscle contraction during tonic-clonic activity is entirely anaerobic. Combined with the ongoing septic shock, tissue oxygen debt is now critical.",
-        _slotRef: "phase[curveball].labs.lactate.why"
+        "id": "cyanosis",
+        "label": "Cyanosis",
+        "finding": "Perioral and circumoral, dusky blue",
+        "pos": "face",
+        "bad": false,
+        "cat": "clinical",
+        "_slotRef": "phase[curveball].signs.cyanosis.why",
+        "why": null
       },
       {
-        id: "ph",
-        name: "pH",
-        value: "7.18",
-        unit: "",
-        ref: "7.35-7.45",
-        critical: true,
-        bad: false,
-        why: "Worsening acidosis. Both the seizure (lactic acid from muscle) and the shock (lactic acid from tissue hypoperfusion) are driving the pH down. Below 7.20, cardiac contractility begins to decline and catecholamines become less effective.",
-        _slotRef: "phase[curveball].labs.ph.why"
+        "id": "breathing",
+        "label": "Breathing",
+        "finding": "Apneic pauses between tonic-clonic phases",
+        "pos": "body",
+        "bad": false,
+        "cat": "clinical",
+        "_slotRef": "phase[curveball].signs.breathing.why",
+        "why": null
       },
       {
-        id: "po2",
-        name: "pO2",
-        value: "48",
-        unit: "mmHg",
-        ref: "80-100",
-        critical: true,
-        bad: false,
-        why: "Severely hypoxic. Corresponds to the SpO2 of 83%. The infant is not ventilating effectively during the seizure because the respiratory muscles are contracting with everything else. The brain is seizing AND hypoxic simultaneously - a double insult.",
-        _slotRef: "phase[curveball].labs.po2.why"
+        "id": "eyes",
+        "label": "Eyes",
+        "finding": "Deviated upward and to the right, pupils dilated",
+        "pos": "head",
+        "bad": false,
+        "cat": "clinical",
+        "_slotRef": "phase[curveball].signs.eyes.why",
+        "why": null
       }
     ],
-    tools: [
-      "suction",
-      "o2Mask",
-      "bvmReady",
-      "glucometer",
-      "stethoscope",
-      "defib"
+    "labs": [
+      {
+        "id": "glucose",
+        "name": "Glucose",
+        "value": "32",
+        "unit": "mg/dL",
+        "ref": ">45",
+        "bad": true,
+        "critical": true,
+        "cat": "lab",
+        "_slotRef": "phase[curveball].labs.glucose.why",
+        "why": "Critically low. This is the most likely cause of the seizure. Glycogen stores are exhausted and the brain has lost its primary fuel source. Neurons cannot generate ATP, the Na/K pump fails, membranes depolarize, and seizure results. D10W 2-4 mL/kg is potentially curative."
+      },
+      {
+        "id": "lactate",
+        "name": "Lactate",
+        "value": "8.1",
+        "unit": "mmol/L",
+        "ref": "0.5-2.0",
+        "bad": true,
+        "critical": true,
+        "cat": "lab",
+        "_slotRef": "phase[curveball].labs.lactate.why",
+        "why": "Severely elevated from 5.8 - the seizure itself is generating massive lactate. Sustained muscle contraction during tonic-clonic activity is entirely anaerobic. Combined with the ongoing septic shock, tissue oxygen debt is now critical."
+      },
+      {
+        "id": "ph",
+        "name": "pH",
+        "value": "7.18",
+        "unit": "",
+        "ref": "7.35-7.45",
+        "bad": true,
+        "critical": true,
+        "cat": "lab",
+        "_slotRef": "phase[curveball].labs.ph.why",
+        "why": "Worsening acidosis. Both the seizure (lactic acid from muscle) and the shock (lactic acid from tissue hypoperfusion) are driving the pH down. Below 7.20, cardiac contractility begins to decline and catecholamines become less effective."
+      },
+      {
+        "id": "po2",
+        "name": "pO2",
+        "value": "48",
+        "unit": "mmHg",
+        "ref": "80-100",
+        "bad": true,
+        "critical": true,
+        "cat": "lab",
+        "_slotRef": "phase[curveball].labs.po2.why",
+        "why": "Severely hypoxic. Corresponds to the SpO2 of 83%. The infant is not ventilating effectively during the seizure because the respiratory muscles are contracting with everything else. The brain is seizing AND hypoxic simultaneously - a double insult."
+      }
     ],
-    meds: [
-      "lorazepam",
-      "fosphenytoin",
-      "dextroseBolus",
-      "epiIV",
-      "nsBolus",
-      "atropine"
-    ],
-    actions: {
-      tools: {
-        suction: {
-          ok: true,
-          pri: 1,
-          fb: "Protect the airway first. Seizing infant has lost gag, cough, and swallow reflexes. High aspiration risk from salivation and vomiting. Use Yankauer catheter for oropharyngeal suction. Avoid deep flexible catheter suctioning - stimulates vagus nerve, can trigger bradycardia."
+    "actions": {
+      "tools": {
+        "suction": {
+          "id": "suction",
+          "priority": "correct",
+          "ok": true,
+          "_slotRef": "phase[curveball].actions.tools.suction.fb",
+          "fb": "Protect the airway first. Seizing infant has lost gag, cough, and swallow reflexes. High aspiration risk from salivation and vomiting. Use Yankauer catheter for oropharyngeal suction. Avoid deep flexible catheter suctioning - stimulates vagus nerve, can trigger bradycardia."
         },
-        o2Mask: {
-          ok: true,
-          pri: 2,
-          fb: "SpO2 83% = PaO2 approximately 48 mmHg, severely hypoxic. Apply non-rebreather at 10-15 L/min (delivers 60-80% FiO2). The seizing brain has massively increased O2 demand while ventilation is impaired. Hypoxic brain injury begins within 4-6 minutes."
+        "o2Mask": {
+          "id": "o2Mask",
+          "priority": "correct",
+          "ok": true,
+          "_slotRef": "phase[curveball].actions.tools.o2Mask.fb",
+          "fb": "SpO2 83% = PaO2 approximately 48 mmHg, severely hypoxic. Apply non-rebreather at 10-15 L/min (delivers 60-80% FiO2). The seizing brain has massively increased O2 demand while ventilation is impaired. Hypoxic brain injury begins within 4-6 minutes."
         },
-        bvmReady: {
-          ok: true,
-          pri: null,
-          fb: "Have BVM staged at the bedside. Do NOT ventilate during the tonic phase when the glottis is contracted - bagging then drives air into the stomach. Be ready to deliver gentle breaths during clonic relaxation phases only if SpO2 falls further. Avoid over-bagging - causes gastric distension and increased aspiration risk."
+        "bvmReady": {
+          "id": "bvmReady",
+          "priority": "correct",
+          "ok": true,
+          "_slotRef": "phase[curveball].actions.tools.bvmReady.fb",
+          "fb": "Have BVM staged at the bedside. Do NOT ventilate during the tonic phase when the glottis is contracted - bagging then drives air into the stomach. Be ready to deliver gentle breaths during clonic relaxation phases only if SpO2 falls further. Avoid over-bagging - causes gastric distension and increased aspiration risk."
         },
-        glucometer: {
-          ok: true,
-          pri: 3,
-          fb: "Check POC glucose immediately. Infant hepatic glycogen: 3-4g (adults: 70-100g). After 12 hours of illness, stores may be exhausted. Infant gluconeogenesis pathways are immature. If glucose <45 mg/dL, push D10W 2-4 mL/kg. Glucose correction alone may terminate the seizure."
+        "glucometer": {
+          "id": "glucometer",
+          "priority": "correct",
+          "ok": true,
+          "_slotRef": "phase[curveball].actions.tools.glucometer.fb",
+          "fb": "Check POC glucose immediately. Infant hepatic glycogen: 3-4g (adults: 70-100g). After 12 hours of illness, stores may be exhausted. Infant gluconeogenesis pathways are immature. If glucose <45 mg/dL, push D10W 2-4 mL/kg. Glucose correction alone may terminate the seizure."
         },
-        stethoscope: {
-          ok: false,
-          pri: null,
-          fb: "Cannot auscultate meaningfully during active tonic-clonic seizure. Muscle contraction artifact drowns out heart and lung sounds. Useful AFTER seizure control to assess for aspiration or arrhythmia. Not a priority right now."
+        "stethoscope": {
+          "id": "stethoscope",
+          "priority": "distractor-misc",
+          "ok": false,
+          "_slotRef": "phase[curveball].actions.tools.stethoscope.fb",
+          "fb": "Cannot auscultate meaningfully during active tonic-clonic seizure. Muscle contraction artifact drowns out heart and lung sounds. Useful AFTER seizure control to assess for aspiration or arrhythmia. Not a priority right now."
         },
-        defib: {
-          ok: false,
-          pri: null,
-          fb: "HR 210 with narrow QRS = sinus tachycardia. Appropriate physiologic response to seizure, hypoxia, and catecholamine surge. Defibrillation is for VF or pulseless VT only. Shocking sinus tachycardia could induce an actual arrhythmia. Monitor pads are fine but do not charge."
+        "defib": {
+          "id": "defib",
+          "priority": "distractor-misc",
+          "ok": false,
+          "_slotRef": "phase[curveball].actions.tools.defib.fb",
+          "fb": "HR 210 with narrow QRS = sinus tachycardia. Appropriate physiologic response to seizure, hypoxia, and catecholamine surge. Defibrillation is for VF or pulseless VT only. Shocking sinus tachycardia could induce an actual arrhythmia. Monitor pads are fine but do not charge."
         }
       },
-      meds: {
-        lorazepam: {
-          ok: true,
-          pri: 1,
-          fb: "First-line antiepileptic. 0.1 mg/kg IV (0.75 mg for this infant). Binds GABA-A receptor benzodiazepine site, increasing chloride channel opening frequency. Chloride influx hyperpolarizes the neuron from -70mV toward -90mV, suppressing the electrical storm. Onset 1-3 min IV. Alternative: midazolam 0.2 mg/kg IN or IM. Two failed doses = status epilepticus."
+      "meds": {
+        "lorazepam": {
+          "id": "lorazepam",
+          "priority": "tied-correct",
+          "ok": true,
+          "_slotRef": "phase[curveball].actions.meds.lorazepam.fb",
+          "fb": "First-line antiepileptic. 0.1 mg/kg IV (0.75 mg for this infant). Binds GABA-A receptor benzodiazepine site, increasing chloride channel opening frequency. Chloride influx hyperpolarizes the neuron from -70mV toward -90mV, suppressing the electrical storm. Onset 1-3 min IV. Alternative: midazolam 0.2 mg/kg IN or IM. Two failed doses = status epilepticus."
         },
-        fosphenytoin: {
-          ok: false,
-          pri: null,
-          fb: "Second-line only after two benzodiazepine doses fail. Fosphenytoin blocks voltage-gated sodium channels. Requires 20-minute infusion (rapid push causes hypotension and arrhythmia via His-Purkinje depression). Too slow for first-line use. Also: always check glucose before escalating antiepileptics - hypoglycemia-driven seizures will not respond to antiepileptics."
+        "fosphenytoin": {
+          "id": "fosphenytoin",
+          "priority": "distractor-clinical",
+          "ok": false,
+          "_slotRef": "phase[curveball].actions.meds.fosphenytoin.fb",
+          "fb": "Second-line only after two benzodiazepine doses fail. Fosphenytoin blocks voltage-gated sodium channels. Requires 20-minute infusion (rapid push causes hypotension and arrhythmia via His-Purkinje depression). Too slow for first-line use. Also: always check glucose before escalating antiepileptics - hypoglycemia-driven seizures will not respond to antiepileptics."
         },
-        dextroseBolus: {
-          ok: true,
-          pri: 2,
-          fb: "Give after checking glucose. If <45 mg/dL, push D10W 2-4 mL/kg (15-30 mL). Use D10W in infants, not D25 or D50 (hyperosmolar, causes venous endothelial damage and rebound hyperinsulinemia). Without glucose, neuronal ATP production stops, Na/K ATPase fails, membrane depolarizes uncontrollably. May terminate seizure within 1-2 minutes."
+        "dextroseBolus": {
+          "id": "dextroseBolus",
+          "priority": "tied-correct",
+          "ok": true,
+          "_slotRef": "phase[curveball].actions.meds.dextroseBolus.fb",
+          "fb": "Give after checking glucose. If <45 mg/dL, push D10W 2-4 mL/kg (15-30 mL). Use D10W in infants, not D25 or D50 (hyperosmolar, causes venous endothelial damage and rebound hyperinsulinemia). Without glucose, neuronal ATP production stops, Na/K ATPase fails, membrane depolarizes uncontrollably. May terminate seizure within 1-2 minutes."
         },
-        epiIV: {
-          ok: false,
-          pri: null,
-          fb: "Harmful in this context. Beta-1 stimulation increases myocardial O2 demand (HR already 210). Alpha-1 increases afterload. CNS catecholamine stimulation lowers seizure threshold. Epinephrine also raises ICP. Indicated for pulseless arrest or fluid-refractory shock only. Neither applies here."
+        "epiIV": {
+          "id": "epiIV",
+          "priority": "distractor-clinical",
+          "ok": false,
+          "_slotRef": "phase[curveball].actions.meds.epiIV.fb",
+          "fb": "Harmful in this context. Beta-1 stimulation increases myocardial O2 demand (HR already 210). Alpha-1 increases afterload. CNS catecholamine stimulation lowers seizure threshold. Epinephrine also raises ICP. Indicated for pulseless arrest or fluid-refractory shock only. Neither applies here."
         },
-        nsBolus: {
-          ok: true,
-          pri: null,
-          fb: "Do NOT stop the bolus. The seizure was caused by sepsis (hypoglycemia, meningitis, or fever), not by normal saline. Septic shock is still present and requires ongoing volume resuscitation. Continue fluid while managing seizure simultaneously. Delegate tasks across the team."
+        "nsBolus": {
+          "id": "nsBolus",
+          "priority": "correct",
+          "ok": true,
+          "_slotRef": "phase[curveball].actions.meds.nsBolus.fb",
+          "fb": "Do NOT stop the bolus. The seizure was caused by sepsis (hypoglycemia, meningitis, or fever), not by normal saline. Septic shock is still present and requires ongoing volume resuscitation. Continue fluid while managing seizure simultaneously. Delegate tasks across the team."
         },
-        atropine: {
-          ok: false,
-          pri: null,
-          fb: "Blocks M2 muscarinic receptors, increasing heart rate by removing vagal tone. Patient is already at 210 bpm. Pushing atropine could drive rate above 220, reducing diastolic filling time so severely that stroke volume drops and CO paradoxically falls. Indicated for symptomatic bradycardia only."
+        "atropine": {
+          "id": "atropine",
+          "priority": "distractor-misc",
+          "ok": false,
+          "_slotRef": "phase[curveball].actions.meds.atropine.fb",
+          "fb": "Blocks M2 muscarinic receptors, increasing heart rate by removing vagal tone. Patient is already at 210 bpm. Pushing atropine could drive rate above 220, reducing diastolic filling time so severely that stroke volume drops and CO paradoxically falls. Indicated for symptomatic bradycardia only."
         }
       }
     },
-    teaches: [
+    "teaches": [
       {
-        title: "Why Infants Seize in Sepsis",
-        content: "Seizures in septic infants arise from three converging mechanisms. First, hypoglycemia: infants store only 3-4 grams of hepatic glycogen compared to 70-100 grams in adults, and their glucose utilization rate is 4-6 mg/kg/min at baseline. Sepsis can double or triple this rate because activated neutrophils and macrophages are obligate glucose consumers, and the catecholamine surge of shock accelerates glycogenolysis. Once stores are exhausted, gluconeogenesis in infants is too immature to compensate (the key enzymes PEPCK and glucose-6-phosphatase are not yet fully expressed). The result is neuronal energy failure: without glucose, ATP production via glycolysis and the Krebs cycle halts, the Na/K ATPase pump fails, the membrane depolarizes uncontrollably, and a seizure initiates. Second, direct CNS infection: bacteria can cross the blood-brain barrier more easily in infants because the tight junctions between cerebral endothelial cells are less mature. Once bacteria enter the CSF, the inflammatory response (complement activation, cytokine release, neutrophil infiltration) causes cerebral edema, increased intracranial pressure, and cortical irritability leading to seizure. Third, fever itself: febrile seizures occur in 2-5% of neurologically normal children between 6 months and 5 years. The mechanism is not fully understood but likely involves temperature-sensitive ion channels (TRPV1 and TRPV4) that alter neuronal excitability when core temperature rises rapidly. In sepsis, never assume a seizure is a simple febrile seizure without ruling out hypoglycemia and meningitis first.",
-        tldr: "Infants seize in sepsis because of low glucose (tiny glycogen stores), bacteria crossing an immature blood-brain barrier, or fever. Always check glucose first."
+        "title": "Why Infants Seize in Sepsis",
+        "content": "Seizures in septic infants arise from three converging mechanisms. First, hypoglycemia: infants store only 3-4 grams of hepatic glycogen compared to 70-100 grams in adults, and their glucose utilization rate is 4-6 mg/kg/min at baseline. Sepsis can double or triple this rate because activated neutrophils and macrophages are obligate glucose consumers, and the catecholamine surge of shock accelerates glycogenolysis. Once stores are exhausted, gluconeogenesis in infants is too immature to compensate (the key enzymes PEPCK and glucose-6-phosphatase are not yet fully expressed). The result is neuronal energy failure: without glucose, ATP production via glycolysis and the Krebs cycle halts, the Na/K ATPase pump fails, the membrane depolarizes uncontrollably, and a seizure initiates. Second, direct CNS infection: bacteria can cross the blood-brain barrier more easily in infants because the tight junctions between cerebral endothelial cells are less mature. Once bacteria enter the CSF, the inflammatory response (complement activation, cytokine release, neutrophil infiltration) causes cerebral edema, increased intracranial pressure, and cortical irritability leading to seizure. Third, fever itself: febrile seizures occur in 2-5% of neurologically normal children between 6 months and 5 years. The mechanism is not fully understood but likely involves temperature-sensitive ion channels (TRPV1 and TRPV4) that alter neuronal excitability when core temperature rises rapidly. In sepsis, never assume a seizure is a simple febrile seizure without ruling out hypoglycemia and meningitis first.",
+        "tldr": "Infants seize in sepsis because of low glucose (tiny glycogen stores), bacteria crossing an immature blood-brain barrier, or fever. Always check glucose first."
       },
       {
-        title: "Glucose: The Forgotten Critical Value",
-        content: "The infant brain consumes approximately 60% of total body glucose production, compared to 25% in adults. This disproportionate demand exists because the infant brain is relatively larger (10-12% of body weight vs 2% in adults) and has a higher metabolic rate per gram of tissue due to active synaptogenesis and myelination. Unlike adult neurons, which can partially switch to ketone body oxidation during prolonged fasting, infant neurons have limited capacity to utilize alternative fuels in the acute setting because the enzymes for ketolysis (beta-hydroxybutyrate dehydrogenase and succinyl-CoA:3-oxoacid CoA transferase) are not yet fully upregulated. When serum glucose falls below 45 mg/dL, the immediate consequence is failure of the Na/K ATPase, which requires approximately 50% of neuronal ATP output to maintain the -70mV resting membrane potential. As the pump fails, sodium leaks in, the membrane depolarizes, voltage-gated calcium channels open, and intracellular calcium rises to toxic levels triggering both seizure activity and excitotoxic cell death through calpain and caspase activation. Treatment is D10W at 2-4 mL/kg IV push. D10 is used in infants rather than D25 or D50 because the higher-concentration solutions are hyperosmolar (D50 has an osmolality of approximately 2,525 mOsm/L) and cause direct endothelial injury, phlebitis, and tissue necrosis if extravasated. Always recheck glucose 15 minutes after correction to ensure adequacy, and consider starting a continuous dextrose infusion (glucose infusion rate of 6-8 mg/kg/min) if the underlying cause of hypoglycemia persists.",
-        tldr: "Infant brains use 60% of all glucose and cannot switch to backup fuels. Below 45 mg/dL, neurons lose power and seize. Treat with D10W (not D50 - too concentrated for small veins)."
+        "title": "Glucose: The Forgotten Critical Value",
+        "content": "The infant brain consumes approximately 60% of total body glucose production, compared to 25% in adults. This disproportionate demand exists because the infant brain is relatively larger (10-12% of body weight vs 2% in adults) and has a higher metabolic rate per gram of tissue due to active synaptogenesis and myelination. Unlike adult neurons, which can partially switch to ketone body oxidation during prolonged fasting, infant neurons have limited capacity to utilize alternative fuels in the acute setting because the enzymes for ketolysis (beta-hydroxybutyrate dehydrogenase and succinyl-CoA:3-oxoacid CoA transferase) are not yet fully upregulated. When serum glucose falls below 45 mg/dL, the immediate consequence is failure of the Na/K ATPase, which requires approximately 50% of neuronal ATP output to maintain the -70mV resting membrane potential. As the pump fails, sodium leaks in, the membrane depolarizes, voltage-gated calcium channels open, and intracellular calcium rises to toxic levels triggering both seizure activity and excitotoxic cell death through calpain and caspase activation. Treatment is D10W at 2-4 mL/kg IV push. D10 is used in infants rather than D25 or D50 because the higher-concentration solutions are hyperosmolar (D50 has an osmolality of approximately 2,525 mOsm/L) and cause direct endothelial injury, phlebitis, and tissue necrosis if extravasated. Always recheck glucose 15 minutes after correction to ensure adequacy, and consider starting a continuous dextrose infusion (glucose infusion rate of 6-8 mg/kg/min) if the underlying cause of hypoglycemia persists.",
+        "tldr": "Infant brains use 60% of all glucose and cannot switch to backup fuels. Below 45 mg/dL, neurons lose power and seize. Treat with D10W (not D50 - too concentrated for small veins)."
       },
       {
-        title: "Parallel Crisis Management",
-        content: "The PICU frequently presents overlapping emergencies that require simultaneous management. The key principle is ABC prioritization with parallel task execution through team delegation. In this scenario, the infant has two concurrent life-threatening problems: septic shock requiring fluid resuscitation and antibiotics, and a generalized seizure requiring airway protection and antiepileptic therapy. Stopping the fluid bolus to manage the seizure would worsen the shock. Ignoring the seizure to continue the bolus would allow ongoing hypoxia and potential brain injury. The solution is parallel processing: one team member manages the airway (positioning, suction, oxygen delivery), another draws up and administers lorazepam, a third continues the fluid bolus and monitors the infusion pump, and the physician directs the overall resuscitation and makes prioritization decisions. Time-based protocols run simultaneously: the seizure protocol (benzodiazepine at time zero, repeat at 5 minutes, second-line agent at 10 minutes if refractory) and the sepsis bundle (blood cultures, antibiotics within 60 minutes, fluid resuscitation to perfusion targets). Effective communication tools include closed-loop communication (repeat-back of orders), time calls (announcing elapsed time since seizure onset), and designated role assignments at the start of the resuscitation.",
-        tldr: "When two emergencies happen at once, do not stop treating one to treat the other. Delegate tasks across the team and run both protocols in parallel."
+        "title": "Parallel Crisis Management",
+        "content": "The PICU frequently presents overlapping emergencies that require simultaneous management. The key principle is ABC prioritization with parallel task execution through team delegation. In this scenario, the infant has two concurrent life-threatening problems: septic shock requiring fluid resuscitation and antibiotics, and a generalized seizure requiring airway protection and antiepileptic therapy. Stopping the fluid bolus to manage the seizure would worsen the shock. Ignoring the seizure to continue the bolus would allow ongoing hypoxia and potential brain injury. The solution is parallel processing: one team member manages the airway (positioning, suction, oxygen delivery), another draws up and administers lorazepam, a third continues the fluid bolus and monitors the infusion pump, and the physician directs the overall resuscitation and makes prioritization decisions. Time-based protocols run simultaneously: the seizure protocol (benzodiazepine at time zero, repeat at 5 minutes, second-line agent at 10 minutes if refractory) and the sepsis bundle (blood cultures, antibiotics within 60 minutes, fluid resuscitation to perfusion targets). Effective communication tools include closed-loop communication (repeat-back of orders), time calls (announcing elapsed time since seizure onset), and designated role assignments at the start of the resuscitation.",
+        "tldr": "When two emergencies happen at once, do not stop treating one to treat the other. Delegate tasks across the team and run both protocols in parallel."
       }
     ]
   },
-  reassessment: {
-    narrative: "Forty minutes after the first fluid bolus and the initiation of antibiotics, the infant's clinical trajectory has reversed. Heart rate has come down from 192 to 150, capillary refill is now less than 2 seconds, and the mottling on the lower extremities has resolved. He is tracking faces again and reaching for his pacifier. The mother, who was holding his hand during the resuscitation, notices him squeeze back.",
-    vitals: {
-      hr: 150,
-      rr: 36,
-      sbp: 84,
-      dbp: 52,
-      spo2: 99,
-      temp: 38.1,
-      cap: 2
+  "reassessment": {
+    "narrative": "Forty minutes after the first fluid bolus and the initiation of antibiotics, the infant's clinical trajectory has reversed. Heart rate has come down from 192 to 150, capillary refill is now less than 2 seconds, and the mottling on the lower extremities has resolved. He is tracking faces again and reaching for his pacifier. The mother, who was holding his hand during the resuscitation, notices him squeeze back.",
+    "vitals": {
+      "hr": 150,
+      "rr": 36,
+      "bp": "84/52",
+      "spo2": 99,
+      "temp": 38.1,
+      "cap": 2
     },
-    signs: [
+    "signs": [
       {
-        label: "Perfusion",
-        finding: "Warm pink extremities, cap refill <2s",
-        pos: "body",
-        sys: "Cardiovascular"
+        "label": "Perfusion",
+        "finding": "Warm pink extremities, cap refill <2s",
+        "pos": "body",
+        "sys": "Cardiovascular"
       },
       {
-        label: "Mental status",
-        finding: "Tracking faces, reaching for pacifier",
-        pos: "head",
-        sys: "Neuro"
+        "label": "Mental status",
+        "finding": "Tracking faces, reaching for pacifier",
+        "pos": "head",
+        "sys": "Neuro"
       },
       {
-        label: "Skin",
-        finding: "Mottling resolved, no new rash",
-        pos: "body",
-        sys: "Integumentary"
+        "label": "Skin",
+        "finding": "Mottling resolved, no new rash",
+        "pos": "body",
+        "sys": "Integumentary"
       }
     ]
   },
-  stabilizationSummary: "Aggressive isotonic fluid resuscitation restored circulating volume and tissue perfusion. Broad-spectrum antibiotics targeted the underlying bacterial source before cultures returned. Dextrose corrected hypoglycemia and protected cortical function while the metabolic acidosis resolved.",
-  debrief: {
-    summary: "You identified septic shock by recognizing HR-temperature dissociation, initiated resuscitation, and managed an unexpected seizure.",
-    explainers: [
+  "stabilizationSummary": "Aggressive isotonic fluid resuscitation restored circulating volume and tissue perfusion. Broad-spectrum antibiotics targeted the underlying bacterial source before cultures returned. Dextrose corrected hypoglycemia and protected cortical function while the metabolic acidosis resolved.",
+  "debrief": {
+    "summary": "You identified septic shock by recognizing HR-temperature dissociation, initiated resuscitation, and managed an unexpected seizure.",
+    "keyTeaching": [
+      "HR–temperature dissociation — temperature falling while heart rate climbs — is an early, reliable sign of septic shock in a febrile infant.",
+      "Children defend blood pressure until late; capillary refill, skin perfusion, mental status, and urine output decline well before BP drops.",
+      "Give broad-spectrum antibiotics within the first hour of recognizing sepsis — every hour of delay raises mortality.",
+      "Fluids before vasopressors in septic shock, reassessing perfusion after each bolus rather than pushing a fixed volume.",
+      "Always check glucose in a sick infant — tiny glycogen stores deplete fast, and hypoglycemia is a treatable cause of seizure."
+    ],
+    "physiologyDeepDive": [
       {
-        title: "HR-Temperature Dissociation",
-        content: "In infants, cardiac output is calculated as heart rate multiplied by stroke volume. Unlike older children and adults who can increase stroke volume by augmenting contractility and preload utilization, infants have a relatively fixed stroke volume because their immature myocardium contains fewer contractile elements (sarcomeres), has lower ventricular compliance, and operates near the top of its Frank-Starling curve at baseline. This means infants are fundamentally rate-dependent for cardiac output. During fever, the expected heart rate increase is approximately 10 beats per minute for each 1 degree Celsius above 37. This thermoregulatory tachycardia is driven by increased metabolic oxygen demand: fever raises the basal metabolic rate by roughly 10-13% per degree Celsius via accelerated enzymatic reactions, requiring proportionally more oxygen delivery. When an antipyretic is administered and the temperature decreases, you would expect the heart rate to decrease proportionally. If instead the temperature falls but the heart rate rises or remains disproportionately elevated, the tachycardia is no longer thermoregulatory. It is now driven by the sympathetic nervous system compensating for a different problem, most commonly hypovolemia or vasodilation from sepsis. The adrenal medulla releases epinephrine and norepinephrine in response to baroreceptor sensing of decreased arterial stretch (reduced circulating volume), which directly stimulates beta-1 adrenergic receptors on the sinoatrial node to increase firing rate. This HR-temperature dissociation is one of the earliest and most reliable clinical indicators of septic shock in febrile infants.",
-        tldr: "Infant hearts depend on rate, not squeeze strength, for output. Fever raises HR predictably (~10 bpm per degree). If temp goes down but HR goes up, the tachycardia is from shock, not fever."
+        "id": "hr-temperature-dissociation",
+        "title": "HR-Temperature Dissociation",
+        "_slotRef": "debrief.physiologyDeepDive.hr-temperature-dissociation.content",
+        "content": "In infants, cardiac output is calculated as heart rate multiplied by stroke volume. Unlike older children and adults who can increase stroke volume by augmenting contractility and preload utilization, infants have a relatively fixed stroke volume because their immature myocardium contains fewer contractile elements (sarcomeres), has lower ventricular compliance, and operates near the top of its Frank-Starling curve at baseline. This means infants are fundamentally rate-dependent for cardiac output. During fever, the expected heart rate increase is approximately 10 beats per minute for each 1 degree Celsius above 37. This thermoregulatory tachycardia is driven by increased metabolic oxygen demand: fever raises the basal metabolic rate by roughly 10-13% per degree Celsius via accelerated enzymatic reactions, requiring proportionally more oxygen delivery. When an antipyretic is administered and the temperature decreases, you would expect the heart rate to decrease proportionally. If instead the temperature falls but the heart rate rises or remains disproportionately elevated, the tachycardia is no longer thermoregulatory. It is now driven by the sympathetic nervous system compensating for a different problem, most commonly hypovolemia or vasodilation from sepsis. The adrenal medulla releases epinephrine and norepinephrine in response to baroreceptor sensing of decreased arterial stretch (reduced circulating volume), which directly stimulates beta-1 adrenergic receptors on the sinoatrial node to increase firing rate. This HR-temperature dissociation is one of the earliest and most reliable clinical indicators of septic shock in febrile infants.\n\n**TL;DR:** Infant hearts depend on rate, not squeeze strength, for output. Fever raises HR predictably (~10 bpm per degree). If temp goes down but HR goes up, the tachycardia is from shock, not fever."
       },
       {
-        title: "Why Children Maintain BP Until Collapse",
-        content: "Pediatric patients have proportionally larger adrenal glands relative to body size compared to adults, and their sympathetic nervous system is highly reactive. When cardiac output falls from any cause (hypovolemia, sepsis, cardiogenic), baroreceptors in the carotid sinus and aortic arch detect reduced arterial wall stretch and trigger a massive sympathetic discharge. This produces intense peripheral vasoconstriction through alpha-1 adrenergic receptor activation on arteriolar smooth muscle, which increases systemic vascular resistance (SVR) and maintains mean arterial pressure (MAP = CO x SVR). Because MAP is maintained, the blood pressure reading on the monitor appears reassuringly normal even as tissue perfusion is deteriorating. The clinical signs that betray this compensated state are the perfusion markers: capillary refill time prolongs because arteriolar constriction throttles inflow to the capillary beds; skin becomes mottled as dermal blood flow becomes patchy; extremities cool as blood is shunted away from the periphery; mental status declines as cerebral autoregulation approaches its lower limit; and urine output falls as renal perfusion drops below the threshold for adequate glomerular filtration. These signs change well before blood pressure drops. When BP finally does fall, it indicates that the compensatory mechanisms have been exhausted. Catecholamine stores in the adrenal medulla are depleted, SVR can no longer be maintained, and the patient transitions abruptly from compensated to decompensated shock. In children this transition is often described as falling off a cliff because it is sudden rather than gradual. Hypotension in a child is a pre-arrest sign representing loss of approximately 25-30% of circulating blood volume.",
-        tldr: "Kids vasoconstrict aggressively to maintain BP. Cap refill, skin color, and mental status change way before BP drops. When BP finally falls, they have lost 25-30% of their blood volume and are about to arrest."
+        "id": "why-children-maintain-bp-until-collapse",
+        "title": "Why Children Maintain BP Until Collapse",
+        "_slotRef": "debrief.physiologyDeepDive.why-children-maintain-bp-until-collapse.content",
+        "content": "Pediatric patients have proportionally larger adrenal glands relative to body size compared to adults, and their sympathetic nervous system is highly reactive. When cardiac output falls from any cause (hypovolemia, sepsis, cardiogenic), baroreceptors in the carotid sinus and aortic arch detect reduced arterial wall stretch and trigger a massive sympathetic discharge. This produces intense peripheral vasoconstriction through alpha-1 adrenergic receptor activation on arteriolar smooth muscle, which increases systemic vascular resistance (SVR) and maintains mean arterial pressure (MAP = CO x SVR). Because MAP is maintained, the blood pressure reading on the monitor appears reassuringly normal even as tissue perfusion is deteriorating. The clinical signs that betray this compensated state are the perfusion markers: capillary refill time prolongs because arteriolar constriction throttles inflow to the capillary beds; skin becomes mottled as dermal blood flow becomes patchy; extremities cool as blood is shunted away from the periphery; mental status declines as cerebral autoregulation approaches its lower limit; and urine output falls as renal perfusion drops below the threshold for adequate glomerular filtration. These signs change well before blood pressure drops. When BP finally does fall, it indicates that the compensatory mechanisms have been exhausted. Catecholamine stores in the adrenal medulla are depleted, SVR can no longer be maintained, and the patient transitions abruptly from compensated to decompensated shock. In children this transition is often described as falling off a cliff because it is sudden rather than gradual. Hypotension in a child is a pre-arrest sign representing loss of approximately 25-30% of circulating blood volume.\n\n**TL;DR:** Kids vasoconstrict aggressively to maintain BP. Cap refill, skin color, and mental status change way before BP drops. When BP finally falls, they have lost 25-30% of their blood volume and are about to arrest."
       },
       {
-        title: "Infant Glucose Vulnerability",
-        content: "The metabolic vulnerability of infants to hypoglycemia stems from a fundamental mismatch between glucose demand and storage capacity. Hepatic glycogen in a full-term neonate is approximately 5% of liver weight, yielding roughly 3-4 grams of total glycogen storage. Adults store 70-100 grams. Meanwhile, the infant brain, which constitutes 10-12% of total body weight (versus 2% in adults), consumes approximately 60% of total glucose production through obligate aerobic glycolysis. Under normal fasting conditions, these glycogen stores provide approximately 4-8 hours of glucose supply at the basal utilization rate of 4-6 mg/kg/min. Any condition that increases metabolic demand (fever, sepsis, seizures, cold stress) or impairs intake (vomiting, NPO status) accelerates depletion. Sepsis is particularly dangerous because it simultaneously increases demand (activated immune cells consume glucose at high rates, and catecholamine-driven glycogenolysis rapidly exhausts stores) and impairs the compensatory gluconeogenic response (sepsis-associated hepatic dysfunction reduces the liver's ability to synthesize new glucose from lactate, amino acids, and glycerol). The immature expression of gluconeogenic enzymes (phosphoenolpyruvate carboxykinase, fructose-1,6-bisphosphatase, and glucose-6-phosphatase) further limits this backup pathway. When serum glucose falls below the critical threshold of 45 mg/dL, neuronal mitochondrial ATP production collapses. The Na/K ATPase pump, which consumes roughly half of all neuronal ATP, fails first. Sodium leaks into the cell, the membrane depolarizes, voltage-gated calcium channels open, and the resulting calcium influx triggers both seizure activity and excitotoxic cascades (calpain activation, mitochondrial membrane permeabilization, and caspase-mediated apoptosis). Treatment is D10W at 2-4 mL/kg IV push. D10 (100 mg/mL) is preferred over D25 or D50 in infants because higher-concentration dextrose solutions are hyperosmolar and cause endothelial damage, phlebitis, and tissue necrosis. The goal is a glucose delivery of 200-400 mg/kg, which typically raises serum glucose by 60-120 mg/dL.",
-        tldr: "Babies have almost no glucose reserves (3-4g vs 70-100g in adults) and their brains consume most of it. Sepsis burns through it fast. Below 45 mg/dL = seizures. Check glucose on every sick infant."
+        "id": "infant-glucose-vulnerability",
+        "title": "Infant Glucose Vulnerability",
+        "_slotRef": "debrief.physiologyDeepDive.infant-glucose-vulnerability.content",
+        "content": "The metabolic vulnerability of infants to hypoglycemia stems from a fundamental mismatch between glucose demand and storage capacity. Hepatic glycogen in a full-term neonate is approximately 5% of liver weight, yielding roughly 3-4 grams of total glycogen storage. Adults store 70-100 grams. Meanwhile, the infant brain, which constitutes 10-12% of total body weight (versus 2% in adults), consumes approximately 60% of total glucose production through obligate aerobic glycolysis. Under normal fasting conditions, these glycogen stores provide approximately 4-8 hours of glucose supply at the basal utilization rate of 4-6 mg/kg/min. Any condition that increases metabolic demand (fever, sepsis, seizures, cold stress) or impairs intake (vomiting, NPO status) accelerates depletion. Sepsis is particularly dangerous because it simultaneously increases demand (activated immune cells consume glucose at high rates, and catecholamine-driven glycogenolysis rapidly exhausts stores) and impairs the compensatory gluconeogenic response (sepsis-associated hepatic dysfunction reduces the liver's ability to synthesize new glucose from lactate, amino acids, and glycerol). The immature expression of gluconeogenic enzymes (phosphoenolpyruvate carboxykinase, fructose-1,6-bisphosphatase, and glucose-6-phosphatase) further limits this backup pathway. When serum glucose falls below the critical threshold of 45 mg/dL, neuronal mitochondrial ATP production collapses. The Na/K ATPase pump, which consumes roughly half of all neuronal ATP, fails first. Sodium leaks into the cell, the membrane depolarizes, voltage-gated calcium channels open, and the resulting calcium influx triggers both seizure activity and excitotoxic cascades (calpain activation, mitochondrial membrane permeabilization, and caspase-mediated apoptosis). Treatment is D10W at 2-4 mL/kg IV push. D10 (100 mg/mL) is preferred over D25 or D50 in infants because higher-concentration dextrose solutions are hyperosmolar and cause endothelial damage, phlebitis, and tissue necrosis. The goal is a glucose delivery of 200-400 mg/kg, which typically raises serum glucose by 60-120 mg/dL.\n\n**TL;DR:** Babies have almost no glucose reserves (3-4g vs 70-100g in adults) and their brains consume most of it. Sepsis burns through it fast. Below 45 mg/dL = seizures. Check glucose on every sick infant."
       }
     ]
   }
 };
 
 export var SC2 = {
-  id: "vomiting-toddler",
-  source: "builtin",
-  title: "Won't Stop Vomiting",
-  tier: 2,
-  icon: "🤢",
-  tagline: "2-year-old - Vomiting and Lethargy",
-  description: "A 2-year-old with 3 days of vomiting and diarrhea, increasingly lethargic.",
-  patient: {
-    ageLabel: "2 years",
-    weightKg: 12,
-    sex: "Male",
-    cc: "Vomiting/diarrhea x 3 days, lethargy",
-    history: "Marcus has been sick for three days. Started with watery diarrhea, then vomiting everything including Pedialyte. His mom says he had one wet diaper in the last 12 hours and is sleeping way more than usual. No fever. Previously healthy, no medications."
+  "id": "vomiting-toddler",
+  "source": "builtin",
+  "schemaVersion": "5.4.1",
+  "title": "Won't Stop Vomiting",
+  "tier": 2,
+  "icon": "🤢",
+  "tagline": "2-year-old - Vomiting and Lethargy",
+  "description": "A 2-year-old with 3 days of vomiting and diarrhea, increasingly lethargic.",
+  "visuals": [],
+  "patient": {
+    "ageLabel": "2 years",
+    "weightKg": 12,
+    "sex": "Male",
+    "cc": "Vomiting/diarrhea x 3 days, lethargy",
+    "history": "Marcus has been sick for three days. Started with watery diarrhea, then vomiting everything including Pedialyte. His mom says he had one wet diaper in the last 12 hours and is sleeping way more than usual. No fever. Previously healthy, no medications."
   },
-  emsReport: "Private vehicle arrival. 2-year-old male with 3 days of vomiting and watery diarrhea, unable to tolerate oral rehydration. Mother reports one wet diaper in the past 24 hours (normally 6-7). No fever, no blood in stool, no sick contacts. Arrived limp and lethargic in mother's arms. No prehospital interventions.",
-  learnMore: "Pediatric dehydration severity is classified by percent volume loss: mild (3-5%), moderate (6-9%), and severe (>10%). Each category corresponds to a cluster of clinical findings - tachycardia and dry mucous membranes appear early, sunken fontanelle and skin tenting indicate moderate loss, and delayed cap refill with altered mental status signals severe depletion. Treatment is guided by this severity classification: oral rehydration for mild, IV bolus for moderate, and aggressive resuscitation for severe.",
-  norms: {
-    hr: [
+  "emsReport": "Private vehicle arrival. 2-year-old male with 3 days of vomiting and watery diarrhea, unable to tolerate oral rehydration. Mother reports one wet diaper in the past 24 hours (normally 6-7). No fever, no blood in stool, no sick contacts. Arrived limp and lethargic in mother's arms. No prehospital interventions.",
+  "learnMore": "Pediatric dehydration severity is classified by percent volume loss: mild (3-5%), moderate (6-9%), and severe (>10%). Each category corresponds to a cluster of clinical findings - tachycardia and dry mucous membranes appear early, sunken fontanelle and skin tenting indicate moderate loss, and delayed cap refill with altered mental status signals severe depletion. Treatment is guided by this severity classification: oral rehydration for mild, IV bolus for moderate, and aggressive resuscitation for severe.",
+  "norms": {
+    "hr": [
       80,
       130
     ],
-    rr: [
+    "rr": [
       20,
       30
     ],
-    sbp: [
+    "sbp": [
       80,
       100
     ],
-    dbp: [
+    "dbp": [
       50,
       65
     ],
-    spo2: [
+    "spo2": [
       95,
       100
     ],
-    temp: [
+    "temp": [
       36.5,
       37.5
     ]
   },
-  phases: [
+  "phases": [
     {
-      id: "triage",
-      name: "Triage",
-      narrative: "You receive report on a two-year-old male named Marcus presenting with a three-day history of vomiting and watery diarrhea. His mother has attempted oral rehydration with Pedialyte but he has been unable to tolerate any oral intake. She reports only one wet diaper in the past 24 hours compared to his usual six to seven per day. He has no fever, no blood in the stool, and no known sick contacts. His weight on arrival is 12 kilograms. On initial assessment, the child is limp and lethargic in his mother's arms, opening his eyes briefly to voice but not reaching or engaging. His lips are dry and cracked, and the anterior fontanelle is visibly sunken.",
-      vitals: {
-        hr: {
-          id: "hr",
-          label: "HR",
-          value: "155",
-          unit: "bpm",
-          bad: true,
-          _slotRef: "phase[0].vitals.hr.why",
-          why: "Elevated for a 2-year-old (normal 80-130). Tachycardia is the earliest compensatory response to hypovolemia. Baroreceptors in the carotid sinus detect reduced stretch from low circulating volume and trigger sympathetic activation."
-        },
-        rr: {
-          id: "rr",
-          label: "RR",
-          value: "30",
-          unit: "/min",
-          bad: false,
-          _slotRef: "phase[0].vitals.rr.why",
-          why: "Normal for age (20-30). No respiratory compensation yet, which means metabolic acidosis is not yet severe enough to trigger Kussmaul breathing."
-        },
-        sbp: {
-          id: "sbp",
-          label: "BP",
-          value: "88",
-          unit: "mmHg",
-          bad: false,
-          _slotRef: "phase[0].vitals.sbp.why",
-          why: "Normal for a 2-year-old (SBP 80-100). BP is being MAINTAINED despite volume loss. This is compensated shock - the child is vasoconstricting hard to keep perfusion pressure. The cap refill and mental status tell the real story."
-        },
-        dbp: {
-          id: "dbp",
-          label: "BP",
-          value: "58",
-          unit: "mmHg",
-          bad: false,
-          _slotRef: "phase[0].vitals.dbp.why",
-          why: null
-        },
-        spo2: {
-          id: "spo2",
-          label: "SpO2",
-          value: "99",
-          unit: "%",
-          bad: false,
-          _slotRef: "phase[0].vitals.spo2.why",
-          why: "Normal. No respiratory compromise. Dehydration alone doesn't typically affect oxygenation unless severe enough to cause shock-related pulmonary changes."
-        },
-        temp: {
-          id: "temp",
-          label: "Temp",
-          value: "36.8",
-          unit: "C",
-          bad: false,
-          _slotRef: "phase[0].vitals.temp.why",
-          why: "Normal. Afebrile gastroenteritis is common in viral etiologies (rotavirus, norovirus). The absence of fever does NOT make this less serious - the dehydration is the threat."
-        },
-        cap: {
-          id: "cap",
-          label: "Cap Refill",
-          value: "3",
-          unit: "sec",
-          bad: true,
-          _slotRef: "phase[0].vitals.cap.why",
-          why: "At the upper limit of normal. In a child with clear dehydration, this is the first sign of impaired perfusion. Sympathetic vasoconstriction is already redirecting blood from the skin to vital organs."
-        }
-      },
-      signs: [
+      "phaseIndex": 0,
+      "id": "assess",
+      "stageType": "assess",
+      "title": "Triage",
+      "narrative": "You receive report on a two-year-old male named Marcus presenting with a three-day history of vomiting and watery diarrhea. His mother has attempted oral rehydration with Pedialyte but he has been unable to tolerate any oral intake. She reports only one wet diaper in the past 24 hours compared to his usual six to seven per day. He has no fever, no blood in the stool, and no known sick contacts. His weight on arrival is 12 kilograms. On initial assessment, the child is limp and lethargic in his mother's arms, opening his eyes briefly to voice but not reaching or engaging. His lips are dry and cracked, and the anterior fontanelle is visibly sunken.",
+      "vitals": [
         {
-          id: "skin-turgor",
-          label: "Skin turgor",
-          finding: "Tenting on abdomen, >2 seconds recoil",
-          pos: "body",
-          sys: "Integumentary",
-          bad: false,
-          why: "Skin turgor reflects interstitial fluid volume. When you pinch well-hydrated skin it snaps back immediately because the dermis is plump with water. A tent that persists more than 2 seconds indicates at least 5-10% total body water loss. This is a late sign - meaningful tenting in a toddler usually means moderate to severe dehydration.",
-          _slotRef: "phase[0].signs.skin-turgor.why"
+          "id": "hr",
+          "label": "HR",
+          "value": "155",
+          "unit": "bpm",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[0].vitals.hr.why",
+          "why": "Elevated for a 2-year-old (normal 80-130). Tachycardia is the earliest compensatory response to hypovolemia. Baroreceptors in the carotid sinus detect reduced stretch from low circulating volume and trigger sympathetic activation."
         },
         {
-          id: "fontanelle",
-          label: "Fontanelle",
-          finding: "Anterior fontanelle sunken",
-          pos: "head",
-          sys: "Neuro",
-          bad: false,
-          why: "A sunken anterior fontanelle indicates reduced intracranial CSF volume, which tracks with systemic dehydration. At this age the fontanelle is a direct window into volume status that you lose access to once it closes (typically 12-18 months). A sunken fontanelle suggests at least 5% dehydration, often more.",
-          _slotRef: "phase[0].signs.fontanelle.why"
+          "id": "rr",
+          "label": "RR",
+          "value": "30",
+          "unit": "/min",
+          "bad": false,
+          "cat": "vital",
+          "_slotRef": "phase[0].vitals.rr.why",
+          "why": "Normal for age (20-30). No respiratory compensation yet, which means metabolic acidosis is not yet severe enough to trigger Kussmaul breathing."
         },
         {
-          id: "mucous-membranes",
-          label: "Mucous membranes",
-          finding: "Dry, tacky lips and tongue",
-          pos: "face",
-          sys: "GI/Hydration",
-          bad: false,
-          _slotRef: "phase[0].signs.mucous-membranes.why"
+          "id": "bp",
+          "label": "BP",
+          "value": "88/58",
+          "unit": "mmHg",
+          "bad": false,
+          "cat": "vital",
+          "_slotRef": "phase[0].vitals.bp.why",
+          "why": "Normal for a 2-year-old (SBP 80-100). BP is being MAINTAINED despite volume loss. This is compensated shock - the child is vasoconstricting hard to keep perfusion pressure. The cap refill and mental status tell the real story."
         },
         {
-          id: "behavior",
-          label: "Behavior",
-          finding: "Lethargic, arousable to voice briefly",
-          pos: "head",
-          sys: "Neuro",
-          bad: false,
-          _slotRef: "phase[0].signs.behavior.why"
+          "id": "spo2",
+          "label": "SpO2",
+          "value": "99",
+          "unit": "%",
+          "bad": false,
+          "cat": "vital",
+          "_slotRef": "phase[0].vitals.spo2.why",
+          "why": "Normal. No respiratory compromise. Dehydration alone doesn't typically affect oxygenation unless severe enough to cause shock-related pulmonary changes."
+        },
+        {
+          "id": "temp",
+          "label": "Temp",
+          "value": "36.8",
+          "unit": "C",
+          "bad": false,
+          "cat": "vital",
+          "_slotRef": "phase[0].vitals.temp.why",
+          "why": "Normal. Afebrile gastroenteritis is common in viral etiologies (rotavirus, norovirus). The absence of fever does NOT make this less serious - the dehydration is the threat."
+        },
+        {
+          "id": "cap",
+          "label": "Cap Refill",
+          "value": "3",
+          "unit": "sec",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[0].vitals.cap.why",
+          "why": "At the upper limit of normal. In a child with clear dehydration, this is the first sign of impaired perfusion. Sympathetic vasoconstriction is already redirecting blood from the skin to vital organs."
         }
       ],
-      labs: [
+      "signs": [
         {
-          id: "na",
-          name: "Na+",
-          value: "134",
-          unit: "mEq/L",
-          ref: "135-145",
-          critical: false,
-          bad: false,
-          _slotRef: "phase[0].labs.na.why"
+          "id": "skin-turgor",
+          "label": "Skin turgor",
+          "finding": "Tenting on abdomen, >2 seconds recoil",
+          "pos": "body",
+          "sys": "Integumentary",
+          "bad": true,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.skin-turgor.why",
+          "why": "Skin turgor reflects interstitial fluid volume. When you pinch well-hydrated skin it snaps back immediately because the dermis is plump with water. A tent that persists more than 2 seconds indicates at least 5-10% total body water loss. This is a late sign - meaningful tenting in a toddler usually means moderate to severe dehydration."
         },
         {
-          id: "k",
-          name: "K+",
-          value: "2.9",
-          unit: "mEq/L",
-          ref: "3.5-5.5",
-          critical: true,
-          bad: false,
-          why: "Low from GI losses. Gastric fluid contains potassium, and the kidneys worsen it by excreting K+ to retain H+ during alkalosis. Below 3.0, ECG changes begin (flattened T waves, U waves). Below 2.5, arrhythmia risk is high.",
-          _slotRef: "phase[0].labs.k.why"
+          "id": "fontanelle",
+          "label": "Fontanelle",
+          "finding": "Anterior fontanelle sunken",
+          "pos": "head",
+          "sys": "Neuro",
+          "bad": true,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.fontanelle.why",
+          "why": "A sunken anterior fontanelle indicates reduced intracranial CSF volume, which tracks with systemic dehydration. At this age the fontanelle is a direct window into volume status that you lose access to once it closes (typically 12-18 months). A sunken fontanelle suggests at least 5% dehydration, often more."
         },
         {
-          id: "cl",
-          name: "Cl-",
-          value: "88",
-          unit: "mEq/L",
-          ref: "98-106",
-          critical: true,
-          bad: false,
-          why: "Low from loss of gastric HCl. Hypochloremia triggers the kidneys to retain bicarbonate (because Cl- and HCO3- are exchanged in the renal tubule), worsening the metabolic alkalosis.",
-          _slotRef: "phase[0].labs.cl.why"
+          "id": "mucous-membranes",
+          "label": "Mucous membranes",
+          "finding": "Dry, tacky lips and tongue",
+          "pos": "face",
+          "sys": "GI/Hydration",
+          "bad": true,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.mucous-membranes.why",
+          "why": "Dry, tacky lips and tongue are an early, reproducible bedside marker of dehydration — a finding to flag.\n\n- **Mucous membranes** dry out as total body water falls; tacky-to-dry tracks with roughly 5% or more fluid deficit\n- Combined with a sunken fontanelle and tenting skin, this places the child in at least moderate dehydration\n- It is one of the most reliable exam findings for estimating volume loss in a toddler"
         },
         {
-          id: "co2",
-          name: "CO2",
-          value: "30",
-          unit: "mEq/L",
-          ref: "20-28",
-          critical: true,
-          bad: true,
-          why: "Elevated total CO2 (bicarbonate) confirms metabolic alkalosis. The body is retaining bicarb to compensate for the massive H+ losses from vomiting. This alkalosis drives further potassium wasting through the kidney.",
-          _slotRef: "phase[0].labs.co2.why"
-        },
-        {
-          id: "bun",
-          name: "BUN",
-          value: "32",
-          unit: "mg/dL",
-          ref: "5-18",
-          critical: true,
-          bad: true,
-          why: "Elevated BUN with BUN/Cr ratio >20 indicates pre-renal azotemia. Reduced kidney perfusion from dehydration causes increased urea reabsorption in the proximal tubule. The kidneys are not damaged - they are underperfused.",
-          _slotRef: "phase[0].labs.bun.why"
-        },
-        {
-          id: "cr",
-          name: "Cr",
-          value: "0.5",
-          unit: "mg/dL",
-          ref: "0.2-0.4",
-          critical: true,
-          bad: false,
-          why: "Mildly elevated for a 2-year-old. GFR is declining from reduced renal blood flow. This is still pre-renal but approaching the threshold where acute kidney injury may develop if perfusion is not restored.",
-          _slotRef: "phase[0].labs.cr.why"
-        },
-        {
-          id: "glucose",
-          name: "Glucose",
-          value: "68",
-          unit: "mg/dL",
-          ref: "60-100",
-          critical: false,
-          bad: false,
-          _slotRef: "phase[0].labs.glucose.why"
-        },
-        {
-          id: "lactate",
-          name: "Lactate",
-          value: "3.2",
-          unit: "mmol/L",
-          ref: "0.5-2.0",
-          critical: true,
-          bad: false,
-          why: "Mildly elevated. Tissue perfusion is compromised enough that some cells are switching to anaerobic metabolism. This confirms the cap refill and mental status findings - this child is in compensated shock.",
-          _slotRef: "phase[0].labs.lactate.why"
+          "id": "behavior",
+          "label": "Behavior",
+          "finding": "Lethargic, arousable to voice briefly",
+          "pos": "head",
+          "sys": "Neuro",
+          "bad": true,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.behavior.why",
+          "why": "Lethargy that only briefly arouses to voice is an abnormal mental status — an end-organ effect of failing perfusion, not a tired child.\n\n- **Altered mental status** in dehydration reflects reduced cerebral perfusion as circulating volume drops\n- A previously active toddler who won't engage or reach is showing decompensation, not fatigue\n- Declining responsiveness is a marker that prompt resuscitation is needed"
         }
       ],
-      tools: null,
-      meds: null,
-      actions: null
+      "labs": [
+        {
+          "id": "na",
+          "name": "Na+",
+          "value": "134",
+          "unit": "mEq/L",
+          "ref": "133-145",
+          "bad": false,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.na.why",
+          "why": "Sodium sits just below the reference but is essentially isotonic — not the priority derangement in this child.\n\n- **Na 134** reflects mild, expected change in acute gastroenteritis and needs no separate urgent correction\n- It keeps this an **isotonic** dehydration, so standard isotonic fluid resuscitation is appropriate\n- The dangerous electrolytes here are the **potassium** and **chloride**, not the sodium"
+        },
+        {
+          "id": "k",
+          "name": "K+",
+          "value": "2.9",
+          "unit": "mEq/L",
+          "ref": "3.5-5.5",
+          "bad": true,
+          "critical": true,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.k.why",
+          "why": "Low from GI losses. Gastric fluid contains potassium, and the kidneys worsen it by excreting K+ to retain H+ during alkalosis. Below 3.0, ECG changes begin (flattened T waves, U waves). Below 2.5, arrhythmia risk is high."
+        },
+        {
+          "id": "cl",
+          "name": "Cl-",
+          "value": "88",
+          "unit": "mEq/L",
+          "ref": "98-106",
+          "bad": true,
+          "critical": true,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.cl.why",
+          "why": "Low from loss of gastric HCl. Hypochloremia triggers the kidneys to retain bicarbonate (because Cl- and HCO3- are exchanged in the renal tubule), worsening the metabolic alkalosis."
+        },
+        {
+          "id": "co2",
+          "name": "CO2",
+          "value": "30",
+          "unit": "mEq/L",
+          "ref": "20-28",
+          "bad": true,
+          "critical": true,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.co2.why",
+          "why": "Elevated total CO2 (bicarbonate) confirms metabolic alkalosis. The body is retaining bicarb to compensate for the massive H+ losses from vomiting. This alkalosis drives further potassium wasting through the kidney."
+        },
+        {
+          "id": "bun",
+          "name": "BUN",
+          "value": "32",
+          "unit": "mg/dL",
+          "ref": "5-18",
+          "bad": true,
+          "critical": true,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.bun.why",
+          "why": "Elevated BUN with BUN/Cr ratio >20 indicates pre-renal azotemia. Reduced kidney perfusion from dehydration causes increased urea reabsorption in the proximal tubule. The kidneys are not damaged - they are underperfused."
+        },
+        {
+          "id": "cr",
+          "name": "Cr",
+          "value": "0.5",
+          "unit": "mg/dL",
+          "ref": "0.2-0.4",
+          "bad": true,
+          "critical": true,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.cr.why",
+          "why": "Mildly elevated for a 2-year-old. GFR is declining from reduced renal blood flow. This is still pre-renal but approaching the threshold where acute kidney injury may develop if perfusion is not restored."
+        },
+        {
+          "id": "glucose",
+          "name": "Glucose",
+          "value": "68",
+          "unit": "mg/dL",
+          "ref": "60-100",
+          "bad": false,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.glucose.why",
+          "why": "Glucose is normal now, but in a vomiting toddler it's a value to recheck rather than forget.\n\n- **Glucose 68** is within range, so hypoglycemia isn't yet contributing to the lethargy\n- A 2-year-old's glycogen stores deplete within ~12–16 hours of poor intake, so this can fall quickly\n- It is already trending down by the next draw — recheck with any change in mental status"
+        },
+        {
+          "id": "lactate",
+          "name": "Lactate",
+          "value": "3.2",
+          "unit": "mmol/L",
+          "ref": "0.5-2.0",
+          "bad": true,
+          "critical": true,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.lactate.why",
+          "why": "Mildly elevated. Tissue perfusion is compromised enough that some cells are switching to anaerobic metabolism. This confirms the cap refill and mental status findings - this child is in compensated shock."
+        }
+      ],
+      "actions": {
+        "tools": {},
+        "meds": {}
+      }
     },
     {
-      id: "escalation",
-      name: "Escalation",
-      narrative: "Peripheral IV access was obtained on the second attempt due to poor venous filling from dehydration. Twenty minutes into admission, your reassessment reveals clinical deterioration. The child's hands and feet are now cold to the touch with a capillary refill time exceeding five seconds. You observe mottling extending from the knees distally in a reticular pattern. He responds only to painful stimulation with a weak grimace and withdrawal. His eyes are open but unfocused with no purposeful gaze. This represents a significant decline from his arrival status and suggests progression from compensated to decompensated hypovolemic shock.",
-      vitals: {
-        hr: {
-          id: "hr",
-          label: "HR",
-          value: "172",
-          unit: "bpm",
-          bad: true,
-          _slotRef: "phase[1].vitals.hr.why",
-          why: "Worsening tachycardia. Heart rate is climbing as the sympathetic system works harder. The child is losing the ability to compensate. Stroke volume is falling, so rate must increase further to maintain CO."
-        },
-        rr: {
-          id: "rr",
-          label: "RR",
-          value: "38",
-          unit: "/min",
-          bad: true,
-          _slotRef: "phase[1].vitals.rr.why",
-          why: "Now elevated (normal 20-30). Tachypnea is compensating for developing metabolic acidosis. Poor tissue perfusion causes lactic acid accumulation. The respiratory center increases rate to blow off CO2 and buffer the acidosis."
-        },
-        sbp: {
-          id: "sbp",
-          label: "BP",
-          value: "82",
-          unit: "mmHg",
-          bad: true,
-          _slotRef: "phase[1].vitals.sbp.why",
-          why: "Dropping. Still technically borderline normal, but trending DOWN. In a child who was 88 systolic, a drop to 82 is significant. Pediatric compensatory mechanisms are starting to fail. This is the transition from compensated to decompensated shock."
-        },
-        dbp: {
-          id: "dbp",
-          label: "BP",
-          value: "56",
-          unit: "mmHg",
-          bad: false,
-          _slotRef: "phase[1].vitals.dbp.why",
-          why: null
-        },
-        spo2: {
-          id: "spo2",
-          label: "SpO2",
-          value: "98",
-          unit: "%",
-          bad: false,
-          _slotRef: "phase[1].vitals.spo2.why",
-          why: "Still maintained. But remember: SpO2 tells you about lung function, not tissue perfusion. This child's tissues are starving despite adequate oxygenation."
-        },
-        temp: {
-          id: "temp",
-          label: "Temp",
-          value: "36.6",
-          unit: "C",
-          bad: false,
-          _slotRef: "phase[1].vitals.temp.why",
-          why: null
-        },
-        cap: {
-          id: "cap",
-          label: "Cap Refill",
-          value: "5",
-          unit: "sec",
-          bad: true,
-          _slotRef: "phase[1].vitals.cap.why",
-          why: "Significantly prolonged. Severe peripheral vasoconstriction. The microcirculation is shutting down. Lactate is building. Without fluid resuscitation, this child will hit the cliff - sudden cardiovascular collapse."
-        }
-      },
-      signs: [
+      "phaseIndex": 1,
+      "id": "intervene",
+      "stageType": "intervene",
+      "title": "Escalation",
+      "narrative": "Peripheral IV access was obtained on the second attempt due to poor venous filling from dehydration. Twenty minutes into admission, your reassessment reveals clinical deterioration. The child's hands and feet are now cold to the touch with a capillary refill time exceeding five seconds. You observe mottling extending from the knees distally in a reticular pattern. He responds only to painful stimulation with a weak grimace and withdrawal. His eyes are open but unfocused with no purposeful gaze. This represents a significant decline from his arrival status and suggests progression from compensated to decompensated hypovolemic shock.",
+      "vitals": [
         {
-          id: "mottling",
-          label: "Mottling",
-          finding: "Reticular pattern, knees and elbows bilaterally",
-          pos: "body",
-          sys: "Integumentary",
-          bad: false,
-          why: "Reticular mottling at the knees and elbows marks the perfusion boundary - proximal skin is still being perfused while distal skin is not. As shock progresses this boundary migrates centrally. When mottling reaches mid-thigh, cardiac arrest is often minutes away.",
-          _slotRef: "phase[1].signs.mottling.why"
+          "id": "hr",
+          "label": "HR",
+          "value": "172",
+          "unit": "bpm",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[1].vitals.hr.why",
+          "why": "Worsening tachycardia. Heart rate is climbing as the sympathetic system works harder. The child is losing the ability to compensate. Stroke volume is falling, so rate must increase further to maintain CO."
         },
         {
-          id: "urine-output",
-          label: "Urine output",
-          finding: "No urine output in 14 hours",
-          pos: "body",
-          sys: "Renal",
-          bad: false,
-          why: "Anuria in a child with a fluid deficit reflects renin-angiotensin activation preserving plasma volume at the cost of renal output. GFR drops as renal arterioles constrict. Prolonged hypoperfusion converts pre-renal azotemia into acute tubular necrosis - reversible now, but not indefinitely.",
-          _slotRef: "phase[1].signs.urine-output.why"
+          "id": "rr",
+          "label": "RR",
+          "value": "38",
+          "unit": "/min",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[1].vitals.rr.why",
+          "why": "Now elevated (normal 20-30). Tachypnea is compensating for developing metabolic acidosis. Poor tissue perfusion causes lactic acid accumulation. The respiratory center increases rate to blow off CO2 and buffer the acidosis."
         },
         {
-          id: "mental-status",
-          label: "Mental status",
-          finding: "Responds to pain only, weak grimace",
-          pos: "head",
-          sys: "Neuro",
-          bad: false,
-          why: "AVPU status of P (pain) in a previously alert child signals inadequate cerebral perfusion. The brain autoregulates until MAP drops below about 50 mmHg in a toddler. Once that threshold fails, consciousness deteriorates rapidly. This is a trajectory marker for imminent decompensation.",
-          _slotRef: "phase[1].signs.mental-status.why"
+          "id": "bp",
+          "label": "BP",
+          "value": "82/56",
+          "unit": "mmHg",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[1].vitals.bp.why",
+          "why": "Dropping. Still technically borderline normal, but trending DOWN. In a child who was 88 systolic, a drop to 82 is significant. Pediatric compensatory mechanisms are starting to fail. This is the transition from compensated to decompensated shock."
         },
         {
-          id: "extremities",
-          label: "Extremities",
-          finding: "Cool, clammy, pale",
-          pos: "body",
-          sys: "Cardiovascular",
-          bad: false,
-          _slotRef: "phase[1].signs.extremities.why"
+          "id": "spo2",
+          "label": "SpO2",
+          "value": "98",
+          "unit": "%",
+          "bad": false,
+          "cat": "vital",
+          "_slotRef": "phase[1].vitals.spo2.why",
+          "why": "Still maintained. But remember: SpO2 tells you about lung function, not tissue perfusion. This child's tissues are starving despite adequate oxygenation."
+        },
+        {
+          "id": "temp",
+          "label": "Temp",
+          "value": "36.6",
+          "unit": "C",
+          "bad": false,
+          "cat": "vital",
+          "_slotRef": "phase[1].vitals.temp.why",
+          "why": null
+        },
+        {
+          "id": "cap",
+          "label": "Cap Refill",
+          "value": "5",
+          "unit": "sec",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[1].vitals.cap.why",
+          "why": "Significantly prolonged. Severe peripheral vasoconstriction. The microcirculation is shutting down. Lactate is building. Without fluid resuscitation, this child will hit the cliff - sudden cardiovascular collapse."
         }
       ],
-      labs: [
+      "signs": [
         {
-          id: "k",
-          name: "K+",
-          value: "2.1",
-          unit: "mEq/L",
-          ref: "3.5-5.5",
-          critical: true,
-          bad: true,
-          why: "Critically low and worsening. At this level, the cardiac myocyte resting membrane potential is destabilized. The cell becomes hyperexcitable and prone to spontaneous depolarization, creating the substrate for ventricular tachycardia and torsades de pointes.",
-          _slotRef: "phase[1].labs.k.why"
+          "id": "mottling",
+          "label": "Mottling",
+          "finding": "Reticular pattern, knees and elbows bilaterally",
+          "pos": "body",
+          "sys": "Integumentary",
+          "bad": true,
+          "cat": "clinical",
+          "_slotRef": "phase[1].signs.mottling.why",
+          "why": "Reticular mottling at the knees and elbows marks the perfusion boundary - proximal skin is still being perfused while distal skin is not. As shock progresses this boundary migrates centrally. When mottling reaches mid-thigh, cardiac arrest is often minutes away."
         },
         {
-          id: "cl",
-          name: "Cl-",
-          value: "82",
-          unit: "mEq/L",
-          ref: "98-106",
-          critical: true,
-          bad: false,
-          why: "Worsening hypochloremia. Ongoing gastric losses continue to deplete chloride. The kidney cannot correct the alkalosis without adequate chloride for exchange in the collecting duct.",
-          _slotRef: "phase[1].labs.cl.why"
+          "id": "urine-output",
+          "label": "Urine output",
+          "finding": "No urine output in 14 hours",
+          "pos": "body",
+          "sys": "Renal",
+          "bad": true,
+          "cat": "clinical",
+          "_slotRef": "phase[1].signs.urine-output.why",
+          "why": "Anuria in a child with a fluid deficit reflects renin-angiotensin activation preserving plasma volume at the cost of renal output. GFR drops as renal arterioles constrict. Prolonged hypoperfusion converts pre-renal azotemia into acute tubular necrosis - reversible now, but not indefinitely."
         },
         {
-          id: "co2",
-          name: "CO2",
-          value: "34",
-          unit: "mEq/L",
-          ref: "20-28",
-          critical: true,
-          bad: false,
-          why: "Worsening alkalosis. Bicarb continues to climb as H+ losses continue. The alkalosis itself drives further K+ wasting - a vicious cycle that will continue until volume and chloride are replaced.",
-          _slotRef: "phase[1].labs.co2.why"
+          "id": "mental-status",
+          "label": "Mental status",
+          "finding": "Responds to pain only, weak grimace",
+          "pos": "head",
+          "sys": "Neuro",
+          "bad": true,
+          "cat": "clinical",
+          "_slotRef": "phase[1].signs.mental-status.why",
+          "why": "AVPU status of P (pain) in a previously alert child signals inadequate cerebral perfusion. The brain autoregulates until MAP drops below about 50 mmHg in a toddler. Once that threshold fails, consciousness deteriorates rapidly. This is a trajectory marker for imminent decompensation."
         },
         {
-          id: "bun",
-          name: "BUN",
-          value: "38",
-          unit: "mg/dL",
-          ref: "5-18",
-          critical: true,
-          bad: false,
-          why: "Rising from 32. Renal perfusion is declining further as the child progresses from compensated to decompensated shock. Without fluid resuscitation, acute kidney injury will follow.",
-          _slotRef: "phase[1].labs.bun.why"
-        },
-        {
-          id: "cr",
-          name: "Cr",
-          value: "0.7",
-          unit: "mg/dL",
-          ref: "0.2-0.4",
-          critical: true,
-          bad: false,
-          why: "Now clearly elevated. The kidneys are being injured by sustained hypoperfusion. Oliguria (no urine in 14 hours) confirms inadequate renal blood flow.",
-          _slotRef: "phase[1].labs.cr.why"
-        },
-        {
-          id: "lactate",
-          name: "Lactate",
-          value: "6.4",
-          unit: "mmol/L",
-          ref: "0.5-2.0",
-          critical: true,
-          bad: true,
-          why: "Doubled from 3.2. The child is transitioning from compensated to decompensated shock. Tissue oxygen debt is accumulating rapidly. Above 4 in pediatric shock correlates with significantly increased mortality.",
-          _slotRef: "phase[1].labs.lactate.why"
-        },
-        {
-          id: "glucose",
-          name: "Glucose",
-          value: "54",
-          unit: "mg/dL",
-          ref: "60-100",
-          critical: true,
-          bad: false,
-          why: "Dropping. Glycogen stores are depleting from prolonged fasting and metabolic stress. Approaching the threshold where neuronal function may be impaired. Needs monitoring and likely dextrose supplementation.",
-          _slotRef: "phase[1].labs.glucose.why"
-        },
-        {
-          id: "mg2",
-          name: "Mg2+",
-          value: "1.4",
-          unit: "mg/dL",
-          ref: "1.7-2.2",
-          critical: true,
-          bad: false,
-          why: "Low magnesium accompanies prolonged vomiting. Magnesium depletion makes it harder to correct potassium because Mg2+ is required for the Na/K ATPase pump to retain potassium intracellularly. Must replace Mg2+ to effectively correct K+.",
-          _slotRef: "phase[1].labs.mg2.why"
+          "id": "extremities",
+          "label": "Extremities",
+          "finding": "Cool, clammy, pale",
+          "pos": "body",
+          "sys": "Cardiovascular",
+          "bad": true,
+          "cat": "clinical",
+          "_slotRef": "phase[1].signs.extremities.why",
+          "why": "Cool, clammy, pale extremities mark the peripheral vasoconstriction of worsening shock — blood shunted centrally.\n\n- **Cool, clammy skin** reflects sympathetic clamp-down on peripheral vessels to defend core perfusion\n- Pallor and a cool gradient moving proximally track with falling cardiac output\n- Paired with a 5-second cap refill and mottling, this is decompensated, not compensated, shock"
         }
       ],
-      tools: [
-        "ivKit",
-        "stethoscope",
-        "capRefill",
-        "glucometer",
-        "thermometer",
-        "defib"
+      "labs": [
+        {
+          "id": "k",
+          "name": "K+",
+          "value": "2.1",
+          "unit": "mEq/L",
+          "ref": "3.5-5.5",
+          "bad": true,
+          "critical": true,
+          "cat": "lab",
+          "_slotRef": "phase[1].labs.k.why",
+          "why": "Critically low and worsening. At this level, the cardiac myocyte resting membrane potential is destabilized. The cell becomes hyperexcitable and prone to spontaneous depolarization, creating the substrate for ventricular tachycardia and torsades de pointes."
+        },
+        {
+          "id": "cl",
+          "name": "Cl-",
+          "value": "82",
+          "unit": "mEq/L",
+          "ref": "98-106",
+          "bad": true,
+          "critical": true,
+          "cat": "lab",
+          "_slotRef": "phase[1].labs.cl.why",
+          "why": "Worsening hypochloremia. Ongoing gastric losses continue to deplete chloride. The kidney cannot correct the alkalosis without adequate chloride for exchange in the collecting duct."
+        },
+        {
+          "id": "co2",
+          "name": "CO2",
+          "value": "34",
+          "unit": "mEq/L",
+          "ref": "20-28",
+          "bad": true,
+          "critical": true,
+          "cat": "lab",
+          "_slotRef": "phase[1].labs.co2.why",
+          "why": "Worsening alkalosis. Bicarb continues to climb as H+ losses continue. The alkalosis itself drives further K+ wasting - a vicious cycle that will continue until volume and chloride are replaced."
+        },
+        {
+          "id": "bun",
+          "name": "BUN",
+          "value": "38",
+          "unit": "mg/dL",
+          "ref": "5-18",
+          "bad": true,
+          "critical": true,
+          "cat": "lab",
+          "_slotRef": "phase[1].labs.bun.why",
+          "why": "Rising from 32. Renal perfusion is declining further as the child progresses from compensated to decompensated shock. Without fluid resuscitation, acute kidney injury will follow."
+        },
+        {
+          "id": "cr",
+          "name": "Cr",
+          "value": "0.7",
+          "unit": "mg/dL",
+          "ref": "0.2-0.4",
+          "bad": true,
+          "critical": true,
+          "cat": "lab",
+          "_slotRef": "phase[1].labs.cr.why",
+          "why": "Now clearly elevated. The kidneys are being injured by sustained hypoperfusion. Oliguria (no urine in 14 hours) confirms inadequate renal blood flow."
+        },
+        {
+          "id": "lactate",
+          "name": "Lactate",
+          "value": "6.4",
+          "unit": "mmol/L",
+          "ref": "0.5-2.0",
+          "bad": true,
+          "critical": true,
+          "cat": "lab",
+          "_slotRef": "phase[1].labs.lactate.why",
+          "why": "Doubled from 3.2. The child is transitioning from compensated to decompensated shock. Tissue oxygen debt is accumulating rapidly. Above 4 in pediatric shock correlates with significantly increased mortality."
+        },
+        {
+          "id": "glucose",
+          "name": "Glucose",
+          "value": "54",
+          "unit": "mg/dL",
+          "ref": "60-100",
+          "bad": true,
+          "critical": true,
+          "cat": "lab",
+          "_slotRef": "phase[1].labs.glucose.why",
+          "why": "Dropping. Glycogen stores are depleting from prolonged fasting and metabolic stress. Approaching the threshold where neuronal function may be impaired. Needs monitoring and likely dextrose supplementation."
+        },
+        {
+          "id": "mg2",
+          "name": "Mg2+",
+          "value": "1.4",
+          "unit": "mg/dL",
+          "ref": "1.7-2.2",
+          "bad": true,
+          "critical": true,
+          "cat": "lab",
+          "_slotRef": "phase[1].labs.mg2.why",
+          "why": "Low magnesium accompanies prolonged vomiting. Magnesium depletion makes it harder to correct potassium because Mg2+ is required for the Na/K ATPase pump to retain potassium intracellularly. Must replace Mg2+ to effectively correct K+."
+        }
       ],
-      meds: [
-        "nsBolus",
-        "dextroseBolus",
-        "acetaminophen",
-        "epiIV",
-        "albuterol",
-        "ceftriaxone"
-      ],
-      actions: {
-        tools: {
-          ivKit: {
-            ok: true,
-            pri: 1,
-            fb: "Confirm and secure IV access. May need a second line. If this child decompensates, you need reliable access for fluids and emergency meds. Consider IO if peripheral access is failing - dehydrated toddlers have collapsed veins."
+      "actions": {
+        "tools": {
+          "ivKit": {
+            "id": "ivKit",
+            "priority": "correct",
+            "ok": true,
+            "_slotRef": "phase[1].actions.tools.ivKit.fb",
+            "fb": "Confirm and secure IV access. May need a second line. If this child decompensates, you need reliable access for fluids and emergency meds. Consider IO if peripheral access is failing - dehydrated toddlers have collapsed veins."
           },
-          stethoscope: {
-            ok: true,
-            pri: null,
-            fb: "Auscultate before and after each bolus. Listen for gallop (S3 = volume overload), crackles (pulmonary edema from over-resuscitation). Also establishes if bowel sounds are present - ileus from hypokalemia is possible with prolonged vomiting."
+          "stethoscope": {
+            "id": "stethoscope",
+            "priority": "correct",
+            "ok": true,
+            "_slotRef": "phase[1].actions.tools.stethoscope.fb",
+            "fb": "Auscultate before and after each bolus. Listen for gallop (S3 = volume overload), crackles (pulmonary edema from over-resuscitation). Also establishes if bowel sounds are present - ileus from hypokalemia is possible with prolonged vomiting."
           },
-          capRefill: {
-            ok: true,
-            pri: null,
-            fb: "Your best real-time perfusion marker. Check after each 20 mL/kg bolus. Improvement from 5s toward 2-3s indicates effective volume resuscitation. No improvement after 40-60 mL/kg suggests either ongoing losses or a different etiology."
+          "capRefill": {
+            "id": "capRefill",
+            "priority": "correct",
+            "ok": true,
+            "_slotRef": "phase[1].actions.tools.capRefill.fb",
+            "fb": "Your best real-time perfusion marker. Check after each 20 mL/kg bolus. Improvement from 5s toward 2-3s indicates effective volume resuscitation. No improvement after 40-60 mL/kg suggests either ongoing losses or a different etiology."
           },
-          glucometer: {
-            ok: true,
-            pri: 2,
-            fb: "Check immediately. Toddlers with 3 days of vomiting and poor intake are at HIGH risk for hypoglycemia. Hepatic glycogen stores in a 2-year-old deplete within 12-16 hours of fasting. Hypoglycemia causes altered mental status and can mimic septic shock."
+          "glucometer": {
+            "id": "glucometer",
+            "priority": "correct",
+            "ok": true,
+            "_slotRef": "phase[1].actions.tools.glucometer.fb",
+            "fb": "Check immediately. Toddlers with 3 days of vomiting and poor intake are at HIGH risk for hypoglycemia. Hepatic glycogen stores in a 2-year-old deplete within 12-16 hours of fasting. Hypoglycemia causes altered mental status and can mimic septic shock."
           },
-          thermometer: {
-            ok: false,
-            pri: null,
-            fb: "Temperature is normal and stable. This child's problem is volume depletion, not infection. Rechecking temp doesn't change your immediate management - you need fluid resuscitation."
+          "thermometer": {
+            "id": "thermometer",
+            "priority": "distractor-misc",
+            "ok": false,
+            "_slotRef": "phase[1].actions.tools.thermometer.fb",
+            "fb": "Temperature is normal and stable. This child's problem is volume depletion, not infection. Rechecking temp doesn't change your immediate management - you need fluid resuscitation."
           },
-          defib: {
-            ok: false,
-            pri: null,
-            fb: "Whoa there. This toddler is in sinus tachycardia from dehydration. You just defibrillated a child who needed a glass of water. The rhythm is a normal compensatory response to hypovolemia. Defibrillation is for VF or pulseless VT. This child has a pulse and an organized rhythm. Step away from the defibrillator and go hang a bag of saline."
+          "defib": {
+            "id": "defib",
+            "priority": "distractor-misc",
+            "ok": false,
+            "_slotRef": "phase[1].actions.tools.defib.fb",
+            "fb": "Whoa there. This toddler is in sinus tachycardia from dehydration. You just defibrillated a child who needed a glass of water. The rhythm is a normal compensatory response to hypovolemia. Defibrillation is for VF or pulseless VT. This child has a pulse and an organized rhythm. Step away from the defibrillator and go hang a bag of saline."
           }
         },
-        meds: {
-          nsBolus: {
-            ok: true,
-            pri: 1,
-            fb: "First-line. Push 20 mL/kg (240 mL for 12 kg) normal saline over 5-10 minutes. Reassess perfusion markers after each bolus. May need 40-60 mL/kg total. Isotonic crystalloid replaces intravascular volume and improves preload, stroke volume, and cardiac output."
+        "meds": {
+          "nsBolus": {
+            "id": "nsBolus",
+            "priority": "tied-correct",
+            "ok": true,
+            "_slotRef": "phase[1].actions.meds.nsBolus.fb",
+            "fb": "First-line. Push 20 mL/kg (240 mL for 12 kg) normal saline over 5-10 minutes. Reassess perfusion markers after each bolus. May need 40-60 mL/kg total. Isotonic crystalloid replaces intravascular volume and improves preload, stroke volume, and cardiac output."
           },
-          dextroseBolus: {
-            ok: false,
-            pri: null,
-            fb: "Check glucose first, then give only if < 60 mg/dL. Prolonged vomiting with poor intake puts this child at risk, but empiric dextrose without checking can cause rebound hyperglycemia and osmotic complications. Always measure first."
+          "dextroseBolus": {
+            "id": "dextroseBolus",
+            "priority": "correct",
+            "ok": true,
+            "_slotRef": "phase[1].actions.meds.dextroseBolus.fb",
+            "fb": "Indicated — glucose is 54 mg/dL, below the 60 mg/dL treatment threshold outside the neonatal period. Give D25W 2 mL/kg (or D10W 5 mL/kg) IV. Three days of vomiting with poor intake exhausts a toddler's hepatic glycogen within 12–16 hours, and hypoglycemia worsens both mental status and myocardial function on top of the shock. Volume resuscitation stays the first priority, but the low glucose needs correcting alongside it — don't leave it on the chart."
           },
-          acetaminophen: {
-            ok: false,
-            pri: null,
-            fb: "Not indicated. Temperature is 36.6C - normal. There is no fever to treat. Giving acetaminophen to a dehydrated child with no fever adds no benefit and creates a false sense of action. Focus on volume."
+          "acetaminophen": {
+            "id": "acetaminophen",
+            "priority": "distractor-misc",
+            "ok": false,
+            "_slotRef": "phase[1].actions.meds.acetaminophen.fb",
+            "fb": "Not indicated. Temperature is 36.6C - normal. There is no fever to treat. Giving acetaminophen to a dehydrated child with no fever adds no benefit and creates a false sense of action. Focus on volume."
           },
-          epiIV: {
-            ok: false,
-            pri: null,
-            fb: "Premature. This is hypovolemic shock, not distributive. The treatment is volume replacement, not vasopressors. Epinephrine in an empty vascular system just squeezes harder on nothing. Fill the tank first."
+          "epiIV": {
+            "id": "epiIV",
+            "priority": "distractor-clinical",
+            "ok": false,
+            "_slotRef": "phase[1].actions.meds.epiIV.fb",
+            "fb": "Premature. This is hypovolemic shock, not distributive. The treatment is volume replacement, not vasopressors. Epinephrine in an empty vascular system just squeezes harder on nothing. Fill the tank first."
           },
-          albuterol: {
-            ok: false,
-            pri: null,
-            fb: "No respiratory pathology here. The tachypnea is metabolic compensation for lactic acidosis, not bronchospasm. Albuterol would add tachycardia without addressing the underlying volume deficit."
+          "albuterol": {
+            "id": "albuterol",
+            "priority": "distractor-misc",
+            "ok": false,
+            "_slotRef": "phase[1].actions.meds.albuterol.fb",
+            "fb": "No respiratory pathology here. The tachypnea is metabolic compensation for lactic acidosis, not bronchospasm. Albuterol would add tachycardia without addressing the underlying volume deficit."
           },
-          ceftriaxone: {
-            ok: false,
-            pri: null,
-            fb: "No evidence of infection. Afebrile, no localizing signs, clear history of viral gastroenteritis. Antibiotics are for septic shock, not hypovolemic shock from GI losses. Unnecessary antibiotics add risk without benefit."
+          "ceftriaxone": {
+            "id": "ceftriaxone",
+            "priority": "distractor-clinical",
+            "ok": false,
+            "_slotRef": "phase[1].actions.meds.ceftriaxone.fb",
+            "fb": "No evidence of infection. Afebrile, no localizing signs, clear history of viral gastroenteritis. Antibiotics are for septic shock, not hypovolemic shock from GI losses. Unnecessary antibiotics add risk without benefit."
           }
         }
       }
     }
   ],
-  curveball: {
-    name: "Wide-Complex Tachycardia",
-    narrative: "Near the completion of the first 20 mL/kg normal saline bolus, the cardiac monitor alarm activates with a rhythm change. The previously narrow-complex sinus tachycardia has been replaced by a wide-complex tachycardia at a rate of 220 beats per minute. The QRS morphology is broad and bizarre with no discernible P waves. The child's skin color rapidly transitions from pale to ashen gray and he becomes unresponsive. The clinical picture is consistent with ventricular tachycardia, and given the three-day history of persistent vomiting, the most likely etiology is a hypokalemia-driven arrhythmia secondary to ongoing gastrointestinal electrolyte losses.",
-    vitals: {
-      hr: {
-        id: "hr",
-        label: "HR",
-        value: "220",
-        unit: "bpm",
-        bad: false,
-        _slotRef: "phase[curveball].vitals.hr.why",
-        why: null
-      },
-      rr: {
-        id: "rr",
-        label: "RR",
-        value: "42",
-        unit: "/min",
-        bad: false,
-        _slotRef: "phase[curveball].vitals.rr.why",
-        why: null
-      },
-      sbp: {
-        id: "sbp",
-        label: "BP",
-        value: "64",
-        unit: "mmHg",
-        bad: false,
-        _slotRef: "phase[curveball].vitals.sbp.why",
-        why: null
-      },
-      dbp: {
-        id: "dbp",
-        label: "BP",
-        value: "38",
-        unit: "mmHg",
-        bad: false,
-        _slotRef: "phase[curveball].vitals.dbp.why",
-        why: null
-      },
-      spo2: {
-        id: "spo2",
-        label: "SpO2",
-        value: "94",
-        unit: "%",
-        bad: false,
-        _slotRef: "phase[curveball].vitals.spo2.why",
-        why: null
-      },
-      temp: {
-        id: "temp",
-        label: "Temp",
-        value: "36.6",
-        unit: "C",
-        bad: false,
-        _slotRef: "phase[curveball].vitals.temp.why",
-        why: null
-      },
-      cap: {
-        id: "cap",
-        label: "Cap Refill",
-        value: "6",
-        unit: "sec",
-        bad: false,
-        _slotRef: "phase[curveball].vitals.cap.why",
-        why: null
-      }
-    },
-    signs: [
+  "curveball": {
+    "name": "Wide-Complex Tachycardia",
+    "narrative": "Near the completion of the first 20 mL/kg normal saline bolus, the cardiac monitor alarm activates with a rhythm change. The previously narrow-complex sinus tachycardia has been replaced by a wide-complex tachycardia at a rate of 220 beats per minute. The QRS morphology is broad and bizarre with no discernible P waves. The child's skin color rapidly transitions from pale to ashen gray and he becomes unresponsive. The clinical picture is consistent with ventricular tachycardia, and given the three-day history of persistent vomiting, the most likely etiology is a hypokalemia-driven arrhythmia secondary to ongoing gastrointestinal electrolyte losses.",
+    "vitals": [
       {
-        id: "rhythm",
-        label: "Rhythm",
-        finding: "Wide-complex tachycardia at 220 bpm, QRS >0.09s, no P waves",
-        pos: "body",
-        bad: false,
-        _slotRef: "phase[curveball].signs.rhythm.why"
+        "id": "hr",
+        "label": "HR",
+        "value": "220",
+        "unit": "bpm",
+        "bad": false,
+        "cat": "vital",
+        "_slotRef": "phase[curveball].vitals.hr.why",
+        "why": null
       },
       {
-        id: "perfusion",
-        label: "Perfusion",
-        finding: "Pale, diaphoretic, thready pulses",
-        pos: "body",
-        bad: false,
-        _slotRef: "phase[curveball].signs.perfusion.why"
+        "id": "rr",
+        "label": "RR",
+        "value": "42",
+        "unit": "/min",
+        "bad": false,
+        "cat": "vital",
+        "_slotRef": "phase[curveball].vitals.rr.why",
+        "why": null
       },
       {
-        id: "mental-status",
-        label: "Mental status",
-        finding: "Eyes rolling back, barely responsive",
-        pos: "head",
-        bad: false,
-        _slotRef: "phase[curveball].signs.mental-status.why"
+        "id": "bp",
+        "label": "BP",
+        "value": "64/38",
+        "unit": "mmHg",
+        "bad": false,
+        "cat": "vital",
+        "_slotRef": "phase[curveball].vitals.bp.why",
+        "why": null
       },
       {
-        id: "color",
-        label: "Color",
-        finding: "Ashen gray",
-        pos: "face",
-        bad: false,
-        _slotRef: "phase[curveball].signs.color.why"
+        "id": "spo2",
+        "label": "SpO2",
+        "value": "94",
+        "unit": "%",
+        "bad": false,
+        "cat": "vital",
+        "_slotRef": "phase[curveball].vitals.spo2.why",
+        "why": null
+      },
+      {
+        "id": "temp",
+        "label": "Temp",
+        "value": "36.6",
+        "unit": "C",
+        "bad": false,
+        "cat": "vital",
+        "_slotRef": "phase[curveball].vitals.temp.why",
+        "why": null
+      },
+      {
+        "id": "cap",
+        "label": "Cap Refill",
+        "value": "6",
+        "unit": "sec",
+        "bad": false,
+        "cat": "vital",
+        "_slotRef": "phase[curveball].vitals.cap.why",
+        "why": null
       }
     ],
-    labs: [
+    "signs": [
       {
-        id: "k",
-        name: "K+",
-        value: "1.8",
-        unit: "mEq/L",
-        ref: "3.5-5.5",
-        critical: true,
-        bad: false,
-        why: "Critically low - this is the cause of the arrhythmia. At K+ 1.8, the myocyte resting membrane potential has shifted from -90mV toward -70mV. The cell is partially depolarized and hyperexcitable, generating the wide-complex tachycardia you see on the monitor.",
-        _slotRef: "phase[curveball].labs.k.why"
+        "id": "rhythm",
+        "label": "Rhythm",
+        "finding": "Wide-complex tachycardia at 220 bpm, QRS >0.09s, no P waves",
+        "pos": "body",
+        "bad": false,
+        "cat": "clinical",
+        "_slotRef": "phase[curveball].signs.rhythm.why",
+        "why": null
       },
       {
-        id: "mg2",
-        name: "Mg2+",
-        value: "1.2",
-        unit: "mg/dL",
-        ref: "1.7-2.2",
-        critical: true,
-        bad: false,
-        why: "Low magnesium makes the arrhythmia harder to treat. Mg2+ stabilizes the cardiac membrane independent of K+ levels. IV magnesium 25-50 mg/kg should be given alongside potassium replacement.",
-        _slotRef: "phase[curveball].labs.mg2.why"
+        "id": "perfusion",
+        "label": "Perfusion",
+        "finding": "Pale, diaphoretic, thready pulses",
+        "pos": "body",
+        "bad": false,
+        "cat": "clinical",
+        "_slotRef": "phase[curveball].signs.perfusion.why",
+        "why": null
       },
       {
-        id: "ica2",
-        name: "iCa2+",
-        value: "0.98",
-        unit: "mmol/L",
-        ref: "1.12-1.32",
-        critical: true,
-        bad: false,
-        why: "Low ionized calcium from the alkalosis. Alkalemia increases protein binding of calcium, reducing the free (ionized) fraction. Low iCa2+ further destabilizes cardiac conduction and can prolong the QT interval.",
-        _slotRef: "phase[curveball].labs.ica2.why"
+        "id": "mental-status",
+        "label": "Mental status",
+        "finding": "Eyes rolling back, barely responsive",
+        "pos": "head",
+        "bad": false,
+        "cat": "clinical",
+        "_slotRef": "phase[curveball].signs.mental-status.why",
+        "why": null
       },
       {
-        id: "ph",
-        name: "pH",
-        value: "7.52",
-        unit: "",
-        ref: "7.35-7.45",
-        critical: true,
-        bad: false,
-        why: "Significantly alkalotic from ongoing gastric H+ losses. The alkalosis is driving the hypokalemia (kidneys waste K+ to retain H+) and the hypocalcemia (alkalemia increases Ca2+ protein binding). Fixing the pH helps fix the electrolytes.",
-        _slotRef: "phase[curveball].labs.ph.why"
+        "id": "color",
+        "label": "Color",
+        "finding": "Ashen gray",
+        "pos": "face",
+        "bad": false,
+        "cat": "clinical",
+        "_slotRef": "phase[curveball].signs.color.why",
+        "why": null
       }
     ],
-    tools: [
-      "stethoscope",
-      "defib",
-      "glucometer",
-      "ivKit",
-      "capRefill",
-      "thermometer"
+    "labs": [
+      {
+        "id": "k",
+        "name": "K+",
+        "value": "1.8",
+        "unit": "mEq/L",
+        "ref": "3.5-5.5",
+        "bad": true,
+        "critical": true,
+        "cat": "lab",
+        "_slotRef": "phase[curveball].labs.k.why",
+        "why": "Critically low - this is the cause of the arrhythmia. At K+ 1.8, the myocyte resting membrane potential has shifted from -90mV toward -70mV. The cell is partially depolarized and hyperexcitable, generating the wide-complex tachycardia you see on the monitor."
+      },
+      {
+        "id": "mg2",
+        "name": "Mg2+",
+        "value": "1.2",
+        "unit": "mg/dL",
+        "ref": "1.7-2.2",
+        "bad": true,
+        "critical": true,
+        "cat": "lab",
+        "_slotRef": "phase[curveball].labs.mg2.why",
+        "why": "Low magnesium makes the arrhythmia harder to treat. Mg2+ stabilizes the cardiac membrane independent of K+ levels. IV magnesium 25-50 mg/kg should be given alongside potassium replacement."
+      },
+      {
+        "id": "ica2",
+        "name": "iCa2+",
+        "value": "0.98",
+        "unit": "mmol/L",
+        "ref": "1.12-1.32",
+        "bad": true,
+        "critical": true,
+        "cat": "lab",
+        "_slotRef": "phase[curveball].labs.ica2.why",
+        "why": "Low ionized calcium from the alkalosis. Alkalemia increases protein binding of calcium, reducing the free (ionized) fraction. Low iCa2+ further destabilizes cardiac conduction and can prolong the QT interval."
+      },
+      {
+        "id": "ph",
+        "name": "pH",
+        "value": "7.52",
+        "unit": "",
+        "ref": "7.35-7.45",
+        "bad": true,
+        "critical": true,
+        "cat": "lab",
+        "_slotRef": "phase[curveball].labs.ph.why",
+        "why": "Significantly alkalotic from ongoing gastric H+ losses. The alkalosis is driving the hypokalemia (kidneys waste K+ to retain H+) and the hypocalcemia (alkalemia increases Ca2+ protein binding). Fixing the pH helps fix the electrolytes."
+      }
     ],
-    meds: [
-      "adenosine",
-      "epiIV",
-      "nsBolus",
-      "lorazepam",
-      "atropine",
-      "albuterol"
-    ],
-    actions: {
-      tools: {
-        stethoscope: {
-          ok: true,
-          pri: null,
-          fb: "Auscultate quickly to confirm rate and rhythm. In wide-complex tachycardia, you're listening for whether beats are regular (VT, SVT with aberrancy) or irregular (polymorphic VT/torsades). Also check for cannon A waves in the neck veins - present in VT due to AV dissociation."
+    "actions": {
+      "tools": {
+        "stethoscope": {
+          "id": "stethoscope",
+          "priority": "correct",
+          "ok": true,
+          "_slotRef": "phase[curveball].actions.tools.stethoscope.fb",
+          "fb": "Auscultate quickly to confirm rate and rhythm. In wide-complex tachycardia, you're listening for whether beats are regular (VT, SVT with aberrancy) or irregular (polymorphic VT/torsades). Also check for cannon A waves in the neck veins - present in VT due to AV dissociation."
         },
-        defib: {
-          ok: true,
-          pri: 1,
-          fb: "CRITICAL. Get the defibrillator pads ON immediately. If this child becomes pulseless or hemodynamically unstable (which they are), synchronized cardioversion at 0.5-1 J/kg is first-line for unstable wide-complex tachycardia. You must be ready. In peds, the sequence is: unstable + wide complex = synchronized cardioversion first."
+        "defib": {
+          "id": "defib",
+          "priority": "tied-correct",
+          "ok": true,
+          "_slotRef": "phase[curveball].actions.tools.defib.fb",
+          "fb": "CRITICAL. Get the defibrillator pads ON immediately. If this child becomes pulseless or hemodynamically unstable (which they are), synchronized cardioversion at 0.5-1 J/kg is first-line for unstable wide-complex tachycardia. You must be ready. In peds, the sequence is: unstable + wide complex = synchronized cardioversion first."
         },
-        glucometer: {
-          ok: true,
-          pri: null,
-          fb: "Quick check. Hypoglycemia can worsen any cardiac arrhythmia and this child has been vomiting for 3 days. Low glucose exacerbates myocardial dysfunction."
+        "glucometer": {
+          "id": "glucometer",
+          "priority": "correct",
+          "ok": true,
+          "_slotRef": "phase[curveball].actions.tools.glucometer.fb",
+          "fb": "Quick check. Hypoglycemia can worsen any cardiac arrhythmia and this child has been vomiting for 3 days. Low glucose exacerbates myocardial dysfunction."
         },
-        ivKit: {
-          ok: true,
-          pri: null,
-          fb: "Confirm IV access is patent. You may need to push medications or give volume. If IV was positional or infiltrated, you need working access NOW before cardioversion or drug administration."
+        "ivKit": {
+          "id": "ivKit",
+          "priority": "correct",
+          "ok": true,
+          "_slotRef": "phase[curveball].actions.tools.ivKit.fb",
+          "fb": "Confirm IV access is patent. You may need to push medications or give volume. If IV was positional or infiltrated, you need working access NOW before cardioversion or drug administration."
         },
-        capRefill: {
-          ok: false,
-          pri: null,
-          fb: "You already know perfusion is terrible - the child is gray and unresponsive. Cap refill confirms what you can see. Don't delay treatment to do an assessment you don't need right now. Act."
+        "capRefill": {
+          "id": "capRefill",
+          "priority": "distractor-misc",
+          "ok": false,
+          "_slotRef": "phase[curveball].actions.tools.capRefill.fb",
+          "fb": "You already know perfusion is terrible - the child is gray and unresponsive. Cap refill confirms what you can see. Don't delay treatment to do an assessment you don't need right now. Act."
         },
-        thermometer: {
-          ok: false,
-          pri: null,
-          fb: "Temperature is irrelevant in an acute arrhythmia emergency. This child needs rhythm correction, not temperature monitoring. Every second counts."
+        "thermometer": {
+          "id": "thermometer",
+          "priority": "distractor-misc",
+          "ok": false,
+          "_slotRef": "phase[curveball].actions.tools.thermometer.fb",
+          "fb": "Temperature is irrelevant in an acute arrhythmia emergency. This child needs rhythm correction, not temperature monitoring. Every second counts."
         }
       },
-      meds: {
-        adenosine: {
-          ok: false,
-          pri: null,
-          fb: "DANGEROUS in this context. Adenosine is for NARROW-complex SVT, not wide-complex tachycardia. If this is ventricular tachycardia (which it likely is in a hypokalemic child), adenosine will not convert it and may worsen hemodynamic collapse. Additionally, if this is torsades de pointes from hypokalemia, adenosine is contraindicated. The correct treatment is to FIX THE POTASSIUM and cardiovert if unstable."
+      "meds": {
+        "adenosine": {
+          "id": "adenosine",
+          "priority": "distractor-clinical",
+          "ok": false,
+          "_slotRef": "phase[curveball].actions.meds.adenosine.fb",
+          "fb": "DANGEROUS in this context. Adenosine is for NARROW-complex SVT, not wide-complex tachycardia. If this is ventricular tachycardia (which it likely is in a hypokalemic child), adenosine will not convert it and may worsen hemodynamic collapse. Additionally, if this is torsades de pointes from hypokalemia, adenosine is contraindicated. The correct treatment is to FIX THE POTASSIUM and cardiovert if unstable."
         },
-        epiIV: {
-          ok: false,
-          pri: null,
-          fb: "Not first-line for wide-complex tachycardia with a pulse. Epinephrine increases myocardial oxygen demand, raises heart rate further, and can trigger VF in an already irritable myocardium. It's indicated for pulseless arrest, not organized tachyarrhythmia. If this child goes pulseless, then epi enters the algorithm."
+        "epiIV": {
+          "id": "epiIV",
+          "priority": "distractor-clinical",
+          "ok": false,
+          "_slotRef": "phase[curveball].actions.meds.epiIV.fb",
+          "fb": "Not first-line for wide-complex tachycardia with a pulse. Epinephrine increases myocardial oxygen demand, raises heart rate further, and can trigger VF in an already irritable myocardium. It's indicated for pulseless arrest, not organized tachyarrhythmia. If this child goes pulseless, then epi enters the algorithm."
         },
-        nsBolus: {
-          ok: true,
-          pri: null,
-          fb: "Appropriate as a temporizing measure. This child is hypovolemic AND arrhythmic. Volume helps maintain preload during the arrhythmia. But the DEFINITIVE treatment is correcting the rhythm and the underlying electrolyte abnormality. Fluid alone won't fix a potassium of 2.0."
+        "nsBolus": {
+          "id": "nsBolus",
+          "priority": "correct",
+          "ok": true,
+          "_slotRef": "phase[curveball].actions.meds.nsBolus.fb",
+          "fb": "Appropriate as a temporizing measure. This child is hypovolemic AND arrhythmic. Volume helps maintain preload during the arrhythmia. But the DEFINITIVE treatment is correcting the rhythm and the underlying electrolyte abnormality. Fluid alone won't fix a potassium of 2.0."
         },
-        lorazepam: {
-          ok: false,
-          pri: null,
-          fb: "Not indicated for arrhythmia. Benzodiazepines are for seizures or procedural sedation. If you need to cardiovert, you WILL need sedation (etomidate or ketamine preferred), but lorazepam alone does nothing for the rhythm."
+        "lorazepam": {
+          "id": "lorazepam",
+          "priority": "distractor-misc",
+          "ok": false,
+          "_slotRef": "phase[curveball].actions.meds.lorazepam.fb",
+          "fb": "Not indicated for arrhythmia. Benzodiazepines are for seizures or procedural sedation. If you need to cardiovert, you WILL need sedation (etomidate or ketamine preferred), but lorazepam alone does nothing for the rhythm."
         },
-        atropine: {
-          ok: false,
-          pri: null,
-          fb: "Atropine increases heart rate by blocking vagal tone. This child's rate is ALREADY 220. Pushing atropine would be like adding fuel to a fire. Atropine is for symptomatic bradycardia, the opposite of this situation."
+        "atropine": {
+          "id": "atropine",
+          "priority": "distractor-misc",
+          "ok": false,
+          "_slotRef": "phase[curveball].actions.meds.atropine.fb",
+          "fb": "Atropine increases heart rate by blocking vagal tone. This child's rate is ALREADY 220. Pushing atropine would be like adding fuel to a fire. Atropine is for symptomatic bradycardia, the opposite of this situation."
         },
-        albuterol: {
-          ok: false,
-          pri: null,
-          fb: "No respiratory indication. The tachypnea is from poor cardiac output and acidosis. Albuterol is a beta-agonist that would further stimulate the already irritable myocardium and potentially worsen the arrhythmia."
+        "albuterol": {
+          "id": "albuterol",
+          "priority": "distractor-misc",
+          "ok": false,
+          "_slotRef": "phase[curveball].actions.meds.albuterol.fb",
+          "fb": "No respiratory indication. The tachypnea is from poor cardiac output and acidosis. Albuterol is a beta-agonist that would further stimulate the already irritable myocardium and potentially worsen the arrhythmia."
         }
       }
     },
-    teaches: [
+    "teaches": [
       {
-        title: "Vomiting and Electrolyte Derangement",
-        content: "Prolonged vomiting causes loss of H+ and Cl- from gastric secretions, producing hypochloremic, hypokalemic metabolic alkalosis. The kidneys compensate by excreting K+ and retaining H+, worsening hypokalemia. When serum K+ drops below 2.5-3.0 mEq/L, the cardiac myocyte resting membrane potential becomes less negative (partially depolarized), making the cell hyperexcitable. This predisposes to ventricular arrhythmias including VT and torsades de pointes.",
-        tldr: "Vomiting loses stomach acid (H+ and Cl-), which drags potassium down with it. Low potassium makes heart cells electrically unstable and prone to dangerous arrhythmias."
+        "title": "Vomiting and Electrolyte Derangement",
+        "content": "Prolonged vomiting causes loss of H+ and Cl- from gastric secretions, producing hypochloremic, hypokalemic metabolic alkalosis. The kidneys compensate by excreting K+ and retaining H+, worsening hypokalemia. When serum K+ drops below 2.5-3.0 mEq/L, the cardiac myocyte resting membrane potential becomes less negative (partially depolarized), making the cell hyperexcitable. This predisposes to ventricular arrhythmias including VT and torsades de pointes.",
+        "tldr": "Vomiting loses stomach acid (H+ and Cl-), which drags potassium down with it. Low potassium makes heart cells electrically unstable and prone to dangerous arrhythmias."
       },
       {
-        title: "SVT vs VT in Pediatrics",
-        content: "Differentiating SVT from VT: SVT typically shows narrow QRS (< 0.09s), regular rate, and may have P waves buried in T waves. VT shows wide QRS (> 0.09s), may be slightly irregular, often has AV dissociation. In pediatrics, VT is less common than SVT but more dangerous. KEY RULE: any wide-complex tachycardia in a sick, hemodynamically unstable child should be treated as VT until proven otherwise. History matters - vomiting + dehydration + wide complex screams electrolyte-driven VT.",
-        tldr: "Narrow QRS = probably SVT. Wide QRS = treat as VT until proven otherwise. In a sick kid with vomiting, wide complex almost certainly means electrolyte-driven VT."
+        "title": "SVT vs VT in Pediatrics",
+        "content": "Differentiating SVT from VT: SVT typically shows narrow QRS (< 0.09s), regular rate, and may have P waves buried in T waves. VT shows wide QRS (> 0.09s), may be slightly irregular, often has AV dissociation. In pediatrics, VT is less common than SVT but more dangerous. KEY RULE: any wide-complex tachycardia in a sick, hemodynamically unstable child should be treated as VT until proven otherwise. History matters - vomiting + dehydration + wide complex screams electrolyte-driven VT.",
+        "tldr": "Narrow QRS = probably SVT. Wide QRS = treat as VT until proven otherwise. In a sick kid with vomiting, wide complex almost certainly means electrolyte-driven VT."
       },
       {
-        title: "Root Cause Thinking",
-        content: "Don't just chase the rhythm on the monitor. Ask WHY the rhythm changed. This child had 3 days of vomiting causing hypokalemia. The arrhythmia is a SYMPTOM of the electrolyte problem, not the primary disease. Cardioversion may convert the rhythm temporarily, but it will recur unless you fix the potassium. Always look for and treat the root cause: check a BMP/electrolytes, replace K+ aggressively (0.5-1 mEq/kg IV over 1 hour with cardiac monitoring), and give magnesium (which stabilizes the cardiac membrane).",
-        tldr: "The arrhythmia is a symptom, not the disease. Fix the potassium that caused it or the rhythm will keep coming back no matter how many times you shock."
+        "title": "Root Cause Thinking",
+        "content": "Don't just chase the rhythm on the monitor. Ask WHY the rhythm changed. This child had 3 days of vomiting causing hypokalemia. The arrhythmia is a SYMPTOM of the electrolyte problem, not the primary disease. Cardioversion may convert the rhythm temporarily, but it will recur unless you fix the potassium. Always look for and treat the root cause: check a BMP/electrolytes, replace K+ aggressively (0.5-1 mEq/kg IV over 1 hour with cardiac monitoring), and give magnesium (which stabilizes the cardiac membrane).",
+        "tldr": "The arrhythmia is a symptom, not the disease. Fix the potassium that caused it or the rhythm will keep coming back no matter how many times you shock."
       }
     ]
   },
-  reassessment: {
-    narrative: "After two 20 mL/kg boluses and potassium replacement, the child's perfusion and mental status have returned. Heart rate is down to 130, cap refill is 2 seconds, and his hands are warm to the touch. He has produced a small amount of concentrated urine, signaling that renal blood flow is recovering. He opens his eyes to voice and reaches for his mother's necklace.",
-    vitals: {
-      hr: 130,
-      rr: 26,
-      sbp: 94,
-      dbp: 60,
-      spo2: 99,
-      temp: 36.9,
-      cap: 2
+  "reassessment": {
+    "narrative": "After two 20 mL/kg boluses and potassium replacement, the child's perfusion and mental status have returned. Heart rate is down to 130, cap refill is 2 seconds, and his hands are warm to the touch. He has produced a small amount of concentrated urine, signaling that renal blood flow is recovering. He opens his eyes to voice and reaches for his mother's necklace.",
+    "vitals": {
+      "hr": 130,
+      "rr": 26,
+      "bp": "94/60",
+      "spo2": 99,
+      "temp": 36.9,
+      "cap": 2
     },
-    signs: [
+    "signs": [
       {
-        label: "Perfusion",
-        finding: "Warm extremities, cap refill 2s",
-        pos: "body",
-        sys: "Cardiovascular"
+        "label": "Perfusion",
+        "finding": "Warm extremities, cap refill 2s",
+        "pos": "body",
+        "sys": "Cardiovascular"
       },
       {
-        label: "Urine",
-        finding: "Small concentrated void noted",
-        pos: "body",
-        sys: "Renal"
+        "label": "Urine",
+        "finding": "Small concentrated void noted",
+        "pos": "body",
+        "sys": "Renal"
       },
       {
-        label: "Mental status",
-        finding: "Alert, reaching for mother",
-        pos: "head",
-        sys: "Neuro"
+        "label": "Mental status",
+        "finding": "Alert, reaching for mother",
+        "pos": "head",
+        "sys": "Neuro"
       }
     ]
   },
-  stabilizationSummary: "Repeated normal saline boluses restored circulating volume and reversed compensated hypovolemic shock. Potassium and magnesium replacement corrected the electrolyte derangement that triggered the arrhythmia, eliminating recurrence risk. Early recognition of the vomiting-hypokalemia-VT chain prevented the scenario from becoming a cardiac arrest.",
-  debrief: {
-    summary: "You recognized compensated hypovolemic shock in a dehydrated toddler, initiated fluid resuscitation, and identified a wide-complex tachycardia caused by electrolyte derangement from prolonged vomiting. Root cause thinking - connecting the vomiting to hypokalemia to arrhythmia - was the critical skill tested.",
-    explainers: [
+  "stabilizationSummary": "Repeated normal saline boluses restored circulating volume and reversed compensated hypovolemic shock. Potassium and magnesium replacement corrected the electrolyte derangement that triggered the arrhythmia, eliminating recurrence risk. Early recognition of the vomiting-hypokalemia-VT chain prevented the scenario from becoming a cardiac arrest.",
+  "debrief": {
+    "summary": "You recognized compensated hypovolemic shock in a dehydrated toddler, initiated fluid resuscitation, and identified a wide-complex tachycardia caused by electrolyte derangement from prolonged vomiting. Root cause thinking - connecting the vomiting to hypokalemia to arrhythmia - was the critical skill tested.",
+    "keyTeaching": [
+      "In a child, blood pressure stays normal until late — read perfusion (cap refill, skin, mental status, urine output) and the lab trends, not the BP, to catch compensated shock.",
+      "Prolonged vomiting loses H⁺, Cl⁻, and K⁺, producing a hypochloremic, hypokalemic metabolic alkalosis — and the kidney worsens the hypokalemia trying to retain H⁺.",
+      "Isotonic fluid boluses (20 mL/kg, reassess, repeat) are first-line for hypovolemic shock from GI losses.",
+      "Hypokalemia partially depolarizes cardiac cells and can drive ventricular tachycardia — replace potassium AND magnesium, and keep the child on a monitor.",
+      "Treat the root cause, not the monitor: an electrolyte-driven arrhythmia recurs after cardioversion unless the potassium is corrected."
+    ],
+    "physiologyDeepDive": [
       {
-        title: "The Pediatric Shock Cliff",
-        content: "Unlike adults who gradually decompensate, children have a binary-like transition. Their massive sympathetic reserve maintains perfusion until suddenly it doesn't. When catecholamine stores deplete and SVR collapses, BP crashes precipitously. Cap refill going from 3s to 5s is the warning. The next step is cardiovascular collapse with bradycardia - a pre-arrest rhythm in a child who was tachycardic.",
-        tldr: "Kids compensate hard then crash suddenly. Worsening cap refill is the warning sign. Bradycardia in a previously tachycardic child means arrest is imminent."
+        "id": "the-pediatric-shock-cliff",
+        "title": "The Pediatric Shock Cliff",
+        "_slotRef": "debrief.physiologyDeepDive.the-pediatric-shock-cliff.content",
+        "content": "Unlike adults who gradually decompensate, children have a binary-like transition. Their massive sympathetic reserve maintains perfusion until suddenly it doesn't. When catecholamine stores deplete and SVR collapses, BP crashes precipitously. Cap refill going from 3s to 5s is the warning. The next step is cardiovascular collapse with bradycardia - a pre-arrest rhythm in a child who was tachycardic.\n\n**TL;DR:** Kids compensate hard then crash suddenly. Worsening cap refill is the warning sign. Bradycardia in a previously tachycardic child means arrest is imminent."
       },
       {
-        title: "Vomiting-Induced Metabolic Cascade",
-        content: "Gastric fluid contains H+, Cl-, K+, and Na+. Losing it creates: (1) Metabolic alkalosis from H+ loss, (2) Hypochloremia triggering renal Cl- retention and HCO3- retention, (3) Hypokalemia from both direct loss and renal K+ wasting as kidneys try to retain H+. The kidneys exchange K+ for H+ in the collecting duct, worsening K+ depletion. Below K+ 3.0, ECG changes appear (flattened T waves, U waves). Below 2.5, arrhythmia risk skyrockets.",
-        tldr: "Vomiting loses H+, Cl-, and K+. The kidneys make it worse by dumping more K+ to save H+. Below K+ 2.5, the heart becomes electrically unstable."
+        "id": "vomiting-induced-metabolic-cascade",
+        "title": "Vomiting-Induced Metabolic Cascade",
+        "_slotRef": "debrief.physiologyDeepDive.vomiting-induced-metabolic-cascade.content",
+        "content": "Gastric fluid contains H+, Cl-, K+, and Na+. Losing it creates: (1) Metabolic alkalosis from H+ loss, (2) Hypochloremia triggering renal Cl- retention and HCO3- retention, (3) Hypokalemia from both direct loss and renal K+ wasting as kidneys try to retain H+. The kidneys exchange K+ for H+ in the collecting duct, worsening K+ depletion. Below K+ 3.0, ECG changes appear (flattened T waves, U waves). Below 2.5, arrhythmia risk skyrockets.\n\n**TL;DR:** Vomiting loses H+, Cl-, and K+. The kidneys make it worse by dumping more K+ to save H+. Below K+ 2.5, the heart becomes electrically unstable."
       },
       {
-        title: "Electrolyte-Driven Arrhythmias in Children",
-        content: "Hypokalemia shifts the myocyte resting potential from -90mV toward -70mV. This partial depolarization makes the cell easier to excite but harder to repolarize normally. The result: prolonged QT interval, increased automaticity, and re-entry circuits that generate VT. Torsades de pointes (polymorphic VT with twisting axis) is the classic hypokalemia arrhythmia. Treatment: IV potassium replacement AND IV magnesium (which stabilizes the cardiac membrane independent of K+ levels). Monitor on telemetry during replacement.",
-        tldr: "Low potassium partially depolarizes heart cells, making them fire when they should not. Replace potassium AND magnesium, and keep the patient on a monitor while you do it."
+        "id": "electrolyte-driven-arrhythmias-in-children",
+        "title": "Electrolyte-Driven Arrhythmias in Children",
+        "_slotRef": "debrief.physiologyDeepDive.electrolyte-driven-arrhythmias-in-children.content",
+        "content": "Hypokalemia shifts the myocyte resting potential from -90mV toward -70mV. This partial depolarization makes the cell easier to excite but harder to repolarize normally. The result: prolonged QT interval, increased automaticity, and re-entry circuits that generate VT. Torsades de pointes (polymorphic VT with twisting axis) is the classic hypokalemia arrhythmia. Treatment: IV potassium replacement AND IV magnesium (which stabilizes the cardiac membrane independent of K+ levels). Monitor on telemetry during replacement.\n\n**TL;DR:** Low potassium partially depolarizes heart cells, making them fire when they should not. Replace potassium AND magnesium, and keep the patient on a monitor while you do it."
       }
     ]
   }

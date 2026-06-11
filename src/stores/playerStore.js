@@ -13,6 +13,7 @@
 import { create } from "zustand";
 import { useScenariosStore } from "./scenariosStore.js";
 import { startDispatcher as runDispatcher, dispatcherShouldRun } from "../lib/ai/dispatcher.js";
+import { generateRound2, mergeRound2 } from "../lib/ai/client.js";
 import { vitalsLookup } from "../lib/scenarios/canonicalize.js";
 import { migrateLegacyScenario } from "../lib/scenarios/migrateLegacyScenario.js";
 
@@ -62,7 +63,12 @@ var initialState = {
   waveOneComplete: false,
   dispatcherAbortController: null,
   perItemCacheWarmed: false,
-  deepDiveCacheWarmed: false
+  deepDiveCacheWarmed: false,
+  // Phase 6.3 (Stage 2): background Round-2 generation state.
+  // "idle" (full case awaiting gen) | "generating" | "ready" | "error".
+  // The interlude screen gates the Round-2 entry on "ready".
+  round2State: "ready",
+  round2AbortController: null
 };
 
 export var usePlayerStore = create(function(set, get) {
@@ -75,6 +81,11 @@ export var usePlayerStore = create(function(set, get) {
       var prev = get().dispatcherAbortController;
       if (prev) {
         try { prev.abort(); } catch (e) { /* best-effort */ }
+      }
+      // Phase 6.3: same for any in-flight Round-2 generation.
+      var prevR2 = get().round2AbortController;
+      if (prevR2) {
+        try { prevR2.abort(); } catch (e) { /* best-effort */ }
       }
       // Phase 6.1: normalize to schema 5.4.1 shape. Built-ins reach
       // the player without going through scenariosStore.hydrate, so
@@ -106,7 +117,12 @@ export var usePlayerStore = create(function(set, get) {
         waveOneComplete: false,
         dispatcherAbortController: null,
         perItemCacheWarmed: false,
-        deepDiveCacheWarmed: false
+        deepDiveCacheWarmed: false,
+        // Phase 6.3: a full case still needing Round 2 starts "idle" (the
+        // player fires startRound2Generation on mount); everything else is
+        // already complete ("ready").
+        round2State: (sc && sc._pendingRound2 && (!sc.phases || sc.phases.length < 4)) ? "idle" : "ready",
+        round2AbortController: null
       });
     },
     reset: function() {
@@ -275,6 +291,39 @@ export var usePlayerStore = create(function(set, get) {
         }
         console.warn("[playerStore.startDispatcher] wave 1 failed: " + (err && err.message || err));
         set({ dispatcherState: "aborted" });
+      }
+    },
+    // Phase 6.3 (Stage 2): generate Round 2 in the background during Round 1
+    // play, then merge + persist + fill its why/fb/deep-dive slots. Fired once
+    // on mount for a full case. Replay (already 4 phases) or a quick case is a
+    // no-op. The interlude screen gates the Round-2 entry on round2State.
+    startRound2Generation: async function() {
+      var sc = get().activeScenario;
+      if (!sc) return;
+      if (Array.isArray(sc.phases) && sc.phases.length >= 4) { set({ round2State: "ready" }); return; }
+      if (!sc._pendingRound2) { set({ round2State: "ready" }); return; }
+      if (get().round2State === "generating") return;
+      var prev = get().round2AbortController;
+      if (prev) { try { prev.abort(); } catch (e) {} }
+      var controller = new AbortController();
+      set({ round2AbortController: controller, round2State: "generating" });
+      var updateCustom = useScenariosStore.getState().updateCustom;
+      try {
+        var r2 = await generateRound2(sc, controller.signal);
+        var merged = mergeRound2(sc, r2);
+        set({ activeScenario: merged, round2State: "ready" });
+        try { updateCustom(merged); } catch (e) { /* built-ins / best-effort */ }
+        // Fill the new Round 2 why/fb + debrief deep-dive slots in the
+        // background. Reuses the Round-2 controller so a scenario change
+        // aborts both the gen and the fill. Round 1 slots are already
+        // populated, so collectAllNullSlots only walks the Round 2 ones.
+        try {
+          await runDispatcher(merged, controller, updateCustom, get().forceRefreshScenario, {});
+        } catch (e) { /* abort or best-effort */ }
+      } catch (err) {
+        if (err && err.name === "AbortError") { set({ round2State: "idle" }); return; }
+        console.warn("[playerStore.startRound2Generation] " + (err && err.message || err));
+        set({ round2State: "error" });
       }
     }
   });

@@ -45,9 +45,15 @@ export function buildSystemPrompt(cbMode){
 
 // Phase-5.4.2: orchestrator system prompt for the new lazy-generation
 // pipeline. Returns the slot-shaped scenario plan; a separate Haiku
-// worker fills in why/fb later. Lives alongside buildSystemPrompt —
-// unwired in this commit, activated in Phase 5.4.4.
-export function buildOrchestratorPrompt(){
+// worker fills in why/fb later.
+//
+// Phase 6.3 (Stage 2): this is the TUNED BASE prompt and the single source
+// of truth for all clinical/accuracy machinery. It emits a complete single-
+// round scenario (2 phases + reassessment + debrief) — the "quick case".
+// buildRound1Prompt() and buildRound2Prompt() below derive the two-round
+// prompts from this base by swapping ONLY the phase-structure framing; they
+// never touch the clinical rules. Call via buildOrchestratorPrompt(mode).
+function buildOrchestratorBase(){
   return "You are a pediatric critical care educator for Block Ward, a clinical simulation app for nurses, residents, and medical students. Your job is to plan a single high-fidelity scenario from a brief user prompt.\n\n"+
     "Voice: write like an experienced bedside peds clinician explaining a case to a colleague — not like a textbook. Use precise terminology where it matters clinically, but ground concepts in plain language and concrete observations. Real-world phrasing and analogies are encouraged. Avoid stacking dense jargon sentences in a row. When content is dense, break it into short paragraphs or bullet points so the reader can actually parse it.\n\n"+
     "This voice rule applies to every piece of inline narrative you author: scenario titles and subtitles, the EMS report and patient presentation, the Learn More background, per-phase narratives, debrief summaries, and key teaching points. A separate model writes the per-item explanation paragraphs (\"why\" and \"fb\" fields); your voice still informs the overall scenario tone.\n\n"+
@@ -464,6 +470,73 @@ export function buildOrchestratorPrompt(){
     "11. Priority label coherence. Every tied-correct action is a must-have therapeutic for THIS scenario's pathology. Routine preparatory actions (vsMonitor, ivKit, stethoscope, pulseOx) are correct, never tied-correct. If a scenario has more than 3-4 tied-correct items, you're probably over-using the label — promote the must-haves and demote the rest to correct.\n\n"+
     "If any check fails, fix silently and re-verify before emitting JSON. Do not narrate.\n\n"+
     "Return ONLY valid JSON conforming to schema 5.4.1. No prose before or after. No code fences. No explanation of what you did. The first character of your response is \"{\" and the last is \"}\".";
+}
+
+// Phase 6.3 (Stage 2 — two-round model). Derive the Round 1 (foreground) and
+// Round 2 (background continuation) prompts from the single tuned base prompt
+// by surgically swapping ONLY the phase-structure framing. The clinical
+// accuracy machinery (dosing tables, loyalty, internal consistency,
+// distractors, the verification checklist) is preserved VERBATIM — nothing
+// here touches it. Each swap asserts its anchor still exists so a future edit
+// to the base prompt fails loudly here instead of silently drifting.
+function _promptSwap(s, find, repl, tag){
+  if(s.indexOf(find)<0)throw new Error("buildPrompt anchor missing ("+tag+") — base prompt changed; update the Stage 2 swaps in prompt.js");
+  return s.replace(find, repl);
+}
+
+// Entry point. mode "full"/"round1" -> Round 1 of a two-round case; anything
+// else (incl. undefined) -> the single-round "quick" base. Backward-compatible
+// with existing no-arg callers (dry-run, quick-case path).
+export function buildOrchestratorPrompt(mode){
+  if(mode==="full"||mode==="round1")return buildRound1Prompt();
+  return buildOrchestratorBase();
+}
+
+// Round 1 of a two-round case (foreground call). Emits ONLY Round 1 (2 phases)
+// + patient/norms/visuals; the reassessment + debrief are deferred to Round 2,
+// which resolves the full arc. The patient must NOT be stabilized here.
+export function buildRound1Prompt(){
+  var s = buildOrchestratorBase();
+  s = _promptSwap(s,
+    "The phases array is exactly 2 entries for v1: phase[0].stageType = \"assess\", phase[1].stageType = \"intervene\". Do not add additional phases.",
+    "This is ROUND 1 of a two-round case. Emit exactly 2 phases: phase[0] (round 1, stageType \"assess\") and phase[1] (round 1, stageType \"intervene\"). Add a \"round\": 1 field to each phase alongside phaseIndex and stageType. Round 1 is the INITIAL presentation and first management — do NOT resolve or stabilize the case. The same patient will deteriorate into Round 2 (generated separately), so Round 1's intervene phase is the opening management, not the final escalation. Loyalty note: if the user's brief pins a fact to a later round or complication (e.g., \"in round 2 she develops X\", \"later a rash appears\"), do NOT place it in Round 1 — it belongs to the round the user named, and Round 2 will honor it.",
+    "r1-phasecount");
+  s = _promptSwap(s,
+    "Return ONLY valid JSON conforming to schema 5.4.1. No prose before or after. No code fences. No explanation of what you did. The first character of your response is \"{\" and the last is \"}\".",
+    "ROUND 1 OUTPUT. This is Round 1 of a two-round case. Emit ONLY these top-level keys: schemaVersion, id, title, subtitle, patientCard, presentation, norms, phases (the two Round 1 phases, each carrying \"round\": 1), and visuals. Do NOT emit a reassessment object or a debrief object — those are generated together with Round 2, after the patient's full arc resolves. The reassessment-shape, debrief-shape, and reassessment-outcome (verification check 6) instructions above apply to that later Round 2 generation, NOT to Round 1 — skip them here. Return ONLY valid JSON. No prose, no code fences. The first character is { and the last is }.",
+    "r1-output");
+  return s;
+}
+
+// Round 2 continuation (background call, runs during Round 1 play). Given the
+// user's ORIGINAL brief + the Round 1 scenario (supplied in the user message),
+// emits the evolved Round 2 (phases 2 & 3) + the final reassessment + debrief.
+// Loyalty to the original brief is threaded in here AND preserved verbatim via
+// the base prompt's Loyalty section + verification check 2. Validated by
+// scripts/_exp-round2-continuation.mjs (continuity strong, ~99s).
+export function buildRound2Prompt(){
+  var s = buildOrchestratorBase();
+  s = _promptSwap(s,
+    "Your job is to plan a single high-fidelity scenario from a brief user prompt.",
+    "You are extending an EXISTING Round 1 scenario into Round 2 — the same patient a short time later. The user message contains the user's ORIGINAL free-text brief and the Round 1 scenario (patient, norms, the Round 1 assessment, and the Round 1 interventions that were available). Continue this SAME patient; do not restart the case or change the patient. LOYALTY TO THE ORIGINAL BRIEF APPLIES IN FULL TO ROUND 2: honor every fact the user stated, including any that pertain specifically to Round 2 or a later complication (e.g., \"in round 2 another bolus was given\", \"later she develops a fever\", a stated allergy or code status) — bind those facts to Round 2 here. The Loyalty rules and the verification checklist below apply to your Round 2 output exactly as they would to a full scenario.",
+    "r2-role");
+  s = _promptSwap(s,
+    "The phases array is exactly 2 entries for v1: phase[0].stageType = \"assess\", phase[1].stageType = \"intervene\". Do not add additional phases.",
+    "Emit exactly the two Round 2 phases: phaseIndex 2 (round 2, stageType \"assess\") then phaseIndex 3 (round 2, stageType \"intervene\"). Add a \"round\": 2 field to each. Do not re-emit the Round 1 phases.\n\nRound 2 deterioration arc. The round-2 assess phase (phaseIndex 2) shows the SAME patient's evolved state a short time after Round 1 — a continuous, physiologically plausible progression, not a dramatic reinvention. Anchor every Round 2 value to its Round 1 counterpart (given in the user message) and move it along the trajectory the pathology dictates, accounting for the interventions that were AVAILABLE in Round 1. Reuse the SAME finding ids across rounds where a finding persists (HR stays id \"hr\", lactate stays id \"lactate\") so it reads as one patient over time; the values change, the identity does not. The round-2 narrative MUST reference the Round 1 interventions and the time elapsed. The round-2 intervene phase (phaseIndex 3) is the escalation the evolved state now demands. Apply the continuity and brief-completeness rules — anything Round 2 feedback assumes was observed must be stated in the round-2 narrative.",
+    "r2-phasecount");
+  s = _promptSwap(s,
+    "Phase 0 emits no actions. The assess phase (stageType: \"assess\", id: \"assess\")",
+    "The round-2 assess phase (phaseIndex 2) emits no actions. That phase (stageType: \"assess\")",
+    "r2-assess");
+  s = _promptSwap(s,
+    "Phase 1 is where all actions live. The intervene phase (stageType: \"intervene\", id: \"intervene\")",
+    "The round-2 intervene phase (phaseIndex 3) is where actions live. That phase (stageType: \"intervene\")",
+    "r2-intervene");
+  s = _promptSwap(s,
+    "Return ONLY valid JSON conforming to schema 5.4.1. No prose before or after. No code fences. No explanation of what you did. The first character of your response is \"{\" and the last is \"}\".",
+    "ROUND 2 OUTPUT. Emit ONLY a JSON object with exactly these keys: \"phases\" (an array of the two Round 2 phases — phaseIndex 2 stageType assess, then phaseIndex 3 stageType intervene, each with \"round\": 2, using the per-phase shape and slot refs phase[2].* / phase[3].* with null why/fb as described), \"reassessment\", and \"debrief\". Do NOT emit patientCard, presentation, norms, visuals, or the Round 1 phases. The reassessment + debrief resolve the FULL two-round arc. Return ONLY valid JSON. No prose, no code fences. The first character is { and the last is }.",
+    "r2-output");
+  return s;
 }
 
 // Phase-5.4.3b: system prompt for the per-item lazy-explanation

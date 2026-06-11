@@ -1,4 +1,4 @@
-import { buildSystemPrompt, buildOrchestratorPrompt, buildMarkForReviewDeepDivePrompt, MODEL_ID, MAX_TOKENS } from "./prompt.js";
+import { buildSystemPrompt, buildOrchestratorPrompt, buildRound2Prompt, buildMarkForReviewDeepDivePrompt, MODEL_ID, MAX_TOKENS } from "./prompt.js";
 import { resolveSlotText, kindToPromptType } from "../scenarios/slotResolve.js";
 import { validateSchema, validateConsistency, validateCounts, applyAutocorrections } from "./validate.js";
 import { migrateLegacyScenario } from "../scenarios/migrateLegacyScenario.js";
@@ -31,14 +31,43 @@ var PHASE_KEYS=[
   {key:"\"debrief\":",message:"Writing teaching takeaways..."}
 ];
 
-function applyPostParseFixups(scenario,cbMode){
+// Phase 6.3 (Stage 2): stamp a round index on every phase, derived from
+// phaseIndex (0,1 -> round 1; 2,3 -> round 2). Belt-and-suspenders — the
+// prompts ask Sonnet to emit `round`, but the player relies on it for the
+// interlude transition, so we guarantee it here.
+function _stampRounds(scenario){
+  if(scenario&&Array.isArray(scenario.phases)){
+    scenario.phases.forEach(function(p,i){
+      if(p&&typeof p==="object"){
+        if(typeof p.phaseIndex!=="number")p.phaseIndex=i;
+        p.round=(p.phaseIndex<2)?1:2;
+      }
+    });
+  }
+}
+
+function applyPostParseFixups(scenario,opts){
+  // Phase 6.3: opts = { mode:"full"|"quick", cbMode, sourcePrompt }.
+  opts=opts||{};
+  var cbMode=opts.cbMode;
+  var pendingR2=opts.mode==="full";
   // Phase-5.4.3a: legacy buildSystemPrompt() still instructs Sonnet to
   // emit flat assessItems[]. Upgrade the shape to schema 5.4.1 before
   // anything else touches the scenario. Idempotent — no-op for 5.4.1
   // output once Phase 5.4.4 wires in the orchestrator prompt.
   scenario=migrateLegacyScenario(scenario);
+  _stampRounds(scenario);
   if(!cbMode)scenario.curveball=null;
-  if(!scenario.debrief)scenario.debrief={summary:"Complete.",explainers:[]};
+  // Full-case Round 1 defers reassessment + debrief to the Round 2 call
+  // (which resolves the full arc). Stash the original brief + cbMode so the
+  // background Round 2 generation can honor loyalty and gate the curveball.
+  if(pendingR2){
+    scenario._pendingRound2=true;
+    scenario._sourcePrompt=opts.sourcePrompt||"";
+    scenario._cbMode=!!cbMode;
+  }else if(!scenario.debrief){
+    scenario.debrief={summary:"Complete.",keyTeaching:[],physiologyDeepDive:[]};
+  }
   var schemaErrs=validateSchema(scenario);
   if(schemaErrs.length>0)throw new Error("Generated scenario was incomplete — missing: "+schemaErrs.slice(0,3).join("; ")+(schemaErrs.length>3?" (and "+(schemaErrs.length-3)+" more)":""));
   var decisions=validateConsistency(scenario);
@@ -79,7 +108,13 @@ function parseAccumulated(tb){
 // generateScenario — phase-2.6.1 part 2D streaming version.
 // onProgress({bytes, accumulated, message?}) fires as new SSE chunks
 // arrive. message is set only when a new phase key is detected.
-export async function generateScenario(txt, cbMode, signal, onProgress){
+export async function generateScenario(txt, opts, signal, onProgress){
+  // Phase 6.3: opts = { mode:"full"|"quick", cbMode }. "full" generates only
+  // Round 1 (the background Round 2 follows during play); "quick"/default is
+  // the single-round scenario. Backward compat: a boolean opts is legacy cbMode.
+  if(typeof opts==="boolean")opts={mode:"quick",cbMode:opts};
+  opts=opts||{mode:"quick"};
+  var mode=opts.mode==="full"?"full":"quick";
   var userContent="Create pediatric scenario:\n\n"+txt+randomNameHint();
   // Phase-4-prep: prompt caching on the system prompt (stable across every
   // scenario generation). Adaptive thinking + output_config{effort:"medium"}
@@ -99,7 +134,7 @@ export async function generateScenario(txt, cbMode, signal, onProgress){
       // imported for Phase 6.4 cleanup (deletes the function + the
       // import together). web_search tool stays available; the
       // prompt's Section 24 governs when Sonnet uses it.
-      system:[{type:"text",text:buildOrchestratorPrompt(),cache_control:{type:"ephemeral"}}],
+      system:[{type:"text",text:buildOrchestratorPrompt(mode),cache_control:{type:"ephemeral"}}],
       messages:[{role:"user",content:userContent}],
       stream:true})});
   if(!r.ok){
@@ -154,7 +189,80 @@ export async function generateScenario(txt, cbMode, signal, onProgress){
     throw new Error("No text in AI response. Try again.");
   }
   var scenario=parseAccumulated(accumulated);
-  return applyPostParseFixups(scenario,cbMode);
+  return applyPostParseFixups(scenario,{mode:mode,cbMode:opts.cbMode,sourcePrompt:txt});
+}
+
+// Phase 6.3 (Stage 2): background Round-2 continuation. Given a Round-1
+// scenario (carrying _sourcePrompt), generate the evolved Round 2 (phases 2
+// & 3) + the final reassessment + debrief, honoring the user's ORIGINAL brief
+// (loyalty safeguard — the brief is threaded into the user message). Non-
+// streaming; runs in the background while the user plays Round 1. Returns the
+// raw { phases, reassessment, debrief } object for mergeRound2().
+export async function generateRound2(scenario, signal){
+  var brief=(scenario&&scenario._sourcePrompt)||"";
+  var pc=scenario.patientCard||scenario.patient||{};
+  var r1ctx={patientCard:pc,norms:scenario.norms,phases:[scenario.phases[0],scenario.phases[1]]};
+  var userContent="ORIGINAL USER BRIEF (honor every fact, including any pinned to Round 2):\n"+brief+"\n\nROUND 1 SCENARIO (continue this same patient):\n"+JSON.stringify(r1ctx);
+  var r=await fetch("/api/generate",{method:"POST",headers:{"Content-Type":"application/json"},signal:signal,
+    body:JSON.stringify({model:MODEL_ID,max_tokens:MAX_TOKENS,mode:"round2",
+      tools:[{type:"web_search_20250305",name:"web_search"}],
+      system:[{type:"text",text:buildRound2Prompt(),cache_control:{type:"ephemeral"}}],
+      messages:[{role:"user",content:userContent}]})});
+  if(!r.ok){
+    var eb="";try{eb=await r.text();}catch(e){}
+    var em="Round 2 generation failed — please check your connection.";
+    try{var ej=JSON.parse(eb);if(ej&&ej.error&&ej.error.message)em=ej.error.message;}catch(e){}
+    throw new Error(em);
+  }
+  var data=await r.json();
+  if(data.error)throw new Error(data.error.message||"Round 2 API error");
+  var tb="";(data.content||[]).forEach(function(b){if(b&&b.type==="text"&&b.text)tb+=b.text;});
+  if(!tb.trim())throw new Error("No text in Round 2 response.");
+  var r2=_parseLooseJson(tb);
+  if(!r2||!Array.isArray(r2.phases)||r2.phases.length<2)throw new Error("Round 2 response was malformed — missing phases.");
+  return r2;
+}
+
+// Merge a Round-2 result into its Round-1 scenario: append phases 2 & 3,
+// install reassessment + debrief, stamp round/phaseIndex, normalize via the
+// migrator, clear the pending flag. Returns the merged 4-phase scenario.
+export function mergeRound2(scenario, r2){
+  var merged=Object.assign({},scenario);
+  var r2phases=(r2.phases||[]).slice(0,2).map(function(p,i){
+    var copy=Object.assign({},p);
+    copy.phaseIndex=2+i;
+    copy.round=2;
+    // Force unique ids/stageType so round-1 "intervene" and round-2
+    // "intervene2" never collide in snapshot/recovery keying.
+    copy.stageType=(i===0?"assess":"intervene");
+    copy.id=(i===0?"assess2":"intervene2");
+    return copy;
+  });
+  merged.phases=[scenario.phases[0],scenario.phases[1]].concat(r2phases);
+  if(r2.reassessment)merged.reassessment=r2.reassessment;
+  if(r2.debrief)merged.debrief=r2.debrief;
+  delete merged._pendingRound2;
+  // Normalize the merged scenario (array vitals, _slotRef/why backfill on the
+  // new Round 2 phases, keyTeaching synth if needed). Idempotent on R1.
+  merged=migrateLegacyScenario(merged);
+  _stampRounds(merged);
+  merged.source="ai";
+  return merged;
+}
+
+// Tolerant JSON-object parser for the non-streaming Round 2 response: direct
+// parse, then longest balanced-brace recovery (mirrors parseAccumulated minus
+// the id/phases gate, since Round 2 carries neither id nor a full scenario).
+function _parseLooseJson(text){
+  var cl=text.replace(/```json\s*/gi,"").replace(/```\s*/g,"").trim();
+  try{return JSON.parse(cl);}catch(e){}
+  var depth=0,start=-1,best=null;
+  for(var i=0;i<cl.length;i++){
+    if(cl[i]==="{"){if(depth===0)start=i;depth++;}
+    else if(cl[i]==="}"){depth--;if(depth===0&&start>=0&&(!best||i-start>best.len))best={s:start,e:i,len:i-start};}
+  }
+  if(best){try{return JSON.parse(cl.substring(best.s,best.e+1));}catch(e){}}
+  return null;
 }
 
 // Phase-2.6 group D: request deep-dive expansions for items the user

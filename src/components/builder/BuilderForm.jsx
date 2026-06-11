@@ -10,12 +10,16 @@ export function BuilderForm(props){
   var _busy=useState(false);var busy=_busy[0];var setBusy=_busy[1];
   var _err=useState(null);var err=_err[0];var setErr=_err[1];
   var _cbMode=useState(true);var cbMode=_cbMode[0];var setCbMode=_cbMode[1];
+  // Phase 6.3 (Stage 2): case length. "full" = two assess/intervene rounds
+  // (the patient deteriorating over time); "quick" = a single round. Default
+  // full per the two-round design.
+  var _caseMode=useState("full");var caseMode=_caseMode[0];var setCaseMode=_caseMode[1];
   var _built=useState(null);var built=_built[0];var setBuilt=_built[1];
   // Phase-2.6.1 part 2D/E/F: streaming progress state, fed by client.js
   var _progress=useState({bytes:0,message:"Researching clinical guidelines..."});var progress=_progress[0];var setProgress=_progress[1];
   var go=async function(){if(!txt.trim())return;setBusy(true);setErr(null);setProgress({bytes:0,message:"Researching clinical guidelines..."});
     try{var controller=new AbortController();var tid=setTimeout(function(){controller.abort();},GENERATE_TIMEOUT_MS);
-      var scenario=await generateScenario(txt,cbMode,controller.signal,function(p){
+      var scenario=await generateScenario(txt,{mode:caseMode,cbMode:cbMode},controller.signal,function(p){
         // Phase-2.6.1 part 2F: use accumulated text chars (useful content)
         // rather than raw SSE chunk bytes (which include event-stream
         // framing overhead). Falls back to chunk bytes if accumulated
@@ -35,6 +39,13 @@ export function BuilderForm(props){
     <p style={{fontSize:13,color:"#999",marginBottom:6}}>Describe any pediatric emergency, trauma, or critical care case. Even a few words will work. The AI will research clinical details and build a fully playable scenario with vitals, labs, and interventions.</p>
     <p style={{fontSize:11,color:"#666",marginBottom:16}}>Once built, you can share your scenario with others via a link.</p>
     <textarea value={txt} onChange={function(e){setTxt(e.target.value);}} placeholder={"Examples:\n- 12 year old bike crash head injury\n- 9 year old peanut allergy anaphylaxis\n- Newborn with cyanotic heart disease\n- Toddler who drank grandma's pills\n- 4 year old near drowning"} style={{width:"100%",height:200,borderRadius:12,padding:16,color:"white",fontSize:13,resize:"none",background:"rgba(255,255,255,0.06)",border:"2px solid rgba(255,255,255,0.1)",outline:"none",lineHeight:1.6,boxSizing:"border-box"}}/>
+    <div style={{marginTop:12,display:"flex",alignItems:"center",gap:10}}>
+      <button onClick={function(){setCaseMode(caseMode==="full"?"quick":"full");}} style={{width:56,height:32,borderRadius:16,border:"none",cursor:"pointer",position:"relative",background:caseMode==="full"?"#a55eea":"rgba(255,255,255,0.15)",transition:"background 0.2s"}}>
+        <div style={{width:24,height:24,borderRadius:12,background:"white",position:"absolute",top:4,left:caseMode==="full"?28:4,transition:"left 0.2s",boxShadow:"0 1px 3px rgba(0,0,0,0.3)"}}></div>
+      </button>
+      <div><span style={{fontSize:13,fontWeight:700,color:caseMode==="full"?"#a55eea":"#666"}}>{caseMode==="full"?"Full Case (two rounds)":"Quick Case (one round)"}</span>
+        <p style={{fontSize:10,color:"#666",marginTop:1}}>{caseMode==="full"?"The same patient deteriorates over a second assess + intervene round":"A single assess + intervene round, then debrief"}</p></div>
+    </div>
     <div style={{marginTop:12,display:"flex",alignItems:"center",gap:10}}>
       <button onClick={function(){setCbMode(!cbMode);}} style={{width:56,height:32,borderRadius:16,border:"none",cursor:"pointer",position:"relative",background:cbMode?"#4ECDC4":"rgba(255,255,255,0.15)",transition:"background 0.2s"}}>
         <div style={{width:24,height:24,borderRadius:12,background:"white",position:"absolute",top:4,left:cbMode?28:4,transition:"left 0.2s",boxShadow:"0 1px 3px rgba(0,0,0,0.3)"}}></div>

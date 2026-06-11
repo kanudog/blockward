@@ -69,6 +69,9 @@ export function ScenarioPlayer(props){
   var _ps=usePlayerStore.getState();var setStage=_ps.setStage;var setPi=_ps.setPhaseIndex;var setFlags=_ps.setFlags;var toggleFlag=_ps.toggleFlag;var setShowFb=_ps.setShowFb;var setCbDone=_ps.setCbDone;var setShake=_ps.setShake;var setVit=_ps.setVitals;var addSkipped=_ps.addSkipped;var recordAssess=_ps.recordAssess;var recordAction=_ps.recordAction;
   function prevStageFor(s){if(s==="phase")return"intro";if(s==="assess")return"intro";if(s==="act")return"phase";if(s==="cb-alert")return"act";if(s==="cb-act")return"cb-alert";if(s==="reassess")return null;return null;}
   var prev=prevStageFor(stage);
+  // Phase 6.3: the interlude and Round 2 are forward-only — no back-navigation
+  // across the Round 1 -> Round 2 boundary.
+  if(stage==="interlude"||pi>=2)prev=null;
   var goBack=function(){if(prev)setStage(prev);};
   var _recStep=useState(0);var recStep=_recStep[0];var setRecStep=_recStep[1];
   var _learnOpen=useState(false);var learnOpen=_learnOpen[0];var setLearnOpen=_learnOpen[1];
@@ -78,6 +81,9 @@ export function ScenarioPlayer(props){
   // and re-render plumbing internally via playerStore.
   var dispatcherState=usePlayerStore(function(s){return s.dispatcherState;});
   var waveOneComplete=usePlayerStore(function(s){return s.waveOneComplete;});
+  // Phase 6.3 (Stage 2): background Round-2 generation state; the interlude
+  // gates the Round-2 entry on "ready".
+  var round2State=usePlayerStore(function(s){return s.round2State;});
   // Phase 6.0: fire the wave dispatcher once per scenario mount. Replay
   // of an already-populated scenario short-circuits inside startDispatcher
   // via dispatcherShouldRun. Abort happens via playerStore.start when the
@@ -85,8 +91,14 @@ export function ScenarioPlayer(props){
   useEffect(function(){
     if(!sc)return;
     usePlayerStore.getState().startDispatcher();
+    // Phase 6.3: a full case generates Round 2 in the background during
+    // Round 1 play; quick cases / replays short-circuit inside the action.
+    usePlayerStore.getState().startRound2Generation();
   },[sc&&sc.id]);
   var ph=sc.phases[pi];
+  // Phase 6.3: a full case has (or will have) a Round 2. Drives the interlude
+  // transition after the Round 1 intervene phase.
+  var isFullCase=!!(sc._pendingRound2||(sc.phases&&sc.phases.length>=4));
   /* Phase 6.2b.5: "What Saved This Patient" list. Pull only Phase 1
      (intervene) actions with priority "tied-correct" — the must-haves.
      Curveball is excluded (curveball machinery is dormant in the
@@ -108,42 +120,38 @@ export function ScenarioPlayer(props){
   }
   var phase1=sc.phases&&sc.phases[1]?sc.phases[1]:null;
   var p1Sel=_findP1Selections(actionHistoryForRecovery,phase1);
-  var correctActions=[];
-  if(phase1&&phase1.actions){
-    if(phase1.actions.tools){
-      Object.entries(phase1.actions.tools).forEach(function(e){
-        if(e[1]&&e[1].priority==="tied-correct"){
-          var label=isCustomTool(e[0])?(e[1].label||e[0]):(ALL_TOOLS[e[0]]?ALL_TOOLS[e[0]].label:e[0]);
-          correctActions.push({
-            name:label,
-            toolId:e[0],
-            medType:null,
-            fb:e[1].fb?e[1].fb.split(".")[0]+".":"",
-            pri:e[1].pri,
-            type:"tool",
-            userSelected:!!p1Sel[e[0]]
-          });
-        }
-      });
-    }
-    if(phase1.actions.meds){
-      Object.entries(phase1.actions.meds).forEach(function(e){
-        if(e[1]&&e[1].priority==="tied-correct"){
-          var label=isCustomMed(e[0])?(e[1].label||e[0]):(ALL_MEDS[e[0]]?ALL_MEDS[e[0]].label:e[0]);
-          correctActions.push({
-            name:label,
-            toolId:null,
-            medType:lookupMedType(e[0]),
-            fb:e[1].fb?e[1].fb.split(".")[0]+".":"",
-            pri:e[1].pri,
-            type:"med",
-            userSelected:!!p1Sel[e[0]]
-          });
-        }
-      });
-    }
+  // Phase 6.3: must-haves span every intervene phase (Round 1 + Round 2).
+  function _selForPhase(history,phase){
+    if(!Array.isArray(history)||!phase)return{};
+    var pid=phase.id||phase.stageType;
+    for(var hi=0;hi<history.length;hi++){var snap=history[hi];if(snap&&snap.phaseId===pid)return snap.sel||{};}
+    return{};
   }
-  correctActions.sort(function(a,b){return(a.pri||99)-(b.pri||99);});
+  var correctActions=[];
+  (sc.phases||[]).forEach(function(phx){
+    if(!phx||phx.stageType!=="intervene"||!phx.actions)return;
+    var sel=_selForPhase(actionHistoryForRecovery,phx);
+    ["tools","meds"].forEach(function(kind){
+      var coll=phx.actions[kind]||{};
+      Object.keys(coll).forEach(function(id){
+        var e=coll[id];
+        if(e&&e.priority==="tied-correct"){
+          var label=kind==="tools"?(isCustomTool(id)?(e.label||id):(ALL_TOOLS[id]?ALL_TOOLS[id].label:id)):(isCustomMed(id)?(e.label||id):(ALL_MEDS[id]?ALL_MEDS[id].label:id));
+          correctActions.push({
+            name:label,
+            toolId:kind==="tools"?id:null,
+            medType:kind==="meds"?lookupMedType(id):null,
+            fb:e.fb?e.fb.split(".")[0]+".":"",
+            pri:e.pri,
+            type:kind==="tools"?"tool":"med",
+            userSelected:!!sel[id],
+            round:phx.round||1
+          });
+        }
+      });
+    });
+  });
+  correctActions.sort(function(a,b){return((a.round||1)-(b.round||1))||((a.pri||99)-(b.pri||99));});
   useEffect(function(){if(stage!=="recovery")return;setRecStep(0);var iv=setInterval(function(){setRecStep(function(p){if(p>=correctActions.length)return p;return p+1;});},1200);return function(){clearInterval(iv);};},[stage]);
   var pSt=function(){if(stage.startsWith("cb"))return"critical";if(pi>=1||stage==="act")return"declining";return"stable";};
   var trigCb=useCallback(function(){setShake(true);setTimeout(function(){setShake(false);},800);setVit(sc.curveball.vitals,sc.curveball&&sc.curveball.signs);setStage("cb-alert");setCbDone(true);},[sc]);
@@ -187,7 +195,12 @@ export function ScenarioPlayer(props){
     recordAssess({phaseId:ph.id,phaseName:ph.name||ph.id,items:snapshotItems});
     setShowFb(true);};
   var afterA=function(){setFlags({});setShowFb(false);if(pi<sc.phases.length-1){var n=pi+1;setPi(n);setVit(sc.phases[n].vitals,sc.phases[n].signs);setStage("phase");}else setStage("debrief");};
-  var afterAct=function(){if(!cbDone&&sc.curveball)trigCb();else setStage("reassess");};
+  var afterAct=function(){
+    // Phase 6.3: after Round 1's intervene in a full case, go to the interlude
+    // (then Round 2). After the final intervene, curveball/reassess as before.
+    if(ph&&ph.round===1&&isFullCase){setStage("interlude");return;}
+    if(!cbDone&&sc.curveball)trigCb();else setStage("reassess");
+  };
   // Phase 6.1: derive tool/med id arrays from actions for ActionPanel
   // and intervention gating; phase.tools[]/phase.meds[] are no longer
   // present after migration.
@@ -290,6 +303,46 @@ export function ScenarioPlayer(props){
             <ActionPanel tools={phActionIds.tools} meds={phActionIds.meds} actions={ph.actions} phaseIdx={pi} onDone={function(sel){recordAction({phaseId:ph.id,phaseName:ph.name||ph.id,tools:phActionIds.tools,meds:phActionIds.meds,actions:ph.actions||{},sel:sel||{}});afterAct();}} onSkip={function(m,sel){if(m&&m.length>0)addSkipped(m.map(function(x){return Object.assign({},x,{phase:ph.name||ph.id});}));recordAction({phaseId:ph.id,phaseName:ph.name||ph.id,tools:phActionIds.tools,meds:phActionIds.meds,actions:ph.actions||{},sel:sel||{}});afterAct();}}/>
           </div>
         </div></div>)}
+      {stage==="interlude"&&(function(){
+        var r2ready=round2State==="ready"&&sc.phases&&sc.phases.length>=4;
+        var r2narr=r2ready&&sc.phases[2]?sc.phases[2].narrative:"";
+        // What the user actually did in Round 1 (client-side, no regeneration).
+        var choices=[];
+        if(phase1&&phase1.actions){
+          ["tools","meds"].forEach(function(kind){
+            var coll=phase1.actions[kind]||{};
+            Object.keys(coll).forEach(function(id){
+              if(p1Sel[id]){
+                var lbl=kind==="tools"?(isCustomTool(id)?(coll[id].label||id):(ALL_TOOLS[id]?ALL_TOOLS[id].label:id)):(isCustomMed(id)?(coll[id].label||id):(ALL_MEDS[id]?ALL_MEDS[id].label:id));
+                choices.push(lbl);
+              }
+            });
+          });
+        }
+        return(<div className="slu" style={{textAlign:"center"}}>
+          <style>{"@keyframes bwspin{to{transform:rotate(360deg)}}"}</style>
+          <div style={{display:"inline-block",padding:"4px 14px",borderRadius:20,fontSize:11,fontWeight:800,letterSpacing:1,textTransform:"uppercase",background:"rgba(165,94,234,0.15)",color:"#a55eea",border:"1px solid rgba(165,94,234,0.35)",marginBottom:14}}>Round 1 Complete · Time Passes</div>
+          <div style={{maxWidth:180,margin:"0 auto 14px"}}>
+            <PatientSVG status="declining" rr={vit.rr&&typeof vit.rr==="object"?parseFloat(vit.rr.value)||20:(vit.rr||20)} ageGroup={ageG} sex={sexG} emotion="sad" seed={pSeed} visuals={scVisuals}/>
+          </div>
+          {choices.length>0&&<div className="bw-glass" style={{borderRadius:14,padding:12,marginBottom:12,textAlign:"left"}}>
+            <div style={{fontSize:10,textTransform:"uppercase",letterSpacing:1.5,color:"#a55eea",fontWeight:700,marginBottom:6}}>What you did</div>
+            <p style={{fontSize:13,color:"#ddd",lineHeight:1.5,margin:0}}>{"In Round 1 you chose: "+choices.join(", ")+"."}</p>
+          </div>}
+          {r2ready?
+            <div className="bw-glass" style={{borderRadius:16,padding:14,marginBottom:14,textAlign:"left"}}>
+              <div style={{fontSize:10,textTransform:"uppercase",letterSpacing:1.5,color:"#a55eea",fontWeight:700,marginBottom:6}}>How the patient has changed</div>
+              <TextBlock text={r2narr} style={{fontSize:13,color:"#ddd",lineHeight:1.6}}/>
+            </div>
+            :round2State==="error"?
+              <div style={{borderRadius:14,padding:14,marginBottom:14,background:"rgba(255,71,87,0.1)",border:"1px solid rgba(255,71,87,0.3)",color:"#FF6B81",fontSize:13}}>Round 2 couldn't be generated. <button onClick={function(){usePlayerStore.getState().startRound2Generation();}} style={{marginLeft:6,background:"none",border:"1px solid rgba(255,107,129,0.5)",borderRadius:8,color:"#FF6B81",padding:"3px 10px",cursor:"pointer"}}>Retry</button></div>
+              :<div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:10,padding:"18px 0",marginBottom:14,color:"#a55eea",fontSize:13}}>
+                <span style={{width:14,height:14,borderRadius:"50%",border:"2px solid rgba(165,94,234,0.3)",borderTopColor:"#a55eea",display:"inline-block",animation:"bwspin 0.8s linear infinite"}}></span>
+                Re-evaluating the patient as the case evolves…
+              </div>}
+          <button disabled={!r2ready} onClick={function(){if(!r2ready)return;setFlags({});setShowFb(false);setPi(2);setVit(sc.phases[2].vitals,sc.phases[2].signs);setStage("assess");}} style={Object.assign({},BS,{background:r2ready?PP:"rgba(255,255,255,0.12)",opacity:r2ready?1:0.55,cursor:r2ready?"pointer":"default"})}>{r2ready?"Continue to Round 2":"Patient evolving…"}</button>
+        </div>);
+      })()}
       {stage==="cb-alert"&&(<div className="slu">
         <div className="alp" style={{textAlign:"center",marginBottom:12}}><div style={{display:"inline-block",padding:"8px 16px",borderRadius:20,fontWeight:900,color:"white",fontSize:13,background:"#FF4757"}}>UNEXPECTED EVENT</div></div>
         <div className="bw-split">

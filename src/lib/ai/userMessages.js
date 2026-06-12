@@ -172,7 +172,8 @@ export function buildPerItemUserMessage(scenario, slotRef) {
   if (!parsed) return "(invalid slotRef)";
   if (!scenario || !Array.isArray(scenario.phases)) return "(invalid scenario)";
   var phaseIdx = parsed.phaseIdx;
-  var phase = scenario.phases[phaseIdx];
+  // Phase 6.3 (Stage 3): curveball items live on sc.curveball, not phases[].
+  var phase = phaseIdx === "curveball" ? scenario.curveball : scenario.phases[phaseIdx];
   if (!phase) return "(phase " + phaseIdx + " not found)";
 
   var parts = [];

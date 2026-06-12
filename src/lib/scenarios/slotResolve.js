@@ -37,9 +37,13 @@ export var SYNTHESIZED_FB_FALLBACK = "This action's feedback was not generated f
 // malformed input (no throw — callers decide how to handle absence).
 export function parseSlotRefString(str) {
   if (!str || typeof str !== "string") return null;
-  var phaseMatch = str.match(/^phase\[(\d+)\]\.([a-zA-Z]+)(?:\.([a-zA-Z]+))?\.([^.]+)\.([a-zA-Z]+)$/);
+  // Phase 6.3 (Stage 3): the curveball is a single beat addressed as
+  // phase[curveball] (not a numeric index). _phaseFor already routes a
+  // phaseIdx of "curveball" to sc.curveball, so the resolve/write/context
+  // helpers work once we parse the string form here.
+  var phaseMatch = str.match(/^phase\[(\d+|curveball)\]\.([a-zA-Z]+)(?:\.([a-zA-Z]+))?\.([^.]+)\.([a-zA-Z]+)$/);
   if (phaseMatch) {
-    var phaseIdx = Number(phaseMatch[1]);
+    var phaseIdx = phaseMatch[1] === "curveball" ? "curveball" : Number(phaseMatch[1]);
     var coll = phaseMatch[2];
     var subColl = phaseMatch[3];
     var id = phaseMatch[4];

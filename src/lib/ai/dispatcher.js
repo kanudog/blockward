@@ -220,7 +220,9 @@ export async function startDispatcher(scenario, abortController, persistCallback
     throw err;
   }
   if (typeof h.onWaveOneComplete === "function") {
-    try { h.onWaveOneComplete(); } catch (e) { /* best-effort */ }
+    // Phase 6.3 (Stage 3.5): awaited so a Phase-0 verify pass can run BEFORE the
+    // hook flips the Assess gate (the caller's onWaveOneComplete may be async).
+    try { await h.onWaveOneComplete(scenario); } catch (e) { /* best-effort */ }
   }
 
   // Waves 2-5: background chain. Not awaited by caller — the dispatcher
@@ -228,6 +230,10 @@ export async function startDispatcher(scenario, abortController, persistCallback
   runWave(slotsByWave[2], "per-item", scenario, signal, cacheState, onWaveComplete)
     .then(function () { return runWave(slotsByWave[3], "per-item", scenario, signal, cacheState, onWaveComplete); })
     .then(function () { return runWave(slotsByWave[4], "per-item", scenario, signal, cacheState, onWaveComplete); })
+    // Phase 6.3 (Stage 3.5): verify the intervene-phase fills here, after wave 4
+    // (their fb) and BEFORE the slow deep-dive wave, so the content is checked
+    // before the learner reaches it. Awaited within the chain (returns a promise).
+    .then(function () { if (typeof h.onBeforeDeepDives === "function") return h.onBeforeDeepDives(scenario); })
     .then(function () { return runWave(slotsByWave[5], "deep-dive", scenario, signal, cacheState, onWaveComplete); })
     .then(function () {
       if (typeof h.onAllWavesComplete === "function") {

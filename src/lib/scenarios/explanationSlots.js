@@ -253,6 +253,52 @@ export function collectAllNullSlots(scenario) {
     });
   }
 
+  // Phase 6.3 (Stage 3): curveball why/fb slots. The curveball is a single
+  // beat (not in phases[]); its vitals/signs/labs why fill on wave 3 and its
+  // action fb on wave 4 — the same background waves Round 2 uses, with plenty
+  // of lead time before the post-Round-2 beat. teaches are authored inline by
+  // the orchestrator (content filled, no slot), so they are not walked here.
+  if (scenario.curveball && typeof scenario.curveball === "object") {
+    var cb = scenario.curveball;
+    if (Array.isArray(cb.vitals)) {
+      cb.vitals.forEach(function (v) {
+        if (!v || typeof v !== "object") return;
+        if (v.why !== null) return;
+        if (!_hasRef(v)) return;
+        out.push({ slotRefString: v._slotRef, wave: 3, kind: "per-item" });
+      });
+    }
+    if (Array.isArray(cb.signs)) {
+      cb.signs.forEach(function (s) {
+        if (!s) return;
+        if (s.why !== null) return;
+        if (!_hasRef(s)) return;
+        out.push({ slotRefString: s._slotRef, wave: 3, kind: "per-item" });
+      });
+    }
+    if (Array.isArray(cb.labs)) {
+      cb.labs.forEach(function (l) {
+        if (!l) return;
+        if (l.why !== null) return;
+        if (!_hasRef(l)) return;
+        out.push({ slotRefString: l._slotRef, wave: 3, kind: "per-item" });
+      });
+    }
+    if (cb.actions) {
+      ["tools", "meds"].forEach(function (kind) {
+        var coll = cb.actions[kind];
+        if (!coll || typeof coll !== "object") return;
+        Object.keys(coll).forEach(function (id) {
+          var entry = coll[id];
+          if (!entry) return;
+          if (entry.fb !== null) return;
+          if (!_hasRef(entry)) return;
+          out.push({ slotRefString: entry._slotRef, wave: 4, kind: "per-item" });
+        });
+      });
+    }
+  }
+
   // Debrief deep dives — array of {id, title, content, _slotRef}.
   if (scenario.debrief && Array.isArray(scenario.debrief.physiologyDeepDive)) {
     scenario.debrief.physiologyDeepDive.forEach(function (entry) {

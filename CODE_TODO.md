@@ -6,6 +6,44 @@ Working notes on architectural decisions, in-flight phase work, and pending engi
 
 ---
 
+## 2026-06-11 — Cross-check verifier shipped (Stage 3.5); SECOND-PASS tuning is a follow-up
+
+Built the deferred Sonnet cross-check verifier — the fix for the
+2026-05-29 per-item drift gap below. After the Haiku dispatcher fills a
+unit's `why`/`fb`, a single Sonnet pass (`src/lib/ai/verifier.js`,
+`buildVerifierPrompt`, `client.verifyExplanations`) reads the scenario's
+ground truth (narrative + teaches + tied-correct actions) and returns
+ok/repair/drop per item: repair rewrites to the correct picture, drop sets
+`""` (the existing "no explanation" state — non-null so it isn't re-filled).
+Runs per unit via two new dispatcher hooks (`onWaveOneComplete` is now
+awaited so Phase 0 gates the Assess button on verify; `onBeforeDeepDives`
+verifies Phase 1 / Round 2 / curveball before the learner reaches them).
+Design: `docs/superpowers/specs/2026-06-11-cross-check-verifier-design.md`.
+
+**Verified (live AI smoke):** on the curveball that the clinical reviewer
+rated UNSAFE (cb1: ~19 items asserting "right mainstem intubation" vs. the
+correct tension-pneumothorax answer), the verifier repaired 21–22 of 25 with
+correct content + doses preserved, and independently fixed a K⁺/acidosis
+mechanism inversion; on SOUND content (cb2) it left 27/30 ok (3 trivial
+tightenings) — it discriminates, not over-aggressive.
+
+**LIMITATION → FOLLOW-UP (the tracked second pass):** a SINGLE pass is a
+strong risk-reducer, not a 100% guarantee. An independent re-review of the
+repaired cb1 found 1–2 of 25 residual contradictions surviving inside an
+"either X or Y" differential or a trailing action clause (e.g. an
+`atropine.fb` closing clause recommending ETT repositioning, contradicting
+the corrected breath-sounds field). A prompt-tightening caught the "either/or"
+case but a trailing-clause miss still slipped. Follow-up options:
+(a) a SECOND verifier pass over the once-verified unit to catch residual
+cross-item contradictions (~2× cost); (b) further prompt tuning on the
+"residual ruled-out cause in a closing clause" pattern. Until then, the
+verifier + the author's manual pre-ship review together cover the residual.
+NOT YET LIVE-EXERCISED end-to-end: the dispatcher↔playerStore hook wiring is
+build- + logic-verified; confirm with a curveball-ON AI generation (watch the
+`[verify] <unit>: checked/repaired/dropped` console logs + the Assess gate).
+
+---
+
 ## 2026-05-29 — Per-item why-text clinical inconsistency (found in bug-sweep smoke)
 
 During the bug-sweep Batch 1 smoke (6yo septic shock from CAP,

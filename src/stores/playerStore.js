@@ -13,7 +13,8 @@
 import { create } from "zustand";
 import { useScenariosStore } from "./scenariosStore.js";
 import { startDispatcher as runDispatcher, dispatcherShouldRun } from "../lib/ai/dispatcher.js";
-import { generateRound2, mergeRound2 } from "../lib/ai/client.js";
+import { verifyUnit } from "../lib/ai/verifier.js";
+import { generateRound2, mergeRound2, generateCurveball, mergeCurveball } from "../lib/ai/client.js";
 import { vitalsLookup } from "../lib/scenarios/canonicalize.js";
 import { migrateLegacyScenario } from "../lib/scenarios/migrateLegacyScenario.js";
 
@@ -68,7 +69,15 @@ var initialState = {
   // "idle" (full case awaiting gen) | "generating" | "ready" | "error".
   // The interlude screen gates the Round-2 entry on "ready".
   round2State: "ready",
-  round2AbortController: null
+  round2AbortController: null,
+  // Phase 6.3 (Stage 3): background curveball generation state.
+  // "idle" (full _cbMode case awaiting its curveball) | "generating" |
+  // "ready" | "error". The player's afterAct uses this to decide between
+  // firing the curveball, holding on the "monitor alarming" bridge, or
+  // skipping to reassess. Default "ready" — only a full curveball-mode case
+  // without a curveball yet flips to "idle".
+  curveballState: "ready",
+  curveballAbortController: null
 };
 
 export var usePlayerStore = create(function(set, get) {
@@ -86,6 +95,11 @@ export var usePlayerStore = create(function(set, get) {
       var prevR2 = get().round2AbortController;
       if (prevR2) {
         try { prevR2.abort(); } catch (e) { /* best-effort */ }
+      }
+      // Phase 6.3 (Stage 3): and any in-flight curveball generation.
+      var prevCb = get().curveballAbortController;
+      if (prevCb) {
+        try { prevCb.abort(); } catch (e) { /* best-effort */ }
       }
       // Phase 6.1: normalize to schema 5.4.1 shape. Built-ins reach
       // the player without going through scenariosStore.hydrate, so
@@ -122,13 +136,26 @@ export var usePlayerStore = create(function(set, get) {
         // player fires startRound2Generation on mount); everything else is
         // already complete ("ready").
         round2State: (sc && sc._pendingRound2 && (!sc.phases || sc.phases.length < 4)) ? "idle" : "ready",
-        round2AbortController: null
+        round2AbortController: null,
+        // Phase 6.3 (Stage 3): a full curveball-mode case that doesn't yet
+        // carry a curveball starts "idle" (the player fires
+        // startCurveballGeneration after Round 2 lands); everything else
+        // (toggle off, quick case, already-built curveball, built-in) is
+        // already "ready".
+        curveballState: (sc && sc._cbMode && !sc.curveball) ? "idle" : "ready",
+        curveballAbortController: null
       });
     },
     reset: function() {
       var prev = get().dispatcherAbortController;
       if (prev) {
         try { prev.abort(); } catch (e) {}
+      }
+      // Phase 6.3 (Stage 3): abort any in-flight curveball generation so its
+      // completion can't resurrect activeScenario after reset.
+      var prevCb = get().curveballAbortController;
+      if (prevCb) {
+        try { prevCb.abort(); } catch (e) {}
       }
       set(initialState);
     },
@@ -272,8 +299,17 @@ export var usePlayerStore = create(function(set, get) {
       var updateCustom = useScenariosStore.getState().updateCustom;
       var forceRefreshScenario = get().forceRefreshScenario;
       var hooks = {
-        onWaveOneComplete: function() {
+        onWaveOneComplete: async function(filledSc) {
+          // Phase 6.3 (Stage 3.5): verify Phase 0's fills BEFORE opening the
+          // Assess gate, so a learner never opens an unverified explanation.
+          try { await verifyUnit(filledSc || get().activeScenario, "phase0", controller.signal, updateCustom, forceRefreshScenario); }
+          catch (e) { if (e && e.name === "AbortError") return; }
           set({ waveOneComplete: true, dispatcherState: "background" });
+        },
+        onBeforeDeepDives: async function(filledSc) {
+          // Verify Phase 1's fills in the background, after their fb lands and
+          // before the slow deep-dive wave / before the learner reaches them.
+          try { await verifyUnit(filledSc || get().activeScenario, "phase1", controller.signal, updateCustom, forceRefreshScenario); } catch (e) {}
         },
         onAllWavesComplete: function() {
           set({ dispatcherState: "complete" });
@@ -317,13 +353,63 @@ export var usePlayerStore = create(function(set, get) {
         // background. Reuses the Round-2 controller so a scenario change
         // aborts both the gen and the fill. Round 1 slots are already
         // populated, so collectAllNullSlots only walks the Round 2 ones.
+        // Phase 6.3 (Stage 3.5): verify the Round-2 fills (after their fb, before
+        // the deep-dive wave) so they're checked before the learner reaches them.
         try {
-          await runDispatcher(merged, controller, updateCustom, get().forceRefreshScenario, {});
+          await runDispatcher(merged, controller, updateCustom, get().forceRefreshScenario, {
+            onBeforeDeepDives: async function(filledSc) { try { await verifyUnit(filledSc || get().activeScenario, "round2", controller.signal, updateCustom, get().forceRefreshScenario); } catch (e) {} }
+          });
         } catch (e) { /* abort or best-effort */ }
+        // Phase 6.3 (Stage 3): now that Round 2 has merged, chain the curveball
+        // generation off the evolved Round 2 state. No-op when curveball mode is
+        // off or a curveball already exists. Fire-and-forget — it runs in the
+        // background while the user plays Round 2.
+        get().startCurveballGeneration();
       } catch (err) {
         if (err && err.name === "AbortError") { set({ round2State: "idle" }); return; }
         console.warn("[playerStore.startRound2Generation] " + (err && err.message || err));
         set({ round2State: "error" });
+      }
+    },
+    // Phase 6.3 (Stage 3): generate the curveball in the background AFTER Round 2
+    // has merged, seeded with the evolved Round 2 state. Chained from
+    // startRound2Generation's success path, and also called re-entrantly from
+    // the player mount so a reload after R2 merged but before the curveball
+    // landed resumes it. No-op for toggle-off / quick / built-in / already-built
+    // cases. Merges + persists + fills the curveball's why/fb slots.
+    startCurveballGeneration: async function() {
+      var sc = get().activeScenario;
+      if (!sc) return;
+      if (sc.curveball) { set({ curveballState: "ready" }); return; }
+      if (!sc._cbMode) { set({ curveballState: "ready" }); return; }
+      // The curveball builds on the evolved Round 2 state — defer until Round 2
+      // has merged (4 phases). startRound2Generation chains us once it lands.
+      if (!(Array.isArray(sc.phases) && sc.phases.length >= 4)) return;
+      if (get().curveballState === "generating") return;
+      var prev = get().curveballAbortController;
+      if (prev) { try { prev.abort(); } catch (e) {} }
+      var controller = new AbortController();
+      set({ curveballAbortController: controller, curveballState: "generating" });
+      var updateCustom = useScenariosStore.getState().updateCustom;
+      try {
+        var cb = await generateCurveball(sc, controller.signal);
+        var merged = mergeCurveball(sc, cb);
+        set({ activeScenario: merged, curveballState: "ready" });
+        try { updateCustom(merged); } catch (e) { /* built-ins / best-effort */ }
+        // Fill the curveball why/fb slots in the background. Reuses the curveball
+        // controller so a scenario change aborts both the gen and the fill. Only
+        // the curveball's null slots are walked (Round 1/2 are already filled).
+        // Phase 6.3 (Stage 3.5): verify the curveball fills (the highest-stakes,
+        // peri-arrest content) before the learner hits the post-Round-2 beat.
+        try {
+          await runDispatcher(merged, controller, updateCustom, get().forceRefreshScenario, {
+            onBeforeDeepDives: async function(filledSc) { try { await verifyUnit(filledSc || get().activeScenario, "curveball", controller.signal, updateCustom, get().forceRefreshScenario); } catch (e) {} }
+          });
+        } catch (e) { /* abort or best-effort */ }
+      } catch (err) {
+        if (err && err.name === "AbortError") { set({ curveballState: "idle" }); return; }
+        console.warn("[playerStore.startCurveballGeneration] " + (err && err.message || err));
+        set({ curveballState: "error" });
       }
     }
   });

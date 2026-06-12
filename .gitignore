@@ -20,5 +20,6 @@ smoke-test-per-item-output.txt
 smoke-test-deep-dive-output.txt
 smoke-test-dispatcher-output.txt
 scripts/orchestrator-dry-run-*
+scripts/_exp-*
 .claude/settings.local.json
 .claude/scheduled_tasks.lock

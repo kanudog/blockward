@@ -84,6 +84,10 @@ export function ScenarioPlayer(props){
   // Phase 6.3 (Stage 2): background Round-2 generation state; the interlude
   // gates the Round-2 entry on "ready".
   var round2State=usePlayerStore(function(s){return s.round2State;});
+  // Phase 6.3 (Stage 3): background curveball generation state; afterAct uses
+  // it to decide between firing the curveball, holding on the alarm bridge, or
+  // skipping to reassess.
+  var curveballState=usePlayerStore(function(s){return s.curveballState;});
   // Phase 6.0: fire the wave dispatcher once per scenario mount. Replay
   // of an already-populated scenario short-circuits inside startDispatcher
   // via dispatcherShouldRun. Abort happens via playerStore.start when the
@@ -94,6 +98,11 @@ export function ScenarioPlayer(props){
     // Phase 6.3: a full case generates Round 2 in the background during
     // Round 1 play; quick cases / replays short-circuit inside the action.
     usePlayerStore.getState().startRound2Generation();
+    // Phase 6.3 (Stage 3): re-entrant curveball kick. On a fresh mount Round 2
+    // isn't merged yet so this no-ops (startRound2Generation chains it once R2
+    // lands); on a reload where Round 2 is already merged but the curveball
+    // didn't finish, this resumes it.
+    usePlayerStore.getState().startCurveballGeneration();
   },[sc&&sc.id]);
   var ph=sc.phases[pi];
   // Phase 6.3: a full case has (or will have) a Round 2. Drives the interlude
@@ -151,10 +160,54 @@ export function ScenarioPlayer(props){
       });
     });
   });
+  // Phase 6.3 (Stage 3): the curveball's must-haves also "saved this patient".
+  // It lives on sc.curveball (not phases[]); tag round 3 so it sorts after both
+  // intervene rounds and flag isCurveball for the recovery-list badge.
+  if(sc.curveball&&sc.curveball.actions){
+    var cbSel=_selForPhase(actionHistoryForRecovery,{id:"curveball"});
+    ["tools","meds"].forEach(function(kind){
+      var cbColl=sc.curveball.actions[kind]||{};
+      Object.keys(cbColl).forEach(function(id){
+        var ce=cbColl[id];
+        if(ce&&ce.priority==="tied-correct"){
+          var clabel=kind==="tools"?(isCustomTool(id)?(ce.label||id):(ALL_TOOLS[id]?ALL_TOOLS[id].label:id)):(isCustomMed(id)?(ce.label||id):(ALL_MEDS[id]?ALL_MEDS[id].label:id));
+          correctActions.push({
+            name:clabel,
+            toolId:kind==="tools"?id:null,
+            medType:kind==="meds"?lookupMedType(id):null,
+            fb:ce.fb?ce.fb.split(".")[0]+".":"",
+            pri:ce.pri,
+            type:kind==="tools"?"tool":"med",
+            userSelected:!!cbSel[id],
+            round:3,
+            isCurveball:true
+          });
+        }
+      });
+    });
+  }
   correctActions.sort(function(a,b){return((a.round||1)-(b.round||1))||((a.pri||99)-(b.pri||99));});
   useEffect(function(){if(stage!=="recovery")return;setRecStep(0);var iv=setInterval(function(){setRecStep(function(p){if(p>=correctActions.length)return p;return p+1;});},1200);return function(){clearInterval(iv);};},[stage]);
   var pSt=function(){if(stage.startsWith("cb"))return"critical";if(pi>=1||stage==="act")return"declining";return"stable";};
   var trigCb=useCallback(function(){setShake(true);setTimeout(function(){setShake(false);},800);setVit(sc.curveball.vitals,sc.curveball&&sc.curveball.signs);setStage("cb-alert");setCbDone(true);},[sc]);
+  // Phase 6.3 (Stage 3): advance the "monitor alarming" bridge. While on
+  // cb-wait, fire the curveball the instant it lands (sc updates with
+  // activeScenario), skip to reassess if generation errored, and never strand
+  // the learner — a safety timeout moves on if it can't land in time.
+  useEffect(function(){
+    if(stage!=="cb-wait")return;
+    if(curveballState==="error"){setStage("reassess");return;}
+    if(!cbDone&&sc.curveball){trigCb();return;}
+    // If generation hasn't even kicked yet (idle — the post-R2 chain hasn't
+    // fired because the learner outran the R2 slot-fill), start it now.
+    if(curveballState==="idle")usePlayerStore.getState().startCurveballGeneration();
+    var t=setTimeout(function(){
+      var st=usePlayerStore.getState();var live=st.activeScenario;
+      if(live&&live.curveball){st.setShake(true);setTimeout(function(){st.setShake(false);},800);st.setVitals(live.curveball.vitals,live.curveball.signs);st.setCbDone(true);st.setStage("cb-alert");}
+      else st.setStage("reassess");
+    },30000);
+    return function(){clearTimeout(t);};
+  },[stage,curveballState,sc,cbDone]);
   var flag=function(id){if(!showFb)toggleFlag(id);};
   var submit=function(){
     // Phase-4a: scoring removed. Per-item breakdown still captured for debrief.
@@ -197,9 +250,14 @@ export function ScenarioPlayer(props){
   var afterA=function(){setFlags({});setShowFb(false);if(pi<sc.phases.length-1){var n=pi+1;setPi(n);setVit(sc.phases[n].vitals,sc.phases[n].signs);setStage("phase");}else setStage("debrief");};
   var afterAct=function(){
     // Phase 6.3: after Round 1's intervene in a full case, go to the interlude
-    // (then Round 2). After the final intervene, curveball/reassess as before.
+    // (then Round 2). After the final intervene, fire the curveball if present.
     if(ph&&ph.round===1&&isFullCase){setStage("interlude");return;}
-    if(!cbDone&&sc.curveball)trigCb();else setStage("reassess");
+    if(!cbDone&&sc.curveball){trigCb();return;}
+    // Phase 6.3 (Stage 3): curveball mode is ON but the background curveball
+    // hasn't landed yet — hold on a brief "monitor alarming" bridge that
+    // advances the instant it's ready (or skips to reassess if it errored).
+    if(!cbDone&&sc._cbMode&&(curveballState==="generating"||curveballState==="idle")){setStage("cb-wait");return;}
+    setStage("reassess");
   };
   // Phase 6.1: derive tool/med id arrays from actions for ActionPanel
   // and intervention gating; phase.tools[]/phase.meds[] are no longer
@@ -343,6 +401,17 @@ export function ScenarioPlayer(props){
           <button disabled={!r2ready} onClick={function(){if(!r2ready)return;setFlags({});setShowFb(false);setPi(2);setVit(sc.phases[2].vitals,sc.phases[2].signs);setStage("assess");}} style={Object.assign({},BS,{background:r2ready?PP:"rgba(255,255,255,0.12)",opacity:r2ready?1:0.55,cursor:r2ready?"pointer":"default"})}>{r2ready?"Continue to Round 2":"Patient evolving…"}</button>
         </div>);
       })()}
+      {stage==="cb-wait"&&(<div className="slu" style={{textAlign:"center"}}>
+        <style>{"@keyframes bwspin{to{transform:rotate(360deg)}}"}</style>
+        <div className="alp" style={{display:"inline-block",padding:"8px 16px",borderRadius:20,fontWeight:900,color:"white",fontSize:13,background:"#FF4757",marginBottom:16}}>MONITOR ALARMING</div>
+        <div style={{maxWidth:180,margin:"0 auto 16px"}}>
+          <PatientSVG status="critical" rr={vit&&vit.rr&&typeof vit.rr==="object"?parseFloat(vit.rr.value)||24:(vit&&vit.rr)||24} ageGroup={ageG} sex={sexG} emotion="sad" seed={pSeed} visuals={scVisuals}/>
+        </div>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:10,color:"#FF6B81",fontSize:13}}>
+          <span style={{width:14,height:14,borderRadius:"50%",border:"2px solid rgba(255,107,129,0.3)",borderTopColor:"#FF6B81",display:"inline-block",animation:"bwspin 0.8s linear infinite"}}></span>
+          Something&apos;s changing — hold on…
+        </div>
+      </div>)}
       {stage==="cb-alert"&&(<div className="slu">
         <div className="alp" style={{textAlign:"center",marginBottom:12}}><div style={{display:"inline-block",padding:"8px 16px",borderRadius:20,fontWeight:900,color:"white",fontSize:13,background:"#FF4757"}}>UNEXPECTED EVENT</div></div>
         <div className="bw-split">
@@ -459,7 +528,7 @@ export function ScenarioPlayer(props){
               return(<div key={i} style={{display:"flex",alignItems:"flex-start",gap:10,marginBottom:10,opacity:visible?1:0.15,transform:visible?"translateX(0)":"translateX(-10px)",transition:"all 0.4s ease-out"}}>
                 <div style={{flexShrink:0,width:36,height:36,borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",background:act.type==="tool"?"rgba(78,205,196,0.15)":"rgba(116,185,255,0.15)",border:"1px solid "+(act.type==="tool"?"rgba(78,205,196,0.3)":"rgba(116,185,255,0.3)")}}>{act.type==="tool"?ToolIcon({name:act.toolId,size:20,color:"#4ECDC4"}):MedIcon({type:act.medType||"iv",size:20,color:"#74b9ff"})}</div>
                 <div style={{flex:1}}>
-                  <div style={{fontSize:13,fontWeight:700,color:"white"}}>{act.name}</div>
+                  <div style={{fontSize:13,fontWeight:700,color:"white"}}>{act.name}{act.isCurveball&&<span style={{marginLeft:6,fontSize:9,fontWeight:800,letterSpacing:0.5,textTransform:"uppercase",color:"#FF6B81",background:"rgba(255,71,87,0.12)",border:"1px solid rgba(255,71,87,0.3)",borderRadius:6,padding:"1px 5px",verticalAlign:"middle"}}>Curveball</span>}</div>
                   {visible&&act.fb&&<p style={{fontSize:11,color:"#aaa",marginTop:2,lineHeight:1.4}}>{act.fb}</p>}
                 </div>
                 {/* Phase 6.2b.5: selection marker. Filled check = user

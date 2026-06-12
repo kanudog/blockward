@@ -1,4 +1,4 @@
-import { buildSystemPrompt, buildOrchestratorPrompt, buildRound2Prompt, buildMarkForReviewDeepDivePrompt, MODEL_ID, MAX_TOKENS } from "./prompt.js";
+import { buildSystemPrompt, buildOrchestratorPrompt, buildRound2Prompt, buildCurveballPrompt, buildVerifierPrompt, buildMarkForReviewDeepDivePrompt, MODEL_ID, MAX_TOKENS } from "./prompt.js";
 import { resolveSlotText, kindToPromptType } from "../scenarios/slotResolve.js";
 import { validateSchema, validateConsistency, validateCounts, applyAutocorrections } from "./validate.js";
 import { migrateLegacyScenario } from "../scenarios/migrateLegacyScenario.js";
@@ -250,6 +250,92 @@ export function mergeRound2(scenario, r2){
   return merged;
 }
 
+// Phase 6.3 (Stage 3): background curveball generation. Given a merged two-round
+// scenario (carrying _sourcePrompt + the evolved Round 2 phases), generate one
+// curveball beat — an unexpected acute complication of the SAME patient just
+// after the Round 2 interventions — honoring the user's ORIGINAL brief (loyalty
+// safeguard, threaded into the user message) and building on the evolved Round 2
+// state. Non-streaming; runs in the background after Round 2 lands, while the
+// user is still playing Round 2. Returns the raw curveball object for
+// mergeCurveball().
+export async function generateCurveball(scenario, signal){
+  var brief=(scenario&&scenario._sourcePrompt)||"";
+  var pc=scenario.patientCard||scenario.patient||{};
+  var phases=scenario.phases||[];
+  // The evolved Round 2 state (round:2 phases — assess then intervene) is what
+  // the curveball strikes from. Fall back to the last two phases by position.
+  var r2phases=phases.filter(function(p){return p&&p.round===2;});
+  if(r2phases.length===0)r2phases=phases.slice(2,4);
+  var ctx={patientCard:pc,norms:scenario.norms,round2:r2phases};
+  var userContent="ORIGINAL USER BRIEF (honor every fact, including any pinned to the curveball or a later complication):\n"+brief+"\n\nEVOLVED ROUND 2 STATE (the SAME patient after the Round 2 interventions — the curveball strikes from HERE):\n"+JSON.stringify(ctx);
+  var r=await fetch("/api/generate",{method:"POST",headers:{"Content-Type":"application/json"},signal:signal,
+    body:JSON.stringify({model:MODEL_ID,max_tokens:MAX_TOKENS,mode:"curveball",
+      tools:[{type:"web_search_20250305",name:"web_search"}],
+      system:[{type:"text",text:buildCurveballPrompt(),cache_control:{type:"ephemeral"}}],
+      messages:[{role:"user",content:userContent}]})});
+  if(!r.ok){
+    var eb="";try{eb=await r.text();}catch(e){}
+    var em="Curveball generation failed — please check your connection.";
+    try{var ej=JSON.parse(eb);if(ej&&ej.error&&ej.error.message)em=ej.error.message;}catch(e){}
+    throw new Error(em);
+  }
+  var data=await r.json();
+  if(data.error)throw new Error(data.error.message||"Curveball API error");
+  var tb="";(data.content||[]).forEach(function(b){if(b&&b.type==="text"&&b.text)tb+=b.text;});
+  if(!tb.trim())throw new Error("No text in curveball response.");
+  var cb=_parseLooseJson(tb);
+  if(!cb||!cb.actions||(!cb.actions.tools&&!cb.actions.meds))throw new Error("Curveball response was malformed — missing actions.");
+  return cb;
+}
+
+// Merge a curveball into its two-round scenario: install scenario.curveball,
+// normalize via the migrator (stamps phase[curveball].* slot refs + backfills
+// null why/fb on its vitals/signs/labs/actions; name/narrative/teaches pass
+// through inline), then defensively re-stamp the slot refs so the dispatcher can
+// always find them regardless of what the model emitted. Returns the scenario
+// with the curveball attached.
+export function mergeCurveball(scenario, cb){
+  var merged=Object.assign({},scenario);
+  merged.curveball=cb;
+  merged=migrateLegacyScenario(merged);
+  _stampCurveballRefs(merged.curveball);
+  _stampRounds(merged);
+  merged.source="ai";
+  return merged;
+}
+
+// Defensive: force every curveball slot ref to its canonical phase[curveball].*
+// position and backfill any missing why/fb to literal null, so a slot the model
+// left unfilled is always discoverable by collectAllNullSlots + resolveSlotText.
+// Mirrors the ref scheme migratePhase uses; runs after it as the authoritative
+// pass.
+function _stampCurveballRefs(cb){
+  if(!cb||typeof cb!=="object")return;
+  function _ref(arr,kind){
+    if(!Array.isArray(arr))return;
+    arr.forEach(function(it){
+      if(!it||!it.id)return;
+      it._slotRef="phase[curveball]."+kind+"."+it.id+".why";
+      if(!Object.prototype.hasOwnProperty.call(it,"why"))it.why=null;
+    });
+  }
+  _ref(cb.vitals,"vitals");
+  _ref(cb.signs,"signs");
+  _ref(cb.labs,"labs");
+  if(cb.actions&&typeof cb.actions==="object"){
+    ["tools","meds"].forEach(function(kind){
+      var coll=cb.actions[kind];
+      if(!coll||typeof coll!=="object")return;
+      Object.keys(coll).forEach(function(id){
+        var e=coll[id];
+        if(!e||typeof e!=="object")return;
+        e._slotRef="phase[curveball].actions."+kind+"."+id+".fb";
+        if(!Object.prototype.hasOwnProperty.call(e,"fb"))e.fb=null;
+      });
+    });
+  }
+}
+
 // Tolerant JSON-object parser for the non-streaming Round 2 response: direct
 // parse, then longest balanced-brace recovery (mirrors parseAccumulated minus
 // the id/phases gate, since Round 2 carries neither id nor a full scenario).
@@ -411,5 +497,55 @@ export async function expandSingleMarkedItem(scenario, markedItem, signal) {
   };
   var map = await expandMarkedItems(scenario, [internal], signal);
   return map[markedItem.id] || "";
+}
+
+// Phase 6.3 (Stage 3.5): cross-check verifier. Given a ground-truth block for one
+// unit (phase or curveball) and the filled why/fb items for that unit, run a
+// single Sonnet pass that returns ok|repair|drop per item. Output is the same
+// delimited ###ITEM/###END format the fill paths use. Best-effort: on any API or
+// parse failure it returns {} so the caller changes nothing (no worse than the
+// pre-verifier state). Returns { <slotRef>: { verdict, correctedText|null } }.
+export async function verifyExplanations(scenario, groundTruth, items, signal){
+  if(!Array.isArray(items)||items.length===0)return {};
+  var lines=["GROUND TRUTH","",groundTruth,"","ITEMS TO CHECK",""];
+  items.forEach(function(it,i){
+    lines.push("--- item "+(i+1)+" ---");
+    lines.push("id: "+it.slotRef);
+    lines.push("kind: "+it.kind);
+    lines.push("label: "+(it.label||""));
+    lines.push("CURRENT TEXT:");
+    lines.push(it.text||"");
+    lines.push("");
+  });
+  var userContent=lines.join("\n");
+  var r;
+  try{
+    r=await fetch("/api/generate",{method:"POST",headers:{"Content-Type":"application/json"},signal:signal,
+      body:JSON.stringify({model:MODEL_ID,max_tokens:16000,mode:"verify",
+        system:[{type:"text",text:buildVerifierPrompt(),cache_control:{type:"ephemeral"}}],
+        messages:[{role:"user",content:userContent}]})});
+  }catch(e){
+    if(e&&e.name==="AbortError")throw e;
+    console.warn("[verify] request failed, leaving content unchanged: "+(e&&e.message||e));
+    return {};
+  }
+  var raw="";try{raw=await r.text();}catch(e){if(e&&e.name==="AbortError")throw e;return {};}
+  var d;try{d=JSON.parse(raw);}catch(je){console.warn("[verify] non-JSON response, leaving content unchanged");return {};}
+  if(d.error){console.warn("[verify] API error: "+(d.error.message||"(no message)"));return {};}
+  var tb="";(d.content||[]).forEach(function(b){if(b&&b.type==="text"&&b.text)tb+=b.text;});
+  if(!tb.trim())return {};
+  var blocks=parseDelimitedDeepDives(tb); // { <id>: <body> }
+  var out={};
+  Object.keys(blocks).forEach(function(ref){
+    var body=blocks[ref];
+    var nl=body.indexOf("\n");
+    var first=(nl<0?body:body.slice(0,nl)).trim();
+    var rest=(nl<0?"":body.slice(nl+1)).trim();
+    var m=first.match(/VERDICT:\s*(ok|repair|drop)/i);
+    if(!m)return; // unparseable verdict → treat as ok (no change)
+    var verdict=m[1].toLowerCase();
+    out[ref]={verdict:verdict,correctedText:(verdict==="repair"&&rest)?rest:null};
+  });
+  return out;
 }
 

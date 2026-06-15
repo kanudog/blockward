@@ -21,5 +21,7 @@ smoke-test-deep-dive-output.txt
 smoke-test-dispatcher-output.txt
 scripts/orchestrator-dry-run-*
 scripts/_exp-*
+blockward-ui-handoff/
+blockward-ui-handoff.zip
 .claude/settings.local.json
 .claude/scheduled_tasks.lock

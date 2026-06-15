@@ -1,6 +1,7 @@
 # Block Ward — Project Handoff Document
 
-**Last updated:** 2026-05-08
+**Last updated:** 2026-06-12
+**Current state lives in the dated session handoffs** — read `docs/BLOCK_WARD_HANDOFF_2026-06-12.md` first (it chains back through the 06-11, 05-29, 05-27 handoffs). This canonical document is deeper background (overview, schema, infrastructure, history); the dated handoffs carry the live per-session state. As of 2026-06-12: Stage 3 (curveball) + Stage 3.5 (Sonnet cross-check verifier) shipped; Stage 4 (UI/design system, "Midnight Neon") started — design tokens + dashboard done, player-screen rollout + Stage 5 avatar pending.
 **Purpose:** Bring a new AI session fully up to speed on the Block Ward project — current state, architectural decisions, schema, infrastructure, history, and pending work. Read this end-to-end before suggesting any changes.
 
 ---

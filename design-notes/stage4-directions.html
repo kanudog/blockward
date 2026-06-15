@@ -1,0 +1,126 @@
+<meta charset="utf-8">
+<title>Block Ward — Stage 4 liquid-glass directions</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { background:#05060a; }
+  body {
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",system-ui,sans-serif;
+    color:#fff; -webkit-font-smoothing:antialiased; padding:26px 24px 30px;
+  }
+  .head { text-align:center; margin-bottom:22px; }
+  .head h1 { font-size:18px; font-weight:600; letter-spacing:.2px; color:#e9edf7; }
+  .head p { font-size:12px; color:#8b93a7; margin-top:4px; }
+  .row { display:flex; gap:24px; justify-content:center; align-items:flex-start; }
+  .col { width:432px; }
+  .frame {
+    border-radius:26px; padding:22px 20px 24px; position:relative; overflow:hidden;
+    border:1px solid rgba(255,255,255,.06); min-height:660px;
+  }
+  .dlabel { font-size:13px; font-weight:600; letter-spacing:.3px; margin:0 2px 3px; }
+  .dtag { font-size:11.5px; color:#8b93a7; margin:0 2px 12px; }
+  .swatches { display:flex; gap:7px; margin:14px 2px 0; }
+  .sw { width:24px; height:24px; border-radius:7px; border:1px solid rgba(255,255,255,.14); }
+
+  .glass {
+    position:relative; border-radius:18px;
+    background:var(--glass);
+    backdrop-filter:blur(22px) saturate(150%); -webkit-backdrop-filter:blur(22px) saturate(150%);
+    border:1px solid var(--edge);
+    box-shadow: 0 8px 30px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.14), var(--halo);
+  }
+
+  .card { display:flex; gap:13px; align-items:center; padding:13px 15px; }
+  .face { width:50px; height:50px; flex:none; border-radius:50%; overflow:hidden;
+    box-shadow:0 0 0 2px var(--ring), 0 4px 12px rgba(0,0,0,.4); }
+  .ctitle { font-size:15.5px; font-weight:600; letter-spacing:.1px; }
+  .csub { font-size:11.5px; color:#aeb6c8; margin-top:2px; }
+  .chips { display:flex; gap:6px; margin-top:7px; }
+  .chip { font-size:10px; font-weight:600; padding:3px 8px; border-radius:7px;
+    background:rgba(255,255,255,.08); color:#d6dcea; border:1px solid rgba(255,255,255,.10); }
+  .chip.tier { background:var(--accentSoft); color:var(--accentText); border-color:transparent; }
+  .chip.rev { color:var(--accent2); }
+
+  .label { font-size:9.5px; letter-spacing:1.4px; font-weight:700; text-transform:uppercase;
+    color:var(--accent); margin:18px 2px 8px; }
+
+  .monitor { display:flex; padding:12px 6px; gap:2px; }
+  .v { flex:1; text-align:center; }
+  .v + .v { border-left:1px solid rgba(255,255,255,.07); }
+  .vl { font-size:9px; letter-spacing:1px; font-weight:700; color:#7f8aa3; text-transform:uppercase; display:block; }
+  .vv { font-size:21px; font-weight:600; color:#fff; margin-top:3px; display:block; font-variant-numeric:tabular-nums; }
+  .vu { font-size:9px; color:#6f7a92; }
+
+  .popup { padding:15px 16px 13px; }
+  .ptitle { font-size:13.5px; font-weight:600; color:#eef1f8; margin-bottom:7px; display:flex; align-items:center; gap:7px; }
+  .pdot { width:7px; height:7px; border-radius:50%; background:var(--accent); box-shadow:0 0 8px var(--accent); }
+  .pbody { font-size:12.5px; line-height:1.62; color:#c4cbdb; }
+  .term { font-weight:600; color:var(--accent); }
+  .pact { display:flex; gap:8px; margin-top:12px; }
+  .bghost { flex:1; font-size:11.5px; font-weight:600; padding:8px 0; text-align:center; border-radius:10px;
+    background:rgba(255,255,255,.06); color:#d6dcea; border:1px solid rgba(255,255,255,.12); }
+  .bghost.mark { color:var(--accent); border-color:var(--edge); }
+
+  .cta { width:100%; margin-top:16px; padding:13px 0; border-radius:13px; border:none; cursor:pointer;
+    font-size:14px; font-weight:600; color:var(--ctaText); background:var(--cta);
+    box-shadow:0 6px 20px var(--ctaGlow), inset 0 1px 0 rgba(255,255,255,.25); letter-spacing:.2px; }
+</style>
+
+<div class="head">
+  <h1>Block Ward — Stage 4 liquid-glass directions</h1>
+  <p>Same components, three takes on the look. Each frame shows a case card (with the avatar-face chip), the vitals monitor, a "Why?" popup, and the primary button.</p>
+</div>
+<div class="row" id="row"></div>
+
+<script>
+function face(skin, hair){
+  return '<svg viewBox="0 0 64 64" width="50" height="50">'
+    + '<circle cx="32" cy="33" r="30" fill="'+skin+'"/>'
+    + '<path d="M5 28 a27 27 0 0 1 54 0 q-27 -16 -54 0 Z" fill="'+hair+'"/>'
+    + '<circle cx="23" cy="35" r="3.1" fill="#1c1c22"/><circle cx="41" cy="35" r="3.1" fill="#1c1c22"/>'
+    + '<circle cx="18" cy="42" r="4" fill="#ff9d8a" opacity=".5"/><circle cx="46" cy="42" r="4" fill="#ff9d8a" opacity=".5"/>'
+    + '<path d="M24 44 q8 7 16 0" stroke="#1c1c22" stroke-width="2.6" fill="none" stroke-linecap="round"/>'
+    + '</svg>';
+}
+var DIRS = [
+  { name:"A · Aurora Deep", tag:"Evolves today's look — warm teal + violet glow over a deep navy aurora.",
+    bg:"radial-gradient(120% 80% at 18% 8%, rgba(78,205,196,.22), transparent 46%), radial-gradient(130% 90% at 92% 96%, rgba(169,139,255,.24), transparent 50%), linear-gradient(160deg,#0b1024,#171a3e)",
+    glass:"rgba(255,255,255,.06)", edge:"rgba(255,255,255,.12)", halo:"0 0 0 1px rgba(78,205,196,.04)",
+    accent:"#4ECDC4", accent2:"#b6a0ff", accentSoft:"rgba(78,205,196,.18)", accentText:"#bdf3ec", ring:"rgba(78,205,196,.5)",
+    cta:"linear-gradient(135deg,#4ECDC4,#3a9d96)", ctaText:"#04231f", ctaGlow:"rgba(78,205,196,.35)",
+    sw:["#0b1024","#4ECDC4","#b6a0ff","#171a3e"], skin:"#F6C453", hair:"#7a4a24" },
+  { name:"B · Clinical Frost", tag:"Calmer + more medical — desaturated slate, restrained frosted-white glass.",
+    bg:"radial-gradient(120% 80% at 15% 6%, rgba(120,170,210,.14), transparent 48%), radial-gradient(120% 90% at 95% 100%, rgba(150,170,210,.12), transparent 52%), linear-gradient(165deg,#0e1622,#131d2c)",
+    glass:"rgba(214,230,250,.07)", edge:"rgba(255,255,255,.10)", halo:"0 0 0 1px rgba(255,255,255,.02)",
+    accent:"#79cfdf", accent2:"#a7bbdc", accentSoft:"rgba(121,207,223,.16)", accentText:"#c9eef4", ring:"rgba(121,207,223,.45)",
+    cta:"linear-gradient(135deg,#79cfdf,#5aa7bb)", ctaText:"#062229", ctaGlow:"rgba(121,207,223,.28)",
+    sw:["#0e1622","#79cfdf","#a7bbdc","#131d2c"], skin:"#F2C879", hair:"#5b4a8a" },
+  { name:"C · Midnight Neon", tag:"Most futuristic — near-black, vivid cyan/indigo edge glow, glossier glass.",
+    bg:"radial-gradient(115% 75% at 12% 4%, rgba(34,211,238,.20), transparent 44%), radial-gradient(130% 95% at 96% 100%, rgba(129,140,248,.26), transparent 50%), linear-gradient(160deg,#06080f,#0c1230)",
+    glass:"rgba(255,255,255,.075)", edge:"rgba(140,200,255,.22)", halo:"0 0 22px rgba(34,211,238,.10)",
+    accent:"#34d3ee", accent2:"#9aa6ff", accentSoft:"rgba(34,211,238,.18)", accentText:"#c4f4fb", ring:"rgba(34,211,238,.6)",
+    cta:"linear-gradient(135deg,#34d3ee,#6f7bf6)", ctaText:"#051a26", ctaGlow:"rgba(34,211,238,.4)",
+    sw:["#06080f","#34d3ee","#9aa6ff","#0c1230"], skin:"#F6C453", hair:"#23314f" }
+];
+function vital(l,v,u){ return '<div class="v"><span class="vl">'+l+'</span><span class="vv">'+v+'</span><span class="vu">'+u+'</span></div>'; }
+function col(d){
+  return '<div class="col">'
+    + '<div class="dlabel" style="color:'+d.accent+'">'+d.name+'</div>'
+    + '<div class="dtag">'+d.tag+'</div>'
+    + '<div class="frame" style="background:'+d.bg+'; --glass:'+d.glass+'; --edge:'+d.edge+'; --halo:'+d.halo
+      + '; --accent:'+d.accent+'; --accent2:'+d.accent2+'; --accentSoft:'+d.accentSoft+'; --accentText:'+d.accentText
+      + '; --ring:'+d.ring+'; --cta:'+d.cta+'; --ctaText:'+d.ctaText+'; --ctaGlow:'+d.ctaGlow+'">'
+      + '<div class="glass card"><div class="face">'+face(d.skin,d.hair)+'</div>'
+        + '<div><div class="ctitle">The Fussy Infant</div><div class="csub">6-month-old · Fussiness &amp; fever</div>'
+        + '<div class="chips"><span class="chip tier">Tier 1</span><span class="chip rev">Clinically reviewed</span></div></div></div>'
+      + '<div class="label">Vitals</div>'
+      + '<div class="glass monitor">'+vital("HR","178","bpm")+vital("SpO₂","96","%")+vital("BP","84/52","mmHg")+vital("Temp","38.4","°C")+'</div>'
+      + '<div class="label">Why? popup</div>'
+      + '<div class="glass popup"><div class="ptitle"><span class="pdot"></span>Why is this abnormal?</div>'
+        + '<div class="pbody">HR 178 exceeds the infant range of 100–160. <span class="term">Tachycardia</span> here signals <span class="term">physiologic stress</span> — the heart compensating for poor perfusion before blood pressure falls.</div>'
+        + '<div class="pact"><span class="bghost mark">Mark for review</span><span class="bghost">Close</span></div></div>'
+      + '<button class="cta">Begin assessment</button>'
+      + '<div class="swatches">'+d.sw.map(function(c){return '<span class="sw" style="background:'+c+'"></span>';}).join('')+'</div>'
+    + '</div></div>';
+}
+document.getElementById('row').innerHTML = DIRS.map(col).join('');
+</script>

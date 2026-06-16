@@ -16,6 +16,30 @@ A running list of visual, CSS, and styling issues to be addressed by Claude Desi
 
 ## Open items
 
+### ★ NEXT FOCUS (2026-06-12) — avatar-driven focused-exam redesign + professional UI pass
+
+The agreed next-session overhaul. **Supersedes the "Phase 7+ — non-clickable bulleted
+narration" item below** (the binary sign-flagging fairness problem is solved by this, not by
+bullet lists). Full vision + the next-session prompt are in
+`docs/BLOCK_WARD_HANDOFF_2026-06-12.md` ("NEXT SESSION FOCUS"). Summary:
+
+- **Focused-exam interaction:** avatar CENTER-STAGE; exam options around it ("Check pupils",
+  "Assess breathing/abdomen", "Inspect skin", "Check perfusion", …). Clicking one zooms the
+  camera to that body region and plays a **scenario-specific animation of the actual finding**
+  (anisocoria + a light-sweep pupillary exam; respiration at the monitor RR + retractions; etc.),
+  then a popup states the professional finding. 4–5 zoomed/animated exams per scenario. No more
+  right/wrong tile-flagging — it becomes an interactive exam.
+- **Likely a 2D → 3D avatar.** No 3D lib installed; bundle ~313 KB gzip, no code-splitting →
+  lazy-load three.js / react-three-fiber if we go 3D. Decide 2D-enhanced vs 3D first.
+- **Animation system:** a library of pre-made exam animations loaded like the accessory keywords,
+  PLUS a custom/generated fallback for novel findings.
+- **Schema/orchestrator:** the AI emits a per-exam descriptor (region, animation + params, popup
+  text, numeric values), clinically verified via the orchestrator + the Sonnet verifier.
+- **Professional UI pass (prioritized):** the app reads generic/dated — finish the "Midnight Neon"
+  token rollout (Stage 4) across the player/debrief screens, clear the items below, and elevate to
+  a professional look (readable fonts, professional colors, polished components). A light-theme
+  variant is possible. **Design first, then build.**
+
 ### Debrief screen — physiology deep-dives (Phase 5.4.3b)
 
 - **TL;DR rendering as expandable button** — In the new debrief

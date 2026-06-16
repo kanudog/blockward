@@ -102,14 +102,45 @@ silhouettes, richer expressions, smarter auto-placement, and the **face-only ren
 (which the Stage-4 card chips need — the natural first piece). Couple tightly with the
 focused-exam redesign below.
 
-## Still-pending from the 06-11 handoff
+## NEXT SESSION FOCUS (set 2026-06-12) — avatar-driven focused-exam + professional UI
 
-- **Focused-exam assessment redesign** (06-11 "Next steps" #2 — Sebastian's biggest UX ask):
-  replace the ambiguous "flag abnormal findings" tiles with an avatar-centered focused exam
-  (tiles around the avatar with connector lines; clicking zooms the camera to a body region
-  and animates the actual finding — pupils/anisocoria + light sweep, breathing at the phase's
-  monitor RR with retractions — then a popup states the professional finding). Avatar-driven;
-  lives with Stage 5. NOT started.
+The agreed next-session priority. Supersedes the old 06-11 "focused-exam" item AND the
+`DESIGN_TODO.md` Phase-7 sign-flagging note. Two intertwined goals; **design before building** —
+propose a plan + an animation "menu" + a 2D-vs-3D recommendation and let Sebastian approve first.
+
+**A) Avatar-driven focused exam (the big overhaul).** Replace the current "select the abnormal
+tile + flag it" assessment — it's ambiguous: findings are either trivially/obviously abnormal,
+or one small abnormal detail is buried in a tile of otherwise-normal findings, so the user can't
+tell whether to flag the tile. Instead: the generated avatar sits CENTER-STAGE with exam options
+around it ("Check pupils", "Assess breathing/abdomen", "Inspect skin", "Check perfusion", …).
+Clicking one ZOOMS the camera to that body region and plays a **scenario-specific animation of
+the ACTUAL finding**, then a popup states the professional finding. Examples: head injury →
+"Check pupils" zooms to the eyes, shows anisocoria (one pupil larger) + a spotlight light-sweep
+pupillary-reaction exam, popup "right pupil 4 mm nonreactive, left 2 mm brisk"; "Assess
+breathing/abdomen" zooms to the chest/abdomen, animates respiration at the SAME rate shown on the
+VS monitor (faster if tachypneic) with retractions if present. **4–5 zoomed/animated exams per
+generated scenario.** The user no longer gets right/wrong in the systems assessment — it becomes
+an interactive way to perform the exam and see real findings, so the avatar plays a much bigger
+role.
+
+Forks to decide with Sebastian first:
+- **2D-enhanced vs 3D avatar.** Likely needs 3D (the current avatar is 2D inline-SVG). No 3D lib
+  installed; bundle ~313 KB gzip with no code-splitting → lazy-load three.js / react-three-fiber
+  if we go 3D. Weigh 2D-enhanced (cheaper, keeps the LEGO charm) vs 3D and recommend.
+- **Animation system:** a LIBRARY of pre-made exam animations loaded like the current accessory
+  keywords (anisocoria, retractions, breathing-rate, cap-refill, rashes…) PLUS a custom/generated
+  fallback for findings we haven't pre-made.
+- **Schema + orchestrator:** the AI emits a per-exam descriptor (body region, animation + params
+  like rate/retractions/pupil sizes, the popup text, numeric values), kept clinically accurate via
+  the orchestrator + the new Sonnet verifier.
+- **Scoring/flow:** how the assessment phase works without binary flagging.
+
+**B) Professional UI pass (prioritize alongside A).** The app reads generic/dated (built a few
+months ago). Make it look professionally made — readable fonts, professional color system, great
+aesthetics, polished components. Stage 4 ("Midnight Neon" tokens) is started but only on the
+dashboard; finish a cohesive professional look across the player/debrief screens and clear the
+`DESIGN_TODO.md` items. Sebastian is open to refining the direction (possibly a light-theme
+variant) — show options if the current direction doesn't read professional enough.
 
 ## UI handoff bundle (for a separate design-focused session)
 
@@ -133,34 +164,92 @@ generation code, or medication/dosing content anywhere except `MAPPING.md`. **Th
 
 ## Next steps (priority order)
 
-1. **Finish the Stage 4 rollout** — player screens + `DESIGN_TODO.md` items + the avatar-face
-   card chips (face-only `PatientSVG` mode).
-2. **Stage 5 — avatar expansion** (propose the menu first) + the **focused-exam redesign**.
+1. **NEXT SESSION FOCUS (see the section above):** the avatar-driven focused-exam redesign
+   (decide 2D-vs-3D + the animation library/custom-fallback + the schema/scoring change) **and**
+   the professional UI pass. Design first, then build.
+2. **Finish the Stage 4 rollout** — player/debrief screens + `DESIGN_TODO.md` items + the
+   avatar-face card chips (face-only `PatientSVG` mode). Folds into #1's UI pass.
 3. **Verifier second pass / further tuning** (CODE_TODO.md) + a live end-to-end verify-hook smoke.
 4. Optional: a **light-theme** variant of the token system.
 
 ## Prompt to give the next Claude Code session
 
 ```
-I'm continuing Block Ward. Pull `main` and read
-docs/BLOCK_WARD_HANDOFF_2026-06-12.md first (it points to the 06-11, 05-27, 05-29
-handoffs for prior context — skim those too).
+I'm continuing Block Ward (pediatric emergency clinical simulator). Pull `main`
+and get fully caught up FIRST:
 
-State (all on main, pushed, deployed): Stage 3 (curveball) and Stage 3.5 (the Sonnet
-cross-check verifier) are DONE and verified. Stage 4 (UI/design system) is STARTED — a
-shared design-token module (src/lib/design/tokens.js, "Midnight Neon" direction) is built
-and wired into the dashboard; the player/debrief screens are still on the legacy palette.
+1. Read docs/BLOCK_WARD_HANDOFF_2026-06-12.md end-to-end (it chains back to the
+   06-11, 05-29, 05-27 dated handoffs — skim those for tech-stack + working-
+   relationship context). docs/BLOCK_WARD_HANDOFF.md is deep-background canonical.
+2. Read these files before proposing anything:
+   - The avatar: src/components/player/PatientSVG.jsx (2D inline-SVG "LEGO
+     minifig", keyword-driven accessories from scenario.visuals[]),
+     PatientView.jsx, and scripts/render-avatar.mjs (the render harness).
+   - The current assessment: src/components/player/AssessPanel.jsx,
+     BodySystemsView.jsx, SignCard.jsx + how signs are shaped/emitted (the
+     orchestrator in src/lib/ai/prompt.js, the player schema).
+   - The design system: src/lib/design/tokens.js ("Midnight Neon" Stage-4
+     tokens, started) + DESIGN_TODO.md (its Phase-7 entry already flags the
+     binary sign-flagging as a fairness problem — this redesign supersedes it).
+   - The sanitized UI handoff bundle blockward-ui-handoff/ — a GENERIC,
+     renderer-agnostic avatar schema (animationState enum + numeric params), a
+     telemetry schema, MOCKDATA, design context, and 3D-headroom notes. Good
+     reference for the design + 3D scoping. (Originals in src/ are full; the
+     bundle is a sanitized copy.)
 
-Immediate priorities (detailed in the handoff "Next steps"):
-(1) Finish the Stage 4 rollout — apply the tokens across the player + debrief screens,
-clear the open DESIGN_TODO.md items, and build the circular avatar-FACE card chips (a
-face-only PatientSVG render mode). (2) Stage 5 avatar expansion — propose a menu first —
-plus the avatar-centered focused-exam assessment redesign. (3) The verifier second-pass
-tuning tracked in CODE_TODO.md, and a live end-to-end smoke of the verify hooks.
+THIS SESSION'S FOCUS — two intertwined goals. Do NOT start coding; propose a
+design + an animation "menu" + a 2D-vs-3D recommendation, and let me approve
+first (my process: design docs before implementation; surface the big forks one
+question at a time).
 
-Code style is strict (JS, no template literals, string + concat, no arrow fns in JSX
-attrs, inline styles, Object.assign, plain function decls). Clinical accuracy is paramount;
-preserve the tuned orchestrator + Haiku machinery + the new Sonnet verifier. Run `vercel dev`
-on :3000 for AI generation, `npm run dev` (:5173) for UI-only. Sebastian authorized direct
-pushes; smoke-test before commits. Never paste API keys.
+A) AVATAR-DRIVEN FOCUSED-EXAM ASSESSMENT (the big overhaul). Replace the current
+"select the abnormal tile + flag it" interaction — it's ambiguous (findings are
+either obviously abnormal and trivial, or one small abnormal detail is buried in
+a tile of normal findings, so you can't tell whether to flag the tile). Instead:
+the generated avatar sits CENTER-STAGE, with exam options around it ("Check
+pupils", "Assess breathing/abdomen", "Inspect skin", "Check perfusion", etc.).
+Clicking one ZOOMS the camera to that body region and plays a scenario-specific
+animation of the ACTUAL finding, then a popup states the professional finding.
+Examples: head injury -> "Check pupils" zooms to the eyes, anisocoria (one pupil
+larger) + a spotlight sweeps across the eyes (pupillary-reaction exam), popup
+"right pupil 4 mm nonreactive, left 2 mm briskly reactive"; "Assess breathing"
+zooms to chest/abdomen, respiration animated at the SAME rate shown on the VS
+monitor (faster if tachypneic), with retractions if present. 4-5 zoomed, animated
+exams per generated scenario. The user no longer gets right/wrong in the systems
+assessment — it becomes an interactive way to perform the exam and see real
+findings, so the avatar plays a much bigger role.
+
+  Forks to decide with me BEFORE building:
+  - 2D-enhanced vs 3D avatar. Probably needs 3D (current is 2D inline-SVG). No
+    3D lib installed; bundle ~313KB gzip, no code-splitting -> lazy-load three.js
+    / react-three-fiber if we go 3D. Weigh 2D-enhanced (cheaper, keeps the LEGO
+    charm) vs 3D and recommend.
+  - Animation system: a LIBRARY of pre-made exam animations loaded like the
+    current accessory keywords (anisocoria, retractions, breathing-rate,
+    cap-refill, rashes...) PLUS a custom/generated fallback for findings we
+    haven't pre-made.
+  - Schema + orchestrator: the AI emits a per-exam descriptor (body region,
+    animation + params like rate/retractions/pupil sizes, the popup text, the
+    numeric values), kept clinically accurate via the orchestrator + the new
+    Sonnet verifier.
+  - Scoring/flow: how the assessment phase works without binary flagging.
+
+B) PROFESSIONAL UI PASS (prioritize alongside A). The app looks generic/dated.
+Make it look professionally made: readable fonts, professional color system,
+great aesthetics, polished spacing/components. Stage 4 ("Midnight Neon" tokens)
+is started and applied to the dashboard only — finish a cohesive professional
+look across the player/debrief screens and clear the open DESIGN_TODO.md items.
+I'm open to refining the direction (I may also want a light-theme variant) — show
+me options if the current direction doesn't read professional enough.
+
+Constraints: clinical accuracy is paramount (preserve the tuned orchestrator +
+Haiku fill + the new Sonnet verifier in src/lib/ai/). Code style is strict (JS,
+no template literals, string + concat, no arrow fns in JSX attrs, inline styles,
+Object.assign, plain function decls). Run `vercel dev` on :3000 for AI generation,
+`npm run dev` (:5173) for UI-only. window.__bw_playerStore is the DevTools hook.
+I authorize direct commits/pushes; smoke-test before commits. Never paste API keys.
+
+Start by confirming your understanding of the current avatar + assessment code,
+then propose the 2D-vs-3D recommendation and a design for the focused-exam +
+animation system for my approval before any implementation.
 ```

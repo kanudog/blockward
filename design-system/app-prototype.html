@@ -1,0 +1,190 @@
+<!-- @dsCard group="Prototype" name="Full app — finalized walkthrough" subtitle="Cases · Intro · Exam · Treat · Recover · Debrief" -->
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>Block Ward — finalized app walkthrough</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap');
+*{box-sizing:border-box;margin:0}
+body{font-family:'Nunito',sans-serif;color:#fff;padding:24px;min-height:100vh;display:flex;justify-content:center;align-items:flex-start;
+ background:radial-gradient(115% 75% at 12% 4%,rgba(34,211,238,0.16),transparent 44%),radial-gradient(130% 95% at 96% 100%,rgba(129,140,248,0.20),transparent 50%),linear-gradient(160deg,#06080f,#0c1230);}
+.frame{position:relative;width:392px;border-radius:32px;overflow:hidden;background:linear-gradient(160deg,#070a16,#0c1230);border:1px solid rgba(140,200,255,0.14);box-shadow:0 26px 80px rgba(0,0,0,0.55),0 0 0 9px #05060c,0 0 0 10px rgba(140,200,255,0.10)}
+.tabs{display:flex;gap:3px;padding:11px 11px 9px;background:rgba(4,7,16,0.55);border-bottom:1px solid rgba(140,200,255,0.08)}
+.tab{flex:1;text-align:center;font-family:'Fredoka';font-weight:600;font-size:10.5px;color:#8b93a7;padding:7px 0;border-radius:9px;cursor:pointer;border:1px solid transparent;transition:all .15s}
+.tab.on{color:#7fe9fb;background:rgba(52,211,238,0.12);border-color:rgba(52,211,238,0.3)}
+.body{position:relative;height:660px;overflow-y:auto;overflow-x:hidden}
+.screen{display:none;padding:16px 15px 22px;animation:fade .25s ease}
+.screen.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.h{font-family:'Fredoka';font-weight:600}
+.chip{display:inline-flex;align-items:center;gap:5px;font-weight:800;font-size:11px;padding:5px 10px;border-radius:999px}
+.glass{background:rgba(255,255,255,0.065);border:1px solid rgba(140,200,255,0.18);border-radius:16px}
+.cta{width:100%;border:none;font-family:'Fredoka';font-weight:600;font-size:14.5px;color:#051a26;padding:13px 0;border-radius:14px;background:linear-gradient(135deg,#34d3ee,#6f7bf6);box-shadow:0 8px 22px rgba(34,211,238,0.30),inset 0 1px 0 rgba(255,255,255,0.3);letter-spacing:.2px;cursor:pointer}
+.cta.indigo{color:#fff;background:linear-gradient(135deg,#818cf8,#6366f1)}
+.mv{text-align:center}.mv .l{color:#8b93a7;font-size:9px;font-weight:800;letter-spacing:.5px}.mv .n{color:#fff;font-family:'Fredoka';font-weight:600;font-size:16px}
+.scard{display:flex;align-items:center;gap:11px;padding:11px;border-radius:15px;background:rgba(255,255,255,0.05);border:1px solid rgba(140,200,255,0.14);margin-bottom:9px;cursor:pointer;transition:all .15s}
+.scard:hover{border-color:rgba(52,211,238,0.45);transform:translateY(-1px)}
+.stat{flex:1;border-radius:13px;padding:11px;text-align:center;border:1px solid rgba(140,200,255,0.18)}
+.ex{text-align:left;color:#eaf0fb;border:1px solid rgba(140,200,255,0.16);background:rgba(255,255,255,0.05);border-radius:14px;padding:10px 11px;display:flex;align-items:center;gap:9px;cursor:pointer;transition:all .15s}
+.ex:hover{background:rgba(52,211,238,0.12);border-color:rgba(52,211,238,0.5)}
+.ex .ic{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;background:rgba(52,211,238,0.14);color:#7fe9fb;flex-shrink:0}
+.ex.done .ic{background:rgba(52,211,153,0.16);color:#6ee7b7}
+.ex .nm{font-weight:700;font-size:12.5px;line-height:1.15}.ex .sb{font-size:10px;color:#8b93a7;font-weight:600}
+.ex .tk{margin-left:auto;color:#34d399;opacity:0}.ex.done .tk{opacity:1}
+.tool{border-radius:13px;padding:10px;border:1px solid rgba(140,200,255,0.16);background:rgba(255,255,255,0.04);cursor:pointer;transition:all .15s;text-align:center}
+.tool.sel{border-color:rgba(52,211,153,0.6);background:rgba(52,211,153,0.12)}
+.tool .tl{font-weight:700;font-size:11.5px;color:#eaf0fb;margin-top:5px;line-height:1.2}
+.deep{border-radius:13px;border:1px solid rgba(140,200,255,0.14);background:rgba(255,255,255,0.04);padding:11px 12px;margin-bottom:9px}
+.tldr{cursor:pointer;color:#7fe9fb;font-weight:800;font-size:11px;display:inline-flex;align-items:center;gap:5px;background:rgba(52,211,238,0.1);padding:5px 11px;border-radius:999px;border:1px solid rgba(52,211,238,0.25)}
+#ov{position:absolute;inset:0;background:rgba(4,6,14,0.74);display:none;flex-direction:column;justify-content:flex-end;z-index:5}
+#ov.on{display:flex;animation:fade .2s ease}
+.sheet{background:linear-gradient(180deg,rgba(16,22,46,0.98),rgba(10,14,32,0.99));border-top:1px solid rgba(140,200,255,0.22);border-radius:24px 24px 0 0;padding:6px 15px 18px;max-height:90%;overflow:auto}
+.grab{width:38px;height:4px;border-radius:2px;background:rgba(255,255,255,0.22);margin:8px auto 6px}
+.inset{border-radius:14px;background:radial-gradient(70% 60% at 50% 40%,rgba(52,211,238,0.10),transparent 70%),rgba(3,5,12,0.5);border:1px solid rgba(140,200,255,0.12);overflow:hidden}
+.llight{animation:ll 4.6s ease-in-out infinite}@keyframes ll{0%,6%{opacity:0}13%{opacity:.5}30%{opacity:.5}37%{opacity:0}100%{opacity:0}}
+.lpup{transform-box:fill-box;transform-origin:center;animation:lp 4.6s ease-in-out infinite}@keyframes lp{0%,13%{transform:scale(1)}19%{transform:scale(.48)}31%{transform:scale(.48)}38%{transform:scale(1)}100%{transform:scale(1)}}
+.rlight{animation:rl 4.6s ease-in-out infinite}@keyframes rl{0%,52%{opacity:0}59%{opacity:.5}76%{opacity:.5}83%{opacity:0}100%{opacity:0}}
+.breatheBelly{transform-box:fill-box;transform-origin:50% 100%;animation:belly 4.4s ease-in-out infinite}@keyframes belly{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.13)}}
+.pinchA{transform-box:fill-box;transform-origin:center;animation:pa 4s ease-in-out infinite}@keyframes pa{0%{transform:translateX(-26px)}15%{transform:translateX(0)}25%{transform:translateX(0)}33%{transform:translateX(-26px)}100%{transform:translateX(-26px)}}
+.pinchB{transform-box:fill-box;transform-origin:center;animation:pb 4s ease-in-out infinite}@keyframes pb{0%{transform:translateX(26px)}15%{transform:translateX(0)}25%{transform:translateX(0)}33%{transform:translateX(26px)}100%{transform:translateX(26px)}}
+.blanch{animation:bl 4s ease-in-out infinite}@keyframes bl{0%,15%{opacity:0}23%{opacity:.95}27%{opacity:.95}77%{opacity:0}100%{opacity:0}}
+.skinpan{animation:pan 6.5s ease-in-out infinite}@keyframes pan{0%,14%{transform:translateX(0)}56%,82%{transform:translateX(-168px)}100%{transform:translateX(0)}}
+.throb{transform-box:fill-box;transform-origin:center;animation:throb 2.6s ease-in-out infinite}@keyframes throb{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+.gcsrow{display:flex;justify-content:space-between;gap:6px;padding:3px 7px;border-radius:7px;font-size:11px;color:#aeb6c8;font-weight:600}
+.gcsrow.hit{background:rgba(52,211,238,0.16);color:#eafcff;border:1px solid rgba(52,211,238,0.45)}
+.gcsrow .sc{font-family:'Fredoka';font-weight:600;color:#7fe9fb}.gcsrow.hit .sc{color:#fff}
+.jump{animation:jump 1s ease-in-out infinite}@keyframes jump{0%,100%{transform:translateY(0)}30%{transform:translateY(-9px)}60%{transform:translateY(-3px)}}
+</style></head><body>
+<div class="frame">
+ <div class="tabs">
+  <div class="tab on" data-s="cases" onclick="go('cases')">Cases</div>
+  <div class="tab" data-s="intro" onclick="go('intro')">Intro</div>
+  <div class="tab" data-s="exam" onclick="go('exam')">Exam</div>
+  <div class="tab" data-s="treat" onclick="go('treat')">Treat</div>
+  <div class="tab" data-s="recover" onclick="go('recover')">Recover</div>
+  <div class="tab" data-s="debrief" onclick="go('debrief')">Debrief</div>
+ </div>
+ <div class="body">
+
+  <div class="screen on" data-s="cases">
+   <div class="h" style="font-size:24px;color:#fff">Block Ward</div>
+   <div style="color:#8b93a7;font-weight:700;font-size:12px;margin-bottom:14px">Pediatric emergency simulator</div>
+   <div style="display:flex;gap:9px;margin-bottom:16px">
+    <div class="stat" style="background:linear-gradient(135deg,rgba(34,211,238,0.16),rgba(34,211,238,0.04))"><div style="color:#34d3ee;font-family:'Fredoka';font-weight:600;font-size:20px">24</div><div style="color:#8b93a7;font-size:9.5px;font-weight:800">CASES</div></div>
+    <div class="stat" style="background:linear-gradient(135deg,rgba(129,140,248,0.16),rgba(129,140,248,0.04))"><div style="color:#aab4ff;font-family:'Fredoka';font-weight:600;font-size:20px">88%</div><div style="color:#8b93a7;font-size:9.5px;font-weight:800">AVG SCORE</div></div>
+    <div class="stat" style="background:linear-gradient(135deg,rgba(52,211,153,0.16),rgba(52,211,153,0.04))"><div style="color:#34d399;font-family:'Fredoka';font-weight:600;font-size:20px">6</div><div style="color:#8b93a7;font-size:9.5px;font-weight:800">STREAK</div></div>
+   </div>
+   <div class="scard" onclick="go('intro')"><svg width="46" height="46" viewBox="0 0 46 46"><circle cx="23" cy="23" r="23" fill="#f0ccb0"/><rect x="9" y="14" width="28" height="7" rx="3" fill="#fff" opacity="0.92"/><circle cx="17" cy="27" r="2.4" fill="#1a1a1a"/><circle cx="29" cy="27" r="2.4" fill="#1a1a1a"/><path d="M18 35 Q23 31 28 35" fill="none" stroke="#2d3436" stroke-width="2" stroke-linecap="round"/></svg><div style="flex:1"><div class="h" style="font-size:14px;color:#fff">Liam Carter</div><div style="color:#8b93a7;font-size:11px;font-weight:600">6 yr · head injury, fall from height</div></div><span class="chip" style="background:rgba(255,107,129,0.16);color:#ff9fb0">Trauma</span></div>
+   <div class="scard"><svg width="46" height="46" viewBox="0 0 46 46"><circle cx="23" cy="23" r="23" fill="#f4cba0"/><path d="M9 16 q14 -8 28 0" fill="#6b4a2c"/><circle cx="17" cy="27" r="2.4" fill="#1a1a1a"/><circle cx="29" cy="27" r="2.4" fill="#1a1a1a"/><ellipse cx="23" cy="34" rx="6" ry="3.5" fill="#e0625f"/></svg><div style="flex:1"><div class="h" style="font-size:14px;color:#fff">Mia Okafor</div><div style="color:#8b93a7;font-size:11px;font-weight:600">2 yr · anaphylaxis, peanut</div></div><span class="chip" style="background:rgba(251,191,36,0.16);color:#fbd36b">Allergy</span></div>
+   <div class="scard"><svg width="46" height="46" viewBox="0 0 46 46"><circle cx="23" cy="23" r="23" fill="#f6c188"/><circle cx="15" cy="24" r="6" fill="#ef8a86" opacity="0.5"/><circle cx="31" cy="24" r="6" fill="#ef8a86" opacity="0.5"/><circle cx="17" cy="25" r="2.4" fill="#1a1a1a"/><circle cx="29" cy="25" r="2.4" fill="#1a1a1a"/><path d="M18 33 Q23 36 28 33" fill="none" stroke="#9b6b50" stroke-width="2" stroke-linecap="round"/></svg><div style="flex:1"><div class="h" style="font-size:14px;color:#fff">Noah Bennett</div><div style="color:#8b93a7;font-size:11px;font-weight:600">8 yr · status asthmaticus</div></div><span class="chip" style="background:rgba(52,211,238,0.16);color:#7fe9fb">Resp</span></div>
+   <button class="cta indigo" style="margin-top:7px"> + Generate new case</button>
+  </div>
+
+  <div class="screen" data-s="intro">
+   <div style="display:flex;align-items:center;gap:9px;margin-bottom:12px"><div class="h" style="flex:1;font-size:17px;color:#fff">Liam Carter</div><span class="chip" style="background:rgba(255,107,129,0.16);color:#ff9fb0">Head injury</span></div>
+   <div class="glass" style="padding:13px;margin-bottom:12px"><div style="color:#7fe9fb;font-weight:800;font-size:10px;letter-spacing:.6px;margin-bottom:6px">EMS HANDOFF</div><div style="color:#dfe6f4;font-size:12.5px;line-height:1.55;font-weight:600">6-year-old, fell ~3 m from a play structure. Brief LOC at the scene, now increasingly drowsy. A boggy swelling over the right temple. GCS dropping en route; pupils noted to be unequal in the rig.</div></div>
+   <div id="introAvatar" style="width:150px;margin:2px auto 12px"></div>
+   <button class="cta" onclick="go('exam')">Begin assessment</button>
+  </div>
+
+  <div class="screen" data-s="exam">
+   <div class="glass" style="padding:8px 11px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center">
+    <div class="mv"><div class="l">HR</div><div class="n">52</div></div><div class="mv"><div class="l">RR</div><div class="n">10</div></div><div class="mv"><div class="l">SpO&#8322;</div><div class="n">96</div></div><div class="mv"><div class="l">BP</div><div class="n">142/64</div></div><div style="font-size:9px;color:#5f6781;font-weight:700;max-width:54px;line-height:1.2">tap a vital to flag</div>
+   </div>
+   <div style="position:relative;border-radius:18px;overflow:hidden;margin-bottom:10px;background:radial-gradient(58% 48% at 50% 40%,rgba(52,211,238,0.13),transparent 72%);border:1px solid rgba(140,200,255,0.10);padding:6px 0 2px"><div id="examAvatar" style="width:140px;margin:0 auto"></div><div style="position:absolute;left:11px;top:10px" class="chip"><span style="color:#7fe9fb;font-size:10px;background:rgba(52,211,238,0.14);padding:5px 10px;border-radius:999px">tap a region to examine</span></div></div>
+   <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:9px">
+    <div class="ex" id="x-pupils" onclick="openEx('pupils')"><span class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="12" rx="9" ry="6"/><circle cx="12" cy="12" r="2.6" fill="currentColor" stroke="none"/></svg></span><span><span class="nm">Pupils</span><br><span class="sb">cranial nerve / ICP</span></span><span class="tk">&#10003;</span></div>
+    <div class="ex" id="x-breathing" onclick="openEx('breathing')"><span class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 13q3 -7 6 0t6 0t6 0"/></svg></span><span><span class="nm">Breathing</span><br><span class="sb">rate &amp; effort</span></span><span class="tk">&#10003;</span></div>
+    <div class="ex" id="x-perfusion" onclick="openEx('perfusion')"><span class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h4l2-6 4 12 2-6h8"/></svg></span><span><span class="nm">Perfusion</span><br><span class="sb">cap refill</span></span><span class="tk">&#10003;</span></div>
+    <div class="ex" id="x-neuro" onclick="openEx('neuro')"><span class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="11" r="7"/><path d="M9 11q3-4 6 0" stroke-linecap="round"/></svg></span><span><span class="nm">Responsiveness</span><br><span class="sb">GCS scale</span></span><span class="tk">&#10003;</span></div>
+    <div class="ex" id="x-skin" onclick="openEx('skin')"><span class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="5" width="14" height="14" rx="3"/><circle cx="10" cy="10" r="1.4" fill="currentColor" stroke="none"/></svg></span><span><span class="nm">Inspect skin</span><br><span class="sb">colour &amp; lesions</span></span><span class="tk">&#10003;</span></div>
+    <div style="display:flex;flex-direction:column;justify-content:center;align-items:center;border-radius:14px;border:1px dashed rgba(140,200,255,0.18)"><div id="exProg" style="color:#aab4ff;font-family:'Fredoka';font-weight:600;font-size:12px">0 of 5 examined</div><div style="color:#5f6781;font-size:9px;font-weight:700;margin-top:2px">explore, not graded</div></div>
+   </div>
+   <div class="glass" style="padding:10px 12px;margin-bottom:10px;cursor:pointer" onclick="go('treat')"><div style="display:flex;align-items:center;gap:8px"><span style="color:#7fe9fb;font-size:16px">&#9879;</span><div style="flex:1"><div style="font-weight:700;font-size:12px;color:#eaf0fb">Review labs &amp; flag abnormals</div><div style="font-size:10px;color:#8b93a7;font-weight:600">CBC · chem · coags · lactate — grouped by tube</div></div><span style="color:#5f6781">&#8250;</span></div></div>
+   <button class="cta" onclick="go('treat')">Proceed to interventions</button>
+  </div>
+
+  <div class="screen" data-s="treat">
+   <div class="h" style="font-size:16px;color:#fff;margin-bottom:3px">Tool belt</div>
+   <div style="color:#8b93a7;font-weight:700;font-size:11px;margin-bottom:13px">Rising ICP — choose your interventions</div>
+   <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:13px">
+    <div class="tool" onclick="this.classList.toggle('sel')"><span style="font-size:20px">&#128137;</span><div class="tl">3% hypertonic saline</div></div>
+    <div class="tool" onclick="this.classList.toggle('sel')"><span style="font-size:20px">&#128678;</span><div class="tl">Elevate head of bed 30&deg;</div></div>
+    <div class="tool" onclick="this.classList.toggle('sel')"><span style="font-size:20px">&#129729;</span><div class="tl">Intubate (GCS &le; 8)</div></div>
+    <div class="tool" onclick="this.classList.toggle('sel')"><span style="font-size:20px">&#129516;</span><div class="tl">Emergent CT head</div></div>
+    <div class="tool" onclick="this.classList.toggle('sel')"><span style="font-size:20px">&#127973;</span><div class="tl">Neurosurgery consult</div></div>
+    <div class="tool" onclick="this.classList.toggle('sel')"><span style="font-size:20px">&#128167;</span><div class="tl">Mannitol 0.5 g/kg</div></div>
+   </div>
+   <button class="cta" onclick="go('recover')">Administer &amp; reassess</button>
+  </div>
+
+  <div class="screen" data-s="recover">
+   <div style="text-align:center;margin-bottom:10px"><span class="chip" style="background:rgba(52,211,153,0.14);color:#6ee7b7;letter-spacing:1px">&#10003; STABILIZED</span></div>
+   <div style="width:120px;margin:0 auto 8px"><svg viewBox="0 0 120 150" style="width:100%"><ellipse cx="60" cy="138" rx="44" ry="8" fill="rgba(0,0,0,0.3)"/><g class="jump"><rect x="46" y="96" width="9" height="30" rx="4" fill="#f0c49a"/><rect x="65" y="96" width="9" height="30" rx="4" fill="#f0c49a"/><path d="M40 96 L80 96 L86 60 Q60 54 34 60 Z" fill="#bcd9f2"/><g transform="rotate(-32 40 60)"><rect x="32" y="56" width="8" height="26" rx="4" fill="#f0c49a"/></g><g transform="rotate(32 80 60)"><rect x="80" y="56" width="8" height="26" rx="4" fill="#f0c49a"/></g><rect x="38" y="14" width="44" height="42" rx="15" fill="#f0c49a"/><path d="M36 24 Q60 4 84 24 L84 30 Q60 18 36 30 Z" fill="#6b4a2c"/><path d="M48 34 Q52 30 56 34" fill="none" stroke="#1a1a1a" stroke-width="2.2" stroke-linecap="round"/><path d="M64 34 Q68 30 72 34" fill="none" stroke="#1a1a1a" stroke-width="2.2" stroke-linecap="round"/><circle cx="52" cy="40" r="2.6" fill="#1a1a1a"/><circle cx="68" cy="40" r="2.6" fill="#1a1a1a"/><path d="M50 46 Q60 54 70 46 Q60 50 50 46 Z" fill="#c0392b"/></g></svg></div>
+   <div class="glass" style="padding:10px 12px;margin-bottom:12px;display:flex;justify-content:space-around"><div class="mv"><div class="l">HR</div><div class="n" style="color:#6ee7b7">96</div></div><div class="mv"><div class="l">RR</div><div class="n" style="color:#6ee7b7">20</div></div><div class="mv"><div class="l">SpO&#8322;</div><div class="n" style="color:#6ee7b7">99</div></div><div class="mv"><div class="l">GCS</div><div class="n" style="color:#6ee7b7">14</div></div></div>
+   <div style="color:#7fe9fb;font-weight:800;font-size:10px;letter-spacing:.6px;margin-bottom:8px">WHAT SAVED THIS PATIENT</div>
+   <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:14px">
+    <div style="display:flex;gap:8px;align-items:center;font-size:12px;color:#dfe6f4;font-weight:600"><span style="color:#34d399">&#10003;</span> Hypertonic saline lowered the ICP</div>
+    <div style="display:flex;gap:8px;align-items:center;font-size:12px;color:#dfe6f4;font-weight:600"><span style="color:#34d399">&#10003;</span> Head-of-bed elevation + airway protection</div>
+    <div style="display:flex;gap:8px;align-items:center;font-size:12px;color:#dfe6f4;font-weight:600"><span style="color:#34d399">&#10003;</span> Emergent CT &#8594; neurosurgical evacuation</div>
+   </div>
+   <button class="cta" onclick="go('debrief')">Continue to debrief</button>
+  </div>
+
+  <div class="screen" data-s="debrief">
+   <div class="h" style="font-size:18px;color:#fff;margin-bottom:3px">Debrief</div>
+   <div style="color:#8b93a7;font-weight:700;font-size:11px;margin-bottom:13px">Epidural haematoma with early herniation</div>
+   <div class="glass" style="padding:12px;margin-bottom:12px"><div style="color:#dfe6f4;font-size:12.5px;line-height:1.55;font-weight:600">A temporal impact tore the middle meningeal artery, and an expanding epidural collection drove the ICP up. The fixed pupil, bradycardia, hypertension and irregular breathing were the herniation warning — recognised and treated before arrest.</div></div>
+   <div style="color:#7fe9fb;font-weight:800;font-size:10px;letter-spacing:.6px;margin-bottom:8px">KEY TEACHING</div>
+   <div class="deep"><div style="font-weight:700;font-size:12.5px;color:#eaf0fb;margin-bottom:5px">The blown pupil &amp; Cushing's triad</div><div style="color:#bcc6dc;font-size:11.5px;line-height:1.5;font-weight:600">A unilaterally fixed, dilated pupil with a falling GCS is uncal herniation until proven otherwise. Bradycardia + widening pulse pressure + irregular breathing complete Cushing's triad.</div><div style="margin-top:9px"><span class="tldr" onclick="var t=this.nextElementSibling;t.style.display=t.style.display==='block'?'none':'block'">&#9889; TL;DR</span><div style="display:none;margin-top:7px;color:#cdd3ff;font-size:11.5px;line-height:1.5;font-weight:600">Treat the pressure in the head, not the heart rate — hypertonic saline, HOB 30&deg;, protect the airway, get the scan and the surgeons.</div></div></div>
+   <div class="deep"><div style="font-weight:700;font-size:12.5px;color:#eaf0fb;margin-bottom:5px">Why anisocoria localises</div><div style="color:#bcc6dc;font-size:11.5px;line-height:1.5;font-weight:600">CN III's parasympathetic fibres ride on its surface, so they're compressed first — the pupil blows on the side of the lesion.</div></div>
+   <button class="cta" onclick="go('cases')">Back to cases</button>
+  </div>
+
+ </div>
+
+ <div id="ov" onclick="if(event.target===this)closeEx()"><div class="sheet"><div class="grab"></div>
+  <div style="display:flex;align-items:center;gap:8px;margin:2px 2px 9px"><div id="ovTitle" class="h" style="color:#fff;font-weight:600;font-size:15.5px;flex:1">Pupillary exam</div><button onclick="closeEx()" style="background:rgba(255,255,255,0.08);border:1px solid rgba(140,200,255,0.18);color:#c4cbdb;width:30px;height:30px;border-radius:9px;cursor:pointer">&#10005;</button></div>
+  <div class="inset" id="ovInset"></div>
+  <div style="margin-top:10px"><div style="color:#7fe9fb;font-weight:800;font-size:10px;letter-spacing:.6px;margin-bottom:5px">FINDING</div><div id="ovFind" style="color:#dfe6f4;font-size:13px;line-height:1.5;font-weight:600"></div></div>
+  <div id="ovWrap" style="margin-top:11px"></div>
+  <div style="display:flex;gap:8px;margin-top:12px"><button onclick="ovWhy()" style="flex:1;background:rgba(129,140,248,0.16);border:1px solid rgba(129,140,248,0.4);color:#cdd3ff;font-weight:800;font-size:12px;padding:11px 0;border-radius:12px;cursor:pointer">Why does this matter?</button><button onclick="closeEx()" style="flex:1;background:linear-gradient(135deg,#34d3ee,#6f7bf6);border:none;color:#051a26;font-family:'Fredoka';font-weight:600;font-size:13px;padding:11px 0;border-radius:12px;cursor:pointer">Done</button></div>
+ </div></div>
+</div>
+
+<script>
+var AVATAR = `<svg viewBox="0 0 200 260" style="width:100%;display:block;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.2))"><g><rect x="4" y="196" width="192" height="64" rx="12" fill="#3f63b8"></rect><rect x="8" y="180" width="184" height="22" rx="10" fill="#eef4fd"></rect><rect x="2" y="172" width="9" height="36" rx="4" fill="#5B86E5"></rect><rect x="189" y="172" width="9" height="36" rx="4" fill="#5B86E5"></rect></g><g><animateTransform attributeName="transform" type="translate" values="0,0;0,-1.5;0,0" dur="6s" repeatCount="indefinite" additive="sum"></animateTransform><g><rect x="40" y="182" width="17" height="32" rx="5" fill="#f0ccb0" stroke="#d8a86a" stroke-width="0.7"></rect><rect x="39" y="213" width="19" height="5" rx="3" fill="#eef4fd" stroke="#93b9e0" stroke-width="0.6"></rect></g><g><rect x="63" y="182" width="17" height="32" rx="5" fill="#f0ccb0" stroke="#d8a86a" stroke-width="0.7"></rect><rect x="62" y="213" width="19" height="5" rx="3" fill="#eef4fd" stroke="#93b9e0" stroke-width="0.6"></rect></g><path d="M33.32 144 L86.68 144 L93.64 178 Q93.64 184 88.64 184 Q60 188 31.36 184 Q26.36 184 26.36 178 Z" fill="#bcd9f2" stroke="#93b9e0" stroke-width="0.8" stroke-linejoin="round"></path><path d="M51 144 L60 154 L69 144 Z" fill="#f0ccb0"></path><path d="M51 144 L60 154 L69 144" fill="none" stroke="#93b9e0" stroke-width="1.2"></path><circle cx="53" cy="163" r="1.5" fill="#93b9e0"></circle><circle cx="67" cy="169.08" r="1.5" fill="#93b9e0"></circle><g transform="rotate(16 33.32 147)"><rect x="24.32" y="147" width="9" height="29" rx="4" fill="#f0ccb0" stroke="#d8a86a" stroke-width="0.7"></rect><rect x="23.82" y="146.5" width="10" height="9" rx="4" fill="#bcd9f2" stroke="#93b9e0" stroke-width="0.6"></rect><g opacity="0.25"><circle cx="28.82" cy="164.4" r="2" fill="#8070a0"></circle><circle cx="28.32" cy="170.78" r="1.6" fill="#8070a0"></circle></g><circle cx="28.82" cy="179" r="4" fill="none" stroke="#f0ccb0" stroke-width="3"></circle></g><g transform="rotate(-16 86.68 147)"><rect x="86.68" y="147" width="9" height="29" rx="4" fill="#f0ccb0" stroke="#d8a86a" stroke-width="0.7"></rect><rect x="86.18" y="146.5" width="10" height="9" rx="4" fill="#bcd9f2" stroke="#93b9e0" stroke-width="0.6"></rect><g opacity="0.25"><circle cx="91.18" cy="164.4" r="2" fill="#8070a0"></circle><circle cx="90.68" cy="170.78" r="1.6" fill="#8070a0"></circle></g><circle cx="91.18" cy="179" r="4" fill="none" stroke="#f0ccb0" stroke-width="3"></circle></g><rect x="51.68" y="143" width="16.64" height="6" rx="2" fill="#f0ccb0" stroke="#d8a86a" stroke-width="0.5"></rect><rect x="51.68" y="91" width="16.64" height="8" rx="3" fill="#f0ccb0" stroke="#d8a86a" stroke-width="0.6"></rect><rect x="34" y="98" width="52" height="48" rx="15" fill="#f0ccb0" stroke="#d8a86a" stroke-width="0.8"></rect><g><rect x="32" y="100" width="56" height="10" rx="4" fill="white" stroke="#ddd" stroke-width="0.5" opacity="0.95"></rect><circle cx="73" cy="105" r="3" fill="#ff6b6b" opacity="0.5"></circle></g><g><line x1="43.56" y1="114.6" x2="53.56" y2="110.6" stroke="#1a1a1a" stroke-width="2.3" stroke-linecap="round"></line><line x1="76.44" y1="114.6" x2="66.44" y2="110.6" stroke="#1a1a1a" stroke-width="2.3" stroke-linecap="round"></line></g><g><ellipse cx="48.56" cy="119.6" rx="2.79" ry="3.6" fill="#1a1a1a"></ellipse><ellipse cx="71.44" cy="119.6" rx="2.79" ry="3.6" fill="#1a1a1a"></ellipse><circle cx="47.76" cy="118.3" r="0.9" fill="#fff"></circle><circle cx="70.64" cy="118.3" r="0.9" fill="#fff"></circle></g><g><path d="M54 134.6 Q60 129.6 66 134.6" fill="none" stroke="#2d3436" stroke-width="1.8" stroke-linecap="round"></path><path d="M72.44 124.6 q -2 5 0 7 q 2 -2 0 -7 Z" fill="#74b9ff"></path></g></g><g><rect x="10" y="190" width="180" height="70" rx="12" fill="#6e93de"></rect><rect x="10" y="190" width="180" height="10" rx="5" fill="#a9c2ee"></rect></g><g transform="translate(120,139)"><ellipse cx="20" cy="27" rx="13" ry="14" fill="#d9a45b"></ellipse><ellipse cx="13" cy="39" rx="5" ry="4" fill="#cf9850"></ellipse><ellipse cx="27" cy="39" rx="5" ry="4" fill="#cf9850"></ellipse><ellipse cx="8" cy="25" rx="4.5" ry="6" fill="#cf9850"></ellipse><ellipse cx="32" cy="25" rx="4.5" ry="6" fill="#cf9850"></ellipse><circle cx="20" cy="10" r="10" fill="#d9a45b"></circle><circle cx="12" cy="3" r="4" fill="#d9a45b"></circle><circle cx="28" cy="3" r="4" fill="#d9a45b"></circle><circle cx="12" cy="3" r="2" fill="#cf9850"></circle><circle cx="28" cy="3" r="2" fill="#cf9850"></circle><ellipse cx="20" cy="13" rx="5" ry="4" fill="#f0d2a0"></ellipse><circle cx="20" cy="12" r="1.6" fill="#5b3d2e"></circle><circle cx="16" cy="8" r="1.6" fill="#2d3436"></circle><circle cx="24" cy="8" r="1.6" fill="#2d3436"></circle></g><g><rect x="180" y="30" width="4" height="222" rx="2" fill="#b8c2cf"></rect><rect x="172" y="248" width="20" height="5" rx="2" fill="#9aa5b1"></rect><path d="M182 30 q0 -8 -10 -8" fill="none" stroke="#b8c2cf" stroke-width="3"></path><rect x="159" y="34" width="20" height="34" rx="5" fill="#e8f2fd" stroke="#9bb8de" stroke-width="1"></rect><rect x="161" y="47" width="16" height="19" rx="3" fill="#bcd8f5"></rect><rect x="166" y="30" width="6" height="6" rx="1" fill="#9bb8de"></rect><rect x="166" y="70" width="6" height="10" rx="2" fill="#eaf3fd" stroke="#9bb8de" stroke-width="0.8"></rect><circle cx="169" cy="75" r="1.2" fill="#74b9ff"></circle><path d="M169 80 C 161 135, 140 132, 96 158" fill="none" stroke="#9bb8de" stroke-width="1.8"></path><rect x="92" y="154" width="10" height="8" rx="2" fill="#ffffff" opacity="0.92" stroke="#cdd8e6" stroke-width="0.6"></rect><line x1="101" y1="158" x2="92" y2="158" stroke="#9bb8de" stroke-width="1.4"></line></g></svg>`;
+document.getElementById('introAvatar').innerHTML = AVATAR;
+document.getElementById('examAvatar').innerHTML = AVATAR;
+
+var INSET = {
+ pupils:`<svg viewBox="0 0 200 150" style="width:100%;height:150px;display:block"><circle cx="60" cy="70" r="30" fill="#fbf7f0"/><circle cx="60" cy="70" r="30" fill="none" stroke="#e2d3bf" stroke-width="1.5"/><circle cx="60" cy="70" r="16.5" fill="#6f4a2a"/><circle class="llight" cx="60" cy="70" r="25" fill="#fff7d6" opacity="0"/><g class="lpup"><circle cx="60" cy="70" r="9" fill="#121212"/></g><circle cx="53" cy="63" r="3.1" fill="#fff" opacity="0.85"/><circle cx="140" cy="70" r="30" fill="#fbf7f0"/><circle cx="140" cy="70" r="30" fill="none" stroke="#e2d3bf" stroke-width="1.5"/><circle cx="140" cy="70" r="16.5" fill="#6f4a2a"/><circle class="rlight" cx="140" cy="70" r="25" fill="#fff7d6" opacity="0"/><circle cx="140" cy="70" r="12.5" fill="#121212"/><circle cx="133" cy="63" r="2.6" fill="#fff" opacity="0.55"/><text x="8" y="128" fill="#8be8a6" font-family="Nunito" font-weight="800" font-size="10.5">L 2mm reactive</text><text x="192" y="128" text-anchor="end" fill="#ff9fb0" font-family="Nunito" font-weight="800" font-size="10.5">R 4mm fixed</text></svg>`,
+ breathing:`<svg viewBox="0 0 220 150" style="width:100%;height:150px;display:block"><rect x="0" y="120" width="220" height="30" fill="#2c4a8f"/><rect x="0" y="113" width="220" height="9" rx="3" fill="#3f63b8"/><g class="breatheBelly"><path d="M0 120 L0 98 C40 86 76 72 110 72 C150 72 190 88 220 102 L220 120 Z" fill="#f0c49a"/><path d="M0 98 C40 86 76 72 110 72 C150 72 190 88 220 102" fill="none" stroke="#d8a86a" stroke-width="2"/><path d="M104 84 q6 6 12 0" fill="none" stroke="#c69468" stroke-width="2" stroke-linecap="round"/></g><text x="110" y="142" text-anchor="middle" fill="#9fb8e0" font-family="Nunito" font-weight="800" font-size="11">abdomen rises &amp; falls &#183; RR 10</text></svg>`,
+ perfusion:`<svg viewBox="0 0 200 150" style="width:100%;height:150px;display:block"><text x="8" y="22" fill="#7fe9fb" font-family="Nunito" font-weight="800" font-size="10">compress</text><text x="192" y="22" text-anchor="end" fill="#8be8a6" font-family="Nunito" font-weight="800" font-size="10">refill 2 s</text><path d="M86 150 L84 64 Q84 42 100 42 Q116 42 116 64 L114 150 Z" fill="#f0c49a" stroke="#d8a86a" stroke-width="1"/><ellipse cx="100" cy="58" rx="11.5" ry="14" fill="#f6d9bc"/><ellipse class="blanch" cx="100" cy="60" rx="14" ry="19" fill="#fdeede"/><g class="pinchA"><path d="M10 48 L66 48 Q84 48 84 60 Q84 72 66 72 L10 72 Z" fill="#e3a878" stroke="#c98f5f" stroke-width="1"/><ellipse cx="76" cy="60" rx="4.5" ry="7" fill="#f2cfa2"/></g><g class="pinchB"><path d="M190 48 L134 48 Q116 48 116 60 Q116 72 134 72 L190 72 Z" fill="#dca06f" stroke="#bd8753" stroke-width="1"/><ellipse cx="124" cy="60" rx="4.5" ry="7" fill="#ecc596"/></g></svg>`,
+ neuro:`<div style="padding:10px 8px 4px"><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px"><div><div style="color:#7fe9fb;font-weight:800;font-size:10px;text-align:center;margin-bottom:4px">EYE</div><div class="gcsrow"><span class="sc">4</span><span>spont.</span></div><div class="gcsrow"><span class="sc">3</span><span>voice</span></div><div class="gcsrow hit"><span class="sc">2</span><span>pain</span></div><div class="gcsrow"><span class="sc">1</span><span>none</span></div></div><div><div style="color:#7fe9fb;font-weight:800;font-size:10px;text-align:center;margin-bottom:4px">VERBAL</div><div class="gcsrow"><span class="sc">5</span><span>orient.</span></div><div class="gcsrow"><span class="sc">4</span><span>conf.</span></div><div class="gcsrow"><span class="sc">3</span><span>words</span></div><div class="gcsrow hit"><span class="sc">2</span><span>sounds</span></div><div class="gcsrow"><span class="sc">1</span><span>none</span></div></div><div><div style="color:#7fe9fb;font-weight:800;font-size:10px;text-align:center;margin-bottom:4px">MOTOR</div><div class="gcsrow"><span class="sc">6</span><span>obeys</span></div><div class="gcsrow"><span class="sc">5</span><span>local.</span></div><div class="gcsrow hit"><span class="sc">4</span><span>withdr.</span></div><div class="gcsrow"><span class="sc">3</span><span>flex.</span></div><div class="gcsrow"><span class="sc">2</span><span>ext.</span></div><div class="gcsrow"><span class="sc">1</span><span>none</span></div></div></div><div style="text-align:center;margin-top:8px"><span class="chip" style="background:rgba(255,107,129,0.18);color:#ff9fb0">total GCS 8 &#183; E2 V2 M4</span></div></div>`,
+ skin:`<svg viewBox="0 0 200 150" style="width:100%;height:150px;display:block"><defs><clipPath id="apsw"><rect x="8" y="10" width="184" height="102" rx="12"/></clipPath></defs><g clip-path="url(#apsw)"><g class="skinpan"><rect x="0" y="0" width="380" height="130" fill="#f3c79c"/><circle cx="70" cy="44" r="1.4" fill="#cf9a63" opacity="0.6"/><circle cx="120" cy="28" r="1.2" fill="#cf9a63" opacity="0.6"/><g class="throb"><path d="M244 50 C258 38 296 36 314 52 C328 66 322 92 298 98 C274 104 248 96 240 76 C236 64 236 56 244 50 Z" fill="#7e4f93" opacity="0.62"/><path d="M268 50 C286 46 305 55 304 71 C302 85 283 87 271 80 C261 74 259 58 268 50 Z" fill="#46285c" opacity="0.6"/></g></g></g><rect x="8" y="10" width="184" height="102" rx="12" fill="none" stroke="rgba(140,200,255,0.22)"/><text x="100" y="130" text-anchor="middle" fill="#c9a6e0" font-family="Nunito" font-weight="800" font-size="11">scanning scalp &#8594; temporal haematoma</text></svg>`
+};
+var EX = {
+ pupils:{t:'Pupillary exam',f:'Right pupil 4 mm and fixed; left 2 mm, briskly reactive &mdash; anisocoria with a unilaterally unreactive pupil.',why:'A unilaterally <b style="color:#ff9fb0">fixed, dilated pupil</b> with a falling GCS is <b style="color:#ffd27f">uncal herniation</b> until proven otherwise. CN III\'s constrictor fibres are compressed first &mdash; the pupil blows on the side of the lesion. Time-critical: hypertonic saline, head up 30&deg;, CT + neurosurgery.'},
+ breathing:{t:'Breathing &amp; effort',f:'Slow, irregular respirations at 10/min, shallow, no retractions. With the bradycardia and hypertension this is Cushing\'s triad.',why:'Slow, irregular breathing signals <b style="color:#ffd27f">brainstem compromise</b>. GCS &le; 8 with an irregular pattern means the airway is no longer safe &mdash; prepare to intubate.'},
+ perfusion:{t:'Perfusion &#183; cap refill',f:'Brisk capillary refill ~2 s with bounding pulses. Bradycardic (52) with a wide pulse pressure (142/64).',why:'The bradycardia and wide pulse pressure are the <b style="color:#ffd27f">Cushing reflex</b> &mdash; the brain forcing up its own perfusion. Treat the pressure in the head, not the heart rate.'},
+ neuro:{t:'Responsiveness &#183; GCS',f:'Eyes open to pain, incomprehensible sounds, withdraws &mdash; GCS 8 (E2 V2 M4).',why:'<b style="color:#ff9fb0">GCS 8 is the airway threshold</b> &mdash; the classic trigger to intubate. The motor score is the most prognostic; the trend matters more than the number.'},
+ skin:{t:'Skin &amp; lesions',f:'Warm, pink, no rash; a boggy, tender haematoma over the right temporal scalp.',why:'A <b style="color:#ffd27f">boggy temporal haematoma</b> overlies the thinnest skull and the middle meningeal artery &mdash; the classic substrate for an <b style="color:#ff9fb0">epidural haematoma</b>.'}
+};
+var done={},cur='pupils';
+function go(s){
+ var ts=document.querySelectorAll('.tab');for(var i=0;i<ts.length;i++)ts[i].classList.toggle('on',ts[i].getAttribute('data-s')===s);
+ var sc=document.querySelectorAll('.screen');for(var j=0;j<sc.length;j++)sc[j].classList.toggle('on',sc[j].getAttribute('data-s')===s);
+ document.querySelector('.body').scrollTop=0;
+}
+function openEx(k){var e=EX[k];cur=k;
+ document.getElementById('ovTitle').innerHTML=e.t;
+ document.getElementById('ovInset').innerHTML=INSET[k];
+ document.getElementById('ovFind').innerHTML=e.f;
+ document.getElementById('ovWrap').innerHTML='';
+ document.getElementById('ov').classList.add('on');
+ var b=document.getElementById('x-'+k);if(b)b.classList.add('done');
+ done[k]=1;document.getElementById('exProg').textContent=Object.keys(done).length+' of 5 examined';
+}
+function closeEx(){document.getElementById('ov').classList.remove('on');}
+function ovWhy(){document.getElementById('ovWrap').innerHTML='<div style="background:rgba(6,10,24,0.92);border:1px solid rgba(129,140,248,0.35);border-radius:13px;padding:11px 12px;color:#cdd3ff;font-size:12px;line-height:1.55;font-weight:600">'+EX[cur].why+'</div>';}
+</script>
+</body></html>

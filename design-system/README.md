@@ -17,6 +17,7 @@ Design System pane reads to build its card index.
 | `finding-library.html` | Finding library | starter set: deformity · open fracture · GSW · angioedema · diaphoresis · petechiae |
 | `lab-section.html` | Labs | Option-A grouped-by-tube labs (BD Vacutainer colours) |
 | `prototype.html` | Prototype | every component composed on one page (live `<iframe>`s, so component edits propagate) |
+| `app-prototype.html` | Prototype | clickable full-app walkthrough: Cases → Intro → Exam → Treat → Recover → Debrief |
 
 Open `prototype.html` to see the **full prototype on one page**. The two animation sets are
 **seeds of a growing registry** (~20 keyed renderers plus build-time

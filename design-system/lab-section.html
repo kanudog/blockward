@@ -1,0 +1,42 @@
+<!-- @dsCard group="Labs" name="Lab results — grouped by tube" subtitle="Option A · BD Vacutainer colours · tap to flag" -->
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>Lab results — grouped by tube</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap');
+*{box-sizing:border-box;margin:0}
+body{font-family:'Nunito',sans-serif;color:#fff;padding:26px;min-height:100vh;
+ background:radial-gradient(115% 75% at 12% 4%,rgba(34,211,238,0.16),transparent 44%),radial-gradient(130% 95% at 96% 100%,rgba(129,140,248,0.20),transparent 50%),linear-gradient(160deg,#06080f,#0c1230);}
+h1{font-family:'Fredoka';font-weight:600;font-size:22px;margin-bottom:3px}
+.sub{color:#8b93a7;font-weight:700;font-size:12px;margin-bottom:18px}
+.opt{width:412px;border-radius:20px;padding:14px 15px 16px;background:radial-gradient(120% 80% at 10% 0%,rgba(34,211,238,0.08),transparent 46%),linear-gradient(160deg,#080b18,#0c1230);border:1px solid rgba(140,200,255,0.14);box-shadow:0 14px 40px rgba(0,0,0,0.4)}
+.phdr{display:flex;align-items:center;gap:9px;margin:11px 0 3px}
+.pnm{font-family:'Fredoka';font-weight:600;font-size:13px;color:#eaf0fb}
+.psub{font-size:9px;color:#8b93a7;font-weight:700;letter-spacing:.3px;text-transform:uppercase}
+.lrow{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:9px;cursor:pointer;border:1px solid transparent;transition:all .15s}
+.lrow:hover{background:rgba(255,255,255,0.04)}
+.lrow.fl{background:rgba(52,211,238,0.12);border-color:rgba(52,211,238,0.5)}
+.ln{flex:1;color:#dfe6f4;font-weight:700;font-size:12.5px}
+.lv{font-family:'Fredoka';font-weight:600;font-size:13.5px;color:#fff;white-space:nowrap}
+.lv i{font-style:normal;font-size:9px;color:#8b93a7;font-weight:700}
+.lv.bad{color:#ff8fa3}
+.lref{font-size:9px;color:#5f6781;font-weight:700;min-width:62px;text-align:right}
+.lflag{width:18px;text-align:center;color:#34d3ee;opacity:0;font-size:13px;flex-shrink:0}
+.lrow.fl .lflag{opacity:1}.lrow:hover .lflag{opacity:.4}
+</style></head><body>
+<h1>Lab results — grouped by tube</h1>
+<div class="sub">src/components/player/LabPanel.jsx · one tube heads each panel · tap a value to flag it abnormal (graded)</div>
+<div class="opt"><div id="la"></div></div>
+<script>
+var P=[
+ {panel:'Complete blood count',tube:'EDTA · lavender',cap:'#b9a7e0',rows:[{n:'Haemoglobin',v:'9.6',u:'g/dL',ref:'11.5-15.5',bad:true},{n:'Platelets',v:'245',u:'x10^9/L',ref:'150-400',bad:false},{n:'WBC',v:'13.8',u:'x10^9/L',ref:'5-15',bad:false}]},
+ {panel:'Chemistry',tube:'SST · gold',cap:'#e0b84e',rows:[{n:'Sodium',v:'147',u:'mmol/L',ref:'135-145',bad:true},{n:'Potassium',v:'3.9',u:'mmol/L',ref:'3.5-5.0',bad:false},{n:'Glucose',v:'168',u:'mg/dL',ref:'70-110',bad:true}]},
+ {panel:'Coagulation',tube:'Citrate · light blue',cap:'#74b3e6',rows:[{n:'INR',v:'1.4',u:'',ref:'0.9-1.2',bad:true},{n:'aPTT',v:'36',u:'sec',ref:'25-38',bad:false}]},
+ {panel:'Lactate',tube:'Fluoride · gray',cap:'#aeb3bd',rows:[{n:'Lactate',v:'2.6',u:'mmol/L',ref:'0.5-2.0',bad:true}]},
+ {panel:'Type & screen',tube:'EDTA · pink',cap:'#e89ab5',rows:[{n:'Blood group',v:'O pos',u:'',ref:'-',bad:false}]}
+];
+function tube(c){return '<svg width="20" height="46" viewBox="0 0 20 46" style="display:block;flex-shrink:0;"><rect x="4" y="9" width="12" height="35" rx="6" fill="'+c+'" opacity="0.2"></rect><rect x="4" y="27" width="12" height="17" rx="6" fill="'+c+'" opacity="0.5"></rect><rect x="4" y="9" width="12" height="35" rx="6" fill="none" stroke="'+c+'" stroke-opacity="0.55" stroke-width="1"></rect><rect x="3" y="3" width="14" height="9" rx="2.5" fill="'+c+'"></rect><rect x="6.6" y="12" width="2.3" height="20" rx="1.1" fill="#fff" opacity="0.22"></rect></svg>';}
+function row(r){return '<div class="lrow" onclick="this.classList.toggle(\'fl\')"><span class="ln">'+r.n+'</span><span class="lv'+(r.bad?' bad':'')+'">'+r.v+(r.u?' <i>'+r.u+'</i>':'')+'</span><span class="lref">'+r.ref+'</span><span class="lflag">&#9873;</span></div>';}
+var A='';P.forEach(function(p){A+='<div class="phdr">'+tube(p.cap)+'<div><div class="pnm">'+p.panel+'</div><div class="psub">'+p.tube+'</div></div></div>';p.rows.forEach(function(r){A+=row(r);});});
+document.getElementById('la').innerHTML=A;
+</script>
+</body></html>

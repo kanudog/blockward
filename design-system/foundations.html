@@ -1,0 +1,63 @@
+<!-- @dsCard group="Foundations" name="Midnight Neon tokens" subtitle="Palette · glass · buttons · chips · type" -->
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>Midnight Neon — foundations</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap');
+*{box-sizing:border-box;margin:0}
+body{font-family:'Nunito',sans-serif;color:#fff;padding:26px;min-height:100vh;
+ background:radial-gradient(115% 75% at 12% 4%,rgba(34,211,238,0.16),transparent 44%),radial-gradient(130% 95% at 96% 100%,rgba(129,140,248,0.20),transparent 50%),linear-gradient(160deg,#06080f,#0c1230);}
+h1{font-family:'Fredoka';font-weight:600;font-size:24px;margin-bottom:3px}
+.sub{color:#8b93a7;font-weight:700;font-size:12px;margin-bottom:18px}
+h2{font-family:'Fredoka';font-weight:600;font-size:12px;color:#7fe9fb;letter-spacing:.5px;margin:22px 0 10px;text-transform:uppercase}
+.sw{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.swatch{border-radius:14px;height:66px;border:1px solid rgba(140,200,255,0.18);display:flex;flex-direction:column;justify-content:flex-end;padding:8px}
+.swatch b{font-family:'Fredoka';font-weight:600;font-size:11px}
+.swatch span{font-size:9px;opacity:.85;font-family:ui-monospace,monospace}
+.glassrow{display:flex;gap:12px}
+.glass{flex:1;border-radius:18px;padding:15px;background:rgba(255,255,255,0.075);backdrop-filter:blur(22px) saturate(150%);-webkit-backdrop-filter:blur(22px) saturate(150%);border:1px solid rgba(140,200,255,0.18);box-shadow:0 8px 30px rgba(0,0,0,0.35),inset 0 1px 0 rgba(255,255,255,0.14)}
+.glass.glow{box-shadow:0 10px 34px rgba(0,0,0,0.42),inset 0 1px 0 rgba(255,255,255,0.16),0 0 26px rgba(34,211,238,0.12)}
+.glass b{font-family:'Fredoka';font-weight:600;font-size:13px}.glass p{color:#c4cbdb;font-size:11px;margin-top:4px}
+.btns{display:flex;gap:12px;max-width:420px}
+.cta{flex:1;padding:14px 0;border:none;border-radius:14px;font-family:'Fredoka';font-weight:600;font-size:15px;cursor:pointer;letter-spacing:.2px}
+.cta.accent{color:#051a26;background:linear-gradient(135deg,#34d3ee,#6f7bf6);box-shadow:0 6px 20px rgba(34,211,238,0.30),inset 0 1px 0 rgba(255,255,255,0.25)}
+.cta.indigo{color:#fff;background:linear-gradient(135deg,#818cf8,#6366f1);box-shadow:0 6px 20px rgba(129,140,248,0.30),inset 0 1px 0 rgba(255,255,255,0.18)}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{font-size:11px;font-weight:800;padding:5px 12px;border-radius:999px}
+</style></head><body>
+<h1>Midnight Neon</h1><div class="sub">Block Ward design tokens · src/lib/design/tokens.js</div>
+
+<h2>Palette</h2>
+<div class="sw">
+ <div class="swatch" style="background:#34d3ee;color:#051a26"><b>accent</b><span>#34d3ee</span></div>
+ <div class="swatch" style="background:#818cf8;color:#0a1022"><b>accent2</b><span>#818cf8</span></div>
+ <div class="swatch" style="background:#34d399;color:#04342c"><b>ok</b><span>#34d399</span></div>
+ <div class="swatch" style="background:#fbbf24;color:#412402"><b>warn</b><span>#fbbf24</span></div>
+ <div class="swatch" style="background:#ff6b81;color:#4a0d18"><b>danger</b><span>#ff6b81</span></div>
+ <div class="swatch" style="background:#ffffff;color:#06080f"><b>ink</b><span>#ffffff</span></div>
+ <div class="swatch" style="background:#c4cbdb;color:#06080f"><b>ink2</b><span>#c4cbdb</span></div>
+ <div class="swatch" style="background:#8b93a7;color:#06080f"><b>ink3</b><span>#8b93a7</span></div>
+ <div class="swatch" style="background:#0c1230"><b>bg1</b><span>#0c1230</span></div>
+ <div class="swatch" style="background:#06080f"><b>bg0</b><span>#06080f</span></div>
+</div>
+
+<h2>Surfaces · liquid glass</h2>
+<div class="glassrow">
+ <div class="glass"><b>Glass</b><p>default panel · blur 22 / sat 150</p></div>
+ <div class="glass glow"><b>Glass · glow</b><p>hero &amp; alert surfaces (cyan halo)</p></div>
+</div>
+
+<h2>Buttons</h2>
+<div class="btns"><button class="cta accent">Primary action</button><button class="cta indigo">Build</button></div>
+
+<h2>Chips</h2>
+<div class="chips">
+ <span class="chip" style="background:rgba(34,211,238,0.16);color:#c4f4fb">accent</span>
+ <span class="chip" style="background:rgba(129,140,248,0.18);color:#cdd3ff">indigo</span>
+ <span class="chip" style="background:rgba(52,211,153,0.14);color:#9ff0cf">ok</span>
+ <span class="chip" style="background:rgba(255,255,255,0.08);color:#c4cbdb;border:1px solid rgba(255,255,255,0.10)">neutral</span>
+</div>
+
+<h2>Type</h2>
+<div style="font-family:'Fredoka';font-weight:600;font-size:24px">Fredoka — display, titles &amp; buttons</div>
+<div style="font-size:14px;color:#c4cbdb;margin-top:6px">Nunito — body, labels &amp; metrics. The quick brown fox jumps over the lazy dog.</div>
+</body></html>

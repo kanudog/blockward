@@ -1,0 +1,38 @@
+<!-- @dsCard group="Finding library" name="Finding animations (starter set)" subtitle="Deformity · open fracture · GSW · angioedema · diaphoresis · petechiae" -->
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>Finding animation library — starter set</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap');
+*{box-sizing:border-box;margin:0}
+body{font-family:'Nunito',sans-serif;color:#fff;padding:26px;min-height:100vh;
+ background:radial-gradient(115% 75% at 12% 4%,rgba(34,211,238,0.16),transparent 44%),radial-gradient(130% 95% at 96% 100%,rgba(129,140,248,0.20),transparent 50%),linear-gradient(160deg,#06080f,#0c1230);}
+h1{font-family:'Fredoka';font-weight:600;font-size:22px;margin-bottom:3px}
+.sub{color:#8b93a7;font-weight:700;font-size:12px;margin-bottom:18px;max-width:620px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:13px;max-width:560px}
+.tile{border-radius:16px;overflow:hidden;background:radial-gradient(80% 60% at 50% 0%,rgba(34,211,238,0.08),transparent 50%),linear-gradient(160deg,#080b18,#0c1230);border:1px solid rgba(140,200,255,0.14)}
+.stage{height:120px;background:rgba(3,5,12,0.42);border-bottom:1px solid rgba(140,200,255,0.08)}
+.meta{padding:8px 10px 10px}
+.nm{font-family:'Fredoka';font-weight:600;font-size:12.5px;color:#eaf0fb}
+.key{font-family:ui-monospace,monospace;font-size:9px;color:#7fe9fb;margin-top:5px}
+.sweat{animation:sweatfall 2s ease-in infinite}@keyframes sweatfall{0%{transform:translateY(-2px);opacity:0}20%{opacity:.95}100%{transform:translateY(40px);opacity:0}}
+.drip{transform-box:fill-box;transform-origin:top center;animation:drip 2.6s ease-in infinite}@keyframes drip{0%{transform:scaleY(.2);opacity:.3}35%{opacity:1}100%{transform:scaleY(1.1) translateY(18px);opacity:0}}
+.lipswell{transform-box:fill-box;transform-origin:center;animation:lipsw 3s ease-in-out infinite}@keyframes lipsw{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+.throb{transform-box:fill-box;transform-origin:center;animation:throb 2.4s ease-in-out infinite}@keyframes throb{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+</style></head><body>
+<h1>Finding animations — starter set</h1>
+<div class="sub">Six seed renderers at the agreed gore level (a little blood is fine; the open fracture shows a small bone). The registry grows from here, with custom generation for findings it doesn't yet cover.</div>
+<div class="grid">
+
+ <div class="tile"><div class="stage"><svg viewBox="0 0 160 120" style="width:100%;height:100%"><rect x="66" y="14" width="22" height="48" rx="10" fill="#f0c49a" stroke="#d8a86a" stroke-width="1"/><g transform="rotate(46 77 60)"><rect x="66" y="58" width="22" height="46" rx="10" fill="#f0c49a" stroke="#d8a86a" stroke-width="1"/><circle cx="77" cy="108" r="11" fill="#f0c49a" stroke="#d8a86a" stroke-width="1"/></g><ellipse class="throb" cx="79" cy="62" rx="13" ry="10" fill="#d98a86" opacity="0.55"/></svg></div><div class="meta"><div class="nm">Deformed limb · closed</div><div class="key">limb-deformity · {angulation:46, open:false}</div></div></div>
+
+ <div class="tile"><div class="stage"><svg viewBox="0 0 160 120" style="width:100%;height:100%"><rect x="66" y="8" width="22" height="46" rx="10" fill="#f0c49a" stroke="#d8a86a" stroke-width="1"/><g transform="rotate(44 77 52)"><rect x="66" y="52" width="22" height="46" rx="10" fill="#f0c49a" stroke="#d8a86a" stroke-width="1"/></g><polygon points="74,48 93,35 85,50" fill="#f4f1e8" stroke="#d8d2c0" stroke-width="1"/><polygon points="78,45 90,31 85,43" fill="#eceadf" stroke="#d8d2c0" stroke-width="0.8"/><circle cx="79" cy="48" r="3.4" fill="#9c1a1a"/><path class="drip" d="M80 50 q-2 9 0 15 q2 -7 0 -15 Z" fill="#b11d1d"/></svg></div><div class="meta"><div class="nm">Open fracture · bone exposed</div><div class="key">limb-deformity · {open:true, bleed:"mild"}</div></div></div>
+
+ <div class="tile"><div class="stage"><svg viewBox="0 0 160 120" style="width:100%;height:100%"><rect x="34" y="30" width="92" height="62" rx="20" fill="#f0c49a" stroke="#d8a86a" stroke-width="1"/><circle cx="62" cy="58" r="6" fill="#5b0f0f"/><circle cx="62" cy="58" r="9" fill="none" stroke="#a62626" stroke-width="2.5"/><path class="drip" d="M62 64 q-2 10 0 18 q2 -8 0 -18 Z" fill="#b11d1d"/><circle cx="100" cy="58" r="9" fill="#5b0f0f"/><circle cx="100" cy="58" r="13" fill="none" stroke="#a62626" stroke-width="3"/><path class="drip" d="M100 70 q-3 12 0 22 q3 -10 0 -22 Z" fill="#b11d1d" style="animation-delay:.5s"/><text x="62" y="104" text-anchor="middle" fill="#9fb8e0" font-family="Nunito" font-weight="800" font-size="9">entry</text><text x="100" y="104" text-anchor="middle" fill="#9fb8e0" font-family="Nunito" font-weight="800" font-size="9">exit</text></svg></div><div class="meta"><div class="nm">Penetrating wound · GSW</div><div class="key">penetrating-wound · {entry, exit, bleed:"mod"}</div></div></div>
+
+ <div class="tile"><div class="stage"><svg viewBox="0 0 160 120" style="width:100%;height:100%"><rect x="44" y="16" width="72" height="78" rx="24" fill="#f3cba0" stroke="#d8a86a" stroke-width="1"/><circle cx="68" cy="50" r="3.4" fill="#1a1a1a"/><circle cx="92" cy="50" r="3.4" fill="#1a1a1a"/><circle cx="58" cy="40" r="3" fill="#ff6b6b" opacity="0.5"/><circle cx="104" cy="44" r="2.6" fill="#ff6b6b" opacity="0.5"/><circle cx="98" cy="34" r="2.2" fill="#ff6b6b" opacity="0.45"/><g class="lipswell"><ellipse cx="80" cy="74" rx="20" ry="11" fill="#e0625f"/><path d="M60 74 q20 -7 40 0" fill="none" stroke="#b23d3b" stroke-width="1.5"/></g></svg></div><div class="meta"><div class="nm">Angioedema · lip swelling</div><div class="key">face-angioedema · {lips:"severe", hives:true}</div></div></div>
+
+ <div class="tile"><div class="stage"><svg viewBox="0 0 160 120" style="width:100%;height:100%"><rect x="44" y="14" width="72" height="80" rx="24" fill="#f6c188" stroke="#d8a86a" stroke-width="1"/><circle cx="60" cy="58" r="9" fill="#ef8a86" opacity="0.5"/><circle cx="100" cy="58" r="9" fill="#ef8a86" opacity="0.5"/><circle cx="68" cy="48" r="3.2" fill="#1a1a1a"/><circle cx="92" cy="48" r="3.2" fill="#1a1a1a"/><path d="M70 72 q10 6 20 0" fill="none" stroke="#9b6b50" stroke-width="2" stroke-linecap="round"/><path class="sweat" d="M52 30 q-2.5 5 0 7 q2.5 -2 0 -7 Z" fill="#9ed0ff"/><path class="sweat" d="M110 26 q-2.5 5 0 7 q2.5 -2 0 -7 Z" fill="#9ed0ff" style="animation-delay:.7s"/><path class="sweat" d="M58 24 q-2 4 0 6 q2 -2 0 -6 Z" fill="#9ed0ff" style="animation-delay:1.2s"/></svg></div><div class="meta"><div class="nm">Diaphoresis · heavy sweating</div><div class="key">diaphoresis · {severity:"heavy", flushed}</div></div></div>
+
+ <div class="tile"><div class="stage"><svg viewBox="0 0 160 120" style="width:100%;height:100%"><rect x="30" y="20" width="100" height="80" rx="16" fill="#f3c79c"/><g fill="#8e2a4f"><circle cx="58" cy="44" r="2.2"/><circle cx="66" cy="50" r="1.8"/><circle cx="60" cy="56" r="2"/><circle cx="72" cy="42" r="1.6"/><circle cx="76" cy="54" r="2.1"/><circle cx="68" cy="62" r="1.7"/><circle cx="86" cy="48" r="2"/><circle cx="92" cy="58" r="1.8"/><circle cx="84" cy="64" r="1.6"/><circle cx="98" cy="44" r="1.9"/><circle cx="54" cy="64" r="1.7"/><circle cx="100" cy="66" r="2"/></g><text x="80" y="92" text-anchor="middle" fill="#c98fa8" font-family="Nunito" font-weight="800" font-size="9">non-blanching</text></svg></div><div class="meta"><div class="nm">Petechial rash</div><div class="key">rash-petechiae · {blanching:false}</div></div></div>
+
+</div></body></html>

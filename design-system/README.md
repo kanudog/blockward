@@ -16,8 +16,10 @@ Design System pane reads to build its card index.
 | `exam-animations.html` | Exam animations | starter set: pupils · breathing · cap-refill · GCS · skin |
 | `finding-library.html` | Finding library | starter set: deformity · open fracture · GSW · angioedema · diaphoresis · petechiae |
 | `lab-section.html` | Labs | Option-A grouped-by-tube labs (BD Vacutainer colours) |
+| `prototype.html` | Prototype | every component composed on one page (live `<iframe>`s, so component edits propagate) |
 
-The two animation sets are **seeds of a growing registry** (~20 keyed renderers plus build-time
+Open `prototype.html` to see the **full prototype on one page**. The two animation sets are
+**seeds of a growing registry** (~20 keyed renderers plus build-time
 custom generation for findings outside the library), not the finished database — see spec §6–§7.
 
 ## Syncing to Claude Design

@@ -1,0 +1,37 @@
+<!-- @dsCard group="Prototype" name="Full prototype — one page" subtitle="Every component composed together (live)" -->
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>Block Ward — full prototype</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap');
+*{box-sizing:border-box;margin:0}
+body{font-family:'Nunito',sans-serif;color:#fff;padding:28px 20px 48px;min-height:100vh;
+ background:radial-gradient(115% 75% at 12% 4%,rgba(34,211,238,0.16),transparent 44%),radial-gradient(130% 95% at 96% 100%,rgba(129,140,248,0.20),transparent 50%),linear-gradient(160deg,#06080f,#0c1230);}
+.wrap{max-width:740px;margin:0 auto}
+h1{font-family:'Fredoka';font-weight:600;font-size:26px}
+.lead{color:#8b93a7;font-weight:700;font-size:12.5px;margin:4px 0 26px}
+.sec{margin-bottom:26px}
+.sec h2{font-family:'Fredoka';font-weight:600;font-size:13px;color:#7fe9fb;letter-spacing:.5px;text-transform:uppercase;margin-bottom:9px;display:flex;align-items:center;gap:8px}
+.sec h2 span{flex:1;height:1px;background:rgba(140,200,255,0.14)}
+iframe{border:0;border-radius:20px;width:100%;display:block;background:transparent;box-shadow:0 14px 40px rgba(0,0,0,0.4);border:1px solid rgba(140,200,255,0.10)}
+.two{display:flex;gap:16px;flex-wrap:wrap}
+.two .col{flex:1;min-width:300px}
+.two .col h2{font-size:12px}
+</style></head><body>
+<div class="wrap">
+ <h1>Block Ward — full prototype</h1>
+ <div class="lead">Every component composed on one page. Each panel is a live frame of its component file, so edits to a component show up here too.</div>
+
+ <div class="sec"><h2>Foundations<span></span></h2><iframe src="foundations.html" height="660" title="Foundations"></iframe></div>
+
+ <div class="sec"><div class="two">
+  <div class="col"><h2>Avatar<span></span></h2><iframe src="avatar.html" height="400" title="Avatar"></iframe></div>
+  <div class="col"><h2>Focused-exam screen<span></span></h2><iframe src="focused-exam-screen.html" height="700" title="Focused-exam screen"></iframe></div>
+ </div></div>
+
+ <div class="sec"><h2>Exam animations<span></span></h2><iframe src="exam-animations.html" height="880" title="Exam animations"></iframe></div>
+
+ <div class="sec"><h2>Finding library<span></span></h2><iframe src="finding-library.html" height="700" title="Finding library"></iframe></div>
+
+ <div class="sec"><h2>Labs<span></span></h2><iframe src="lab-section.html" height="600" title="Labs"></iframe></div>
+</div>
+</body></html>

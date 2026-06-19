@@ -1,0 +1,7 @@
+{
+  "projectId": "2cc31975-2f2c-4091-a158-0fb32cadc13d",
+  "projectName": "Block Ward",
+  "shape": "offscript-html-cards",
+  "localDir": "design-system",
+  "note": "Hand-authored standalone @dsCard HTML previews, not a bundlable component repo. Direct upload, no converter/storybook verification. See docs/design-sync-plan-2026-06-19.md."
+}

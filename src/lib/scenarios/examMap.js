@@ -94,12 +94,16 @@ function _abdomen(text) {
 function _select(text) {
   if (_has(text, ["pupil", "anisocoria"])) return { animation: "pupil-reaction", region: "eyes" };
   if (_has(text, ["breath", "respir", "retract", "lung", "wheez", "stridor", "tripod", "grunt", "flar", "accessory muscle", "work of breath", "air entry", "apnea", "apnoea", "chest wall"])) return { animation: "breathing", region: "chest" };
+  // Injury-pattern findings (penetrating wound, limb fracture/deformity) are
+  // more specific than the perfusion rules below: an open-fracture finding
+  // routinely also reports a distal pulse ("radial pulse absent"), so the
+  // deformity must win over pulse-check / cap-refill.
+  if (_has(text, ["gunshot", "gsw", "stab wound", "stabbing", "penetrating", "entry wound", "exit wound", "impalement", "puncture wound", "knife wound"])) return { animation: "penetrating-wound", region: "wound" };
+  if (_has(text, ["fracture", "deformity", "angulat", "dislocat", "open fracture", "broken bone", "bony step", "bone visible", "bone protrud", "bone through", "exposed bone"])) return { animation: "limb-deformity", region: "limb" };
   if (_has(text, ["radial pulse", "pulse quality", "pulses", "femoral", "brachial", "carotid", "peripheral pulse", "central pulse"]) && !_has(text, ["cap refill", "capillary refill"])) return { animation: "pulse-check", region: "perfusion" };
   if (_has(text, ["cap refill", "capillary", "perfus", "mottl", "cool ext", "cool periph"])) return { animation: "cap-refill", region: "perfusion" };
   if (_has(text, ["mental status", "gcs", "avpu", "conscious", "letharg", "responsive", "alert", "obtund", "stupor", "neuro", "sensorium", "orientat"])) return { animation: "responsiveness", region: "neuro" };
   if (_has(text, ["abdom", "bowel", "distension", "distention", "guard", "rigid", "periton"])) return { animation: "abdomen", region: "abdomen" };
-  if (_has(text, ["gunshot", "gsw", "stab wound", "stabbing", "penetrating", "entry wound", "exit wound", "impalement", "puncture wound", "knife wound"])) return { animation: "penetrating-wound", region: "wound" };
-  if (_has(text, ["fracture", "deformity", "angulat", "dislocat", "open fracture", "broken bone", "bony step"])) return { animation: "limb-deformity", region: "limb" };
   if (_has(text, ["angioedema", "lip swelling", "lip / facial", "facial edema", "facial swelling", "tongue swelling", "lip edema", "oropharyngeal swelling", "periorbital edema"])) return { animation: "face-angioedema", region: "face" };
   if (_has(text, ["skin", "rash", "petechia", "purpura", "hive", "urticaria", "cyan", "pale", "pallor", "jaund", "bruis", "haematoma", "hematoma", "lacerat", "flush", "diaphor", "mucous", "turgor", "sunken", "hydrat", "fontanelle", "integument", "lip", "edema", "oedema", "facial", "swell", "sting", "bite", "blister"])) return { animation: "skin-inspect", region: "skin" };
   if (_has(text, ["eye", "sclera", "conjunctiv"])) return { animation: "inspect", region: "eyes" };

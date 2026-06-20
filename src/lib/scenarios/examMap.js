@@ -68,6 +68,25 @@ function _skinLesion(text) {
   return "normal";
 }
 
+// AVPU level from a mental-status / neuro finding. AVPU is the BEST level of
+// response, so test best-first off the arousal/eye-opening signal — a patient
+// who "opens eyes to voice" is V even if they also withdraw to pain.
+function _avpu(text) {
+  if (_has(text, ["alert", "oriented", "gcs 15", "gcs 14", "awake and interactive", "spontaneous eye"])) return "A";
+  if (_has(text, ["to voice", "to speech", "to verbal", "eyes to voice", "rousable", "arousable", "responds to voice"])) return "V";
+  if (_has(text, ["to pain", "to noxious", "painful stimul", "withdraws to", "localizes to", "only to pain", "posturing", "decort", "decereb"])) return "P";
+  if (_has(text, ["unrespons", "no response", "comatose", "unconscious", "unarousable", "gcs 3", "no eye opening"])) return "U";
+  return "V";
+}
+
+// Abdominal exam state from the finding.
+function _abdomen(text) {
+  if (_has(text, ["distend", "distention", "distension"]) && !_has(text, ["non-distend", "nondistend", "non distend", "not distend"])) return "distended";
+  if (_has(text, ["guard", "rigid", "periton", "rebound", "tense"])) return "guarded";
+  if (_has(text, ["tender"]) && !_has(text, ["non-tender", "nontender", "non tender", "not tender", "no tender"])) return "tender";
+  return "soft";
+}
+
 // Pick the animation + region from a piece of text (no params yet). Returns
 // null when nothing matches. Order matters: specific regions before skin's
 // broad keyword net.
@@ -75,8 +94,8 @@ function _select(text) {
   if (_has(text, ["pupil", "anisocoria"])) return { animation: "pupil-reaction", region: "eyes" };
   if (_has(text, ["breath", "respir", "retract", "lung", "wheez", "stridor", "tripod", "grunt", "flar", "accessory muscle", "work of breath", "air entry", "apnea", "apnoea", "chest wall"])) return { animation: "breathing", region: "chest" };
   if (_has(text, ["cap refill", "capillary", "perfus", "mottl", "cool ext", "cool periph", "pulse"])) return { animation: "cap-refill", region: "perfusion" };
-  if (_has(text, ["mental status", "gcs", "avpu", "conscious", "letharg", "responsive", "alert", "obtund", "stupor", "neuro", "sensorium", "orientat"])) return { animation: "inspect", region: "neuro" };
-  if (_has(text, ["abdom", "bowel", "distension", "distention", "guard", "rigid", "periton"])) return { animation: "inspect", region: "abdomen" };
+  if (_has(text, ["mental status", "gcs", "avpu", "conscious", "letharg", "responsive", "alert", "obtund", "stupor", "neuro", "sensorium", "orientat"])) return { animation: "responsiveness", region: "neuro" };
+  if (_has(text, ["abdom", "bowel", "distension", "distention", "guard", "rigid", "periton"])) return { animation: "abdomen", region: "abdomen" };
   if (_has(text, ["skin", "rash", "petechia", "purpura", "hive", "urticaria", "cyan", "pale", "pallor", "jaund", "bruis", "haematoma", "hematoma", "lacerat", "wound", "flush", "diaphor", "mucous", "turgor", "sunken", "hydrat", "fontanelle", "integument", "lip", "edema", "oedema", "angioedema", "facial", "swell", "sting", "bite", "blister"])) return { animation: "skin-inspect", region: "skin" };
   if (_has(text, ["eye", "sclera", "conjunctiv"])) return { animation: "inspect", region: "eyes" };
   return null;
@@ -103,6 +122,10 @@ export function examForSign(sign, vitals) {
     params = { seconds: sec || 2, mottled: _has(full, ["mottl"]) };
   } else if (sel.animation === "skin-inspect") {
     params = { lesion: _skinLesion(full) };
+  } else if (sel.animation === "responsiveness") {
+    params = { level: _avpu(full) };
+  } else if (sel.animation === "abdomen") {
+    params = { state: _abdomen(full) };
   }
   return { animation: sel.animation, region: sel.region, params: params };
 }

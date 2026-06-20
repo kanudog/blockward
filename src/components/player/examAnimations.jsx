@@ -143,6 +143,45 @@ function renderInspect(p, label) {
   );
 }
 
+function renderResponsiveness(p) {
+  var level = p.level || "A";
+  var rows = [["A", "Alert"], ["V", "Responds to voice"], ["P", "Responds to pain"], ["U", "Unresponsive"]];
+  return (
+    <div style={{padding:"14px 16px"}}>
+      {rows.map(function(r, i) {
+        var hit = r[0] === level;
+        return (
+          <div key={i} style={{display:"flex",alignItems:"center",gap:11,padding:"8px 11px",marginBottom:6,borderRadius:8,background:hit?"rgba(78,205,196,0.16)":"rgba(255,255,255,0.03)",border:hit?"1px solid rgba(78,205,196,0.5)":"1px solid rgba(255,255,255,0.06)"}}>
+            <span style={{width:23,height:23,borderRadius:6,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:800,fontSize:12,color:hit?"#06231f":"#8b93a7",background:hit?"#4ECDC4":"rgba(255,255,255,0.06)"}}>{r[0]}</span>
+            <span style={{fontSize:12.5,fontWeight:700,color:hit?"#eafdfb":"#9aa6b8"}}>{r[1]}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function renderAbdomen(p) {
+  var state = p.state || "soft";
+  var distended = state === "distended";
+  var guarded = state === "guarded" || state === "tender";
+  var topY = distended ? 46 : 60;
+  var label = state === "soft" ? "soft, non-tender" : state;
+  return (
+    <svg viewBox="0 0 200 150" style={{width:"100%",height:150,display:"block"}}>
+      <rect x="46" y="20" width="108" height="110" rx="22" fill="#e8b48a" opacity="0.2"/>
+      <g>
+        {guarded ? null : <animateTransform attributeName="transform" type="translate" dur="3.4s" repeatCount="indefinite" values="0,0;0,-3;0,0"/>}
+        <path d={"M50 124 L50 " + (topY + 16) + " Q50 " + topY + " 100 " + (topY - 6) + " Q150 " + topY + " 150 " + (topY + 16) + " L150 124 Z"} fill="#f0c49a"/>
+        <path d={"M50 " + (topY + 16) + " Q50 " + topY + " 100 " + (topY - 6) + " Q150 " + topY + " 150 " + (topY + 16)} fill="none" stroke="#d8a86a" strokeWidth="2"/>
+        <path d="M96 94 q4 6 8 0" fill="none" stroke="#c69468" strokeWidth="2" strokeLinecap="round"/>
+      </g>
+      {guarded ? (<g stroke="#c0703a" strokeWidth="2.4" opacity="0.55" strokeLinecap="round"><line x1="74" y1="74" x2="126" y2="104"/><line x1="126" y1="74" x2="74" y2="104"/></g>) : null}
+      <text x="100" y="142" textAnchor="middle" fill="#cbb6a0" fontFamily="sans-serif" fontWeight="800" fontSize="11">{"abdomen · " + label}</text>
+    </svg>
+  );
+}
+
 export function ExamInset(props) {
   var animation = props.animation;
   var params = props.params || {};
@@ -150,5 +189,7 @@ export function ExamInset(props) {
   if (animation === "breathing") return renderBreathing(params);
   if (animation === "cap-refill") return renderCapRefill(params);
   if (animation === "skin-inspect") return renderSkin(params);
+  if (animation === "responsiveness") return renderResponsiveness(params);
+  if (animation === "abdomen") return renderAbdomen(params);
   return renderInspect(params, props.label);
 }

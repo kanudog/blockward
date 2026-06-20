@@ -117,6 +117,8 @@ function renderSkin(p) {
     marks = (<g><path d="M70 80 L130 60" stroke="#7a1f1f" strokeWidth="4" strokeLinecap="round"/><path d="M70 80 L130 60" stroke="#b11d1d" strokeWidth="1.6" strokeLinecap="round"/></g>);
   } else if (lesion === "mottling") {
     marks = (<g fill="#b58aa0" opacity="0.5"><circle cx="74" cy="58" r="7"/><circle cx="100" cy="74" r="9"/><circle cx="126" cy="60" r="6"/><circle cx="112" cy="84" r="5"/></g>);
+  } else if (lesion === "sting") {
+    marks = (<g><ellipse cx="100" cy="70" rx="24" ry="17" fill="#e8a07a" opacity="0.5"><animate attributeName="rx" dur="3s" repeatCount="indefinite" values="22;26;22"/></ellipse><ellipse cx="100" cy="70" rx="13" ry="10" fill="#e07a6a" opacity="0.55"/><circle cx="100" cy="70" r="2.8" fill="#9c1a1a"/></g>);
   } else {
     marks = (<text x="100" y="78" textAnchor="middle" fill="#9b7d4f" fontFamily="sans-serif" fontWeight="800" fontSize="11">clear, no rash</text>);
   }
@@ -165,19 +167,21 @@ function renderAbdomen(p) {
   var state = p.state || "soft";
   var distended = state === "distended";
   var guarded = state === "guarded" || state === "tender";
-  var topY = distended ? 46 : 60;
   var label = state === "soft" ? "soft, non-tender" : state;
   return (
     <svg viewBox="0 0 200 150" style={{width:"100%",height:150,display:"block"}}>
-      <rect x="46" y="20" width="108" height="110" rx="22" fill="#e8b48a" opacity="0.2"/>
+      <rect x="86" y="6" width="28" height="16" rx="7" fill="#f0c49a"/>
       <g>
-        {guarded ? null : <animateTransform attributeName="transform" type="translate" dur="3.4s" repeatCount="indefinite" values="0,0;0,-3;0,0"/>}
-        <path d={"M50 124 L50 " + (topY + 16) + " Q50 " + topY + " 100 " + (topY - 6) + " Q150 " + topY + " 150 " + (topY + 16) + " L150 124 Z"} fill="#f0c49a"/>
-        <path d={"M50 " + (topY + 16) + " Q50 " + topY + " 100 " + (topY - 6) + " Q150 " + topY + " 150 " + (topY + 16)} fill="none" stroke="#d8a86a" strokeWidth="2"/>
-        <path d="M96 94 q4 6 8 0" fill="none" stroke="#c69468" strokeWidth="2" strokeLinecap="round"/>
+        <animateTransform attributeName="transform" type="translate" dur="3.6s" repeatCount="indefinite" values="0,0;0,-2.5;0,0"/>
+        <rect x="22" y="28" width="44" height="15" rx="7" fill="#f0c49a" stroke="#d8a86a" strokeWidth="1"/>
+        <rect x="134" y="28" width="44" height="15" rx="7" fill="#f0c49a" stroke="#d8a86a" strokeWidth="1"/>
+        <path d="M64 30 Q62 22 72 21 L128 21 Q138 22 136 30 L146 60 Q150 94 138 120 Q136 131 122 133 L78 133 Q64 131 62 120 Q50 94 54 60 Z" fill="#f0c49a" stroke="#d8a86a" strokeWidth="1.5"/>
+        <path d="M74 40 Q100 48 126 40" fill="none" stroke="#e0ad7e" strokeWidth="1.4" opacity="0.55"/>
+        {distended ? <ellipse cx="100" cy="98" rx="42" ry="28" fill="#f0c49a" stroke="#d8a86a" strokeWidth="1.5"/> : null}
+        <ellipse cx="100" cy="98" rx="2.4" ry="3.4" fill="#c69468"/>
+        {guarded ? (<g stroke="#c69468" strokeWidth="1.6" opacity="0.5" strokeLinecap="round"><line x1="100" y1="58" x2="100" y2="116"/><line x1="80" y1="82" x2="120" y2="82"/><line x1="82" y1="102" x2="118" y2="102"/></g>) : null}
       </g>
-      {guarded ? (<g stroke="#c0703a" strokeWidth="2.4" opacity="0.55" strokeLinecap="round"><line x1="74" y1="74" x2="126" y2="104"/><line x1="126" y1="74" x2="74" y2="104"/></g>) : null}
-      <text x="100" y="142" textAnchor="middle" fill="#cbb6a0" fontFamily="sans-serif" fontWeight="800" fontSize="11">{"abdomen · " + label}</text>
+      <text x="100" y="144" textAnchor="middle" fill="#cbb6a0" fontFamily="sans-serif" fontWeight="800" fontSize="11">{"abdomen · " + label}</text>
     </svg>
   );
 }
@@ -244,12 +248,38 @@ function renderPenetratingWound(p) {
   );
 }
 
+function renderPulseCheck(p) {
+  var rate = clamp(p.rate || 90, 30, 220);
+  var dur = (60 / rate).toFixed(2) + "s";
+  return (
+    <svg viewBox="0 0 200 150" style={{width:"100%",height:150,display:"block"}}>
+      <path d="M12 76 L132 68 Q150 67 156 80 Q150 95 132 94 L12 96 Z" fill="#f0c49a" stroke="#d8a86a" strokeWidth="1"/>
+      <g fill="#f0c49a" stroke="#d8a86a" strokeWidth="1">
+        <rect x="150" y="62" width="28" height="7" rx="3"/>
+        <rect x="150" y="71" width="30" height="7" rx="3"/>
+        <rect x="150" y="80" width="28" height="7" rx="3"/>
+        <rect x="150" y="89" width="24" height="7" rx="3"/>
+      </g>
+      <circle cx="118" cy="82" r="5" fill="#d05a5a" opacity="0.5">
+        <animate attributeName="r" dur={dur} repeatCount="indefinite" values="3.5;6.5;3.5"/>
+        <animate attributeName="opacity" dur={dur} repeatCount="indefinite" values="0.25;0.6;0.25"/>
+      </circle>
+      <g fill="#e3a878" stroke="#c98f5f" strokeWidth="1">
+        <rect x="106" y="34" width="11" height="46" rx="5"/>
+        <rect x="119" y="32" width="11" height="48" rx="5"/>
+      </g>
+      <text x="100" y="142" textAnchor="middle" fill="#cbb6a0" fontFamily="sans-serif" fontWeight="800" fontSize="11">{"radial pulse · HR " + Math.round(rate)}</text>
+    </svg>
+  );
+}
+
 export function ExamInset(props) {
   var animation = props.animation;
   var params = props.params || {};
   if (animation === "pupil-reaction") return renderPupils(params);
   if (animation === "breathing") return renderBreathing(params);
   if (animation === "cap-refill") return renderCapRefill(params);
+  if (animation === "pulse-check") return renderPulseCheck(params);
   if (animation === "skin-inspect") return renderSkin(params);
   if (animation === "responsiveness") return renderResponsiveness(params);
   if (animation === "abdomen") return renderAbdomen(params);

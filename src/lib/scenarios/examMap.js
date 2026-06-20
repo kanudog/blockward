@@ -56,6 +56,7 @@ function _pupilParams(text) {
 }
 
 function _skinLesion(text) {
+  if (_has(text, ["sting", "bite", "stinger", "envenom"])) return "sting";
   if (_has(text, ["petechia", "purpura", "non-blanch", "nonblanch"])) return "petechiae";
   if (_has(text, ["hive", "urticaria", "wheal"])) return "hives";
   if (_has(text, ["haematoma", "hematoma", "bruis", "ecchymos", "contusion"])) return "bruise";
@@ -82,7 +83,7 @@ function _avpu(text) {
 // Abdominal exam state from the finding.
 function _abdomen(text) {
   if (_has(text, ["distend", "distention", "distension"]) && !_has(text, ["non-distend", "nondistend", "non distend", "not distend"])) return "distended";
-  if (_has(text, ["guard", "rigid", "periton", "rebound", "tense"])) return "guarded";
+  if (_has(text, ["guard", "rigid", "periton", "rebound", "tense"]) && !_has(text, ["no guard", "non-guard", "without guard", "no rigid", "non-rigid", "no peritoneal", "no rebound", "soft, non", "soft and non"])) return "guarded";
   if (_has(text, ["tender"]) && !_has(text, ["non-tender", "nontender", "non tender", "not tender", "no tender"])) return "tender";
   return "soft";
 }
@@ -93,7 +94,8 @@ function _abdomen(text) {
 function _select(text) {
   if (_has(text, ["pupil", "anisocoria"])) return { animation: "pupil-reaction", region: "eyes" };
   if (_has(text, ["breath", "respir", "retract", "lung", "wheez", "stridor", "tripod", "grunt", "flar", "accessory muscle", "work of breath", "air entry", "apnea", "apnoea", "chest wall"])) return { animation: "breathing", region: "chest" };
-  if (_has(text, ["cap refill", "capillary", "perfus", "mottl", "cool ext", "cool periph", "pulse"])) return { animation: "cap-refill", region: "perfusion" };
+  if (_has(text, ["radial pulse", "pulse quality", "pulses", "femoral", "brachial", "carotid", "peripheral pulse", "central pulse"]) && !_has(text, ["cap refill", "capillary refill"])) return { animation: "pulse-check", region: "perfusion" };
+  if (_has(text, ["cap refill", "capillary", "perfus", "mottl", "cool ext", "cool periph"])) return { animation: "cap-refill", region: "perfusion" };
   if (_has(text, ["mental status", "gcs", "avpu", "conscious", "letharg", "responsive", "alert", "obtund", "stupor", "neuro", "sensorium", "orientat"])) return { animation: "responsiveness", region: "neuro" };
   if (_has(text, ["abdom", "bowel", "distension", "distention", "guard", "rigid", "periton"])) return { animation: "abdomen", region: "abdomen" };
   if (_has(text, ["gunshot", "gsw", "stab wound", "stabbing", "penetrating", "entry wound", "exit wound", "impalement", "puncture wound", "knife wound"])) return { animation: "penetrating-wound", region: "wound" };
@@ -129,6 +131,8 @@ export function examForSign(sign, vitals) {
     params = { level: _avpu(full) };
   } else if (sel.animation === "abdomen") {
     params = { state: _abdomen(full) };
+  } else if (sel.animation === "pulse-check") {
+    params = { rate: _vitalNum(vitals, "hr") };
   } else if (sel.animation === "face-angioedema") {
     params = { severity: _has(full, ["severe", "marked", "gross", "massive", "significant"]) ? "severe" : "moderate", hives: _has(full, ["hive", "urticaria", "wheal"]) };
   } else if (sel.animation === "limb-deformity") {

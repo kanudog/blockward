@@ -96,7 +96,10 @@ function _select(text) {
   if (_has(text, ["cap refill", "capillary", "perfus", "mottl", "cool ext", "cool periph", "pulse"])) return { animation: "cap-refill", region: "perfusion" };
   if (_has(text, ["mental status", "gcs", "avpu", "conscious", "letharg", "responsive", "alert", "obtund", "stupor", "neuro", "sensorium", "orientat"])) return { animation: "responsiveness", region: "neuro" };
   if (_has(text, ["abdom", "bowel", "distension", "distention", "guard", "rigid", "periton"])) return { animation: "abdomen", region: "abdomen" };
-  if (_has(text, ["skin", "rash", "petechia", "purpura", "hive", "urticaria", "cyan", "pale", "pallor", "jaund", "bruis", "haematoma", "hematoma", "lacerat", "wound", "flush", "diaphor", "mucous", "turgor", "sunken", "hydrat", "fontanelle", "integument", "lip", "edema", "oedema", "angioedema", "facial", "swell", "sting", "bite", "blister"])) return { animation: "skin-inspect", region: "skin" };
+  if (_has(text, ["gunshot", "gsw", "stab wound", "stabbing", "penetrating", "entry wound", "exit wound", "impalement", "puncture wound", "knife wound"])) return { animation: "penetrating-wound", region: "wound" };
+  if (_has(text, ["fracture", "deformity", "angulat", "dislocat", "open fracture", "broken bone", "bony step"])) return { animation: "limb-deformity", region: "limb" };
+  if (_has(text, ["angioedema", "lip swelling", "lip / facial", "facial edema", "facial swelling", "tongue swelling", "lip edema", "oropharyngeal swelling", "periorbital edema"])) return { animation: "face-angioedema", region: "face" };
+  if (_has(text, ["skin", "rash", "petechia", "purpura", "hive", "urticaria", "cyan", "pale", "pallor", "jaund", "bruis", "haematoma", "hematoma", "lacerat", "flush", "diaphor", "mucous", "turgor", "sunken", "hydrat", "fontanelle", "integument", "lip", "edema", "oedema", "facial", "swell", "sting", "bite", "blister"])) return { animation: "skin-inspect", region: "skin" };
   if (_has(text, ["eye", "sclera", "conjunctiv"])) return { animation: "inspect", region: "eyes" };
   return null;
 }
@@ -126,6 +129,12 @@ export function examForSign(sign, vitals) {
     params = { level: _avpu(full) };
   } else if (sel.animation === "abdomen") {
     params = { state: _abdomen(full) };
+  } else if (sel.animation === "face-angioedema") {
+    params = { severity: _has(full, ["severe", "marked", "gross", "massive", "significant"]) ? "severe" : "moderate", hives: _has(full, ["hive", "urticaria", "wheal"]) };
+  } else if (sel.animation === "limb-deformity") {
+    params = { open: _has(full, ["open fracture", "bone protrud", "bone visible", "exposed bone", "compound fracture", "through the skin"]), bleed: _has(full, ["bleed", "blood", "hemorrhag", "haemorrhag"]) };
+  } else if (sel.animation === "penetrating-wound") {
+    params = { exit: _has(full, ["exit wound", "through and through", "exited"]), bleed: _has(full, ["bleed", "blood", "hemorrhag", "oozing", "haemorrhag"]) };
   }
   return { animation: sel.animation, region: sel.region, params: params };
 }

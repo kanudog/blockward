@@ -182,6 +182,68 @@ function renderAbdomen(p) {
   );
 }
 
+function renderAngioedema(p) {
+  var hives = !!p.hives;
+  return (
+    <svg viewBox="0 0 200 150" style={{width:"100%",height:150,display:"block"}}>
+      <rect x="58" y="12" width="84" height="98" rx="28" fill="#f3cba0" stroke="#d8a86a" strokeWidth="1"/>
+      <circle cx="82" cy="56" r="3.6" fill="#1a1a1a"/>
+      <circle cx="118" cy="56" r="3.6" fill="#1a1a1a"/>
+      <path d="M75 44 Q82 40 89 44" fill="none" stroke="#9b6b50" strokeWidth="2" strokeLinecap="round"/>
+      <path d="M111 44 Q118 40 125 44" fill="none" stroke="#9b6b50" strokeWidth="2" strokeLinecap="round"/>
+      {hives ? (<g fill="#ff6b6b" opacity="0.5"><circle cx="70" cy="42" r="3.2"/><circle cx="130" cy="46" r="2.8"/><circle cx="124" cy="34" r="2.4"/></g>) : null}
+      <ellipse cx="100" cy="90" rx="25" ry="13" fill="#e0625f"><animate attributeName="ry" dur="3s" repeatCount="indefinite" values="12;15.5;12"/></ellipse>
+      <path d="M75 90 q25 -9 50 0" fill="none" stroke="#b23d3b" strokeWidth="1.6"/>
+      <text x="100" y="138" textAnchor="middle" fill="#e3a3a1" fontFamily="sans-serif" fontWeight="800" fontSize="11">lip / facial swelling</text>
+    </svg>
+  );
+}
+
+function renderLimbDeformity(p) {
+  var open = !!p.open;
+  return (
+    <svg viewBox="0 0 200 150" style={{width:"100%",height:150,display:"block"}}>
+      <rect x="89" y="16" width="22" height="48" rx="10" fill="#f0c49a" stroke="#d8a86a" strokeWidth="1"/>
+      <g transform="rotate(42 100 62)">
+        <rect x="89" y="62" width="22" height="48" rx="10" fill="#f0c49a" stroke="#d8a86a" strokeWidth="1"/>
+      </g>
+      {open ? (
+        <g>
+          <polygon points="97,58 115,44 107,60" fill="#f4f1e8" stroke="#d8d2c0" strokeWidth="1"/>
+          <polygon points="101,55 113,40 108,53" fill="#eceadf"/>
+          <circle cx="102" cy="58" r="3.4" fill="#9c1a1a"/>
+          <path d="M103 60 q-2 9 0 15 q2 -7 0 -15 Z" fill="#b11d1d"><animate attributeName="opacity" dur="2.6s" repeatCount="indefinite" values="0.3;1;0.3"/></path>
+        </g>
+      ) : (
+        <ellipse cx="103" cy="62" rx="13" ry="10" fill="#d98a86" opacity="0.55"/>
+      )}
+      <text x="100" y="140" textAnchor="middle" fill="#cbb6a0" fontFamily="sans-serif" fontWeight="800" fontSize="11">{open ? "open fracture" : "angulated deformity"}</text>
+    </svg>
+  );
+}
+
+function renderPenetratingWound(p) {
+  var exit = !!p.exit;
+  return (
+    <svg viewBox="0 0 200 150" style={{width:"100%",height:150,display:"block"}}>
+      <rect x="38" y="38" width="124" height="66" rx="22" fill="#f0c49a" stroke="#d8a86a" strokeWidth="1"/>
+      <circle cx="78" cy="66" r="6" fill="#5b0f0f"/>
+      <circle cx="78" cy="66" r="9" fill="none" stroke="#a62626" strokeWidth="2.5"/>
+      <path d="M78 72 q-2 11 0 20 q2 -9 0 -20 Z" fill="#b11d1d"><animate attributeName="opacity" dur="2.6s" repeatCount="indefinite" values="0.3;1;0.3"/></path>
+      <text x="78" y="116" textAnchor="middle" fill="#9fb8e0" fontFamily="sans-serif" fontWeight="800" fontSize="9">entry</text>
+      {exit ? (
+        <g>
+          <circle cx="126" cy="66" r="9" fill="#5b0f0f"/>
+          <circle cx="126" cy="66" r="13" fill="none" stroke="#a62626" strokeWidth="3"/>
+          <path d="M126 78 q-3 13 0 23 q3 -10 0 -23 Z" fill="#b11d1d"><animate attributeName="opacity" dur="2.6s" repeatCount="indefinite" values="1;0.3;1"/></path>
+          <text x="126" y="116" textAnchor="middle" fill="#9fb8e0" fontFamily="sans-serif" fontWeight="800" fontSize="9">exit</text>
+        </g>
+      ) : null}
+      <text x="100" y="138" textAnchor="middle" fill="#cbb6a0" fontFamily="sans-serif" fontWeight="800" fontSize="11">penetrating wound</text>
+    </svg>
+  );
+}
+
 export function ExamInset(props) {
   var animation = props.animation;
   var params = props.params || {};
@@ -191,5 +253,8 @@ export function ExamInset(props) {
   if (animation === "skin-inspect") return renderSkin(params);
   if (animation === "responsiveness") return renderResponsiveness(params);
   if (animation === "abdomen") return renderAbdomen(params);
+  if (animation === "face-angioedema") return renderAngioedema(params);
+  if (animation === "limb-deformity") return renderLimbDeformity(params);
+  if (animation === "penetrating-wound") return renderPenetratingWound(params);
   return renderInspect(params, props.label);
 }

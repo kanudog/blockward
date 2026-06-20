@@ -79,14 +79,17 @@ errors.
 
 ## NEXT STEPS (priority order)
 
-1. **Grow the animation database** (in progress). v1 has 6 renderers. Trauma/derm findings
-   currently fall to the generic `inspect`/`skin` view. Add (all were prototyped in the
-   design-system bundle): `limb-deformity` (closed + open fracture), `penetrating-wound`
-   (entry/exit), `face-angioedema` (swollen lips), `diaphoresis` (sweat), `rash-petechiae`,
-   and a proper `pupil-reaction` route for head-injury cases (not yet exercised by a live
-   brief). Drive coverage with a **trauma brief** and a **head-injury brief**, then add the
-   renderers + map keys. Pattern: a `render*` in `examAnimations.jsx` + a `_select` branch
-   + (if needed) a param parser in `examMap.js`. Re-run `_exp-exam-coverage.mjs`.
+1. **Grow the animation database** (in progress — now **9 renderers**, commit `6b885e5`):
+   pupil-reaction, breathing, cap-refill, skin-inspect (covers rash/petechiae/hives/bruise/
+   laceration/cyanosis/pallor/jaundice/mottling), responsiveness (AVPU), abdomen,
+   face-angioedema, limb-deformity (closed + open fracture), penetrating-wound (entry/exit).
+   **Verified live:** breathing, cap-refill, skin/hives, responsiveness, face-angioedema.
+   **Verified synthetically only (no built-in trauma/head-injury case):** limb-deformity,
+   penetrating-wound, pupil-reaction — so the immediate next check is a **trauma brief** and
+   a **head-injury brief** via the running app to render-smoke those three live.
+   **Still missing:** a dedicated `diaphoresis` (sweat-on-face) renderer (currently → generic
+   skin). Pattern to add one: a `render*` in `examAnimations.jsx` + a `_select` branch +
+   (if needed) a param parser in `examMap.js`; confirm with `node scripts/_exp-exam-coverage.mjs`.
 2. **Exact full-scenario cost** — restart `vercel dev`, run one full generation, read the
    per-call costs from the server log (`preview_logs` / api/generate.js logging) and sum.
 3. **Colour/theme** is Sebastian's to do (he may use Claude Design — see blocker).

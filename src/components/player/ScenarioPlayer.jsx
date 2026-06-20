@@ -136,7 +136,7 @@ export function ScenarioPlayer(props){
     for(var hi=0;hi<history.length;hi++){var snap=history[hi];if(snap&&snap.phaseId===pid)return snap.sel||{};}
     return{};
   }
-  var correctActions=[];
+  var correctActions=[];var _seenMustHave={};
   (sc.phases||[]).forEach(function(phx){
     if(!phx||phx.stageType!=="intervene"||!phx.actions)return;
     var sel=_selForPhase(actionHistoryForRecovery,phx);
@@ -145,6 +145,7 @@ export function ScenarioPlayer(props){
       Object.keys(coll).forEach(function(id){
         var e=coll[id];
         if(e&&e.priority==="tied-correct"){
+          if(_seenMustHave[id])return;_seenMustHave[id]=true;
           var label=kind==="tools"?(isCustomTool(id)?(e.label||id):(ALL_TOOLS[id]?ALL_TOOLS[id].label:id)):(isCustomMed(id)?(e.label||id):(ALL_MEDS[id]?ALL_MEDS[id].label:id));
           correctActions.push({
             name:label,
@@ -230,13 +231,9 @@ export function ScenarioPlayer(props){
         });
       }
     }
-    if(Array.isArray(ph.signs)){
-      ph.signs.forEach(function(s){
-        if(!s)return;
-        var cid=signCanonicalId(s);
-        snapshotItems.push({id:cid,label:s.label||s.id||"",bad:!!s.bad,why:s.why||"",userFlagged:!!flags[cid]});
-      });
-    }
+    // Phase-7: signs are explore-only in the focused exam (never flagged), so
+    // they no longer enter the assess snapshot — they must not be scored as
+    // "caught/missed" in the debrief. Only vitals + labs remain flaggable.
     if(Array.isArray(ph.labs)){
       ph.labs.forEach(function(l){
         if(!l)return;

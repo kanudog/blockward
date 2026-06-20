@@ -91,9 +91,13 @@ export function Debrief(props){
       // pre-fix the user saw a flash of red on every dev mount cycle.
       // Real network/parse failures still land in setDeepStatus("error").
       if (err && err.name === "AbortError") return;
-      console.error("Deep-dive expansion failed:",err);
-      setDeepError(err.message||"Could not load deep dive");
-      setDeepStatus("error");
+      // Phase-7: a batch failure (/api unreachable, or one unparseable item)
+      // must not blank the whole section — fall back to each item's original
+      // note instead of the red "couldn't generate" banner.
+      console.warn("Deep-dive batch failed; showing original notes per item:",err);
+      setDeepDives({});
+      setDeepStatus("done");
+      setDeepError(null);
     });
     return function(){controller.abort();};
   },[markedForReview.length]);
@@ -133,23 +137,26 @@ export function Debrief(props){
       else if(!correct)missed.push(entry);
     });
   });
-  var interventions=[];
-  actionHistory.forEach(function(snap){
-    var tools=snap.tools||[];var meds=snap.meds||[];var actions=snap.actions||{};var sel=snap.sel||{};
-    tools.forEach(function(id){
-      var info=actions.tools?actions.tools[id]:null;if(!info)return;
-      // Phase-4b: custom entries carry their own label on the action info.
-      var label=isCustomTool(id)?(info.label||id):(ALL_TOOLS[id]?ALL_TOOLS[id].label:id);
-      interventions.push({phase:snap.phaseName,label:label,type:"tool",id:id,info:info,selected:!!sel[id],pri:info.pri,ok:!!info.ok});
+  // Phase-7: the interventions recap shows the must-have ("tied-correct")
+  // actions that actually stabilized the patient — read from the scenario,
+  // de-duplicated across R1 + R2 + curveball — as a SET, not a grade of the
+  // learner's picks (learning as we go; wrong picks aren't penalized).
+  var mustHaveById={};
+  function collectMustHaves(coll,kind){
+    Object.keys(coll||{}).forEach(function(id){
+      var info=coll[id];
+      if(!info||info.priority!=="tied-correct")return;
+      if(mustHaveById[id])return;
+      var label=kind==="tools"?(isCustomTool(id)?(info.label||id):(ALL_TOOLS[id]?ALL_TOOLS[id].label:id)):(isCustomMed(id)?(info.label||id):(ALL_MEDS[id]?ALL_MEDS[id].label:id));
+      mustHaveById[id]={label:label,type:kind==="tools"?"tool":"med",id:id,pri:info.pri};
     });
-    meds.forEach(function(id){
-      var info=actions.meds?actions.meds[id]:null;if(!info)return;
-      var label=isCustomMed(id)?(info.label||id):(ALL_MEDS[id]?ALL_MEDS[id].label:id);
-      interventions.push({phase:snap.phaseName,label:label,type:"med",id:id,info:info,selected:!!sel[id],pri:info.pri,ok:!!info.ok});
-    });
+  }
+  (sc.phases||[]).forEach(function(phx){
+    if(!phx||phx.stageType!=="intervene"||!phx.actions)return;
+    collectMustHaves(phx.actions.tools,"tools");collectMustHaves(phx.actions.meds,"meds");
   });
-  var correctInt=interventions.filter(function(x){return x.ok;}).sort(function(a,b){return(a.pri||99)-(b.pri||99);});
-  var wrongPicks=interventions.filter(function(x){return x.selected&&!x.ok;});
+  if(sc.curveball&&sc.curveball.actions){collectMustHaves(sc.curveball.actions.tools,"tools");collectMustHaves(sc.curveball.actions.meds,"meds");}
+  var correctInt=Object.keys(mustHaveById).map(function(id){return mustHaveById[id];}).sort(function(a,b){return(a.pri||99)-(b.pri||99);});
   return(<div style={{minHeight:"100vh",padding:16,background:"linear-gradient(135deg,#0a0e1a,#1a1a3e)",color:"#fff"}}><div className="bw-container" style={{maxWidth:480,margin:"0 auto"}}>
     <div style={{textAlign:"center",marginBottom:16}}>
       <div style={{width:100,margin:"0 auto"}}><PatientSVG status="stable" rr={20} ageGroup={ageG} sex={sexG} emotion="happy" seed={sc.patient&&sc.patient.name}/></div>
@@ -253,26 +260,18 @@ export function Debrief(props){
         </div>);})}
       </div>}
     </div>}
-    {interventions.length>0&&<div style={{marginBottom:8,borderRadius:12,overflow:"hidden",background:"rgba(78,205,196,0.06)",border:"1px solid rgba(78,205,196,0.25)"}}>
+    {correctInt.length>0&&<div style={{marginBottom:8,borderRadius:12,overflow:"hidden",background:"rgba(78,205,196,0.06)",border:"1px solid rgba(78,205,196,0.25)"}}>
       <button onClick={function(){setExpI(expI==="int"?null:"int");}} style={{width:"100%",textAlign:"left",padding:12,display:"flex",justifyContent:"space-between",background:"none",border:"none",cursor:"pointer",color:"white"}}>
-        <span style={{fontWeight:700,fontSize:14,color:"#4ECDC4",display:"flex",alignItems:"center",gap:6}}><Zap size={14}/>Interventions ({correctInt.length} correct)</span>
+        <span style={{fontWeight:700,fontSize:14,color:"#4ECDC4",display:"flex",alignItems:"center",gap:6}}><Zap size={14}/>Interventions ({correctInt.length})</span>
         <span style={{color:"#4ECDC4"}}>{expI==="int"?<Minus size={16}/>:<Plus size={16}/>}</span></button>
       {expI==="int"&&<div style={{padding:"0 12px 12px"}}>
-        <div style={{fontSize:10,textTransform:"uppercase",letterSpacing:1,color:"#888",fontWeight:700,marginTop:4,marginBottom:6}}>Required actions</div>
-        {correctInt.length===0?<p style={{fontSize:11,color:"#888"}}>No correct interventions in this scenario.</p>:correctInt.map(function(x,i){var chosen=x.selected;return(<div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 10px",marginBottom:4,borderRadius:8,background:chosen?"rgba(0,184,148,0.1)":"rgba(255,71,87,0.08)",border:"1px solid "+(chosen?"rgba(0,184,148,0.3)":"rgba(255,71,87,0.3)")}}>
-          {chosen?<Check size={14} color="#00b894"/>:<Minus size={14} color="#FF6B81"/>}
-          <span style={{fontSize:12,fontWeight:700,color:"#ddd",flex:1}}>{x.label}</span>
-          {x.pri&&<span style={{fontSize:9,color:"#888"}}>{"Priority #"+x.pri}</span>}
-          <span style={{fontSize:9,color:"#666"}}>{x.phase}</span>
-        </div>);})}
-        {wrongPicks.length>0&&<div>
-          <div style={{fontSize:10,textTransform:"uppercase",letterSpacing:1,color:"#888",fontWeight:700,marginTop:10,marginBottom:6}}>Picks that were not indicated</div>
-          {wrongPicks.map(function(x,i){return(<div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 10px",marginBottom:4,borderRadius:8,background:"rgba(255,165,2,0.08)",border:"1px solid rgba(255,165,2,0.3)"}}>
-            <Minus size={14} color="#ffa502"/>
-            <span style={{fontSize:12,fontWeight:700,color:"#ddd",flex:1}}>{x.label}</span>
-            <span style={{fontSize:9,color:"#666"}}>{x.phase}</span>
+        <div style={{fontSize:10,textTransform:"uppercase",letterSpacing:1,color:"#888",fontWeight:700,marginTop:4,marginBottom:8}}>What stabilized this patient</div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+          {correctInt.map(function(x,i){return(<div key={i} style={{padding:"10px 11px",borderRadius:10,background:"rgba(78,205,196,0.1)",border:"1px solid rgba(78,205,196,0.3)",display:"flex",flexDirection:"column",gap:4,minHeight:52,justifyContent:"center"}}>
+            <span style={{fontSize:12,fontWeight:700,color:"#dfe6f4",lineHeight:1.25}}>{x.label}</span>
+            <span style={{fontSize:9,color:"#7f8694",fontWeight:700,textTransform:"uppercase",letterSpacing:0.3}}>{x.type==="med"?"medication":"tool"}</span>
           </div>);})}
-        </div>}
+        </div>
       </div>}
     </div>}
     {(sc.stabilizationSummary||sc.debrief.summary)&&<div style={{marginBottom:16,borderRadius:12,overflow:"hidden",background:"rgba(254,202,87,0.06)",border:"1px solid rgba(254,202,87,0.25)"}}>

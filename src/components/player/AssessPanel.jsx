@@ -114,7 +114,7 @@ export function AssessPanel(props){
           var valueColor = showFb && isAbnormal ? "#ff7675" : "#fff";
           // Phase-3.0-hotfix change 2: Why? on every truly-abnormal vital
           // post-submit, with placeholder fallback when content is missing.
-          var showWhyBtn = showFb && isAbnormal;
+          var showWhyBtn = showFb;
           var whyAccent = isAbnormal ? "#ff7675" : "#4ECDC4";
           function openWhy(e){
             if(e&&e.stopPropagation)e.stopPropagation();

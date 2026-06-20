@@ -15,6 +15,12 @@ function vStr(v){if(v==null)return "";if(typeof v==="object")return v.value;retu
 function _getBpDisplay(vitals){
   if(!vitals)return null;
   var bpVital=vitals.bp;
+  // Phase-7: the reassessment screen passes reassessment.vitals raw, where bp
+  // is a combined STRING ("106/68"); accept that shape so the reassess monitor
+  // doesn't render a blank BP cell (recovery has its own string handling).
+  if(typeof bpVital==="string"&&bpVital!==""){
+    return{value:bpVital,unit:"mmHg",bad:false};
+  }
   if(bpVital&&typeof bpVital==="object"){
     return{value:vStr(bpVital),unit:bpVital.unit||"mmHg",bad:!!bpVital.bad};
   }

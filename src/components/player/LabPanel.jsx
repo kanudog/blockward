@@ -69,7 +69,7 @@ export function LabPanel(props) {
     }
     var valueColor = showFb && isAbnormal ? "#ff7675" : "#fff";
     var showWhyBtn;
-    if (clickable) showWhyBtn = showFb && isAbnormal;
+    if (clickable) showWhyBtn = showFb;
     else showWhyBtn = showFb && !!lab.why;
     var whyAccent = isAbnormal ? "#ff7675" : "#4ECDC4";
     function openWhy(e) {
@@ -115,7 +115,7 @@ export function LabPanel(props) {
           );
         })}
       </div>
-      <WhyModal open={!!whyTarget} onClose={function(){setWhyTarget(null);}} title={whyTarget?whyTarget.name+": "+whyTarget.value+" "+(whyTarget.unit||""):""} body={whyTarget?whyTarget.why:""} accent={whyTarget&&(whyTarget._abnormal||whyTarget.critical)?"#ff7675":"#4ECDC4"} item={whyTarget?{id:labCanonicalId(whyTarget),kind:"lab",phaseIdx:phaseIdx,label:whyTarget.name+" "+whyTarget.value+(whyTarget.unit?" "+whyTarget.unit:""),_slotRef:{kind:"lab",phaseIdx:phaseIdx,indexOrId:whyTarget.name}}:null}/>
+      <WhyModal open={!!whyTarget} onClose={function(){setWhyTarget(null);}} title={whyTarget?whyTarget.name+": "+whyTarget.value+" "+(whyTarget.unit||""):""} body={whyTarget?whyTarget.why:""} accent={whyTarget&&(whyTarget._abnormal||whyTarget.critical)?"#ff7675":"#4ECDC4"} item={whyTarget?{id:labCanonicalId(whyTarget)+"@p"+phaseIdx,kind:"lab",phaseIdx:phaseIdx,label:whyTarget.name+" "+whyTarget.value+(whyTarget.unit?" "+whyTarget.unit:""),_slotRef:{kind:"lab",phaseIdx:phaseIdx,indexOrId:whyTarget.name}}:null}/>
     </div>
   );
 }

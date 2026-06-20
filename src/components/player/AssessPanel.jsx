@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Flag, Check, X, AlertTriangle } from "lucide-react";
 import { VitalsDisplay } from "./VitalsDisplay.jsx";
-import { BodySystemsView } from "./BodySystemsView.jsx";
+import { FocusedExam } from "./FocusedExam.jsx";
 import { LabPanel } from "./LabPanel.jsx";
 import { WhyModal, WhyButton } from "../shared/WhyModal.jsx";
 import { TextBlock } from "../shared/TextBlock.jsx";
@@ -23,6 +23,7 @@ export function AssessPanel(props){
   var ph=props.ph;var vit=props.vit;var curSigns=props.curSigns;var curLabs=props.curLabs;
   var flags=props.flags;var showFb=props.showFb;var submit=props.submit;var afterA=props.afterA;var flag=props.flag;
   var patient=props.patient||{};
+  var ageGroup=props.ageGroup;var sex=props.sex;var visuals=props.visuals;var seed=props.seed;var status=props.status;
   // Phase-5.2.5: phaseIdx propagates into slot refs constructed for
   // marked-for-review items so the lookup at debrief time can resolve
   // current why/fb text from the live scenario.
@@ -140,7 +141,7 @@ export function AssessPanel(props){
           return(<div key={t.key}>{inner}</div>);
         })}
       </div>
-      <BodySystemsView signs={curSigns} badMap={badMap} flags={flags} onFlag={flag} showFb={showFb} phaseIdx={phaseIdx}/>
+      <FocusedExam signs={curSigns} vitals={vit} ageGroup={ageGroup} sex={sex} visuals={visuals} seed={seed} status={status} phaseIdx={phaseIdx}/>
       <LabPanel labs={curLabs} badMap={badMap} flags={flags} onFlag={flag} showFb={showFb} phaseIdx={phaseIdx}/>
       {!showFb?<button onClick={submit} style={Object.assign({},BS,{background:PP})}>Submit Assessment</button>
         :<button onClick={afterA} style={Object.assign({},BS,{background:GR})}>{ph&&ph.actions&&ph.actions.tools&&Object.keys(ph.actions.tools).length>0?"Open Tool Belt":"Continue"}</button>}

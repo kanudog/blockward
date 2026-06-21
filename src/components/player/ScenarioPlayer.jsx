@@ -333,7 +333,7 @@ export function ScenarioPlayer(props){
             )}
           </div>
         </div></div>)}
-      {stage==="assess"&&<AssessPanel ph={ph} vit={vit} curSigns={curSigns} curLabs={curLabs} flags={flags} showFb={showFb} submit={submit} afterA={afterA} flag={flag} patient={sc.patient} ageGroup={ageG} sex={sexG} visuals={scVisuals} seed={pSeed} status={pSt()} phaseIdx={pi}/>}
+      {stage==="assess"&&<AssessPanel ph={ph} vit={vit} curSigns={curSigns} curLabs={curLabs} flags={flags} showFb={showFb} submit={submit} afterA={afterA} flag={flag} patient={sc.patient} ageGroup={ageG} sex={sexG} visuals={scVisuals} seed={pSeed} status={pSt()} phaseIdx={pi} prevAssess={pi>=2&&sc.phases&&sc.phases[0]?sc.phases[0]:null}/>}
       {stage==="act"&&(<div className="slu">
         {/* Phase-3.0 change 2: patient header + narrative anchored at
             top of Phase 2, mirroring change 1 on Phase 1. The right-

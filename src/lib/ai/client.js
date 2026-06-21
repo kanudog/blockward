@@ -238,6 +238,27 @@ export function mergeRound2(scenario, r2){
     copy.id=(i===0?"assess2":"intervene2");
     return copy;
   });
+  // Phase-7 R2 continuity backstop. The Round 2 prompt asks the model not to
+  // re-offer one-time setup steps, but "don't include X" is unreliable, so we
+  // also enforce it deterministically: any genuine SETUP tool (monitoring,
+  // vascular access, applied oxygen) that was correct in the Round 1 intervene
+  // AND is correct again in Round 2 is demoted to a benign distractor with an
+  // "already in place" teaching note — so the learner is never dinged for not
+  // re-connecting a monitor that is already on. Escalation tools that happen to
+  // recur (intubation prep, capnography, cultures) are NOT in this set and stay
+  // as the model graded them. Meds (which can legitimately re-dose) are untouched.
+  var _SETUP_TOOLS={vsMonitor:1,cardiacMonitor:1,pulseOx:1,bpCuff:1,etco2:1,defib:1,ivKit:1,ioAccess:1,o2Mask:1};
+  function _r2isCorrect(a){return !!a&&(a.priority==="correct"||a.priority==="tied-correct");}
+  var _r1tools=(scenario.phases[1]&&scenario.phases[1].actions&&scenario.phases[1].actions.tools)||{};
+  if(r2phases[1]&&r2phases[1].actions&&r2phases[1].actions.tools){
+    var _t2=r2phases[1].actions.tools;
+    Object.keys(_t2).forEach(function(id){
+      if(_SETUP_TOOLS[id]&&_r2isCorrect(_t2[id])&&_r2isCorrect(_r1tools[id])){
+        _t2[id].priority="distractor-pack";
+        if(!_t2[id].fb)_t2[id].fb="This was already set up in Round 1 and is still in place — repeating it now changes nothing for the patient. The evolved picture is asking for the next tier of care, not a repeat of the initial setup.";
+      }
+    });
+  }
   merged.phases=[scenario.phases[0],scenario.phases[1]].concat(r2phases);
   if(r2.reassessment)merged.reassessment=r2.reassessment;
   if(r2.debrief)merged.debrief=r2.debrief;

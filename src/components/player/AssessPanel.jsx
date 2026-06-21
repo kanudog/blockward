@@ -24,6 +24,9 @@ export function AssessPanel(props){
   var flags=props.flags;var showFb=props.showFb;var submit=props.submit;var afterA=props.afterA;var flag=props.flag;
   var patient=props.patient||{};
   var ageGroup=props.ageGroup;var sex=props.sex;var visuals=props.visuals;var seed=props.seed;var status=props.status;
+  // Phase-7 R2: the round-1 assess phase, passed only for the round-2 assess
+  // so the panel can lead with WHAT CHANGED instead of a same-looking re-exam.
+  var prevAssess=props.prevAssess||null;
   // Phase-5.2.5: phaseIdx propagates into slot refs constructed for
   // marked-for-review items so the lookup at debrief time can resolve
   // current why/fb text from the live scenario.
@@ -72,6 +75,38 @@ export function AssessPanel(props){
       if(flags[vitalCanonicalId(k)]){revealMap[k]=true;if(k==="sbp"||k==="bp"){revealMap.sbp=true;revealMap.dbp=true;}}
     });
   }
+  // Phase-7 R2: diff the round-2 assess findings against round-1 so the panel
+  // can lead with what changed. Finding ids persist across rounds (the R2
+  // prompt enforces it): vitals match by tile key, labs by id/name. Numeric
+  // movers get a direction arrow; non-numeric value changes still surface.
+  function _numCh(x){var n=parseFloat(x);return isNaN(n)?null:n;}
+  function computeRoundChanges(prevPhase){
+    if(!prevPhase)return [];
+    var out=[];var pv=prevPhase.vitals||{};
+    vitalTiles(vit).forEach(function(t){
+      var prevRaw=pv[t.key];
+      if(prevRaw===undefined&&t.key==="sbp"&&pv.bp!==undefined)prevRaw=pv.bp;
+      if(prevRaw===undefined&&t.key==="bp"&&pv.sbp!==undefined&&pv.dbp!==undefined)prevRaw=vVal(pv.sbp)+"/"+vVal(pv.dbp);
+      if(prevRaw===undefined||prevRaw===null)return;
+      var prevVal=vVal(prevRaw);
+      if(prevVal===undefined||prevVal===null||prevVal===""||String(prevVal)===String(t.value))return;
+      var pn=_numCh(prevVal),cn=_numCh(t.value);
+      var dir=(pn!=null&&cn!=null)?(cn>pn?"up":(cn<pn?"down":"same")):"same";
+      out.push({label:t.label,from:prevVal,to:t.value,dir:dir});
+    });
+    var prevLabs=prevPhase.labs||[];
+    (curLabs||[]).forEach(function(l){
+      if(!l)return;
+      var p=null;
+      for(var j=0;j<prevLabs.length;j++){var q=prevLabs[j];if(q&&((l.id&&q.id===l.id)||(l.name&&q.name===l.name))){p=q;break;}}
+      if(!p||p.value===undefined||p.value===null||String(p.value)===String(l.value))return;
+      var pn2=_numCh(p.value),cn2=_numCh(l.value);
+      var dir2=(pn2!=null&&cn2!=null)?(cn2>pn2?"up":(cn2<pn2?"down":"same")):"same";
+      out.push({label:l.name,from:p.value,to:l.value,dir:dir2});
+    });
+    return out;
+  }
+  var roundChanges=prevAssess?computeRoundChanges(prevAssess):[];
   return(<div className="slu">
     {/* Phase-3.0 change 1: patient header + narrative anchored at top of Phase 1. */}
     <div style={{marginBottom:12}}>
@@ -80,6 +115,20 @@ export function AssessPanel(props){
         <TextBlock text={ph.narrative} style={{fontSize:13,color:"#ddd",lineHeight:1.55}}/>
       </div>}
     </div>
+    {prevAssess&&roundChanges.length>0&&<div style={{marginBottom:12,borderRadius:12,padding:"10px 12px",background:"rgba(254,202,87,0.10)",border:"1px solid rgba(254,202,87,0.35)"}}>
+      <div style={{fontSize:11,fontWeight:800,color:"#FECA57",letterSpacing:0.3,marginBottom:7}}>WHAT'S CHANGED SINCE ROUND 1</div>
+      <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+        {roundChanges.map(function(c,i){
+          var arrow=c.dir==="up"?"▲":c.dir==="down"?"▼":"→";
+          return(<span key={i} style={{display:"inline-flex",alignItems:"center",gap:5,fontSize:11.5,color:"#dfe6f4",background:"rgba(0,0,0,0.22)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:20,padding:"4px 10px"}}>
+            <span style={{fontWeight:700}}>{c.label}</span>
+            <span style={{color:"#8b93a7"}}>{c.from}</span>
+            <span style={{color:"#FECA57",fontWeight:800}}>{arrow}</span>
+            <span style={{color:"#FECA57",fontWeight:800}}>{c.to}</span>
+          </span>);
+        })}
+      </div>
+    </div>}
     {/* Phase-3.0: single-column layout. Display surfaces (monitor, body
         systems, labs) are the click targets. Submit / Continue is at
         the bottom, full-width. */}

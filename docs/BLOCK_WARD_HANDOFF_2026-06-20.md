@@ -82,21 +82,44 @@ skin-inspect (incl. bee-sting wheal), **responsiveness** (AVPU), **abdomen** (T-
 → pulse-check → cap-refill → responsiveness → abdomen → face → skin → eye/inspect. Injury
 patterns deliberately beat perfusion (open fractures report distal pulses).
 
-## Pending / next (Sebastian OK'd prompt changes for these)
+## Update — same-day session 2: deep-dive RCA + tone + R2 continuation-of-care
 
-The remaining playtest items are **R2-content** problems needing orchestrator/prompt work
-(`buildRound2Prompt` / `mergeRound2` in `src/lib/ai/`), deferred this session:
-- **R2 exam too repetitive** → R2 assess should surface **changed / newly-crucial findings
-  only**, not re-list the whole R1 exam.
-- **R2 interventions repeat R1** (e.g. "connect to monitor" re-offered; redose too soon).
-  Decide: split into smaller rounds vs. a **continuation-of-care** framing where R2 actions
-  are genuinely new (escalation, not repeats).
-- **Why popups for AI scenarios are still prose, not bulleted.** `TextBlock` *renders*
-  bullets/bold when present (built-ins have them), but the per-item explanation prompt emits
-  paragraphs. Update it to emit a 1-line overview + 2–3 short `- ` bullets with `**bold**`
-  key terms so AI `why` text matches the built-in formatting.
-- Optional: a **diaphoresis** animation; live-smoke **penetrating-wound** + **pupils** on a
-  stab-wound / isolated-head-injury brief.
+**Deep-dive RCA (the "Mark for Review failed" mystery).** It was never broken on real
+infra. The playtest ran on the UI-only Vite server (:5173), which has no `/api/generate`,
+so the deep-dive call 404'd and `JSON.parse` of the 404 HTML threw. Verified on :3000:
+marking an item generates a real ~5k-char Sonnet deep-dive, cached under the phase-scoped
+id (`sign:skinRash@p0`), the id round-tripping cleanly through the model. The earlier
+bug-sweep fix only made the OFFLINE failure graceful; on :3000/production it always worked.
+
+**Shipped (on `main`, pushed):**
+- `7f02be9` — **warmer why tone** + **R2 continuation-of-care**:
+  - Tone (`buildPerItemExplanationPrompt`): reframed to a warm, supportive nursing/med-school
+    EDUCATOR — define a complex term in plain words the first time it appears, short
+    sentences, lead with the plain-language "why", write to be read not skimmed. Worked
+    example rewritten; teaching voice decoupled from the narrative's terser bedside voice.
+    Verified live on a fresh meningococcemia case — fills are markedly more readable.
+    NOTE: the lead+2-bold-bullets+closing structure was ALREADY emitted; my prior note that
+    AI `why` was un-bulleted was WRONG (TextBlock + this prompt already bullet it).
+  - R2 interventions (`buildRound2Prompt`): R2 actions are the NEXT tier, not an R1 re-run
+    (no re-offering setup; redose labelling; distractor→correct flips justified in `fb`).
+  - R2 backstop (`mergeRound2`): deterministic demote of one-time SETUP tools (monitoring /
+    vascular access / applied O2) that were correct in BOTH rounds → benign distractor with
+    an "already in place" note. Verified on real data: `vsMonitor` demoted, `intubationKit`/
+    `etco2`/`aLine` (real escalations) KEPT. Fixes "connect to monitor re-offered."
+  - R2 assess "**What's changed since Round 1**" strip (`AssessPanel`, gated on `pi>=2`):
+    diffs round-2 vs round-1 findings by id, shows movers with ↑/↓ (verified deltas: Lactate
+    6.8→9.2, Plt 68→42, Cr 0.9→1.4, etc.). Data + render structure verified.
+- `9202c62` — `chore(dev)`: pin vercel-dev preview to :3000 (`autoPort:false`).
+
+**Still open / next:**
+- **Live VISUAL of the R2 "what's changed" strip + the backstop demote** on an actual R2
+  assess screen. Gotcha: a *replay* of a saved scenario loads the CACHED R2 (bypasses
+  `mergeRound2`), so a BRAND-NEW generation played through to R2 is needed to see both live.
+- Soften the **distractor worked-examples** in `buildPerItemExplanationPrompt` (~line 591) —
+  still dense; the new voice section overrides them, but the examples could match.
+- The deeper **R2 restructure** (split into smaller rounds) was DEFERRED — we kept the
+  2-round generator and made R2 *feel* like continuation via the strip + next-tier actions.
+- Optional: **diaphoresis** animation; live-smoke **penetrating-wound** + **pupils**.
 
 ## Dev env (reminder)
 

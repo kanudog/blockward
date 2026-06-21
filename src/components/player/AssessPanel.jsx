@@ -27,6 +27,9 @@ export function AssessPanel(props){
   // Phase-7 R2: the round-1 assess phase, passed only for the round-2 assess
   // so the panel can lead with WHAT CHANGED instead of a same-looking re-exam.
   var prevAssess=props.prevAssess||null;
+  // Phase-7 (age-anchoring): per-vital age-normal bands shown under each tile
+  // value. scenario.norms[key] = [min,max], already validator-enforced.
+  var norms=props.norms||null;
   // Phase-5.2.5: phaseIdx propagates into slot refs constructed for
   // marked-for-review items so the lookup at debrief time can resolve
   // current why/fb text from the live scenario.
@@ -106,6 +109,17 @@ export function AssessPanel(props){
     });
     return out;
   }
+  // Phase-7 (age-anchoring): format the age-normal band for a vital tile. BP
+  // combines the sbp/dbp norms; a key with no norm returns null (no band).
+  function normBand(key){
+    if(!norms)return null;
+    if(key==="bp"||key==="sbp"){
+      if(Array.isArray(norms.sbp)&&Array.isArray(norms.dbp))return norms.sbp[0]+"/"+norms.dbp[0]+"–"+norms.sbp[1]+"/"+norms.dbp[1];
+      return null;
+    }
+    var n=norms[key];
+    return Array.isArray(n)?(n[0]+"–"+n[1]):null;
+  }
   var roundChanges=prevAssess?computeRoundChanges(prevAssess):[];
   return(<div className="slu">
     {/* Phase-3.0 change 1: patient header + narrative anchored at top of Phase 1. */}
@@ -141,6 +155,7 @@ export function AssessPanel(props){
           // regardless of whether assessItems matched. No opacity-0.6
           // disabled treatment. Selection keyed by canonical ID.
           var cid = vitalCanonicalId(t.key);
+          var band = normBand(t.key);
           var match = badMap[cid] || null;
           var isFlagged = !!flags[cid];
           var isAbnormal = match && !!match.bad;
@@ -183,6 +198,7 @@ export function AssessPanel(props){
               <span style={{fontSize:16,fontWeight:800,color:valueColor}}>{t.value}</span>
               <span style={{fontSize:9,color:"#888"}}>{t.unit}</span>
             </div>
+            {band&&<div style={{fontSize:9.5,color:"#7f8694",marginTop:2,fontWeight:600}}>{"normal "+band}</div>}
           </div>);
           if(!showFb){
             return(<button key={t.key} onClick={function(){flag(cid);}} className="bw-tap" style={{padding:0,background:"none",border:"none",display:"block",width:"100%",cursor:"pointer"}}>{inner}</button>);

@@ -198,7 +198,7 @@ export function AssessPanel(props){
               <span style={{fontSize:16,fontWeight:800,color:valueColor}}>{t.value}</span>
               <span style={{fontSize:9,color:"#888"}}>{t.unit}</span>
             </div>
-            {band&&<div style={{fontSize:9.5,color:"#7f8694",marginTop:2,fontWeight:600}}>{"normal "+band}</div>}
+            {showFb&&band&&<div style={{fontSize:9.5,color:"#7f8694",marginTop:2,fontWeight:600}}>{"normal "+band}</div>}
           </div>);
           if(!showFb){
             return(<button key={t.key} onClick={function(){flag(cid);}} className="bw-tap" style={{padding:0,background:"none",border:"none",display:"block",width:"100%",cursor:"pointer"}}>{inner}</button>);

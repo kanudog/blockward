@@ -8,6 +8,7 @@ import { BuilderForm } from "./components/builder/BuilderForm.jsx";
 import { Toast } from "./components/shared/Toast.jsx";
 import { ConfirmModal } from "./components/shared/ConfirmModal.jsx";
 import { Sidebar } from "./components/shell/Sidebar.jsx";
+import { ThemeToggle } from "./components/shared/ThemeToggle.jsx";
 import { BG_APP, GLASS_CSS, COLOR, FONT, cta } from "./lib/design/tokens.js";
 export default function App(){
   var _view=useState("dash");var view=_view[0];var setView=_view[1];
@@ -66,7 +67,7 @@ export default function App(){
           <h1 style={{fontSize:32,fontWeight:900,fontFamily:"'Fredoka',sans-serif",letterSpacing:-1}}>Block <span style={{color:COLOR.accent}}>Ward</span></h1>
           <p style={{fontSize:12,color:"#999",marginTop:2}}>Peds Emergency and Critical Medicine Clinical Simulator</p>
         </div>
-        <div style={{width:24}}></div>
+        <ThemeToggle/>
       </div>
       <div className="fi" style={{display:"flex",gap:12,marginBottom:24,animationDelay:".1s"}}>
         <div style={{flex:1,borderRadius:14,padding:12,textAlign:"center",background:"linear-gradient(135deg,rgba(34,211,238,0.16),rgba(34,211,238,0.04))",border:"1px solid rgba(34,211,238,0.30)"}}><div style={{fontSize:28,fontWeight:900,color:COLOR.accent}}>{nd}</div><div style={{fontSize:11,color:COLOR.ink3}}>Completed</div></div>

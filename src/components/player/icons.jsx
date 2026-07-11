@@ -25,6 +25,9 @@ export function MedIcon({type, size=22, color="#74b9ff"}) {
   switch(type) {
     case "neb": return <svg style={s} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 18v-2a4 4 0 018 0v2"/><rect x="6" y="18" width="12" height="4" rx="1"/><path d="M12 8v4"/><circle cx="12" cy="6" r="2"/><path d="M9 3l3 3 3-3"/></svg>;
     case "oral": return <Pill size={size} color={color} strokeWidth={2}/>;
+    // IV infusion (the default med route): hanging fluid bag + drip + line to
+    // the patient. medType(id) returns "iv" for most meds and falls back to it.
+    case "iv": return <svg style={s} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v2"/><rect x="7" y="4" width="10" height="8" rx="2"/><line x1="7" y1="7.5" x2="17" y2="7.5"/><path d="M12 12v3"/><path d="M12 15c-1.2 1.6-1.2 3 0 3s1.2-1.4 0-3z"/><path d="M12 18v4"/></svg>;
     case "push": return <svg style={s} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="8" y="2" width="8" height="14" rx="2"/><line x1="12" y1="16" x2="12" y2="22"/><line x1="10" y1="6" x2="14" y2="6"/><path d="M10 2v-0"/><circle cx="12" cy="10" r="1.5" fill={color}/></svg>;
     // Phase-2.6.3 change 2: protocol icon (clipboard) for meta-actions
     // like Activate Pediatric MTP. Distinguishes from individual meds.

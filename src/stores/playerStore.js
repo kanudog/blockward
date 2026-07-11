@@ -30,6 +30,17 @@ var initialState = {
   skippedActions: [],
   assessHistory: [],
   actionHistory: [],
+  // Merged 2026-07-10 (blockward-fable UI): retention/coach/examine run-state.
+  //   insightCards   — keeper takeaways collected through the run (tray + debrief).
+  //   coachSeen      — first-time helper dismissals ({plan, tray, saves}).
+  //   hypotheses     — the synthesis pick per phase index.
+  //   examined       — which examine regions have been opened (phase-scoped keys).
+  //   round2ErrorClass — "service" (no futile retry) | "malformed" (retry ok).
+  insightCards: [],
+  coachSeen: {},
+  hypotheses: {},
+  examined: {},
+  round2ErrorClass: null,
   // Phase-5.2.5: items now store slot references, not rendered text.
   // Shape: {id, kind, phaseIdx, label, _slotRef: {kind, phaseIdx, indexOrId}}
   // Debrief resolves the current why/fb text via slotResolve.resolveSlotText
@@ -121,6 +132,11 @@ export var usePlayerStore = create(function(set, get) {
         skippedActions: [],
         assessHistory: [],
         actionHistory: [],
+        insightCards: [],
+        coachSeen: {},
+        hypotheses: {},
+        examined: {},
+        round2ErrorClass: null,
         markedForReview: [],
         // Phase-5.2.5: fresh per-scenario cache.
         deepDiveCache: {},
@@ -187,6 +203,23 @@ export var usePlayerStore = create(function(set, get) {
       set(function(s) {
         return { actionHistory: s.actionHistory.concat([snapshot]) };
       });
+    },
+    // Merged 2026-07-10 (fable UI run-state actions).
+    addInsightCard: function(card) {
+      if (!card || !card.id) return;
+      set(function(s) {
+        if (s.insightCards.some(function(c) { return c.id === card.id; })) return {};
+        return { insightCards: s.insightCards.concat([card]) };
+      });
+    },
+    dismissCoach: function(key) {
+      set(function(s) { var n = Object.assign({}, s.coachSeen); n[key] = true; return { coachSeen: n }; });
+    },
+    setHypothesis: function(phaseIdx, id) {
+      set(function(s) { var n = Object.assign({}, s.hypotheses); n[phaseIdx] = id; return { hypotheses: n }; });
+    },
+    markExamined: function(key) {
+      set(function(s) { if (s.examined[key]) return {}; var n = Object.assign({}, s.examined); n[key] = true; return { examined: n }; });
     },
     // Phase-5.2.5: accepts slot-ref-shape items
     // ({id, kind, phaseIdx, label, _slotRef}). Toggle preserved for the
@@ -342,7 +375,7 @@ export var usePlayerStore = create(function(set, get) {
       var prev = get().round2AbortController;
       if (prev) { try { prev.abort(); } catch (e) {} }
       var controller = new AbortController();
-      set({ round2AbortController: controller, round2State: "generating" });
+      set({ round2AbortController: controller, round2State: "generating", round2ErrorClass: null });
       var updateCustom = useScenariosStore.getState().updateCustom;
       try {
         var r2 = await generateRound2(sc, controller.signal);
@@ -368,7 +401,10 @@ export var usePlayerStore = create(function(set, get) {
       } catch (err) {
         if (err && err.name === "AbortError") { set({ round2State: "idle" }); return; }
         console.warn("[playerStore.startRound2Generation] " + (err && err.message || err));
-        set({ round2State: "error" });
+        // Honest failure class: a transient service outage must not invite a
+        // futile retry loop; a malformed response should.
+        var cls = /rate|429|503|overload|timeout|network|fetch|unavailable|econn/i.test(String(err && err.message || err)) ? "service" : "malformed";
+        set({ round2State: "error", round2ErrorClass: cls });
       }
     },
     // Phase 6.3 (Stage 3): generate the curveball in the background AFTER Round 2

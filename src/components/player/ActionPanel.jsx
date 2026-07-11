@@ -1,36 +1,19 @@
 import { useState, useEffect } from "react";
-import { Check, X, Minus } from "lucide-react";
+import { Info } from "lucide-react";
+import { CoachBubble } from "../shared/CoachBubble.jsx";
 import { ALL_TOOLS, ALL_MEDS, isCustomTool, isCustomMed } from "../../lib/scenarios/packs/index.js";
 import { medColor, medType as lookupMedType } from "../../lib/scenarios/visualMeta.js";
 import { expandSingleMarkedItem } from "../../lib/ai/client.js";
 import { fetchSingleSlot } from "../../lib/ai/dispatcher.js";
 import { resolveSlotText, SYNTHESIZED_FB_FALLBACK } from "../../lib/scenarios/slotResolve.js";
 import { useScenariosStore } from "../../stores/scenariosStore.js";
+import { ToolIcon, MedIcon } from "./icons.jsx";
+import { TextBlock } from "../shared/TextBlock.jsx";
+import { useTokens } from "../theme/themeStore.js";
+import { usePlayerStore } from "../../stores/playerStore.js";
 
-// Phase 6.1: priority is a string enum under schema 5.4.1
-// ("correct" | "tied-correct" | "distractor-clinical" |
-// "distractor-pack" | "distractor-misc"). PRIORITY_RANK maps the
-// enum to the numeric ordering the player uses for display ("Priority
-// #N") and for sort. Legacy numeric priorities pass through unchanged
-// so any not-yet-migrated input still works.
-var PRIORITY_RANK = {
-  "correct": 1,
-  "tied-correct": 2,
-  "distractor-clinical": 3,
-  "distractor-pack": 4,
-  "distractor-misc": 5
-};
-function priorityRank(p) {
-  if (typeof p === "number") return p;
-  if (typeof p === "string" && PRIORITY_RANK[p] !== undefined) return PRIORITY_RANK[p];
-  return null;
-}
-
-// Phase-4b: tool/med entries come from the pack registry rather than the
-// pre-Phase-4b builtIn.js TOOLS / MEDS maps. Custom entries (id starts
-// with "customTool" or "customMed") read label and description from the
-// per-scenario action entry instead of the registry. lookupTool /
-// lookupMed wrap that branching so the renderer stays uncluttered.
+// Phase-4b: tool/med entries come from the pack registry; custom entries read
+// label/description from the per-scenario action entry.
 function lookupTool(id, actionEntry) {
   if (isCustomTool(id)) return { id: id, label: (actionEntry && actionEntry.label) || id, description: actionEntry && actionEntry.description, custom: true };
   return ALL_TOOLS[id] || null;
@@ -39,44 +22,39 @@ function lookupMed(id, actionEntry) {
   if (isCustomMed(id)) return { id: id, label: (actionEntry && actionEntry.label) || id, description: actionEntry && actionEntry.description, custom: true };
   return ALL_MEDS[id] || null;
 }
-import { ToolIcon, MedIcon } from "./icons.jsx";
-import { TextBlock } from "../shared/TextBlock.jsx";
-import { usePlayerStore } from "../../stores/playerStore.js";
 
-// Phase-2.6.4 change 5: canonical MTP teaching content. Lives on the
-// frontend so it stays consistent across scenarios — the AI gets the
-// scenario-specific *why MTP is indicated for THIS patient* in the
-// fb field, but the WHAT IS MTP body is fixed and well-edited here.
-// Format follows the markdown-lite spec TextBlock parses (overview
-// paragraph, then dash-bullets with **bold** key terms).
-var MTP_CANONICAL=
-"Activates the pediatric massive transfusion protocol — page blood bank now and the team will deliver pRBCs, FFP, and platelets in coordinated rounds.\n\n"+
-"- **When to activate:** sustained hemorrhagic shock not responding to crystalloid, ongoing visible or suspected uncontrolled bleeding, or expected need for >40 mL/kg of products in 24 hours.\n"+
-"- **1:1:1 ratio:** transfuse pRBCs, FFP, and platelets in a 1:1:1 ratio (by unit or by mL/kg) to mimic whole blood and prevent dilutional coagulopathy from imbalanced resuscitation.\n"+
-"- **Pediatric dosing:** **10-15 mL/kg** per round of warmed pRBCs in children under 30 kg; FFP and platelets dosed proportionally. Reassess after each round.\n"+
-"- **Warmed products are mandatory:** cold blood drives the **lethal triad** of hypothermia → coagulopathy → acidosis. Use a fluid warmer; document core temperature.\n"+
-"- **Calcium replacement:** citrate in stored products chelates ionized calcium. Push **calcium chloride 10-20 mg/kg IV** after every 1-2 units of pRBCs; trend ionized Ca with each gas.\n"+
-"- **TXA window:** if within **3 hours of injury**, give tranexamic acid **15 mg/kg IV over 10 min** (max 1 g) — reduces mortality in pediatric trauma.\n"+
-"- **The lethal triad:** hypothermia, acidosis, and coagulopathy reinforce each other. MTP combats all three: warmed products preserve temperature, FFP and platelets restore clotting, pRBCs restore oxygen delivery, calcium maintains contractility.";
+// Phase 4 (#1 + play-test findings): PREVIEW is separated from SELECT.
+// - Tapping a tile opens its teaching card (a preview — adds nothing).
+// - "Add to plan" in the card commits the option; the tile fills with an
+//   unmistakable selected state ("In plan"), not a corner tick.
+// - No verdicts before commit: the card shows what the option does and when
+//   it fits — no appropriate/not badge, no priority rank, no right/wrong
+//   tint on tiles. The verdict arrives as CONSEQUENCE after "Commit plan"
+//   (ScenarioPlayer) and in the debrief.
+// - The old find-all-correct gate is gone: "Commit plan" needs only a
+//   non-empty plan. Missed key steps become consequence teaching, never a
+//   blocker. All lazy-fetch / mark-for-review plumbing is unchanged.
 export function ActionPanel(props){
+  var t=useTokens();
   var tools=props.tools;var meds=props.meds;var actions=props.actions;var onDone=props.onDone;var onSkip=props.onSkip;
-  // Phase-5.2.5: phaseIdx for slot-ref construction. Pass "curveball"
-  // for cb-act stage; pass the regular phase index otherwise. Default
-  // to 0 keeps existing tests green.
+  // Phase-5.2.5: phaseIdx for slot-ref construction ("curveball" on cb-act).
   var phaseIdx=props.phaseIdx!==undefined?props.phaseIdx:0;
   var _sel=useState({});var sel=_sel[0];var setSel=_sel[1];
+  var _opened=useState({});var opened=_opened[0];var setOpened=_opened[1];
   var _pop=useState(null);var pop=_pop[0];var setPop=_pop[1];
-  // Phase-5.3 sub-step E: popup-local lazy-fetch state for synthesized
-  // fb fallback. popLoading suppresses Mark for Review and shows a
-  // shimmer in the popup body; popError shows a polite retry option.
+  // Phase-5.3 sub-step E: popup-local lazy-fetch state for synthesized fb
+  // fallback. popLoading suppresses Mark for Review; popError offers retry.
   var _popLoading=useState(false);var popLoading=_popLoading[0];var setPopLoading=_popLoading[1];
   var _popError=useState(null);var popError=_popError[0];var setPopError=_popError[1];
-  // Phase-2.6.3 change 8: Mark for Review on intervention popup.
-  // Reads/writes the same playerStore.markedForReview list that
-  // WhyModal uses for assess items, so marked interventions show
-  // up alongside marked findings in the debrief deep-dive section.
   var markedForReview=usePlayerStore(function(s){return s.markedForReview;});
   var toggleMark=usePlayerStore(function(s){return s.toggleMarkForReview;});
+  // Owner fix (Gate 4): "In plan" vs "Mark for review" sound alike but do
+  // different things — a first-time mentor bubble explains the difference
+  // (and insight cards); the ⓘ in the card header reopens it any time.
+  var coachSeen=usePlayerStore(function(s){return s.coachSeen;});
+  var dismissCoach=usePlayerStore(function(s){return s.dismissCoach;});
+  var _optHelp=useState(false);var optHelp=_optHelp[0];var setOptHelp=_optHelp[1];
+  var showOptionsCoach=optHelp||!coachSeen.options;
   var setDeepDive=usePlayerStore(function(s){return s.setDeepDive;});
   var forceRefreshScenario=usePlayerStore(function(s){return s.forceRefreshScenario;});
   var updateCustom=useScenariosStore(function(s){return s.updateCustom;});
@@ -85,18 +63,10 @@ export function ActionPanel(props){
     var popActionEntry=pop.ty==="t"?(actions&&actions.tools?actions.tools[pop.id]:null):(actions&&actions.meds?actions.meds[pop.id]:null);
     var meta=pop.ty==="t"?lookupTool(pop.id,popActionEntry):lookupMed(pop.id,popActionEntry);
     var label=meta?meta.label:pop.id;
-    // Phase-5.2.5: slot-ref payload — debrief resolves text fresh via
-    // resolveSlotText, including any post-mark lazy-fetch updates. The
-    // mtpActivate canonical-content special case lives in the popup
-    // render (see MTP_CANONICAL block below); the deep-dive prompt
-    // receives the resolved fb directly via expandSingleMarkedItem.
     var kind=pop.ty==="t"?"tool":"med";
     return{
-      // Bug-sweep: phase-scope the mark id. Without "@p"+phaseIdx the same
-      // tool/med id marked in two phases (e.g. curveball + phase 1) collides
-      // in markedForReview dedup and deepDiveCache. The id is opaque
-      // downstream (dedup, setDeepDive, Debrief all key on it as-is), so the
-      // suffix is safe end-to-end.
+      // Bug-sweep: phase-scope the mark id — same tool/med id marked in two
+      // phases must not collide in markedForReview dedup or deepDiveCache.
       id:(pop.ty==="t"?"tool:":"med:")+pop.id+"@p"+phaseIdx,
       kind:kind,
       phaseIdx:phaseIdx,
@@ -104,16 +74,7 @@ export function ActionPanel(props){
       _slotRef:{kind:kind,phaseIdx:phaseIdx,indexOrId:pop.id}
     };
   }
-  // Phase-5.3 sub-step E (Phase 6.0 rewire): when popup opens with a
-  // synthesized-fallback fb, kick off a single-slot Haiku call via the
-  // dispatcher and read the populated fb back from the scenario.
-  // Mark for Review stays disabled while loading so the user doesn't
-  // pin a placeholder. On error, show a Retry button.
-  //
-  // Curveball phases don't yet have schema-5.4.1 slot-ref strings, so
-  // the single-slot fetch is skipped for them — the synthesized
-  // fallback remains visible. This narrow gap will close when curveball
-  // joins the typed-collection migration.
+  // Phase-5.3 sub-step E (Phase 6.0 rewire): synthesized-fallback fb fetch.
   useEffect(function(){
     if(!pop)return;
     if(!pop.info||pop.info.fb!==SYNTHESIZED_FB_FALLBACK)return;
@@ -134,8 +95,6 @@ export function ActionPanel(props){
       if(!text){setPopError("Couldn't load details — please try again.");setPopLoading(false);return;}
       try{updateCustom(sc);}catch(e){}
       forceRefreshScenario();
-      // Update local pop state so the popup body re-renders with the
-      // freshly fetched text without waiting for a parent re-render.
       setPop(function(p){if(!p||p.id!==popId||p.ty!==popTy)return p;return Object.assign({},p,{info:Object.assign({},p.info,{fb:text})});});
       setPopLoading(false);
     }).catch(function(err){
@@ -146,170 +105,150 @@ export function ActionPanel(props){
     return function(){ctrl.abort();};
   },[pop&&pop.id,pop&&pop.ty]);
   function retryPopFetch(){
-    // Re-trigger the effect by toggling pop reference. Simplest: reset
-    // info.fb back to the synthesized string so the effect predicate
-    // matches again on next mount.
     if(!pop)return;
     setPopError(null);
     setPop(function(p){if(!p)return p;return Object.assign({},p,{info:Object.assign({},p.info,{fb:SYNTHESIZED_FB_FALLBACK})});});
   }
   var popMarked=(function(){var it=popMarkItem();return it?markedForReview.some(function(x){return x.id===it.id;}):false;})();
-  // Bug-sweep (explored counter / soft-lock): only ids that resolve to a
-  // registry or custom entry render a clickable tile — the grid maps the
-  // id list and bails with `if(!t)return null` for anything lookupTool/
-  // lookupMed can't resolve. An off-registry id Sonnet occasionally emits
-  // is therefore unclickable but was still counted in `total`, leaving the
-  // explored counter permanently short and, if the bad id was a correct
-  // action, blocking the Continue gate forever. Derive a renderable id list
-  // up front and drive the grid, the total, and the completion gate from it.
+  // Bug-sweep (explored counter / soft-lock): drive the grid and the counter
+  // from the renderable id list only.
   var renderTools=(tools||[]).filter(function(id){return !!lookupTool(id,actions&&actions.tools?actions.tools[id]:null);});
   var renderMeds=(meds||[]).filter(function(id){return !!lookupMed(id,actions&&actions.meds?actions.meds[id]:null);});
   var renderToolSet={};renderTools.forEach(function(id){renderToolSet[id]=true;});
   var renderMedSet={};renderMeds.forEach(function(id){renderMedSet[id]=true;});
   var rT=Object.entries(actions&&actions.tools?actions.tools:{}).filter(function(e){return e[1].ok&&renderToolSet[e[0]];}).map(function(e){return e[0];});
   var rM=Object.entries(actions&&actions.meds?actions.meds:{}).filter(function(e){return e[1].ok&&renderMedSet[e[0]];}).map(function(e){return e[0];});
-  var totalCorrect=rT.length+rM.length;
-  var allF=totalCorrect>0&&rT.concat(rM).every(function(id){return sel[id];});
-  var explored=Object.keys(sel).length;
+  var explored=Object.keys(opened).length;
+  var planned=Object.keys(sel).length;
   var total=renderTools.length+renderMeds.length;
-  var pick=function(id,ty){
+  // PREVIEW: open the teaching card; selection is a separate, deliberate act.
+  var preview=function(id,ty){
     var src=ty==="t"?(actions&&actions.tools):(actions&&actions.meds);
     var info=src?src[id]:null;
-    // Phase-2.6.4 change 2: if the AI generated a tool/med ID but
-    // omitted its corresponding actions.tools[id] / actions.meds[id]
-    // entry, the original handler silently returned — the tile rendered
-    // normally but every click was a no-op, blocking phase completion.
-    // Sebastian saw this on o2mask and the new mtpActivate. Synthesize
-    // a minimal info so the tile is at least clickable; warn for dev
-    // visibility.
+    // Phase-2.6.4 change 2: synthesize a minimal info if the generator
+    // omitted the actions entry, so the tile stays viewable.
     if(!info||typeof info!=="object"){
       console.warn("ActionPanel: no actions entry for "+id+" ("+ty+"); synthesizing fallback");
-      info={ok:false,pri:null,fb:"This action's feedback was not generated for this scenario. Selection still counts."};
+      info={ok:false,pri:null,fb:"This option's details were not generated for this scenario."};
     }
-    setSel(function(p){var n=Object.assign({},p);n[id]=info;return n;});
+    setOpened(function(p){var n=Object.assign({},p);n[id]=true;return n;});
     setPop({id:id,ty:ty,info:info});
   };
-  // Phase-4a: scoring removed. onDone/onSkip just hand back the selection
-  // map (and missed list for skip) so ScenarioPlayer can record what the
-  // user picked. The per-action ok/correct color logic stays in this file.
-  var finish=function(){onDone(sel);};
+  function togglePlan(id,ty){
+    var src=ty==="t"?(actions&&actions.tools):(actions&&actions.meds);
+    var info=(src&&src[id])||{ok:false,pri:null,fb:""};
+    setSel(function(p){
+      var n=Object.assign({},p);
+      if(n[id])delete n[id];else n[id]=info;
+      return n;
+    });
+  }
+  // Phase-4a: scoring removed. Commit hands back the plan; Skip bails and
+  // reports what a committed plan would have missed (records only).
+  var commit=function(){if(planned===0)return;onDone(sel);};
   var skip=function(){
     var missed=[];
-    rT.forEach(function(id){if(!sel[id]){var t=lookupTool(id,actions&&actions.tools?actions.tools[id]:null);missed.push({id:id,label:t?t.label:id,type:"tool"});}});
+    rT.forEach(function(id){if(!sel[id]){var tl=lookupTool(id,actions&&actions.tools?actions.tools[id]:null);missed.push({id:id,label:tl?tl.label:id,type:"tool"});}});
     rM.forEach(function(id){if(!sel[id]){var m=lookupMed(id,actions&&actions.meds?actions.meds[id]:null);missed.push({id:id,label:m?m.label:id,type:"med"});}});
     if(onSkip)onSkip(missed,sel);else onDone(sel);
   };
-  function tbg(u,o){if(!u)return"rgba(255,255,255,0.05)";return o?"rgba(0,184,148,0.12)":"rgba(255,165,0,0.1)";}
-  function tbd(u,o){if(!u)return"2px solid rgba(255,255,255,0.08)";return o?"2px solid rgba(0,184,148,0.35)":"2px solid rgba(255,165,0,0.25)";}
-  // Phase-4b-hotfix: registry lookup for the open popup, hoisted to
-  // component scope so the popup's JSX header (label + optional custom
-  // description) can reference it. Was previously trapped inside
-  // popMarkItem's scope; the JSX referenced `meta` undeclared and
-  // threw ReferenceError on every Phase 2 tile click.
+  // Phase-4b-hotfix: registry lookup for the open popup, hoisted for the header.
   var popActionEntry=pop?(pop.ty==="t"?(actions&&actions.tools?actions.tools[pop.id]:null):(actions&&actions.meds?actions.meds[pop.id]:null)):null;
   var meta=pop?(pop.ty==="t"?lookupTool(pop.id,popActionEntry):lookupMed(pop.id,popActionEntry)):null;
+  var popInPlan=pop?!!sel[pop.id]:false;
+  var popCard=pop?Object.assign({},t.surface("pop"),{display:"flex",flexDirection:"column",width:"100%",maxWidth:"min(440px, 92vw)",maxHeight:"85vh",overflow:"hidden",animation:"popIn .25s ease-out",fontFamily:t.FONT.body}):null;
+  function actionTile(id,ty){
+    var isTool=ty==="t";
+    var entry=isTool?(actions&&actions.tools?actions.tools[id]:null):(actions&&actions.meds?actions.meds[id]:null);
+    var m=isTool?lookupTool(id,entry):lookupMed(id,entry);
+    if(!m)return null;
+    var inPlan=!!sel[id];
+    var wasOpened=!!opened[id];
+    var st=Object.assign({},t.tile(inPlan?"flagged":"idle"),{position:"relative",display:"flex",flexDirection:"column",alignItems:"center",gap:6,minHeight:78,cursor:"pointer",fontFamily:t.FONT.body});
+    return(<button key={id} onClick={function(){preview(id,ty);}} className="bw-tap" style={st}>
+      {isTool
+        ?<ToolIcon name={id} size={26} color={t.COLOR.accent}/>
+        :<div style={{width:26,height:32,borderRadius:6,display:"flex",alignItems:"center",justifyContent:"center",background:medColor(id)}}><MedIcon type={lookupMedType(id)} size={18} color="#FFFFFF"/></div>}
+      <span style={{fontSize:11,color:t.COLOR.ink,fontWeight:700,textAlign:"center",lineHeight:1.2}}>{m.label}</span>
+      {inPlan&&<span style={Object.assign({},t.chip("accent"),{position:"absolute",top:5,right:5,fontSize:8.5,padding:"2px 7px"})}>In plan</span>}
+      {!inPlan&&wasOpened&&<span style={{position:"absolute",top:7,right:7,width:6,height:6,borderRadius:3,background:t.COLOR.ink3,opacity:0.6}}/>}
+    </button>);
+  }
   return(
-    <div style={{marginTop:16}}>
-      {/* Phase-2.6.3 change 7: action-tile grid mirrors the assess-tile
-          grid (2 cols mobile, 3 at 768px, 4 at 1024px) so Phase 1 and
-          Phase 2 share visual rhythm. Same gap (6), same padding (10),
-          same borderRadius (12), same minHeight (78). */}
+    <div style={{marginTop:16,fontFamily:t.FONT.body}}>
+      {/* Phase-2.6.3 change 7: action-tile grid mirrors the assessment grids. */}
       <style>{"@keyframes popIn{from{opacity:0;transform:scale(.92) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}@keyframes lazyPulse{0%,100%{opacity:.4}50%{opacity:1}}@media(min-width:768px){.bw-action-grid{grid-template-columns:repeat(3,1fr) !important}}@media(min-width:1024px){.bw-action-grid{grid-template-columns:repeat(4,1fr) !important}}"}</style>
-      {renderTools&&renderTools.length>0&&(<div style={{marginBottom:16}}><div style={{fontSize:10,textTransform:"uppercase",letterSpacing:2,color:"#999",fontWeight:700,marginBottom:8}}>Tool Belt</div>
-        <div className="bw-action-grid" style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:6}}>{renderTools.map(function(id){var t=lookupTool(id,actions&&actions.tools?actions.tools[id]:null);if(!t)return null;var u=!!sel[id];var o=actions&&actions.tools&&actions.tools[id]?actions.tools[id].ok:false;
-          return(<button key={id} onClick={function(){pick(id,"t");}} className="bw-tap" style={{position:"relative",display:"flex",flexDirection:"column",alignItems:"center",gap:6,padding:10,borderRadius:12,minHeight:78,background:tbg(u,o),border:tbd(u,o),cursor:"pointer",color:"white"}}>
-            <ToolIcon name={id} size={26} color={u?(o?"#55efc4":"#FECA57"):"#4ECDC4"}/><span style={{fontSize:11,color:"#ccc",fontWeight:600,textAlign:"center",lineHeight:1.2}}>{t.label}</span>
-            {u&&<span style={{position:"absolute",top:6,right:6}}>{o?<Check size={12} color="#55efc4"/>:<Minus size={12} color="#FECA57"/>}</span>}</button>);})}</div></div>)}
-      {renderMeds&&renderMeds.length>0&&(<div style={{marginBottom:16}}><div style={{fontSize:10,textTransform:"uppercase",letterSpacing:2,color:"#999",fontWeight:700,marginBottom:8}}>Med Cart</div>
-        <div className="bw-action-grid" style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:6}}>{renderMeds.map(function(id){var m=lookupMed(id,actions&&actions.meds?actions.meds[id]:null);if(!m)return null;var u=!!sel[id];var o=actions&&actions.meds&&actions.meds[id]?actions.meds[id].ok:false;
-          return(<button key={id} onClick={function(){pick(id,"m");}} className="bw-tap" style={{position:"relative",display:"flex",flexDirection:"column",alignItems:"center",gap:6,padding:10,borderRadius:12,minHeight:78,background:tbg(u,o),border:tbd(u,o),cursor:"pointer",color:"white"}}>
-            <div style={{width:26,height:32,borderRadius:6,display:"flex",alignItems:"center",justifyContent:"center",background:medColor(id),fontSize:16,color:"white"}}><MedIcon type={lookupMedType(id)} size={18} color="white"/></div>
-            <span style={{fontSize:11,color:"#ccc",fontWeight:600,textAlign:"center",lineHeight:1.2}}>{m.label}</span>
-            {u&&<span style={{position:"absolute",top:6,right:6}}>{o?<Check size={12} color="#55efc4"/>:<Minus size={12} color="#FECA57"/>}</span>}</button>);})}</div></div>)}
-      {/* Phase-2.6.5 change 1: popup restructured into sticky header +
-          scrolling body + sticky footer. Container uses display:flex
-          column with maxHeight:85vh; only the body region scrolls so
-          the badge row, label, and the Mark for Review / Got It buttons
-          stay reachable regardless of body length (canonical MTP content
-          can run 8+ bullets and previously pushed the buttons off screen).
-          z-index bumped 50 → 1000 so the modal sits above all Phase 2
-          content on every device. */}
-      {pop&&(<div onClick={function(){setPop(null);}} style={{position:"fixed",top:0,left:0,right:0,bottom:0,zIndex:1000,display:"flex",alignItems:"center",justifyContent:"center",padding:16,background:"rgba(0,0,0,0.7)"}}>
-        <div onClick={function(e){e.stopPropagation();}} style={{display:"flex",flexDirection:"column",width:"100%",maxWidth:"min(440px, 92vw)",maxHeight:"85vh",borderRadius:16,background:"#1a1a3e",border:"2px solid "+(pop.info.ok?"#00b894":"#ffa502"),animation:"popIn .25s ease-out",boxShadow:"0 8px 32px rgba(0,0,0,0.5)"}}>
-          {/* Header — sticky */}
-          <div style={{padding:"16px 20px 12px",borderBottom:"1px solid rgba(255,255,255,0.06)",flexShrink:0}}>
-            <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8,flexWrap:"wrap"}}>
-              <div style={{padding:"4px 12px",borderRadius:20,fontSize:11,fontWeight:900,background:pop.info.ok?"rgba(0,184,148,0.2)":"rgba(255,165,2,0.2)",color:pop.info.ok?"#00b894":"#ffa502",display:"flex",alignItems:"center",gap:4}}>{pop.info.ok?<><Check size={14}/> APPROPRIATE</>:<><X size={14}/> NOT INDICATED NOW</>}</div>
-              {(function(){
-                // Phase 6.1: prefer the schema 5.4.1 string priority enum
-                // and translate to the display rank; fall back to legacy
-                // numeric pri for any not-yet-migrated input.
-                var rank=priorityRank(pop.info.priority||pop.info.pri);
-                if(!rank)return null;
-                return(<div style={{padding:"4px 8px",borderRadius:20,fontSize:10,fontWeight:700,background:"rgba(78,205,196,0.15)",color:"#4ECDC4"}}>{"Priority #"+rank}</div>);
-              })()}
+      {renderTools&&renderTools.length>0&&(<div style={{marginBottom:16}}><div style={Object.assign({},t.label(),{marginBottom:8})}>Tool Belt</div>
+        <div className="bw-action-grid" style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:8}}>{renderTools.map(function(id){return actionTile(id,"t");})}</div></div>)}
+      {renderMeds&&renderMeds.length>0&&(<div style={{marginBottom:16}}><div style={Object.assign({},t.label(),{marginBottom:8})}>Med Cart</div>
+        <div className="bw-action-grid" style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:8}}>{renderMeds.map(function(id){return actionTile(id,"m");})}</div></div>)}
+      {/* Teaching-card popup: sticky header + scrolling body + sticky footer.
+          No verdict badges pre-commit — this is a PREVIEW. */}
+      {pop&&(<div onClick={function(){setPop(null);}} style={{position:"fixed",top:0,left:0,right:0,bottom:0,zIndex:1000,display:"flex",alignItems:"center",justifyContent:"center",padding:16,background:"rgba(15,18,21,0.5)"}}>
+        <div onClick={function(e){e.stopPropagation();}} style={popCard}>
+          <div style={{padding:"14px 18px 10px",borderBottom:"1px solid "+t.COLOR.hairline,flexShrink:0,display:"flex",alignItems:"flex-start",gap:8}}>
+            <div style={{flex:1,minWidth:0}}>
+              <div style={t.label()}>Option</div>
+              <h4 style={{color:t.COLOR.ink,fontWeight:600,fontSize:16,fontFamily:t.FONT.display,marginTop:2,marginBottom:2}}>{meta?meta.label:pop.id}</h4>
+              {meta&&meta.custom&&meta.description&&<p style={{fontSize:11,color:t.COLOR.ink3,margin:0}}>{meta.description}</p>}
             </div>
-            <h4 style={{color:"white",fontWeight:700,marginTop:0,marginBottom:4}}>{meta?meta.label:pop.id}</h4>
-            {meta&&meta.custom&&meta.description&&<p style={{fontSize:11,color:"#999",margin:0}}>{meta.description}</p>}
+            <button className="bw-tap" onClick={function(){setOptHelp(true);}} aria-label="What do these buttons do?"
+              style={{width:26,height:26,borderRadius:13,display:"inline-flex",alignItems:"center",justifyContent:"center",background:"transparent",border:"1px solid "+t.COLOR.hairline,color:t.COLOR.ink3,cursor:"pointer",padding:0,flexShrink:0}}>
+              <Info size={13}/>
+            </button>
           </div>
-          {/* Body — scrolls */}
-          <div style={{padding:"14px 20px",overflowY:"auto",flex:1,minHeight:0}}>
-            {/* Phase-5.3 sub-step E: synthesized-fallback popup shows
-                a small loading state while the lazy fetch lands, then
-                the freshly fetched fb. Error path offers a retry. */}
-            {popLoading?(<div style={{display:"flex",alignItems:"center",gap:8,padding:"4px 0",color:"#4ECDC4",fontSize:13}}>
-              <span style={{display:"inline-block",width:8,height:8,borderRadius:"50%",background:"#4ECDC4",animation:"lazyPulse 1.4s ease-in-out infinite",flexShrink:0}}></span>
-              <span style={{color:"#bbb"}}>Loading clinical context for this action...</span>
-            </div>):popError?(<div style={{padding:"4px 0",color:"#ff9a9f",fontSize:12,lineHeight:1.5}}>
-              {popError} <button onClick={retryPopFetch} style={{marginLeft:6,background:"none",border:"none",color:"#74b9ff",textDecoration:"underline",cursor:"pointer",fontSize:12}}>Retry</button>
+          <div style={{padding:"12px 18px",overflowY:"auto",flex:1,minHeight:0}}>
+            {popLoading?(<div style={{display:"flex",alignItems:"center",gap:8,padding:"4px 0",fontSize:13}}>
+              <span style={{display:"inline-block",width:8,height:8,borderRadius:"50%",background:t.COLOR.accent,animation:"lazyPulse 1.4s ease-in-out infinite",flexShrink:0}}></span>
+              <span style={{color:t.COLOR.ink3}}>Loading details for this option…</span>
+            </div>):popError?(<div style={{padding:"4px 0",color:t.COLOR.attentionText,fontSize:12,lineHeight:1.5}}>
+              {popError} <button onClick={retryPopFetch} style={{marginLeft:6,background:"none",border:"none",color:t.COLOR.boldTerm,textDecoration:"underline",cursor:"pointer",fontSize:12}}>Retry</button>
             </div>):
-            (pop.ty==="m"&&pop.id==="mtpActivate"?(<div>
-              <TextBlock text={MTP_CANONICAL} style={{fontSize:13,color:"#ddd",lineHeight:1.55}}/>
-              {pop.info.fb&&<div style={{marginTop:12,paddingTop:10,borderTop:"1px solid rgba(255,255,255,0.08)"}}>
-                <p style={{fontSize:10,textTransform:"uppercase",letterSpacing:1,color:"#888",fontWeight:700,marginBottom:6}}>Why for this patient</p>
-                <TextBlock text={pop.info.fb} style={{fontSize:12,color:"#bbb",lineHeight:1.5}}/>
-              </div>}
-            </div>):(<TextBlock text={pop.info.fb} style={{fontSize:13,color:"#ddd",lineHeight:1.5}}/>))}
+            (<TextBlock text={pop.info.fb} style={{fontSize:13,color:t.COLOR.ink2,lineHeight:1.55}}/>)}
           </div>
-          {/* Footer — sticky. Mark for Review (phase-2.6.3 change 8) +
-              Got It dismiss. Always visible regardless of body scroll. */}
-          <div style={{padding:"12px 20px 16px",borderTop:"1px solid rgba(255,255,255,0.06)",flexShrink:0}}>
-            {/* Phase-5.3 sub-step E: Mark for Review disabled while
-                lazy fetch is in flight (the fb is still the synthesized
-                placeholder; pinning it would store useless context for
-                the deep-dive prompt). Re-enables once content lands. */}
-            <button disabled={popLoading} onClick={function(){
-              if(popLoading)return;
-              var it=popMarkItem();
-              if(!it)return;
-              var transition=toggleMark(it);
-              if(transition!=="added")return;
-              var store=usePlayerStore.getState();
-              var sc=store.activeScenario;
-              if(!sc)return;
-              // Bug-sweep: skip if already fetched or a fetch for this id is
-              // in flight (rapid mark→unmark→mark); release when it settles.
-              if(store.deepDiveCache[it.id])return;
-              if(!store.beginDeepDive(it.id))return;
-              expandSingleMarkedItem(sc,it).then(function(text){
-                if(text)usePlayerStore.getState().setDeepDive(it.id,text);
-              }).catch(function(err){
-                console.warn("[eager deep-dive] "+it.id+" — "+(err&&err.message||err));
-              }).finally(function(){
-                usePlayerStore.getState().endDeepDive(it.id);
-              });
-            }} style={{width:"100%",padding:"8px 12px",borderRadius:10,fontSize:12,fontWeight:700,cursor:popLoading?"not-allowed":"pointer",background:popMarked?"rgba(254,202,87,0.2)":"rgba(255,255,255,0.06)",border:"1px solid "+(popMarked?"rgba(254,202,87,0.55)":"rgba(255,255,255,0.18)"),color:popMarked?"#FECA57":"#ddd",opacity:popLoading?0.45:1}}>{popMarked?"✓ Marked for Review":"Mark for Review"}</button>
-            <p style={{fontSize:10,color:"#888",marginTop:6,marginBottom:10,textAlign:"center",lineHeight:1.4}}>{popLoading?"Available once details finish loading.":popMarked?"Will appear in the debrief with an expanded deep dive.":"Save this intervention for a deeper review at the end."}</p>
-            <button onClick={function(){setPop(null);}} style={{width:"100%",padding:"12px 0",borderRadius:12,fontWeight:700,color:"white",fontSize:13,background:pop.info.ok?"rgba(0,184,148,0.3)":"rgba(255,165,2,0.2)",border:"none",cursor:"pointer"}}>Got It</button>
+          <div style={{padding:"10px 18px 14px",borderTop:"1px solid "+t.COLOR.hairline,flexShrink:0}}>
+            {showOptionsCoach&&<div style={{marginBottom:10}}>
+              <CoachBubble tail="bottom-left" title="Two different saves"
+                body={"**Add to plan** — the steps you'd actually take now. Only these get answered by the readings when you commit. They do NOT go to your tray.\n\n**Mark for review** — a bookmark for later. It goes to your tray and returns in the debrief with a deeper read. It never affects the plan.\n\nInsight cards join your tray on their own as you play — small keepers, never scored."}
+                onDismiss={function(){dismissCoach("options");setOptHelp(false);}}/>
+            </div>}
+            {/* SELECT and BOOKMARK side by side — different verbs, same row. */}
+            <div style={{display:"flex",gap:8}}>
+              {(function(){
+                var addStyle;
+                if(popInPlan)addStyle={flex:1,padding:"11px 0",borderRadius:10,fontWeight:700,fontSize:12.5,cursor:"pointer",fontFamily:t.FONT.body,background:"rgba("+t.ACCENT_RGB+",0.14)",border:"1.5px solid rgba("+t.ACCENT_RGB+",0.6)",color:t.COLOR.boldTerm};
+                else addStyle=Object.assign({},t.cta("primary"),{flex:1,width:"auto",padding:"11px 0",fontSize:12.5,borderRadius:10});
+                return(<button onClick={function(){togglePlan(pop.id,pop.ty);}} style={addStyle}>{popInPlan?"✓ In plan":"Add to plan"}</button>);
+              })()}
+              <button disabled={popLoading} onClick={function(){
+                if(popLoading)return;
+                var it=popMarkItem();
+                if(!it)return;
+                var transition=toggleMark(it);
+                if(transition!=="added")return;
+                var store=usePlayerStore.getState();
+                var sc=store.activeScenario;
+                if(!sc)return;
+                if(store.deepDiveCache[it.id])return;
+                if(!store.beginDeepDive(it.id))return;
+                expandSingleMarkedItem(sc,it).then(function(text){
+                  if(text)usePlayerStore.getState().setDeepDive(it.id,text);
+                }).catch(function(err){
+                  console.warn("[eager deep-dive] "+it.id+" — "+(err&&err.message||err));
+                }).finally(function(){
+                  usePlayerStore.getState().endDeepDive(it.id);
+                });
+              }} style={{flex:1,padding:"11px 0",borderRadius:10,fontSize:12.5,fontWeight:700,fontFamily:t.FONT.body,cursor:popLoading?"not-allowed":"pointer",background:popMarked?"rgba("+t.ATTN_RGB+",0.16)":t.COLOR.btnNeutralBg,border:"1px solid "+(popMarked?"rgba("+t.ATTN_RGB+",0.55)":t.COLOR.hairline),color:popMarked?t.COLOR.attentionText:t.COLOR.btnNeutralInk,opacity:popLoading?0.45:1}}>{popMarked?"✓ Marked":"Mark for review"}</button>
+            </div>
+            <p style={{fontSize:10,color:t.COLOR.ink3,margin:"6px 0 0",textAlign:"center",lineHeight:1.4}}>Plan — steps you'd take now · Review — saved to your tray for the debrief</p>
+            {/* The proceed action: its own row, lightly accented to be found. */}
+            <button onClick={function(){setPop(null);}} style={{width:"100%",marginTop:10,padding:"12px 0",borderRadius:10,fontWeight:700,fontSize:13.5,fontFamily:t.FONT.body,background:"rgba("+t.ACCENT_RGB+",0.12)",border:"1.5px solid rgba("+t.ACCENT_RGB+",0.45)",color:t.COLOR.boldTerm,cursor:"pointer"}}>Got it</button>
           </div>
         </div></div>)}
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:8,marginTop:12,flexWrap:"wrap"}}>
-        <div style={{fontSize:11,color:"#666"}}>{explored+"/"+total+" explored"}</div>
-        <div style={{display:"flex",gap:8}}>
-          {!allF&&<button onClick={skip} style={{padding:"8px 16px",borderRadius:12,fontWeight:700,color:"#ccc",fontSize:12,background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.12)",cursor:"pointer"}}>Skip to Next</button>}
-          {allF&&<button onClick={finish} style={{padding:"8px 20px",borderRadius:12,fontWeight:700,color:"white",fontSize:13,background:"linear-gradient(135deg,#4ECDC4,#44B09E)",border:"none",cursor:"pointer"}}>Continue</button>}
-        </div>
+        <div style={{fontSize:11,color:t.COLOR.ink3}}>{explored+"/"+total+" explored · "+planned+" in plan"}</div>
+        <button onClick={skip} style={{padding:"8px 16px",borderRadius:12,fontWeight:700,color:t.COLOR.btnNeutralInk,fontSize:12,background:t.COLOR.btnNeutralBg,border:"1px solid "+t.COLOR.hairline,cursor:"pointer",fontFamily:t.FONT.body}}>Skip this round</button>
       </div>
-      {!allF&&explored>0&&<p style={{fontSize:11,color:"#4ECDC4",marginTop:8,opacity:0.7}}>Find all appropriate actions to continue, or Skip to move on.</p>}
+      <button onClick={commit} disabled={planned===0} style={Object.assign({},t.cta("primary"),{marginTop:10},planned===0?{opacity:0.55,cursor:"default"}:{})}>{planned===0?"Add at least one step to your plan":"Commit plan"}</button>
     </div>);
 }

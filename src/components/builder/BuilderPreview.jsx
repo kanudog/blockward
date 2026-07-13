@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useTokens } from "../theme/themeStore.js";
 
 // Phase-2.6.1 part 2E + 2F:
 // - props.message is the current phase-keyed status (set by client.js as
@@ -9,6 +10,7 @@ import { useState, useEffect, useRef } from "react";
 // signal; for the very first second before any bytes have arrived, a
 // time-based 0-30% sweep keeps it from looking frozen.
 export function BuilderPreview(props){
+  var t=useTokens();
   var cbMode=props.cbMode;
   var bytes=props.bytes||0; // accumulated text chars (set by BuilderForm)
   var message=props.message||"Researching clinical guidelines...";
@@ -72,16 +74,16 @@ export function BuilderPreview(props){
   var raw=Math.max(byteFrac,timeFrac);
   var progress=Math.min(raw,0.97);
   var pct=Math.round(progress*100);
-  return(<div style={{minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:24,background:"linear-gradient(135deg,#0a0e1a,#1a1a3e)"}}>
+  return(<div style={{minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:24,background:t.BG_APP,fontFamily:t.FONT.body}}>
     <style>{"@keyframes bbl{0%{transform:translateY(0) scale(1)}50%{transform:translateY(-20px) scale(1.1)}100%{transform:translateY(0) scale(1)}}.bbx>div:nth-child(1){animation:bbl 1.5s ease infinite}.bbx>div:nth-child(2){animation:bbl 1.5s ease .2s infinite}.bbx>div:nth-child(3){animation:bbl 1.5s ease .4s infinite}.bbx>div:nth-child(4){animation:bbl 1.5s ease .6s infinite}@keyframes msgIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}.bw-msg{animation:msgIn .25s ease-out}"}</style>
-    <div className="bbx" style={{display:"flex",gap:12,marginBottom:24}}><div style={{width:40,height:40,borderRadius:8,background:"#4ECDC4"}}></div><div style={{width:40,height:40,borderRadius:8,background:"#FF6B81"}}></div><div style={{width:40,height:40,borderRadius:8,background:"#FECA57"}}></div><div style={{width:40,height:40,borderRadius:8,background:"#a55eea"}}></div></div>
-    <p style={{fontSize:20,fontWeight:700,color:"white",marginBottom:8}}>Building Your Scenario</p>
-    <p key={stall||displayMsg} className="bw-msg" style={{fontSize:14,color:stall?"#FECA57":"#4ECDC4",marginBottom:24,minHeight:20,textAlign:"center",maxWidth:320}}>{stall||displayMsg}</p>
+    <div className="bbx" style={{display:"flex",gap:12,marginBottom:24}}><div style={{width:40,height:40,borderRadius:8,background:t.COLOR.accent}}></div><div style={{width:40,height:40,borderRadius:8,background:t.COLOR.positive}}></div><div style={{width:40,height:40,borderRadius:8,background:t.COLOR.attention}}></div><div style={{width:40,height:40,borderRadius:8,background:t.COLOR.critical}}></div></div>
+    <p style={{fontSize:20,fontWeight:700,color:t.COLOR.ink,marginBottom:8,fontFamily:t.FONT.display}}>Building Your Scenario</p>
+    <p key={stall||displayMsg} className="bw-msg" style={{fontSize:14,color:stall?t.COLOR.attention:t.COLOR.accent,marginBottom:24,minHeight:20,textAlign:"center",maxWidth:320}}>{stall||displayMsg}</p>
     <div style={{width:"100%",maxWidth:320}}>
-      <div style={{height:6,borderRadius:3,background:"rgba(255,255,255,0.08)",overflow:"hidden"}}>
-        <div style={{height:"100%",width:pct+"%",background:"linear-gradient(90deg,#a55eea,#4ECDC4)",transition:"width 0.25s linear"}}></div>
+      <div style={{height:6,borderRadius:3,background:t.COLOR.hairline,overflow:"hidden"}}>
+        <div style={{height:"100%",width:pct+"%",background:t.COLOR.accent,transition:"width 0.25s linear"}}></div>
       </div>
-      <div style={{display:"flex",justifyContent:"space-between",marginTop:6,fontSize:10,color:"#888"}}>
+      <div style={{display:"flex",justifyContent:"space-between",marginTop:6,fontSize:10,color:t.COLOR.ink3}}>
         <span>{bytes>0?(Math.round(bytes/1000)+" KB · "+Math.floor(elapsed)+"s"):(Math.floor(elapsed)+"s elapsed · waiting for first chunk")}</span>
         <span>{cbMode?"Curveball mode":"Standard mode"}</span>
       </div>

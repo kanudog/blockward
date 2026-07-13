@@ -9,8 +9,10 @@ import { Toast } from "./components/shared/Toast.jsx";
 import { ConfirmModal } from "./components/shared/ConfirmModal.jsx";
 import { Sidebar } from "./components/shell/Sidebar.jsx";
 import { ThemeToggle } from "./components/shared/ThemeToggle.jsx";
-import { BG_APP, GLASS_CSS, COLOR, FONT, cta } from "./lib/design/tokens.js";
+import { useTokens } from "./components/theme/themeStore.js";
+import { GOOGLE_FONTS_CSS } from "./components/theme/tokens.js";
 export default function App(){
+  var t=useTokens();
   var _view=useState("dash");var view=_view[0];var setView=_view[1];
   var act=usePlayerStore(function(s){return s.activeScenario;});
   var startPlayer=usePlayerStore(function(s){return s.start;});
@@ -47,11 +49,11 @@ export default function App(){
   };
   var delC=function(id){deleteCustom(id);setDelConfirm(null);};
   var clearAll=function(){clearAllScenarios();setShareMsg("All data cleared");setTimeout(function(){setShareMsg(null);},2000);};
-  if(!ok)return(<div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:COLOR.bg0}}><div style={{color:COLOR.accent,fontSize:20}}>Loading Block Ward...</div></div>);
+  if(!ok)return(<div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:t.BG_APP}}><div style={{color:t.COLOR.accent,fontSize:20,fontFamily:t.FONT.body}}>Loading Block Ward...</div></div>);
   if(view==="play"&&act)return <ScenarioPlayer sc={act} onExit={function(){setView("dash");resetPlayer();}} onDone={done}/>;
   if(view==="build")return <BuilderForm onDone={addC} onBack={function(){setView("dash");}}/>;
-  return(<div style={{minHeight:"100dvh",padding:16,background:BG_APP,color:"#fff",fontFamily:FONT.body}}>
-    <style>{"@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;700;800&display=swap');@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}.flt{animation:float 3s ease-in-out infinite}@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}.fi{animation:fadeIn .5s ease-out both}button{transition:all .15s ease;min-height:44px;min-width:44px}::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:#0c1230}::-webkit-scrollbar-thumb{background:#34d3ee;border-radius:3px}@keyframes scaleIn{from{transform:scale(0.8);opacity:0}to{transform:scale(1);opacity:1}}.si{animation:scaleIn .4s ease-out both}.bw-glass{"+GLASS_CSS+"}.bw-tap{transition:transform .12s ease,box-shadow .12s ease}.bw-tap:active{transform:scale(0.96)}"}</style>
+  return(<div style={{minHeight:"100dvh",padding:16,background:t.BG_APP,color:t.COLOR.ink,fontFamily:t.FONT.body}}>
+    <style>{GOOGLE_FONTS_CSS+"@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}.flt{animation:float 3s ease-in-out infinite}@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}.fi{animation:fadeIn .5s ease-out both}button{transition:all .15s ease;min-height:44px;min-width:44px}::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:"+t.COLOR.hairline+"}::-webkit-scrollbar-thumb{background:"+t.COLOR.accent+";border-radius:3px}@keyframes scaleIn{from{transform:scale(0.8);opacity:0}to{transform:scale(1);opacity:1}}.si{animation:scaleIn .4s ease-out both}.bw-tap{transition:transform .12s ease,box-shadow .12s ease}.bw-tap:active{transform:scale(0.96)}"}</style>
     <Toast message={shareMsg}/>
     <ConfirmModal open={!!delConfirm} title="Delete Scenario?" subtitle={delConfirm?delConfirm.title:null} confirmLabel="Delete" onConfirm={function(){delC(delConfirm.id);}} onCancel={function(){setDelConfirm(null);}}/>
     <ConfirmModal open={clearConfirm} title="Clear All Data?" subtitle="All progress and custom scenarios will be removed." confirmLabel="Clear" onConfirm={function(){clearAll();setClearConfirm(false);setSidebar(false);}} onCancel={function(){setClearConfirm(false);}}/>
@@ -60,22 +62,22 @@ export default function App(){
       {/* Header with hamburger */}
       <div className="fi" style={{display:"flex",justifyContent:"space-between",alignItems:"center",paddingTop:16,marginBottom:20}}>
         <button onClick={function(){setSidebar(true);}} style={{background:"none",border:"none",cursor:"pointer",padding:4}}>
-          <svg viewBox="0 0 24 24" style={{width:24,height:24}}><rect y="3" width="24" height="2.5" rx="1" fill="#888"/><rect y="10.5" width="24" height="2.5" rx="1" fill="#888"/><rect y="18" width="24" height="2.5" rx="1" fill="#888"/></svg>
+          <svg viewBox="0 0 24 24" style={{width:24,height:24}}><rect y="3" width="24" height="2.5" rx="1" fill={t.COLOR.ink3}/><rect y="10.5" width="24" height="2.5" rx="1" fill={t.COLOR.ink3}/><rect y="18" width="24" height="2.5" rx="1" fill={t.COLOR.ink3}/></svg>
         </button>
         <div style={{textAlign:"center"}}>
-          <div className="flt" style={{display:"flex",justifyContent:"center",gap:6,marginBottom:6}}><div style={{width:24,height:24,borderRadius:6,background:"#34d3ee",boxShadow:"0 0 12px rgba(34,211,238,0.5)"}}></div><div style={{width:24,height:24,borderRadius:6,background:"#818cf8",boxShadow:"0 0 12px rgba(129,140,248,0.5)"}}></div><div style={{width:24,height:24,borderRadius:6,background:"#FECA57"}}></div><div style={{width:24,height:24,borderRadius:6,background:"#FF6B81"}}></div></div>
-          <h1 style={{fontSize:32,fontWeight:900,fontFamily:"'Fredoka',sans-serif",letterSpacing:-1}}>Block <span style={{color:COLOR.accent}}>Ward</span></h1>
-          <p style={{fontSize:12,color:"#999",marginTop:2}}>Peds Emergency and Critical Medicine Clinical Simulator</p>
+          <div className="flt" style={{display:"flex",justifyContent:"center",gap:6,marginBottom:6}}><div style={{width:24,height:24,borderRadius:6,background:t.COLOR.accent,boxShadow:"0 0 12px rgba("+t.ACCENT_RGB+",0.5)"}}></div><div style={{width:24,height:24,borderRadius:6,background:t.COLOR.positive,boxShadow:"0 0 12px rgba("+t.POS_RGB+",0.5)"}}></div><div style={{width:24,height:24,borderRadius:6,background:t.COLOR.attention}}></div><div style={{width:24,height:24,borderRadius:6,background:t.COLOR.critical}}></div></div>
+          <h1 style={{fontSize:32,fontWeight:700,fontFamily:t.FONT.display,letterSpacing:-1,color:t.COLOR.ink}}>Block <span style={{color:t.COLOR.accent}}>Ward</span></h1>
+          <p style={{fontSize:12,color:t.COLOR.ink3,marginTop:2}}>Peds Emergency and Critical Medicine Clinical Simulator</p>
         </div>
         <ThemeToggle/>
       </div>
       <div className="fi" style={{display:"flex",gap:12,marginBottom:24,animationDelay:".1s"}}>
-        <div style={{flex:1,borderRadius:14,padding:12,textAlign:"center",background:"linear-gradient(135deg,rgba(34,211,238,0.16),rgba(34,211,238,0.04))",border:"1px solid rgba(34,211,238,0.30)"}}><div style={{fontSize:28,fontWeight:900,color:COLOR.accent}}>{nd}</div><div style={{fontSize:11,color:COLOR.ink3}}>Completed</div></div>
-        <div style={{flex:1,borderRadius:14,padding:12,textAlign:"center",background:"linear-gradient(135deg,rgba(129,140,248,0.16),rgba(129,140,248,0.04))",border:"1px solid rgba(129,140,248,0.30)"}}><div style={{fontSize:28,fontWeight:900,color:"#aab4ff"}}>{built.length+cust.length}</div><div style={{fontSize:11,color:COLOR.ink3}}>Scenarios</div></div>
-        <div style={{flex:1,borderRadius:14,padding:12,textAlign:"center",background:"linear-gradient(135deg,rgba(255,107,129,0.16),rgba(255,107,129,0.04))",border:"1px solid rgba(255,107,129,0.30)"}}><div style={{fontSize:28,fontWeight:900,color:"#fda4af"}}>{cust.length}</div><div style={{fontSize:11,color:COLOR.ink3}}>Custom</div></div></div>
+        <div style={t.statTile("accent")}><div style={{fontSize:28,fontWeight:900,color:t.statTile("accent")._color}}>{nd}</div><div style={{fontSize:11,color:t.COLOR.ink3}}>Completed</div></div>
+        <div style={t.statTile("indigo")}><div style={{fontSize:28,fontWeight:900,color:t.statTile("indigo")._color}}>{built.length+cust.length}</div><div style={{fontSize:11,color:t.COLOR.ink3}}>Scenarios</div></div>
+        <div style={t.statTile("danger")}><div style={{fontSize:28,fontWeight:900,color:t.statTile("danger")._color}}>{cust.length}</div><div style={{fontSize:11,color:t.COLOR.ink3}}>Custom</div></div></div>
       <ScenarioList built={built} cust={cust} prog={prog} onPlay={play} onDelete={setDelConfirm}/>
-      <button onClick={function(){setView("build");}} className="fi" style={Object.assign({},cta("indigo"),{marginTop:24,padding:"16px 0",fontSize:18,animationDelay:".3s"})}>Build Custom Scenario</button>
-      <p style={{textAlign:"center",marginTop:24,paddingBottom:8,fontSize:11,color:COLOR.ink4}}>Block Ward v1.6</p>
-      <p style={{textAlign:"center",paddingBottom:16,fontSize:10,color:COLOR.ink4,letterSpacing:0.5}}>Experience created by: Sebastian J. Heredia</p>
+      <button onClick={function(){setView("build");}} className="fi" style={Object.assign({},t.cta("primary"),{marginTop:24,padding:"16px 0",fontSize:18,animationDelay:".3s"})}>Build Custom Scenario</button>
+      <p style={{textAlign:"center",marginTop:24,paddingBottom:8,fontSize:11,color:t.COLOR.ink3}}>Block Ward v1.6</p>
+      <p style={{textAlign:"center",paddingBottom:16,fontSize:10,color:t.COLOR.ink3,letterSpacing:0.5}}>Experience created by: Sebastian J. Heredia</p>
     </div></div>);
 }

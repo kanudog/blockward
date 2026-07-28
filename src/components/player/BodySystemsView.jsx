@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Brain, Heart, Wind, Droplets, Shield, Gauge, Eye, Search, Flag, Check } from "lucide-react";
+import { Search, Flag, Check } from "lucide-react";
 import { WhyModal, WhyButton } from "../shared/WhyModal.jsx";
 import { signCanonicalId } from "../../lib/scenarios/canonicalize.js";
+import { guessSys, SYS_ICON } from "./bodySystems.js";
 import { useTokens } from "../theme/themeStore.js";
 
 // Phase-3.0-hotfix + Gate-1 token restyle: every sub-finding row is clickable.
@@ -28,33 +29,19 @@ export function BodySystemsView(props) {
   var phaseIdx = props.phaseIdx !== undefined ? props.phaseIdx : 0;
   var clickable = !!(badMap && flags && onFlag);
   var _why=useState(null);var whyTarget=_why[0];var setWhyTarget=_why[1];
-  function guessSys(s) {
-    if (s.sys) return s.sys;
-    var l = (s.label + " " + (s.finding || "")).toLowerCase();
-    if (l.indexOf("neuro") >= 0 || l.indexOf("mental") >= 0 || l.indexOf("gcs") >= 0 || l.indexOf("pupil") >= 0 || l.indexOf("fontanelle") >= 0 || l.indexOf("conscious") >= 0 || l.indexOf("alert") >= 0 || l.indexOf("letharg") >= 0 || l.indexOf("responsive") >= 0 || l.indexOf("behavior") >= 0 || l.indexOf("irritable") >= 0 || l.indexOf("eye") >= 0 || l.indexOf("seiz") >= 0) return "Neuro";
-    if (l.indexOf("heart") >= 0 || l.indexOf("cardio") >= 0 || l.indexOf("pulse") >= 0 || l.indexOf("rhythm") >= 0 || l.indexOf("jvd") >= 0 || l.indexOf("jugular") >= 0 || l.indexOf("perfus") >= 0 || l.indexOf("cool ext") >= 0 || l.indexOf("mottl") >= 0) return "Cardiovascular";
-    if (l.indexOf("lung") >= 0 || l.indexOf("breath") >= 0 || l.indexOf("wheez") >= 0 || l.indexOf("retract") >= 0 || l.indexOf("stridor") >= 0 || l.indexOf("airway") >= 0 || l.indexOf("respir") >= 0 || l.indexOf("tripod") >= 0 || l.indexOf("trachea") >= 0 || l.indexOf("apne") >= 0) return "Respiratory";
-    if (l.indexOf("abdomen") >= 0 || l.indexOf("bowel") >= 0 || l.indexOf("vomit") >= 0 || l.indexOf("mucous") >= 0 || l.indexOf("oral") >= 0 || l.indexOf("hydrat") >= 0) return "GI/Hydration";
-    if (l.indexOf("skin") >= 0 || l.indexOf("rash") >= 0 || l.indexOf("hive") >= 0 || l.indexOf("flush") >= 0 || l.indexOf("cyan") >= 0 || l.indexOf("color") >= 0 || l.indexOf("pale") >= 0 || l.indexOf("diaphor") >= 0 || l.indexOf("integument") >= 0) return "Integumentary";
-    if (l.indexOf("urin") >= 0 || l.indexOf("renal") >= 0 || l.indexOf("kidney") >= 0 || l.indexOf("diaper") >= 0 || l.indexOf("oligur") >= 0) return "Renal";
-    if (l.indexOf("speech") >= 0 || l.indexOf("motor") >= 0 || l.indexOf("posture") >= 0 || l.indexOf("work of") >= 0) return "Musculoskeletal";
-    if (s.pos === "head" || s.pos === "face") return "HEENT";
-    return "Other";
-  }
   var grouped = {};
   signs.forEach(function(s) {
     var sys = guessSys(s);
     if (!grouped[sys]) grouped[sys] = [];
     grouped[sys].push(s);
   });
-  var sysIconMap = {"Neuro":Brain,"Cardiovascular":Heart,"Respiratory":Wind,"GI":Droplets,"GI/Hydration":Droplets,"Integumentary":Shield,"Renal":Droplets,"Musculoskeletal":Gauge,"HEENT":Eye,"Other":Search};
   var presentSystems = Object.keys(grouped);
   if (presentSystems.length === 0) return null;
   return (
     <div style={{marginTop:8,marginBottom:8}}>
       <div style={{display:"flex",flexDirection:"column",gap:6}}>
         {presentSystems.map(function(sys) {
-          var IconComp = sysIconMap[sys] || Search;
+          var IconComp = SYS_ICON[sys] || Search;
           return (
             <div key={sys} style={Object.assign({},t.tile("idle"),{padding:"8px 10px"})}>
               <div style={Object.assign({},t.label(),{marginBottom:4,display:"flex",alignItems:"center",gap:5})}><IconComp size={13} color={t.COLOR.accent}/> {sys}</div>

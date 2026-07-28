@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Info } from "lucide-react";
+import { Info, AlertTriangle } from "lucide-react";
 import { CoachBubble } from "../shared/CoachBubble.jsx";
 import { ALL_TOOLS, ALL_MEDS, isCustomTool, isCustomMed } from "../../lib/scenarios/packs/index.js";
 import { medColor, medType as lookupMedType } from "../../lib/scenarios/visualMeta.js";
@@ -156,6 +156,11 @@ export function ActionPanel(props){
   var popActionEntry=pop?(pop.ty==="t"?(actions&&actions.tools?actions.tools[pop.id]:null):(actions&&actions.meds?actions.meds[pop.id]:null)):null;
   var meta=pop?(pop.ty==="t"?lookupTool(pop.id,popActionEntry):lookupMed(pop.id,popActionEntry)):null;
   var popInPlan=pop?!!sel[pop.id]:false;
+  // Owner direction 2026-07-13: the preview stays verdict-free UNTIL the player
+  // actually adds a not-indicated option to their plan — then the card turns
+  // red with "Not indicated right now" + the why. (Explicit override of the
+  // "no verdict pre-commit" rule, but ONLY for a committed wrong pick.)
+  var popNotIndicated=!!(pop&&popInPlan&&pop.info&&pop.info.ok===false);
   var popCard=pop?Object.assign({},t.surface("pop"),{display:"flex",flexDirection:"column",width:"100%",maxWidth:"min(440px, 92vw)",maxHeight:"85vh",overflow:"hidden",animation:"popIn .25s ease-out",fontFamily:t.FONT.body}):null;
   function actionTile(id,ty){
     var isTool=ty==="t";
@@ -203,6 +208,12 @@ export function ActionPanel(props){
               <span style={{color:t.COLOR.ink3}}>Loading details for this option…</span>
             </div>):popError?(<div style={{padding:"4px 0",color:t.COLOR.attentionText,fontSize:12,lineHeight:1.5}}>
               {popError} <button onClick={retryPopFetch} style={{marginLeft:6,background:"none",border:"none",color:t.COLOR.boldTerm,textDecoration:"underline",cursor:"pointer",fontSize:12}}>Retry</button>
+            </div>):popNotIndicated?(<div style={{borderRadius:12,border:"1.5px solid rgba("+t.CRIT_RGB+",0.55)",background:"rgba("+t.CRIT_RGB+",0.10)",padding:"11px 13px"}}>
+              <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:8}}>
+                <AlertTriangle size={16} color={t.COLOR.critical} style={{flexShrink:0}}/>
+                <span style={{fontSize:13,fontWeight:800,color:t.COLOR.critical,fontFamily:t.FONT.body}}>Not indicated right now</span>
+              </div>
+              <TextBlock text={pop.info.fb} style={{fontSize:13,color:t.COLOR.ink2,lineHeight:1.55}}/>
             </div>):
             (<TextBlock text={pop.info.fb} style={{fontSize:13,color:t.COLOR.ink2,lineHeight:1.55}}/>)}
           </div>
@@ -216,9 +227,10 @@ export function ActionPanel(props){
             <div style={{display:"flex",gap:8}}>
               {(function(){
                 var addStyle;
-                if(popInPlan)addStyle={flex:1,padding:"11px 0",borderRadius:10,fontWeight:700,fontSize:12.5,cursor:"pointer",fontFamily:t.FONT.body,background:"rgba("+t.ACCENT_RGB+",0.14)",border:"1.5px solid rgba("+t.ACCENT_RGB+",0.6)",color:t.COLOR.boldTerm};
+                if(popNotIndicated)addStyle={flex:1,padding:"11px 0",borderRadius:10,fontWeight:700,fontSize:12.5,cursor:"pointer",fontFamily:t.FONT.body,background:"rgba("+t.CRIT_RGB+",0.16)",border:"1.5px solid rgba("+t.CRIT_RGB+",0.6)",color:t.COLOR.critical};
+                else if(popInPlan)addStyle={flex:1,padding:"11px 0",borderRadius:10,fontWeight:700,fontSize:12.5,cursor:"pointer",fontFamily:t.FONT.body,background:"rgba("+t.ACCENT_RGB+",0.14)",border:"1.5px solid rgba("+t.ACCENT_RGB+",0.6)",color:t.COLOR.boldTerm};
                 else addStyle=Object.assign({},t.cta("primary"),{flex:1,width:"auto",padding:"11px 0",fontSize:12.5,borderRadius:10});
-                return(<button onClick={function(){togglePlan(pop.id,pop.ty);}} style={addStyle}>{popInPlan?"✓ In plan":"Add to plan"}</button>);
+                return(<button onClick={function(){togglePlan(pop.id,pop.ty);}} style={addStyle}>{popNotIndicated?"✓ In plan — reconsider":popInPlan?"✓ In plan":"Add to plan"}</button>);
               })()}
               <button disabled={popLoading} onClick={function(){
                 if(popLoading)return;

@@ -151,7 +151,7 @@ export function AssessPanel(props){
       </div>
     </div>
     {hintRow()}
-    <Section title="Character" task="Tap an area to look closer." open={secOpen("char")} onToggle={function(){toggleSec("char");}}>
+    <Section title="Character" task="Tap a body system to look closer." open={secOpen("char")} onToggle={function(){toggleSec("char");}}>
       <FocusedExam signs={curSigns} phaseIdx={phaseIdx} sc={sc}
         cycleRate={parseFloat(vVal(vit.rr))||22} responseSec={parseFloat(vVal(vit.cap))||1.5}/>
     </Section>

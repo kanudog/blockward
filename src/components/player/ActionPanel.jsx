@@ -9,18 +9,62 @@ import { resolveSlotText, SYNTHESIZED_FB_FALLBACK } from "../../lib/scenarios/sl
 import { useScenariosStore } from "../../stores/scenariosStore.js";
 import { ToolIcon, MedIcon } from "./icons.jsx";
 import { TextBlock } from "../shared/TextBlock.jsx";
+import { useModalGuard } from "../shared/useModalGuard.js";
 import { useTokens } from "../theme/themeStore.js";
 import { usePlayerStore } from "../../stores/playerStore.js";
 
 // Phase-4b: tool/med entries come from the pack registry; custom entries read
 // label/description from the per-scenario action entry.
+//
+// Play-test fix 2026-07-29 — TWO bugs lived here:
+//
+// 1. The pack label always won, so every patient-specific dose the generator
+//    authored was thrown away. A cardiogenic-shock case authored "NS bolus
+//    5 mL/kg over 15 min" and the tile rendered the registry default,
+//    "Bolus NS 20 mL/kg IV" — a 4x dose contradiction against the card's own
+//    teaching text. Worse, a PEA-arrest case authored "Confirm non-shockable
+//    rhythm — continue CPR" on the `defib` id and the tile rendered "Apply
+//    Defib Pads", inverting the clinical meaning. The authored label now wins.
+//
+// 2. An id missing from the registry returned null and the caller FILTERED IT
+//    OUT — silently. `furosemide` and `callNeurosurgery` both vanished mid-case
+//    (the latter from a herniating TBI patient who needed an OR). Nothing is
+//    dropped now: unknown ids are cross-checked against the other list, then
+//    rendered from their authored label with a console warning.
+//
+// Note on validation: we can enforce SHAPE here (non-empty, sane length, no
+// stray markdown) but not clinical correctness — a label can be fluent and
+// still wrong. The substantive guard is in the prompt, which now requires the
+// label to name the same intervention as its id and agree with its own `fb`.
+var MAX_LABEL = 90;
+function cleanLabel(raw) {
+  if (typeof raw !== "string") return null;
+  var s = raw.replace(/[*_`]/g, "").replace(/\s+/g, " ").trim();
+  if (!s || s.length > MAX_LABEL) return null;
+  return s;
+}
+function resolveEntry(id, actionEntry, registry, otherRegistry, isCustom, kind) {
+  var authored = cleanLabel(actionEntry && actionEntry.label);
+  if (isCustom(id)) {
+    return { id: id, label: authored || id, description: actionEntry && actionEntry.description, custom: true };
+  }
+  var reg = registry[id];
+  if (reg) return Object.assign({}, reg, { label: authored || reg.label });
+  // Not in its own registry — try the other one (the generator has put
+  // procedures like `bloodCultures` in the meds list).
+  var cross = otherRegistry[id];
+  if (cross) {
+    console.warn("ActionPanel: " + kind + " id '" + id + "' is registered as the other kind; rendering it anyway.");
+    return Object.assign({}, cross, { label: authored || cross.label, crossListed: true });
+  }
+  console.warn("ActionPanel: " + kind + " id '" + id + "' is not in any pack; rendering from its authored label. Consider adding it to the registry.");
+  return { id: id, label: authored || id, unregistered: true };
+}
 function lookupTool(id, actionEntry) {
-  if (isCustomTool(id)) return { id: id, label: (actionEntry && actionEntry.label) || id, description: actionEntry && actionEntry.description, custom: true };
-  return ALL_TOOLS[id] || null;
+  return resolveEntry(id, actionEntry, ALL_TOOLS, ALL_MEDS, isCustomTool, "tool");
 }
 function lookupMed(id, actionEntry) {
-  if (isCustomMed(id)) return { id: id, label: (actionEntry && actionEntry.label) || id, description: actionEntry && actionEntry.description, custom: true };
-  return ALL_MEDS[id] || null;
+  return resolveEntry(id, actionEntry, ALL_MEDS, ALL_TOOLS, isCustomMed, "med");
 }
 
 // Phase 4 (#1 + play-test findings): PREVIEW is separated from SELECT.
@@ -48,6 +92,7 @@ export function ActionPanel(props){
   var _popError=useState(null);var popError=_popError[0];var setPopError=_popError[1];
   var markedForReview=usePlayerStore(function(s){return s.markedForReview;});
   var toggleMark=usePlayerStore(function(s){return s.toggleMarkForReview;});
+  useModalGuard(!!pop);
   // Owner fix (Gate 4): "In plan" vs "Mark for review" sound alike but do
   // different things — a first-time mentor bubble explains the difference
   // (and insight cards); the ⓘ in the card header reopens it any time.
@@ -169,13 +214,20 @@ export function ActionPanel(props){
     if(!m)return null;
     var inPlan=!!sel[id];
     var wasOpened=!!opened[id];
+    // Play-test fix: the red "not indicated" warning used to live only inside
+    // the popup, so closing the card lost the signal and the grid tile looked
+    // identical to a correct pick. The tile now carries it too.
+    var notIndicated=inPlan&&!!(entry&&entry.ok===false);
     var st=Object.assign({},t.tile(inPlan?"flagged":"idle"),{position:"relative",display:"flex",flexDirection:"column",alignItems:"center",gap:6,minHeight:78,cursor:"pointer",fontFamily:t.FONT.body});
+    if(notIndicated)st=Object.assign({},st,{background:"rgba("+t.CRIT_RGB+",0.10)",border:"1.5px solid rgba("+t.CRIT_RGB+",0.55)"});
     return(<button key={id} onClick={function(){preview(id,ty);}} className="bw-tap" style={st}>
       {isTool
-        ?<ToolIcon name={id} size={26} color={t.COLOR.accent}/>
+        ?<ToolIcon name={id} size={26} color={notIndicated?t.COLOR.critical:t.COLOR.accent}/>
         :<div style={{width:26,height:32,borderRadius:6,display:"flex",alignItems:"center",justifyContent:"center",background:medColor(id)}}><MedIcon type={lookupMedType(id)} size={18} color="#FFFFFF"/></div>}
       <span style={{fontSize:11,color:t.COLOR.ink,fontWeight:700,textAlign:"center",lineHeight:1.2}}>{m.label}</span>
-      {inPlan&&<span style={Object.assign({},t.chip("accent"),{position:"absolute",top:5,right:5,fontSize:8.5,padding:"2px 7px"})}>In plan</span>}
+      {notIndicated
+        ?<span style={{position:"absolute",top:5,right:5,display:"inline-flex",alignItems:"center",gap:3,fontSize:8.5,fontWeight:800,padding:"2px 7px",borderRadius:999,background:"rgba("+t.CRIT_RGB+",0.18)",border:"1px solid rgba("+t.CRIT_RGB+",0.5)",color:t.COLOR.critical}}><AlertTriangle size={9}/>Reconsider</span>
+        :inPlan&&<span style={Object.assign({},t.chip("accent"),{position:"absolute",top:5,right:5,fontSize:8.5,padding:"2px 7px"})}>In plan</span>}
       {!inPlan&&wasOpened&&<span style={{position:"absolute",top:7,right:7,width:6,height:6,borderRadius:3,background:t.COLOR.ink3,opacity:0.6}}/>}
     </button>);
   }
@@ -183,6 +235,14 @@ export function ActionPanel(props){
     <div style={{marginTop:16,fontFamily:t.FONT.body}}>
       {/* Phase-2.6.3 change 7: action-tile grid mirrors the assessment grids. */}
       <style>{"@keyframes popIn{from{opacity:0;transform:scale(.92) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}@keyframes lazyPulse{0%,100%{opacity:.4}50%{opacity:1}}@media(min-width:768px){.bw-action-grid{grid-template-columns:repeat(3,1fr) !important}}@media(min-width:1024px){.bw-action-grid{grid-template-columns:repeat(4,1fr) !important}}"}</style>
+      {/* First-run explainer, shown ONCE per run above the grid where it has
+          room, instead of on top of an open card's teaching text. */}
+      {!coachSeen.options&&!optHelp&&<div style={{marginBottom:12}}>
+        <CoachBubble title="Two different saves"
+          body={"**Add to plan** — the steps you'd actually take now. Only these get answered by the readings when you commit. They do NOT go to your tray.\n\n**Mark for review** — a bookmark for later. It goes to your tray and returns in the debrief with a deeper read. It never affects the plan."}
+          dismissLabel="Got it"
+          onDismiss={function(){dismissCoach("options");}}/>
+      </div>}
       {renderTools&&renderTools.length>0&&(<div style={{marginBottom:16}}><div style={Object.assign({},t.label(),{marginBottom:8})}>Tool Belt</div>
         <div className="bw-action-grid" style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:8}}>{renderTools.map(function(id){return actionTile(id,"t");})}</div></div>)}
       {renderMeds&&renderMeds.length>0&&(<div style={{marginBottom:16}}><div style={Object.assign({},t.label(),{marginBottom:8})}>Med Cart</div>
@@ -218,9 +278,17 @@ export function ActionPanel(props){
             (<TextBlock text={pop.info.fb} style={{fontSize:13,color:t.COLOR.ink2,lineHeight:1.55}}/>)}
           </div>
           <div style={{padding:"10px 18px 14px",borderTop:"1px solid "+t.COLOR.hairline,flexShrink:0}}>
-            {showOptionsCoach&&<div style={{marginBottom:10}}>
+            {/* Owner direction 2026-07-29: this explainer used to render HERE, in
+                the card footer, where it covered the teaching text the learner
+                had just opened the card to read — and its dismiss button was a
+                second control also labelled "Got it", so tapping the obvious one
+                closed the card and left the tip standing. It now lives above the
+                action grid, outside the card, and is only shown on request via
+                the ⓘ in the header. */}
+            {optHelp&&<div style={{marginBottom:10}}>
               <CoachBubble tail="bottom-left" title="Two different saves"
                 body={"**Add to plan** — the steps you'd actually take now. Only these get answered by the readings when you commit. They do NOT go to your tray.\n\n**Mark for review** — a bookmark for later. It goes to your tray and returns in the debrief with a deeper read. It never affects the plan.\n\nInsight cards join your tray on their own as you play — small keepers, never scored."}
+                dismissLabel="Hide this tip"
                 onDismiss={function(){dismissCoach("options");setOptHelp(false);}}/>
             </div>}
             {/* SELECT and BOOKMARK side by side — different verbs, same row. */}

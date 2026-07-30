@@ -196,6 +196,18 @@ export function VitalsDisplay(props){
   // Expected-range band: quiet track + band segment + value marker. The marker
   // stays neutral until judged, then settles positive (in) or amber (out) — the
   // band is a cue, never a verdict, before commit.
+  // Play-test fix 2026-07-29: a case marked temp 37.8 as `bad:false` while its
+  // own norms capped temp at 37.5. The tile then drew the value marker OUTSIDE
+  // the band and labelled it "in range" in the same breath. The band is what
+  // the learner is actually shown, so a value numerically outside it can never
+  // be called in-range: treat out-of-band as abnormal even if the case's flag
+  // disagrees.
+  function outOfBand(chKey,val){
+    if(!ranges||!ranges[chKey])return false;
+    var r=ranges[chKey];var n=firstNum(val);
+    if(n==null||isNaN(n))return false;
+    return n<r[0]||n>r[1];
+  }
   function bandRow(chKey,val,unit,isJudged){
     if(!ranges||!ranges[chKey])return null;
     var r=ranges[chKey];
@@ -221,13 +233,16 @@ export function VitalsDisplay(props){
           {vs.map(function(v){
             var flagged=!!(flaggedKeys&&flaggedKeys[v.k]);
             var state="idle";
+            // effBad: the case's own flag OR a value sitting outside the band we
+            // display. Prevents the self-contradicting "in range" label.
+            var effBad=v.bad||outOfBand(v.k,v.v);
             if(judged&&flaggedKeys){
-              if(v.bad&&flagged)state="caught";
-              else if(v.bad&&!flagged)state="missed";
-              else if(!v.bad&&flagged)state="inband";
+              if(effBad&&flagged)state="caught";
+              else if(effBad&&!flagged)state="missed";
+              else if(!effBad&&flagged)state="inband";
             }else if(interactive){
               state=flagged?"flagged":"idle";
-            }else if(isRevealed(v.k)&&v.bad){
+            }else if(isRevealed(v.k)&&effBad){
               state="attn";
             }
             var chip={position:"relative",borderRadius:10,padding:"7px 4px 8px",textAlign:"center",background:M.chipBg,border:M.chipBorder,transition:"all 0.18s ease"};
@@ -236,7 +251,7 @@ export function VitalsDisplay(props){
             if(state==="missed"||state==="attn")chip=Object.assign({},chip,{background:"rgba("+t.ATTN_RGB+",0.10)",border:"1.5px solid rgba("+t.ATTN_RGB+",0.60)"});
             if(state==="inband")chip=Object.assign({},chip,{border:"1px dashed "+M.bandText});
             var canFlag=interactive&&!judged;
-            var canWhy=judged&&v.bad&&typeof onWhyKey==="function";
+            var canWhy=judged&&effBad&&typeof onWhyKey==="function";
             if(canFlag||canWhy)chip=Object.assign({},chip,{cursor:"pointer"});
             var inner=(<div>
               <div style={{fontSize:8.5,letterSpacing:0.8,textTransform:"uppercase",color:M.label,fontWeight:700,fontFamily:t.FONT.body}}>{v.l}</div>

@@ -110,6 +110,18 @@ export var HAIR_STYLES = [
   "side", "buns", "tails", "curls", "swoop"
 ];
 
+// Owner direction 2026-07-29: the gown palette was already sex-coded but the
+// hairstyle was drawn from the full unisex list, so it landed wrong about half
+// the time — play-testing produced an 8-year-old girl with a "cap" cut and a
+// 7-year-old boy with "tails" (pigtails). Hair now mirrors GOWN_PALETTE: one
+// pool per figure variant, with the seed still choosing within the pool so
+// looks stay varied and stable per case. `neutral` keeps the whole set.
+export var HAIR_BY_VARIANT = {
+  v1: ["cap", "buzz", "fringe", "side", "swoop", "tall", "curls"],
+  v2: ["waves", "buns", "tails", "curls", "fringe", "swoop"],
+  neutral: HAIR_STYLES
+};
+
 export var HAIR_COLORS = [
   0x2b2b2b, 0x5b3a22, 0x8a5a33, 0xd9a441,
   0xe8d28a, 0xa8431f, 0xb4553a, 0xbfc3c9
@@ -163,7 +175,7 @@ export function seededConfig(seed, variant) {
   return {
     variant: v,
     gownColor: pick(rnd, GOWN_PALETTE[v]),
-    hairStyle: pick(rnd, HAIR_STYLES),
+    hairStyle: pick(rnd, HAIR_BY_VARIANT[v] || HAIR_STYLES),
     hairColor: pick(rnd, HAIR_COLORS),
     tone: pick(rnd, TONES),
     faceSet: rnd() < 0.5 ? 0 : 1,

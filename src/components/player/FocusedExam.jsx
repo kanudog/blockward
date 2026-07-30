@@ -8,11 +8,12 @@
 // Exploratory only — findings are NEVER graded; a system with only normal
 // findings still shows those findings (no false "nothing unusual" message).
 import { useState } from "react";
-import { Check, X, Search } from "lucide-react";
+import { Check, X, Search, AlertTriangle, Cable } from "lucide-react";
 import { SceneStage } from "./SceneStage.jsx";
 import { TextBlock } from "../shared/TextBlock.jsx";
 import { WhyModal } from "../shared/WhyModal.jsx";
-import { guessSys, SYS_ICON, orderSystems } from "./bodySystems.js";
+import { useModalGuard } from "../shared/useModalGuard.js";
+import { guessSys, SYS_ICON, orderSystems, LINES } from "./bodySystems.js";
 import { useTokens } from "../theme/themeStore.js";
 import { usePlayerStore } from "../../stores/playerStore.js";
 import { expandSingleMarkedItem } from "../../lib/ai/client.js";
@@ -33,16 +34,42 @@ function scoreKind(sign) {
   return null;
 }
 
-// Pull E / V / M (and total) out of free text like "GCS 14 (E4 V4 M6)".
+// Pull E / V / M (and total) out of free text.
+//
+// Play-test fix 2026-07-29: the original used \bE / \bV / \bM, which requires a
+// word boundary before each letter. That holds for the spaced form "E4 V4 M6"
+// but NOT for the compact form "(E3V2M4)" — between "3" and "V" both sides are
+// word characters, so there is no boundary, V and M never matched, hasParts was
+// false, and the whole scoring breakdown silently collapsed to a bare total.
+// A TBI case shipped exactly that form and lost its breakdown. Try the compact
+// triple first, then fall back to the spaced/labelled forms.
 function parseGCS(text) {
   var s = String(text || "");
-  function g(re) { var m = s.match(re); return m ? parseInt(m[1], 10) : null; }
-  var e = g(/\bE\s*[:=]?\s*(\d)/i);
-  var v = g(/\bV\s*[:=]?\s*(\d)/i);
-  var m = g(/\bM\s*[:=]?\s*(\d)/i);
-  var totalM = s.match(/gcs[^\d]*(\d{1,2})/i);
-  var total = (e != null && v != null && m != null) ? e + v + m : (totalM ? parseInt(totalM[1], 10) : null);
-  return { e: e, v: v, m: m, total: total, hasParts: e != null && v != null && m != null };
+  var e = null, v = null, m = null;
+  var triple = s.match(/E\s*[:=]?\s*(\d)\s*[,/·]?\s*V\s*[:=]?\s*(\d)\s*[,/·]?\s*M\s*[:=]?\s*(\d)/i);
+  if (triple) {
+    e = parseInt(triple[1], 10); v = parseInt(triple[2], 10); m = parseInt(triple[3], 10);
+  } else {
+    function g(re) { var x = s.match(re); return x ? parseInt(x[1], 10) : null; }
+    e = g(/(?:^|[^A-Za-z])E\s*[:=]?\s*(\d)/i);
+    v = g(/(?:^|[^A-Za-z])V\s*[:=]?\s*(\d)/i);
+    m = g(/(?:^|[^A-Za-z])M\s*[:=]?\s*(\d)/i);
+  }
+  var hasParts = e != null && v != null && m != null;
+  // Only trust component sums that are actually in range (3–15).
+  var sum = hasParts ? e + v + m : null;
+  if (hasParts && (e < 1 || e > 4 || v < 1 || v > 5 || m < 1 || m > 6)) hasParts = false;
+  var stated = s.match(/gcs[^\d]{0,12}(\d{1,2})/i);
+  var statedTotal = stated ? parseInt(stated[1], 10) : null;
+  return {
+    e: e, v: v, m: m,
+    total: hasParts ? sum : statedTotal,
+    statedTotal: statedTotal,
+    // Surfaces a generator error rather than hiding it: when the case states a
+    // total that disagrees with its own E/V/M, the learner should see both.
+    mismatch: !!(hasParts && statedTotal != null && statedTotal !== sum),
+    hasParts: hasParts
+  };
 }
 
 export function FocusedExam(props) {
@@ -51,14 +78,22 @@ export function FocusedExam(props) {
   var phaseIdx = props.phaseIdx !== undefined ? props.phaseIdx : 0;
   var _open = useState(null); var openSys = _open[0]; var setOpenSys = _open[1];
   var _why = useState(null); var whyTarget = _why[0]; var setWhyTarget = _why[1];
+  // "list" = one head-to-toe pass (default), "systems" = drill by body system.
+  var _vm = useState("list"); var viewMode = _vm[0]; var setViewMode = _vm[1];
   var examined = usePlayerStore(function (s) { return s.examined; });
   var markExamined = usePlayerStore(function (s) { return s.markExamined; });
   var markedForReview = usePlayerStore(function (s) { return s.markedForReview; });
   var toggleMark = usePlayerStore(function (s) { return s.toggleMarkForReview; });
+  useModalGuard(!!openSys);
 
-  // Group findings by real body system.
+  // Group findings by real body system. Lines & devices are handled separately
+  // (their own strip below) so they never occupy a body-system card.
   var grouped = {};
-  signs.forEach(function (s) { var sys = guessSys(s); (grouped[sys] = grouped[sys] || []).push(s); });
+  signs.forEach(function (s) {
+    var sys = guessSys(s);
+    if (sys === LINES) return;
+    (grouped[sys] = grouped[sys] || []).push(s);
+  });
   var systems = orderSystems(Object.keys(grouped));
 
   function sysKey(sys) { return "examine:" + sys + "@p" + phaseIdx; }
@@ -111,6 +146,12 @@ export function FocusedExam(props) {
         <span style={{ fontSize: 24, fontWeight: 800, color: t.COLOR.ink, fontFamily: t.FONT.mono }}>{p.total}</span>
         <span style={{ fontSize: 11, color: t.COLOR.ink3 }}>Glasgow Coma Scale · E{p.e} V{p.v} M{p.m}</span>
       </div>
+      {p.mismatch && <div style={{ display: "flex", alignItems: "flex-start", gap: 6, padding: "7px 9px", marginBottom: 8, borderRadius: 8, background: "rgba(" + t.ATTN_RGB + ",0.12)", border: "1px solid rgba(" + t.ATTN_RGB + ",0.4)" }}>
+        <AlertTriangle size={13} color={t.COLOR.attention} style={{ flexShrink: 0, marginTop: 1 }}/>
+        <span style={{ fontSize: 11, color: t.COLOR.attentionText, lineHeight: 1.45, fontFamily: t.FONT.body }}>
+          {"This case states GCS " + p.statedTotal + ", but E" + p.e + " + V" + p.v + " + M" + p.m + " adds to " + (p.e + p.v + p.m) + ". The components are shown below — trust them over the stated total."}
+        </span>
+      </div>}
       {Object.keys(GCS_SCALE).map(function (cat) {
         var def = GCS_SCALE[cat];
         return (<div key={cat} style={{ marginBottom: 8 }}>
@@ -182,17 +223,101 @@ export function FocusedExam(props) {
     </div>);
   }
 
+  // ---- flat head-to-toe row (the default view) ------------------------------
+  // Owner direction 2026-07-29: grouping by system is useful but it FRAGMENTED
+  // the diagnosis — in a heart-failure case the JVD, the hepatomegaly and the
+  // S3 gallop each lived behind a different card, so the triad that makes the
+  // diagnosis could never be seen at once. One scannable list is the default;
+  // grouping is a toggle for learners who want to drill system by system.
+  function flatRow(sign, i) {
+    var marked = isMarked(sign);
+    var sys = guessSys(sign);
+    var Icon = SYS_ICON[sys] || Search;
+    return (<div key={i} style={Object.assign({}, t.tile("idle"), { padding: "8px 10px", marginBottom: 5 })}>
+      <div style={{ display: "flex", alignItems: "baseline", gap: 6, flexWrap: "wrap" }}>
+        <Icon size={12} color={t.COLOR.accent} style={{ flexShrink: 0, alignSelf: "center" }}/>
+        <span style={{ fontSize: 9.5, letterSpacing: 0.6, textTransform: "uppercase", fontWeight: 700, color: t.COLOR.ink3, fontFamily: t.FONT.body }}>{sys}</span>
+      </div>
+      <div style={{ marginTop: 3 }}>
+        {scoreKind(sign) === "gcs"
+          ? GcsBreakdown(sign)
+          : <TextBlock text={"**" + sign.label + ":** " + (sign.finding || "")} style={{ fontSize: 12.5, color: t.COLOR.ink2, lineHeight: 1.5 }}/>}
+      </div>
+      <div style={{ display: "flex", gap: 6, marginTop: 5 }}>
+        {sign.why && <button className="bw-tap" onClick={function () { setWhyTarget(sign); }}
+          style={{ padding: "5px 11px", borderRadius: 999, fontWeight: 700, fontSize: 11, fontFamily: t.FONT.body, background: "rgba(" + t.ACCENT_RGB + ",0.12)", border: "1px solid rgba(" + t.ACCENT_RGB + ",0.45)", color: t.COLOR.boldTerm, cursor: "pointer" }}>
+          Why this matters
+        </button>}
+        <button className="bw-tap" onClick={function () { handleMark(sign); }}
+          style={{ padding: "5px 11px", borderRadius: 999, fontWeight: 700, fontSize: 11, cursor: "pointer", fontFamily: t.FONT.body,
+            background: marked ? "rgba(" + t.ATTN_RGB + ",0.16)" : t.COLOR.btnNeutralBg,
+            border: "1px solid " + (marked ? "rgba(" + t.ATTN_RGB + ",0.55)" : t.COLOR.hairline),
+            color: marked ? t.COLOR.attentionText : t.COLOR.btnNeutralInk }}>
+          {marked ? "✓ Saved for debrief" : "Explain in debrief"}
+        </button>
+      </div>
+    </div>);
+  }
+
+  var examSigns = signs.filter(function (s) { return guessSys(s) !== LINES; });
+  var deviceSigns = signs.filter(function (s) { return guessSys(s) === LINES; });
+
   return (<div style={Object.assign({}, t.stage(), { position: "relative" })}>
     <div style={{ maxWidth: 190, margin: "0 auto 8px" }}>
       <SceneStage sc={props.sc} height={190} framing="figure" bare={true}/>
     </div>
-    <div style={{ textAlign: "center", fontSize: 11, color: t.COLOR.ink3, fontFamily: t.FONT.body, marginBottom: 8 }}>Tap a system to look closer.</div>
-    <div style={{ display: "grid", gridTemplateColumns: systems.length > 1 ? "1fr 1fr" : "1fr", gap: 6 }}>
-      {systems.map(function (sys) { return systemChip(sys); })}
+
+    {/* The mechanic, stated plainly. Nothing in this section is scored — the
+        learner reads to build a picture and saves what they want explained. */}
+    <div style={{ textAlign: "center", fontSize: 11, color: t.COLOR.ink3, fontFamily: t.FONT.body, marginBottom: 8, lineHeight: 1.5 }}>
+      Read the exam to build your picture. Nothing here is graded — save anything
+      you want explained in the debrief.
     </div>
-    <div style={{ textAlign: "center", marginTop: 8, fontSize: 10.5, color: t.COLOR.ink3, fontFamily: t.FONT.body }}>
-      {examinedCount + " of " + systems.length + " system" + (systems.length === 1 ? "" : "s") + " examined"}
+
+    <div style={{ display: "flex", justifyContent: "center", gap: 6, marginBottom: 9 }}>
+      {[["list", "Head to toe"], ["systems", "By system"]].map(function (m) {
+        var on = viewMode === m[0];
+        return (<button key={m[0]} className="bw-tap" onClick={function () { setViewMode(m[0]); }}
+          style={{ padding: "5px 12px", borderRadius: 999, fontSize: 11, fontWeight: 700, fontFamily: t.FONT.body, cursor: "pointer",
+            background: on ? "rgba(" + t.ACCENT_RGB + ",0.12)" : "transparent",
+            border: "1px solid " + (on ? "rgba(" + t.ACCENT_RGB + ",0.45)" : t.COLOR.hairline),
+            color: on ? t.COLOR.boldTerm : t.COLOR.ink3 }}>{m[1]}</button>);
+      })}
     </div>
+
+    {viewMode === "list"
+      ? <div>{examSigns.map(flatRow)}</div>
+      : (<div>
+          <div style={{ display: "grid", gridTemplateColumns: systems.length > 1 ? "1fr 1fr" : "1fr", gap: 6 }}>
+            {systems.map(function (sys) { return systemChip(sys); })}
+          </div>
+          <div style={{ textAlign: "center", marginTop: 8, fontSize: 10.5, color: t.COLOR.ink3, fontFamily: t.FONT.body }}>
+            {examinedCount + " of " + systems.length + " system" + (systems.length === 1 ? "" : "s") + " examined"}
+          </div>
+        </div>)}
+
+    {/* Hardware is not a body system. It gets a quiet strip of its own so it
+        stops being filed under an organ (IV access used to land in
+        Integumentary, then in a bucket called "Other"). */}
+    {deviceSigns.length > 0 && <div style={{ marginTop: 10, paddingTop: 9, borderTop: "1px solid " + t.COLOR.hairline }}>
+      <div style={Object.assign({}, t.label(), { display: "flex", alignItems: "center", gap: 5, marginBottom: 5 })}>
+        <Cable size={12} color={t.COLOR.ink3}/> {LINES}
+      </div>
+      {deviceSigns.map(function (s, i) {
+        var marked = isMarked(s);
+        return (<div key={i} style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap", fontSize: 11.5, color: t.COLOR.ink3, lineHeight: 1.45, padding: "3px 0", fontFamily: t.FONT.body }}>
+          <span style={{ flex: 1, minWidth: 0 }}><span style={{ fontWeight: 700, color: t.COLOR.ink2 }}>{s.label}:</span> {s.finding}</span>
+          <button className="bw-tap" onClick={function () { handleMark(s); }}
+            style={{ flexShrink: 0, padding: "2px 8px", borderRadius: 999, fontSize: 9.5, fontWeight: 700, fontFamily: t.FONT.body, cursor: "pointer",
+              background: marked ? "rgba(" + t.ATTN_RGB + ",0.16)" : "transparent",
+              border: "1px solid " + (marked ? "rgba(" + t.ATTN_RGB + ",0.55)" : t.COLOR.hairline),
+              color: marked ? t.COLOR.attentionText : t.COLOR.ink3 }}>
+            {marked ? "Saved" : "Explain"}
+          </button>
+        </div>);
+      })}
+    </div>}
+
     {overlay()}
     <WhyModal open={!!whyTarget} onClose={function () { setWhyTarget(null); }} title={whyTarget ? whyTarget.label : ""} body={whyTarget ? whyTarget.why : ""}
       item={whyTarget ? markItemFor(whyTarget) : null}/>

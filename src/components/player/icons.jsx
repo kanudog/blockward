@@ -2,11 +2,12 @@ import {
   Activity, Airplay, AirVent, Anchor, ArrowUpFromLine, AudioLines, AudioWaveform,
   Baby, Bandage, Beaker, Bed, BellRing, Bone, Brain, Cable, ClipboardList, Container,
   Cross, Crosshair, Cylinder, Drill, Droplet, Droplets, Eye, Fan, Filter, Fingerprint,
-  Flame, Flashlight, FlaskConical, FlaskRound, Funnel, Gauge, GitBranch, Heart, HeartPulse,
+  Flame, Flashlight, FlaskConical, FlaskRound, Funnel, Gauge, GitBranch, Hand, Heart,
+  HeartCrack, HeartPulse,
   Layers, Milk, MonitorDot, Phone, PhoneCall, PhoneOutgoing, Pill, Pipette, PlugZap, Radar,
   Radiation, Radio, RadioTower, Route, Scan, ScanEye, ScanLine, ScanSearch, Search, Shield,
   ShieldAlert, ShieldCheck, Siren, Spline, Stethoscope, Syringe, Target, TestTube, TestTubes,
-  Thermometer, Timer, TrendingDown, Waves, Waypoints, Wind, Zap
+  Thermometer, Timer, TrendingDown, Users, Waves, Waypoints, Wind, Zap
 } from "lucide-react";
 
 export function ToolIcon({name, size=24, color="#4ECDC4"}) {
@@ -100,6 +101,13 @@ export function ToolIcon({name, size=24, color="#4ECDC4"}) {
     case "callSurgery": return <PhoneCall size={size} color={color} strokeWidth={2}/>;
     case "callBloodBank": return <PhoneOutgoing size={size} color={color} strokeWidth={2}/>;
     case "callPoisonControl": return <BellRing size={size} color={color} strokeWidth={2}/>;
+    case "callNeurosurgery": return <Brain size={size} color={color} strokeWidth={2}/>;
+    case "callCardiology": return <HeartPulse size={size} color={color} strokeWidth={2}/>;
+    case "callPICU": return <Users size={size} color={color} strokeWidth={2}/>;
+    // --- Resuscitation basics (added 2026-07-29: arrest curveballs had no
+    // way to start compressions even though every explanation demanded it) ---
+    case "cprCompressions": return <HeartCrack size={size} color={color} strokeWidth={2}/>;
+    case "pulseCheck": return <Hand size={size} color={color} strokeWidth={2}/>;
     default: return <Activity size={size} color={color} strokeWidth={2}/>;
   }
 }

@@ -15,7 +15,12 @@ export const TOOLS = [
   { id: "bpCuff",        label: "Place BP Cuff",                       pack: "universal" },
   { id: "vsMonitor",     label: "Connect to Vital Signs Monitor",      pack: "universal" },
   { id: "pupilCheck",    label: "Check Pupils",                        pack: "universal" },
-  { id: "capRefill",     label: "Recheck Capillary Refill",            pack: "universal" }
+  { id: "capRefill",     label: "Recheck Capillary Refill",            pack: "universal" },
+  // Play-test 2026-07-29: both arrest curveballs (pulseless VT, PEA) had no
+  // way to start compressions even though every explanation said to. The
+  // `defib` tool was being repurposed to stand in for it.
+  { id: "cprCompressions", label: "Start Chest Compressions",          pack: "universal" },
+  { id: "pulseCheck",      label: "Check for a Pulse",                 pack: "universal" }
 ];
 
 export const MEDS = [

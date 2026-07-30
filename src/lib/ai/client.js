@@ -3,10 +3,24 @@ import { resolveSlotText, kindToPromptType } from "../scenarios/slotResolve.js";
 import { validateSchema, validateConsistency, validateCounts, applyAutocorrections } from "./validate.js";
 import { migrateLegacyScenario } from "../scenarios/migrateLegacyScenario.js";
 
-var NAME_HINT_LETTERS="ABCDEFGHIJKLMNOPRSTUVWYZ"; // skip Q and X — rare initial sounds
+// Owner direction 2026-07-29: use traditional Western names, assigned at
+// random, and keep the given name consistent with the emitted sex.
+//
+// The previous hint said "vary across cultures and genders", which is how a
+// case shipped a 7-year-old BOY named Priya — and the same first name then
+// turned up in an unrelated case. We now pick the initial at random (so names
+// still vary run to run) but pin the convention and the sex agreement. Age and
+// sex are only suggested when the user's own brief didn't specify them; the
+// prompt tells the model the brief always wins.
+var NAME_HINT_LETTERS="ABCDEFGHJKLMNPRSTVW"; // drop Q/X/Y/Z/I/O/U — thin Western first-name pools
 function randomNameHint(){
   var letter=NAME_HINT_LETTERS.charAt(Math.floor(Math.random()*NAME_HINT_LETTERS.length));
-  return "\n\nName hint: choose a patient name starting with the letter "+letter+". Vary across cultures and genders. Do NOT use Marcus, Sarah, or John.";
+  var sex=Math.random()<0.5?"male":"female";
+  return "\n\nName hint: give this patient a traditional Western given name starting with the letter "+letter+
+    ", plus a common Western surname (e.g. Carter, Brooks, Whitfield, Bradley, Nolan, Sutton). "+
+    "The given name must read unambiguously as the sex you emit, and must not be one you have used recently. "+
+    "Sex hint: unless the user's brief states or clearly implies a sex, make this patient "+sex+" — the brief always wins over this hint. "+
+    "Do not encode anything clinical in the name.";
 }
 
 // Phase-2.6.1 part 2E: when the streaming response surfaces a new
@@ -15,21 +29,45 @@ function randomNameHint(){
 // multiple keys arrive in the same chunk. Keys with first-occurrence
 // matching only (e.g. "vitals" appears in every phase; we only fire
 // the message the first time).
+// Fixed 2026-07-29. Two bugs made the builder look hung:
+//
+//   1. Several keys never existed in the emitted schema. "patient" does not
+//      match "patientCard", "emsReport" is really presentation.report, and
+//      "assessItems"/"escalation" are emitted by nothing at all — so those
+//      four messages could never fire.
+//   2. Matching is first-occurrence-only, and the LAST key that could still
+//      match was "labs". Everything after it — all four phases of actions and
+//      every fb/why body, which is the bulk of a ~40 KB case — advanced the
+//      byte counter while the label sat frozen. Measured twice: 127 s of 181 s
+//      and 44 s of 90 s stuck on "Generating consistent lab values...".
+//
+// Keys below are checked against the RAW streamed schema. The phase counter
+// underneath then keeps the label moving through the long tail.
 var PHASE_KEYS=[
-  {key:"\"patient\":",message:"Building patient profile..."},
-  {key:"\"emsReport\":",message:"Drafting EMS handoff..."},
+  {key:"\"title\":",message:"Naming the case..."},
+  {key:"\"patientCard\":",message:"Building patient profile..."},
+  {key:"\"presentation\":",message:"Drafting the handoff..."},
   {key:"\"learnMore\":",message:"Pulling background context..."},
   {key:"\"norms\":",message:"Setting age-appropriate norms..."},
   {key:"\"vitals\":",message:"Calibrating vital signs to age..."},
   {key:"\"signs\":",message:"Documenting bedside findings..."},
-  {key:"\"assessItems\":",message:"Selecting normal-vs-abnormal options..."},
   {key:"\"labs\":",message:"Generating consistent lab values..."},
-  {key:"\"escalation\"",message:"Building intervention pool..."},
+  {key:"\"actions\":",message:"Building the intervention pool..."},
   {key:"\"curveball\":",message:"Plotting a curveball..."},
   {key:"\"reassessment\":",message:"Modeling post-intervention recovery..."},
   {key:"\"stabilizationSummary\":",message:"Finalizing clinical recap..."},
-  {key:"\"debrief\":",message:"Writing teaching takeaways..."}
+  {key:"\"debrief\":",message:"Writing teaching takeaways..."},
+  {key:"\"visuals\":",message:"Dressing the patient avatar..."}
 ];
+
+// The long tail is the phases array. Counting how many phase objects have
+// opened gives us honest forward motion where the one-shot keys go quiet.
+var PHASE_MARKER="\"stageType\":";
+function countOccurrences(hay,needle){
+  var n=0,i=0;
+  while(true){var j=hay.indexOf(needle,i);if(j<0)break;n++;i=j+needle.length;}
+  return n;
+}
 
 // Phase 6.3 (Stage 2): stamp a round index on every phase, derived from
 // phaseIndex (0,1 -> round 1; 2,3 -> round 2). Belt-and-suspenders — the
@@ -151,10 +189,18 @@ export async function generateScenario(txt, opts, signal, onProgress){
   var bytes=0;
   var stopReason=null;
   var keysSeen={};
+  var phasesSeen=0;
   function checkPhase(text){
     for(var i=0;i<PHASE_KEYS.length;i++){
       var p=PHASE_KEYS[i];
       if(!keysSeen[p.key]&&text.indexOf(p.key)>=0){keysSeen[p.key]=true;return p.message;}
+    }
+    // No new one-shot key. Fall back to phase progress so the label keeps
+    // moving through the long actions/fb tail instead of appearing hung.
+    var n=countOccurrences(text,PHASE_MARKER);
+    if(n>phasesSeen){
+      phasesSeen=n;
+      return "Writing phase "+n+" — interventions and teaching...";
     }
     return null;
   }

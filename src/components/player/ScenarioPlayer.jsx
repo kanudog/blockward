@@ -389,7 +389,7 @@ export function ScenarioPlayer(props){
           <div className="bw-split-left">
             <SceneStage sc={sc} height={260} style={{marginBottom:12}}/>
             <VitalsDisplay vitals={vit} flash={true} ranges={chRanges} showRanges={true}/>
-            <BodySystemsView signs={sc.curveball?sc.curveball.signs:[]}/>
+            <BodySystemsView signs={sc.curveball?sc.curveball.signs:[]} phaseIdx="curveball"/>
             <LabPanel labs={curLabs}/>
           </div>
           <div className="bw-split-right">
@@ -403,7 +403,7 @@ export function ScenarioPlayer(props){
           <div className="bw-split-left">
             <VitalsDisplay vitals={vit} flash={true} ranges={chRanges} showRanges={true}/>
             <LabPanel labs={curLabs}/>
-            <BodySystemsView signs={sc.curveball?sc.curveball.signs:[]}/>
+            <BodySystemsView signs={sc.curveball?sc.curveball.signs:[]} phaseIdx="curveball"/>
           </div>
           <div className="bw-split-right">
             <div style={{borderRadius:t.RADIUS.lg,padding:t.SPACE.pad,background:"rgba("+t.CRIT_RGB+",0.08)",border:"1px solid rgba("+t.CRIT_RGB+",0.25)"}}>
@@ -433,7 +433,7 @@ export function ScenarioPlayer(props){
           <div style={{maxWidth:400,margin:"0 auto 12px"}}>
             <VitalsDisplay vitals={reVitals} ranges={chRanges} showRanges={true}/>
           </div>
-          {reSigns.length>0&&<div style={{maxWidth:400,margin:"0 auto"}}><BodySystemsView signs={reSigns}/></div>}
+          {reSigns.length>0&&<div style={{maxWidth:400,margin:"0 auto"}}><BodySystemsView signs={reSigns} phaseIdx="reassess"/></div>}
           <button onClick={function(){setStage("recovery");}} style={Object.assign({},t.cta("positive"),{marginTop:12})}>Continue</button>
         </div>);
       })()}
@@ -474,7 +474,11 @@ export function ScenarioPlayer(props){
                 <div style={{flexShrink:0,width:36,height:36,borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",background:"rgba("+t.ACCENT_RGB+",0.12)",border:"1px solid rgba("+t.ACCENT_RGB+",0.30)"}}>{act.type==="tool"?ToolIcon({name:act.toolId,size:20,color:t.COLOR.accent}):MedIcon({type:act.medType||"iv",size:20,color:t.COLOR.accent})}</div>
                 <div style={{flex:1}}>
                   <div style={{fontSize:13,fontWeight:700,color:t.COLOR.ink}}>{act.name}{act.isCurveball&&<span style={Object.assign({},t.chip("critical"),{marginLeft:6,fontSize:9,padding:"1px 6px",verticalAlign:"middle"})}>Event</span>}</div>
-                  {visible&&act.fb&&<p style={{fontSize:11,color:t.COLOR.ink3,marginTop:2,marginBottom:0,lineHeight:1.4}}>{act.fb}</p>}
+                  {/* Was a raw <p>, so **bold** from the generated fb rendered
+                      with literal asterisks ("you **defibrillate** it, not
+                      cardiovert it"). TextBlock parses the same markdown the
+                      Why modal already handles. */}
+                  {visible&&act.fb&&<div style={{marginTop:2}}><TextBlock text={act.fb} style={{fontSize:11,color:t.COLOR.ink3,lineHeight:1.4}}/></div>}
                 </div>
                 {visible&&<div style={{flexShrink:0,marginTop:2}}>{act.userSelected?<Check size={18} color={t.COLOR.positive} style={{opacity:0.9}}/>:<Circle size={18} color={t.COLOR.ink3} style={{opacity:0.5}}/>}</div>}
               </div>);

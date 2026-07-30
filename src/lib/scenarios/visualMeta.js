@@ -51,6 +51,13 @@ export const MED_VISUAL_META = {
   calciumGluconate:     { color: "#dfe6e9", medType: "iv"   },
   sodiumBicarb:         { color: "#dfe6e9", medType: "iv"   },
   calciumChloride:      { color: "#dfe6e9", medType: "push" },
+  // cardiac — added 2026-07-29 after play-testing found no diuretic and no
+  // named inotrope in the registry (heart-failure cases had to fall back to
+  // a generic `customMed`, which also lost its distinct icon).
+  furosemide:           { color: "#f6e58d", medType: "push" },
+  milrinone:            { color: "#74b9ff", medType: "iv"   },
+  dobutamine:           { color: "#0984e3", medType: "iv"   },
+  norepinephrine:       { color: "#b71540", medType: "iv"   },
   // neurological
   lorazepam:            { color: "#6c5ce7", medType: "push" },
   midazolamIM:          { color: "#6c5ce7", medType: "push" },

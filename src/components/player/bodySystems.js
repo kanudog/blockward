@@ -2,34 +2,177 @@
 // both BodySystemsView (the read-only systems list) and FocusedExam (the
 // examine loop) so a finding always lands under the same real body system.
 //
-// guessSys(sign) -> a real system label. Prefers an explicit sign.sys; otherwise
-// a keyword heuristic over the label + finding text. SYS_ICON maps each label to
-// a lucide icon. SYSTEM_ORDER gives a stable head-to-toe-ish display order.
-import { Brain, Heart, Wind, Droplets, Shield, Gauge, Eye, Search } from "lucide-react";
+// ---------------------------------------------------------------------------
+// Rewritten 2026-07-29 after play-testing. The old version substring-matched a
+// keyword list against label + finding text, unbounded and finding-first. That
+// produced routings a clinician would call nonsense:
+//
+//   "Motor / Posturing"  -> Renal          ("urin" inside post·urin·g)
+//   "Scalp & Head"       -> GI/Hydration   ("tender" in "boggy and tender")
+//   "Neck Veins" (JVD)   -> Respiratory    ("trachea midline" in the finding)
+//   "IV Access"          -> Integumentary  ("flush" in "flushing well")
+//   "Motor Response"     -> Musculoskeletal (GCS-M split from the GCS)
+//
+// Three changes fix the whole class of bug:
+//
+//   1. An explicit `sign.sys` from the generator always wins. The prompt now
+//      requires it, so the heuristic below is a fallback for legacy cases.
+//   2. The LABEL is matched before the finding prose. The label is the subject
+//      of the finding; the prose is commentary that happens to mention other
+//      organs ("trachea midline", "not tender", "flushing well").
+//   3. Keywords match at a word boundary, so "\burin" cannot match "posturing"
+//      and "\bvoid" cannot match "avoid".
+//
+// Lines and devices (IV access, ETT, collars, catheters) are NOT body systems —
+// they get their own bucket so they stop polluting the exam.
+import { Brain, Heart, Wind, Droplets, Shield, Gauge, Eye, Search, Cable } from "lucide-react";
 
-export function guessSys(s) {
-  if (s && s.sys) return s.sys;
-  var l = ((s && s.label) + " " + ((s && s.finding) || "")).toLowerCase();
-  if (l.indexOf("neuro") >= 0 || l.indexOf("mental") >= 0 || l.indexOf("gcs") >= 0 || l.indexOf("glasgow") >= 0 || l.indexOf("pupil") >= 0 || l.indexOf("fontanelle") >= 0 || l.indexOf("conscious") >= 0 || l.indexOf("alert") >= 0 || l.indexOf("letharg") >= 0 || l.indexOf("responsive") >= 0 || l.indexOf("behavior") >= 0 || l.indexOf("irritable") >= 0 || l.indexOf("seiz") >= 0 || l.indexOf("gaze") >= 0 || l.indexOf("avpu") >= 0) return "Neuro";
-  if (l.indexOf("heart") >= 0 || l.indexOf("cardio") >= 0 || l.indexOf("pulse") >= 0 || l.indexOf("rhythm") >= 0 || l.indexOf("jvd") >= 0 || l.indexOf("jugular") >= 0 || l.indexOf("perfus") >= 0 || l.indexOf("cap refill") >= 0 || l.indexOf("capillary") >= 0 || l.indexOf("cool ext") >= 0 || l.indexOf("mottl") >= 0 || l.indexOf("murmur") >= 0) return "Cardiovascular";
-  if (l.indexOf("lung") >= 0 || l.indexOf("breath") >= 0 || l.indexOf("wheez") >= 0 || l.indexOf("retract") >= 0 || l.indexOf("stridor") >= 0 || l.indexOf("airway") >= 0 || l.indexOf("respir") >= 0 || l.indexOf("tripod") >= 0 || l.indexOf("trachea") >= 0 || l.indexOf("apne") >= 0 || l.indexOf("crackle") >= 0 || l.indexOf("grunt") >= 0 || l.indexOf("work of breathing") >= 0) return "Respiratory";
-  if (l.indexOf("abdomen") >= 0 || l.indexOf("bowel") >= 0 || l.indexOf("vomit") >= 0 || l.indexOf("mucous") >= 0 || l.indexOf("oral intake") >= 0 || l.indexOf("hydrat") >= 0 || l.indexOf("feed") >= 0 || l.indexOf("tender") >= 0) return "GI/Hydration";
-  if (l.indexOf("urin") >= 0 || l.indexOf("renal") >= 0 || l.indexOf("kidney") >= 0 || l.indexOf("diaper") >= 0 || l.indexOf("oligur") >= 0 || l.indexOf("void") >= 0) return "Renal";
-  if (l.indexOf("skin") >= 0 || l.indexOf("rash") >= 0 || l.indexOf("hive") >= 0 || l.indexOf("urticar") >= 0 || l.indexOf("flush") >= 0 || l.indexOf("cyan") >= 0 || l.indexOf("pale") >= 0 || l.indexOf("pallor") >= 0 || l.indexOf("diaphor") >= 0 || l.indexOf("petechia") >= 0 || l.indexOf("integument") >= 0 || l.indexOf("wound") >= 0 || l.indexOf("laceration") >= 0 || l.indexOf("dressing") >= 0 || l.indexOf("bruis") >= 0) return "Integumentary";
-  if (l.indexOf("deform") >= 0 || l.indexOf("fracture") >= 0 || l.indexOf("extremity") >= 0 || l.indexOf("limb") >= 0 || l.indexOf("splint") >= 0 || l.indexOf("range of motion") >= 0 || l.indexOf("swelling") >= 0 || l.indexOf("musculoskeletal") >= 0 || l.indexOf("posture") >= 0 || l.indexOf("motor") >= 0 || l.indexOf("forearm") >= 0 || l.indexOf("bone") >= 0) return "Musculoskeletal";
-  if (s && (s.pos === "head" || s.pos === "face")) return "HEENT";
-  if (l.indexOf("head") >= 0 || l.indexOf("face") >= 0 || l.indexOf("ear") >= 0 || l.indexOf("nose") >= 0 || l.indexOf("throat") >= 0 || l.indexOf("neck") >= 0 || l.indexOf("collar") >= 0) return "HEENT";
-  return "Other";
-}
+export var LINES = "Lines & devices";
+
+// Stable head-to-toe-ish ordering for however many systems a case surfaces.
+// Lines & devices sits near the end: real exam first, hardware after.
+export var SYSTEM_ORDER = [
+  "Neuro", "HEENT", "Respiratory", "Cardiovascular", "GI/Hydration",
+  "Renal", "Musculoskeletal", "Integumentary", LINES, "Other"
+];
 
 export var SYS_ICON = {
   "Neuro": Brain, "Cardiovascular": Heart, "Respiratory": Wind,
   "GI": Droplets, "GI/Hydration": Droplets, "Integumentary": Shield,
-  "Renal": Droplets, "Musculoskeletal": Gauge, "HEENT": Eye, "Other": Search
+  "Renal": Droplets, "Musculoskeletal": Gauge, "HEENT": Eye,
+  "Lines & devices": Cable, "Other": Search
 };
 
-// Stable head-to-toe-ish ordering for however many systems a case surfaces.
-export var SYSTEM_ORDER = ["Neuro", "HEENT", "Respiratory", "Cardiovascular", "GI/Hydration", "Renal", "Musculoskeletal", "Integumentary", "Other"];
+// Accept the spellings a generator might plausibly emit and fold them onto our
+// canonical labels. Anything unrecognised falls through to the heuristic.
+var SYS_ALIAS = {
+  "neuro": "Neuro", "neurologic": "Neuro", "neurological": "Neuro", "cns": "Neuro",
+  "heent": "HEENT", "head": "HEENT", "head and neck": "HEENT", "eent": "HEENT",
+  "resp": "Respiratory", "respiratory": "Respiratory", "pulmonary": "Respiratory",
+  "cardiac": "Cardiovascular", "cardio": "Cardiovascular", "cardiovascular": "Cardiovascular",
+  "circulation": "Cardiovascular",
+  "gi": "GI/Hydration", "gi/hydration": "GI/Hydration", "gastrointestinal": "GI/Hydration",
+  "abdomen": "GI/Hydration", "abdominal": "GI/Hydration", "hydration": "GI/Hydration",
+  "renal": "Renal", "gu": "Renal", "genitourinary": "Renal", "kidney": "Renal",
+  "msk": "Musculoskeletal", "musculoskeletal": "Musculoskeletal", "ortho": "Musculoskeletal",
+  "extremities": "Musculoskeletal",
+  "skin": "Integumentary", "integumentary": "Integumentary", "derm": "Integumentary",
+  "lines": LINES, "lines & devices": LINES, "lines and devices": LINES,
+  "devices": LINES, "access": LINES, "tubes": LINES, "monitoring": LINES,
+  "other": "Other", "general": "Other"
+};
+
+function normalizeSys(raw) {
+  if (!raw || typeof raw !== "string") return null;
+  var k = raw.trim().toLowerCase();
+  if (SYS_ALIAS[k]) return SYS_ALIAS[k];
+  for (var i = 0; i < SYSTEM_ORDER.length; i++) {
+    if (SYSTEM_ORDER[i].toLowerCase() === k) return SYSTEM_ORDER[i];
+  }
+  return null;
+}
+
+// Ordered rules. First match wins, so the most specific / most commonly
+// mis-attributed categories come first. Each entry is a word-start prefix.
+var RULES = [
+  [LINES, ["iv access", "iv site", "peripheral iv", "central line", "central venous",
+    "picc", "port-a-cath", "intraosseous", "io access", "io site", "arterial line",
+    "a-line", "ett", "endotracheal tube", "tracheostomy", "trach tube",
+    "c-collar", "cervical collar", "collar", "foley", "urinary catheter", "catheter",
+    "ng tube", "og tube", "gastric tube", "chest tube", "thoracostomy", "drain",
+    "pacer pad", "pacing pad", "defib pad", "vasoactive infusion", "infusion",
+    "ventilator", "vent setting", "cannula", "tubing"]],
+
+  // Neuro owns the whole neurological exam, INCLUDING motor and posturing.
+  // Those used to leak to Musculoskeletal and Renal respectively.
+  ["Neuro", ["neuro", "mental status", "mentation", "gcs", "glasgow", "avpu",
+    "conscious", "consciousness", "unrespons", "responsive", "letharg", "obtund",
+    "somnolen", "stupor", "coma", "alert", "orient", "confus", "agitat", "irritab",
+    "seiz", "convuls", "postur", "decerebrat", "decorticat", "motor response",
+    "motor exam", "motor", "sensory", "reflex", "babinski", "clonus", "tone",
+    "fontanelle", "gaze", "nystagmus", "cranial nerve", "focal deficit",
+    "pupil", "anisocor", "papilledema"]],
+
+  ["HEENT", ["heent", "scalp", "skull", "head exam", "head injury", "cranium",
+    "battle sign", "raccoon", "otorrhea", "rhinorrhea", "face", "facial", "ear",
+    "tympan", "nose", "nasal", "throat", "pharyn", "tonsil", "oropharyn",
+    "mucous membrane", "oral mucosa", "lip", "tongue", "dentition", "neck stiff",
+    "nuchal", "meningism"]],
+
+  ["Respiratory", ["resp", "lung", "breath", "wheez", "retract", "stridor",
+    "airway", "tripod", "trachea", "apne", "crackle", "rale", "rhonchi", "grunt",
+    "work of breathing", "accessory muscle", "nasal flar", "chest ris",
+    "air entry", "etco2", "capnograph", "oxygenation", "cough", "sputum"]],
+
+  ["Cardiovascular", ["cardi", "heart", "pulse", "rhythm", "murmur", "gallop",
+    "jvd", "jugular", "neck vein", "perfus", "cap refill", "capillary refill",
+    "mottl", "cool extremit", "cold extremit", "precordi", "apical", "thrill",
+    "edema", "peripheral pulse", "central pulse", "blood pressure", "hypotens",
+    "hypertens", "brady", "tachycard"]],
+
+  ["GI/Hydration", ["abdom", "bowel", "peritone", "guard", "rebound", "vomit",
+    "emesis", "diarrhea", "stool", "hepat", "splenomeg", "liver edge", "ascites",
+    "hydrat", "oral intake", "feed", "npo", "distend"]],
+
+  ["Renal", ["renal", "urin", "kidney", "diaper", "oligur", "anur", "void",
+    "bladder", "flank", "genital"]],
+
+  ["Musculoskeletal", ["musculoskeletal", "deform", "fractur", "dislocat",
+    "splint", "traction", "range of motion", "swelling", "joint", "bone",
+    "limb", "extremity", "extremities", "forearm", "femur", "tibia", "pelvi",
+    "c-spine", "cervical spine", "spine", "midline tender", "step-off"]],
+
+  ["Integumentary", ["skin", "integument", "rash", "hive", "urticar", "flush",
+    "cyan", "pale", "pallor", "diaphor", "petechia", "purpur", "ecchymos",
+    "bruis", "wound", "laceration", "abrasion", "road rash", "burn", "blister",
+    "turgor", "capillary bed"]]
+];
+
+function esc(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+var COMPILED = RULES.map(function (rule) {
+  return [rule[0], new RegExp("\\b(?:" + rule[1].map(esc).join("|") + ")", "i")];
+});
+
+function matchRules(text) {
+  if (!text) return null;
+  for (var i = 0; i < COMPILED.length; i++) {
+    if (COMPILED[i][1].test(text)) return COMPILED[i][0];
+  }
+  return null;
+}
+
+// guessSys(sign) -> a real system label.
+// Priority: explicit sys > label match > position hint > finding-prose match.
+export function guessSys(s) {
+  if (!s) return "Other";
+  var explicit = normalizeSys(s.sys);
+  if (explicit) return explicit;
+
+  // The label is the subject of the finding — match it first.
+  var byLabel = matchRules(s.label);
+  if (byLabel) return byLabel;
+
+  // A structured position beats loose prose.
+  var pos = (s.pos || "").toLowerCase();
+  if (pos) {
+    if (/\b(head|face|scalp|skull|ear|nose|throat|mouth)/.test(pos)) return "HEENT";
+    if (/\b(precordi|chest wall|apical)/.test(pos)) return "Cardiovascular";
+    if (/\b(abdomen|abdominal|flank)/.test(pos)) return "GI/Hydration";
+    var byPos = matchRules(pos);
+    if (byPos) return byPos;
+  }
+
+  // Last resort: the prose. This is where incidental words live, so it only
+  // runs when the label and position told us nothing.
+  var byFinding = matchRules(s.finding);
+  if (byFinding) return byFinding;
+
+  return "Other";
+}
+
+// True for hardware/access items, which are shown apart from the body-system
+// exam rather than filed under an organ system.
+export function isLineOrDevice(s) { return guessSys(s) === LINES; }
 
 export function orderSystems(keys) {
   return keys.slice().sort(function (a, b) {

@@ -100,7 +100,13 @@ function buildOrchestratorBase(){
     "}\n\n"+
     "patientCard notes:\n"+
     "- weightKg is a JSON number, not a string. Emit 20, not \"20\" and not \"20 kg\".\n"+
-    "- cc is one short phrase, not a sentence. It surfaces in deep-dive context where space is tight. \"septic shock from pneumonia\" is right; \"The patient is a 6-year-old presenting with septic shock secondary to community-acquired pneumonia.\" is wrong.\n\n"+
+    "- cc is one short phrase, not a sentence. It surfaces in deep-dive context where space is tight. \"septic shock from pneumonia\" is right; \"The patient is a 6-year-old presenting with septic shock secondary to community-acquired pneumonia.\" is wrong.\n"+
+    "- NAME RULES (play-testing found a male patient named Priya, and the same first name reused across unrelated cases):\n"+
+    "  * Use a common traditional Western given name plus a common Western surname. \"Emily Carter\" and \"Daniel Brooks\" show the FORM only — do not reuse these two, pick your own.\n"+
+    "  * The given name MUST read unambiguously as the sex you emit in the sex field. Do not pair a feminine given name with sex \"M\" or vice versa. If you are unsure how a name reads, pick a plainer one.\n"+
+    "  * Vary the name every time. Pick it freshly and at random — do not reach for the same handful of names (Priya, Aisha, Mateo, Liam, Emma) case after case. Vary the first letter, the length, and the era of the name.\n"+
+    "  * Do NOT encode anything clinical in the name. The name must not hint at the diagnosis.\n"+
+    "  * If the user's prompt specifies a sex, an age, or a name, honour it exactly and let that override the randomization. If the prompt says nothing about sex or age, choose both freely — do not default to one sex or to school age.\n\n"+
     "Patient avatar visuals. The top-level \"visuals\" array holds zero or more keyword strings that drive accessories on the patient avatar (the cartoon figure on the intro and assessment screens). The renderer matches these EXACT keywords (case-insensitive substring), so use the wording below verbatim — a novel phrasing renders nothing. Emit only what is visibly true of the patient AT PRESENTATION, and emit an empty array [] when nothing applies (most metabolic, toxicologic, and undifferentiated-shock cases have no visible accessory — that is correct, not a gap).\n\n"+
     "Recognized keywords (use these exact strings):\n"+
     "- \"cast left arm\", \"cast right arm\", \"cast leg\" — a visible cast on that limb (fracture).\n"+
@@ -158,6 +164,7 @@ function buildOrchestratorBase(){
     "  \"id\": \"<short-id>\",\n"+
     "  \"label\": \"<short title shown on the card, e.g. 'Cap Refill', 'Mental Status', 'Breath Sounds'>\",\n"+
     "  \"finding\": \"<bedside-clinician prose describing what's observed, 1-2 sentences>\",\n"+
+    "  \"sys\": \"<REQUIRED body system this finding belongs to — see the list below>\",\n"+
     "  \"pos\": \"<anatomic location or laterality if relevant, e.g. 'right base', 'extremities', 'all four limbs'>\",\n"+
     "  \"bad\": true | false,\n"+
     "  \"cat\": \"clinical\",\n"+
@@ -165,12 +172,22 @@ function buildOrchestratorBase(){
     "  \"why\": null\n"+
     "}\n\n"+
     "Signs are narrative observations — what a bedside clinician would dictate. The finding field holds prose like \"Mottled extremities with cap refill 5 seconds at the fingertip; lower extremities cooler than upper.\" Not value/unit — those imply a numeric measurement, which signs aren't. The pos field is the body location/laterality when it adds clinical signal; omit pos entirely when the location is implicit in the finding text or when the finding describes a whole-patient state (e.g., mental status).\n\n"+
+    "The sys field is REQUIRED on every sign and groups the exam for the learner. Use EXACTLY one of these strings:\n"+
+    "  \"Neuro\" | \"HEENT\" | \"Respiratory\" | \"Cardiovascular\" | \"GI/Hydration\" | \"Renal\" | \"Musculoskeletal\" | \"Integumentary\" | \"Lines & devices\"\n"+
+    "Rules for choosing sys — these come from real mis-groupings found in play-testing:\n"+
+    "- The WHOLE neurological exam is \"Neuro\": mental status, GCS and each of its components, pupils, motor response, posturing, tone, reflexes, focal deficits. Motor response and posturing are Neuro, never Musculoskeletal.\n"+
+    "- Scalp and skull findings (hematoma, step-off, Battle sign, raccoon eyes) are \"HEENT\", never GI — even when the prose says the area is tender.\n"+
+    "- JVD / distended neck veins / hepatomegaly from congestion are \"Cardiovascular\", even when the prose also mentions the trachea or the liver edge.\n"+
+    "- \"Lines & devices\" is for hardware and access, NOT a body system: IV/IO sites, central and arterial lines, ETT, tracheostomy, cervical collar, urinary catheter, gastric tubes, chest tubes, drains, running infusions, ventilator settings. Anything a clinician placed on or in the patient goes here so it does not pollute the organ-system exam.\n"+
+    "- Musculoskeletal is for bone and joint: deformity, fracture, dislocation, swelling, range of motion, spine assessment.\n"+
+    "Pick sys from what the finding IS ABOUT, not from an incidental word in the prose.\n\n"+
     "The why field MUST be present and MUST be the literal null on every sign entry. Same rule as vitals — omission breaks the downstream worker.\n\n"+
     "Two worked sign examples:\n"+
     "{\n"+
     "  \"id\": \"capRefill\",\n"+
     "  \"label\": \"Cap Refill\",\n"+
     "  \"finding\": \"5 seconds at the fingertip, slightly faster at the chest\",\n"+
+    "  \"sys\": \"Cardiovascular\",\n"+
     "  \"pos\": \"extremities\",\n"+
     "  \"bad\": true,\n"+
     "  \"cat\": \"clinical\",\n"+
@@ -180,13 +197,15 @@ function buildOrchestratorBase(){
     "{\n"+
     "  \"id\": \"mentalStatus\",\n"+
     "  \"label\": \"Mental Status\",\n"+
-    "  \"finding\": \"Opens eyes to voice, no spontaneous speech, does not follow commands, withdraws to noxious\",\n"+
+    "  \"finding\": \"Opens eyes to voice, no spontaneous speech, does not follow commands, withdraws to noxious. GCS 9 (E3 V2 M4).\",\n"+
+    "  \"sys\": \"Neuro\",\n"+
     "  \"bad\": true,\n"+
     "  \"cat\": \"clinical\",\n"+
     "  \"_slotRef\": \"phase[0].signs.mentalStatus.why\",\n"+
     "  \"why\": null\n"+
     "}\n\n"+
-    "Note: the mentalStatus example omits pos because the finding describes whole-patient state, not a body region. Don't write pos: \"\" or pos: null — just leave the key out.\n\n"+
+    "Note: the mentalStatus example omits pos because the finding describes whole-patient state, not a body region. Don't write pos: \"\" or pos: null — just leave the key out. Both examples carry sys, which is never optional.\n\n"+
+    "GCS CONSISTENCY. When a finding reports a GCS, write the components in the prose and make the arithmetic agree: \"GCS 9 (E3 V2 M4)\" means eyes-to-voice, incomprehensible sounds, withdraws-to-pain. If your prose says the child LOCALIZES, that is M5 and the total must reflect it. Play-testing caught a case whose prose said \"localizes to sternal rub\" while the numbers said M4 — the learner sees both and the contradiction is obvious. Spell the components with spaces, \"E3 V2 M4\", not \"E3V2M4\".\n\n"+
     "Slot-shaped lab item (note: uses 'name' not 'label', and adds 'ref' and 'critical'):\n"+
     "{\n"+
     "  \"id\": \"<short-id>\",\n"+
@@ -215,6 +234,17 @@ function buildOrchestratorBase(){
     "  \"fb\": null\n"+
     "}\n\n"+
     "The fb field MUST be present and MUST be the literal null on every tool and med entry. Omitting the field is a bug — the downstream worker model finds slots by checking for fb === null. A missing field is not the same as null and will be skipped.\n\n"+
+    "ACTION LABEL RULES. The label is the button the learner taps, and it is now displayed verbatim in place of the registry default — so a wrong label is a wrong instruction, not a cosmetic slip. Play-testing found two real failures:\n"+
+    "- A cardiogenic-shock case authored a 5 mL/kg cautious fluid challenge in its fb but the tile read \"20 mL/kg\". Put the SAME dose in the label and the fb. If the label carries a dose, it must be the dose you actually intend, weight-calculated for this patient.\n"+
+    "- A pulseless-VT case put \"Deliver synchronized cardioversion\" on the defib id while its own fb correctly said to DEFIBRILLATE, unsynchronized. The label must name the same intervention as the id and must agree with its own fb. Never describe a different procedure than the one you are grading.\n"+
+    "Keep labels short imperatives under 80 characters, with no markdown. Include the weight-based dose when there is one: \"Give 3% saline 3 mL/kg IV (66 mL)\".\n\n"+
+    "ACTION ID RULES. Prefer ids from the registry you were given. If you need something that is not in it, use \"customTool\" / \"customMed\" and put the real name in the label — do NOT invent a plausible-looking id like \"callNeurosurgery\" or \"furosemide\" and hope it exists, and do NOT put a procedure id (bloodCultures, urinalysis) in the meds list. Procedures are tools; drugs are meds.\n\n"+
+    "DECISION DENSITY. Every intervention phase needs real choices to make, in BOTH lists:\n"+
+    "- At least 2 of the tools and at least 2 of the meds must be distractors (priority \"distractor-*\"). A phase where every tool is correct teaches nothing — the learner just selects everything. Play-testing hit a TBI phase with nine tools and zero distractors.\n"+
+    "- Distractors must be TEMPTING and clinically reasoned: the intervention a competent trainee might genuinely reach for and that this specific physiology argues against (adenosine for the sinus tachycardia of a failing heart; a 20 mL/kg bolus in raised ICP; mannitol when hypotension is the greater risk). Do not pad the list with absurd options nobody would pick — a lumbar puncture in cardiogenic shock is not a distractor, it is noise.\n"+
+    "- Limit purely procedural setup steps (connect the monitor, place an IV, call for help) to at most 2 per phase, and never make one the top priority. They are not decisions. Spend the slots on things that change the physiology.\n"+
+    "- When a setup step was already completed in an earlier round, mark it a distractor in the later round rather than listing it as correct again.\n\n"+
+    "ARREST ACTIONS. Any phase or curveball where the patient has no pulse MUST offer \"cprCompressions\" (chest compressions) as a correct action, and the shock decision must be honest: defibrillation for VF and pulseless VT only; for asystole and PEA the correct move is compressions and epinephrine, with the defibrillator used to confirm a non-shockable rhythm.\n\n"+
     "Reassessment shape:\n"+
     "{\n"+
     "  \"narrative\": \"<3-5 sentence post-intervention narrative in your voice>\",\n"+
@@ -522,7 +552,7 @@ export function buildRound2Prompt(){
     "r2-role");
   s = _promptSwap(s,
     "The phases array is exactly 2 entries for v1: phase[0].stageType = \"assess\", phase[1].stageType = \"intervene\". Do not add additional phases.",
-    "Emit exactly the two Round 2 phases: phaseIndex 2 (round 2, stageType \"assess\") then phaseIndex 3 (round 2, stageType \"intervene\"). Add a \"round\": 2 field to each. Do not re-emit the Round 1 phases.\n\nRound 2 deterioration arc. The round-2 assess phase (phaseIndex 2) shows the SAME patient's evolved state a short time after Round 1 — a continuous, physiologically plausible progression, not a dramatic reinvention. Anchor every Round 2 value to its Round 1 counterpart (given in the user message) and move it along the trajectory the pathology dictates, accounting for the interventions that were AVAILABLE in Round 1. Reuse the SAME finding ids across rounds where a finding persists (HR stays id \"hr\", lactate stays id \"lactate\") so it reads as one patient over time; the values change, the identity does not. The round-2 narrative MUST reference the Round 1 interventions and the time elapsed. The round-2 intervene phase (phaseIndex 3) is the escalation the evolved state now demands. Round 2 interventions are the NEXT tier of care, not a re-run of the Round 1 menu: do NOT re-offer one-time setup actions that were already available in Round 1 (the cardiac monitor, the first IV/IO line, initial oxygen or airway positioning) unless the evolved state genuinely calls for a NEW instance — a second large-bore line for blood products, an airway upgrade. A medication that was available in Round 1 may reappear only as an explicit RE-DOSE once its dosing interval has elapsed; label it as a re-dose in the fb and state the interval. Any action that was a distractor in Round 1 but is correct now (for example, preparing for intubation as the airway starts to fail) MUST carry fb that names the specific change since Round 1 that flipped it from premature to indicated. Apply the continuity and brief-completeness rules — anything Round 2 feedback assumes was observed must be stated in the round-2 narrative.",
+    "Emit exactly the two Round 2 phases: phaseIndex 2 (round 2, stageType \"assess\") then phaseIndex 3 (round 2, stageType \"intervene\"). Add a \"round\": 2 field to each. Do not re-emit the Round 1 phases.\n\nRound 2 deterioration arc. The round-2 assess phase (phaseIndex 2) shows the SAME patient's evolved state a short time after Round 1 — a continuous, physiologically plausible progression, not a dramatic reinvention. Anchor every Round 2 value to its Round 1 counterpart (given in the user message) and move it along the trajectory the pathology dictates, accounting for the interventions that were AVAILABLE in Round 1. Reuse the SAME finding ids across rounds where a finding persists (HR stays id \"hr\", lactate stays id \"lactate\") so it reads as one patient over time; the values change, the identity does not. The round-2 narrative MUST reference the Round 1 interventions and the time elapsed. The round-2 intervene phase (phaseIndex 3) is the escalation the evolved state now demands. Round 2 interventions are the NEXT tier of care, not a re-run of the Round 1 menu: do NOT re-offer one-time setup actions that were already available in Round 1 (the cardiac monitor, the first IV/IO line, initial oxygen or airway positioning) unless the evolved state genuinely calls for a NEW instance — a second large-bore line for blood products, an airway upgrade. A medication that was available in Round 1 may reappear only as an explicit RE-DOSE once its dosing interval has elapsed; label it as a re-dose in the fb and state the interval. Any action that was a distractor in Round 1 but is correct now (for example, preparing for intubation as the airway starts to fail) MUST carry fb that names the specific change since Round 1 that flipped it from premature to indicated. Apply the continuity and brief-completeness rules — anything Round 2 feedback assumes was observed must be stated in the round-2 narrative.\n\nCRITICAL — YOU DO NOT KNOW WHAT THE LEARNER CHOSE. Round 2 is generated in the background while Round 1 is still being played, so you know only which interventions were OFFERED, never which were selected. Therefore the round-2 narrative must NEVER assert that a specific optional intervention was performed. Play-testing caught narratives stating \"20 minutes since RSI, the tube is in, on the ventilator now\" and \"the head CT just came back\" for a learner who had done neither — which silently erased the consequence of omitting an airway. Instead:\n- Attribute the change to TIME and PATHOLOGY, which are always true: \"Twenty minutes on, the picture has hardened.\"\n- When you must reference an optional action, hedge it explicitly and briefly: \"If you started an inotrope, it is running now; if you did not, this is what that costs.\" or \"The echo, if you obtained it, shows...\"\n- Interventions that are FORCED by the case (already in place at handoff, e.g. an EMS line or oxygen the presentation states) may be asserted freely — those are facts, not choices.\n- Never reference an action that was not offered in the Round 1 menu at all.\nThe consequence of an omission is the learner's to discover; do not perform it for them.",
     "r2-phasecount");
   s = _promptSwap(s,
     "Phase 0 emits no actions. The assess phase (stageType: \"assess\", id: \"assess\")",

@@ -38,6 +38,8 @@ var initialState = {
   //   round2ErrorClass — "service" (no futile retry) | "malformed" (retry ok).
   insightCards: [],
   coachSeen: {},
+  // How many overlays are currently open (see pushModal/popModal).
+  modalOpen: 0,
   hypotheses: {},
   examined: {},
   round2ErrorClass: null,
@@ -215,6 +217,14 @@ export var usePlayerStore = create(function(set, get) {
     dismissCoach: function(key) {
       set(function(s) { var n = Object.assign({}, s.coachSeen); n[key] = true; return { coachSeen: n }; });
     },
+    // Owner direction 2026-07-29: the floating tray coach mark competed with
+    // whatever dialog was open — it showed through the 50%-opacity backdrop at
+    // the bottom-right of an open examine or option card and "got in the way".
+    // Every overlay registers itself here so ambient coach marks can stand
+    // down while a dialog has the learner's attention. A counter, not a
+    // boolean, so nested overlays (option card -> why modal) unwind correctly.
+    pushModal: function() { set(function(s) { return { modalOpen: (s.modalOpen || 0) + 1 }; }); },
+    popModal: function() { set(function(s) { return { modalOpen: Math.max(0, (s.modalOpen || 0) - 1) }; }); },
     setHypothesis: function(phaseIdx, id) {
       set(function(s) { var n = Object.assign({}, s.hypotheses); n[phaseIdx] = id; return { hypotheses: n }; });
     },

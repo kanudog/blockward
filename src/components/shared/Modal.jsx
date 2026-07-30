@@ -9,10 +9,14 @@
 //     supplied it colors the title; otherwise the title takes the neutral
 //     ink so the enhanced surface reads clean.
 import { useTokens } from "../theme/themeStore.js";
+import { useModalGuard } from "./useModalGuard.js";
 
 export function Modal(props) {
   var t = useTokens();
-  var open = props.open; if (!open) return null;
+  var open = props.open;
+  // Called before the early return so the hook order stays stable.
+  useModalGuard(open);
+  if (!open) return null;
   var title = props.title; var onClose = props.onClose;
   var kicker = props.kicker;
   var accent = props.accent;

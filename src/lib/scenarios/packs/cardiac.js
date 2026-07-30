@@ -19,5 +19,12 @@ export const MEDS = [
   { id: "lidocaine",        label: "Give Lidocaine IV",                pack: "cardiac" },
   { id: "calciumGluconate", label: "Give Calcium Gluconate IV",        pack: "cardiac" },
   { id: "sodiumBicarb",     label: "Give Sodium Bicarbonate IV",       pack: "cardiac" },
-  { id: "calciumChloride",  label: "Give Calcium Chloride IV",         pack: "cardiac" }
+  { id: "calciumChloride",  label: "Give Calcium Chloride IV",         pack: "cardiac" },
+  // Play-test 2026-07-29: there was NO diuretic anywhere in the registry, so
+  // heart-failure cases could not offer the one drug every learner expects.
+  // The generator asked for `furosemide` and it was silently dropped.
+  { id: "furosemide",       label: "Give Furosemide IV",               pack: "cardiac" },
+  { id: "milrinone",        label: "Start Milrinone Infusion",         pack: "cardiac" },
+  { id: "dobutamine",       label: "Start Dobutamine Infusion",        pack: "cardiac" },
+  { id: "norepinephrine",   label: "Start Norepinephrine Infusion",    pack: "cardiac" }
 ];

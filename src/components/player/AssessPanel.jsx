@@ -83,9 +83,22 @@ export function AssessPanel(props){
   // Round-2 "what changed" value diff (preserved real feature). Vitals match by
   // monitor key; labs by id/name. Numeric movers get a direction arrow.
   function _numCh(x){var n=parseFloat(x);return isNaN(n)?null:n;}
+  // Play-test fix 2026-07-29: generated phases store `vitals` as an ARRAY of
+  // {id,value,...}, but this function indexed it like an object (pv[m.key]), so
+  // every lookup was undefined and EVERY vital was skipped — the round-2
+  // "what's changed" strip showed labs only. In a TBI case that hid a widening
+  // pulse pressure (158/68 -> 168/58), the single most important trend on the
+  // screen. Normalize array or object into a plain key->value map first.
+  function normalizeVitals(v){
+    if(!v)return {};
+    if(!Array.isArray(v))return v;
+    var o={};
+    v.forEach(function(entry){ if(entry&&entry.id!==undefined)o[entry.id]=entry.value!==undefined?entry.value:entry; });
+    return o;
+  }
   function computeRoundChanges(prevPhase){
     if(!prevPhase)return [];
-    var out=[];var pv=prevPhase.vitals||{};
+    var out=[];var pv=normalizeVitals(prevPhase.vitals);
     monitorTiles(vit).forEach(function(m){
       var prevRaw=pv[m.key];
       if(prevRaw===undefined&&m.key==="sbp"&&pv.bp!==undefined)prevRaw=pv.bp;
@@ -151,7 +164,10 @@ export function AssessPanel(props){
       </div>
     </div>
     {hintRow()}
-    <Section title="Character" task="Tap a body system to look closer." open={secOpen("char")} onToggle={function(){toggleSec("char");}}>
+    {/* Owner direction 2026-07-29: findings are exploration, not a hunt. The
+        monitor and the labs are where the learner commits to a judgement; the
+        exam is where they build the picture. The copy now says so. */}
+    <Section title="Exam" task="Read the findings — nothing here is graded." open={secOpen("char")} onToggle={function(){toggleSec("char");}}>
       <FocusedExam signs={curSigns} phaseIdx={phaseIdx} sc={sc}
         cycleRate={parseFloat(vVal(vit.rr))||22} responseSec={parseFloat(vVal(vit.cap))||1.5}/>
     </Section>

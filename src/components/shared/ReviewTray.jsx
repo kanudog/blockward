@@ -20,6 +20,7 @@ export function ReviewTray() {
   var sc = usePlayerStore(function (s) { return s.activeScenario; });
   var coachSeen = usePlayerStore(function (s) { return s.coachSeen; });
   var dismissCoach = usePlayerStore(function (s) { return s.dismissCoach; });
+  var modalOpen = usePlayerStore(function (s) { return s.modalOpen; });
   var count = marked.length + insights.length;
   if (count === 0 && !open) return null;
   var pill = (<button className="bw-tap" onClick={function () { setOpen(!open); }}
@@ -28,7 +29,9 @@ export function ReviewTray() {
     {"Tray · " + count}
   </button>);
   // First-time introduction, anchored above the pill the moment it appears.
-  var trayCoach = (!open && !coachSeen.tray)
+  // Held back while any dialog is open (modalOpen>0): it used to show through
+  // the backdrop of an open examine/option card and cover the teaching text.
+  var trayCoach = (!open && !coachSeen.tray && !modalOpen)
     ? (<div style={{ position: "fixed", right: 14, bottom: 64, zIndex: 900, maxWidth: 270 }}>
         <CoachBubble tail="bottom-right" title="This is your tray"
           body={"Anything you **mark for review** and every insight card you collect lands here automatically, and follows you to the debrief.\n\nA keepsake shelf — nothing in it is graded."}

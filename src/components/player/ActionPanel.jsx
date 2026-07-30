@@ -217,6 +217,9 @@ export function ActionPanel(props){
     // Play-test fix: the red "not indicated" warning used to live only inside
     // the popup, so closing the card lost the signal and the grid tile looked
     // identical to a correct pick. The tile now carries it too.
+    // The tile chip reads "Not indicated" while the popup's confirm button reads
+    // "In plan — tap to remove". Deliberately different wording: when both said
+    // "reconsider" the two controls were indistinguishable from each other.
     var notIndicated=inPlan&&!!(entry&&entry.ok===false);
     var st=Object.assign({},t.tile(inPlan?"flagged":"idle"),{position:"relative",display:"flex",flexDirection:"column",alignItems:"center",gap:6,minHeight:78,cursor:"pointer",fontFamily:t.FONT.body});
     if(notIndicated)st=Object.assign({},st,{background:"rgba("+t.CRIT_RGB+",0.10)",border:"1.5px solid rgba("+t.CRIT_RGB+",0.55)"});
@@ -226,7 +229,7 @@ export function ActionPanel(props){
         :<div style={{width:26,height:32,borderRadius:6,display:"flex",alignItems:"center",justifyContent:"center",background:medColor(id)}}><MedIcon type={lookupMedType(id)} size={18} color="#FFFFFF"/></div>}
       <span style={{fontSize:11,color:t.COLOR.ink,fontWeight:700,textAlign:"center",lineHeight:1.2}}>{m.label}</span>
       {notIndicated
-        ?<span style={{position:"absolute",top:5,right:5,display:"inline-flex",alignItems:"center",gap:3,fontSize:8.5,fontWeight:800,padding:"2px 7px",borderRadius:999,background:"rgba("+t.CRIT_RGB+",0.18)",border:"1px solid rgba("+t.CRIT_RGB+",0.5)",color:t.COLOR.critical}}><AlertTriangle size={9}/>Reconsider</span>
+        ?<span style={{position:"absolute",top:5,right:5,display:"inline-flex",alignItems:"center",gap:3,fontSize:8.5,fontWeight:800,padding:"2px 7px",borderRadius:999,background:"rgba("+t.CRIT_RGB+",0.18)",border:"1px solid rgba("+t.CRIT_RGB+",0.5)",color:t.COLOR.critical}}><AlertTriangle size={9}/>Not indicated</span>
         :inPlan&&<span style={Object.assign({},t.chip("accent"),{position:"absolute",top:5,right:5,fontSize:8.5,padding:"2px 7px"})}>In plan</span>}
       {!inPlan&&wasOpened&&<span style={{position:"absolute",top:7,right:7,width:6,height:6,borderRadius:3,background:t.COLOR.ink3,opacity:0.6}}/>}
     </button>);
@@ -237,7 +240,9 @@ export function ActionPanel(props){
       <style>{"@keyframes popIn{from{opacity:0;transform:scale(.92) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}@keyframes lazyPulse{0%,100%{opacity:.4}50%{opacity:1}}@media(min-width:768px){.bw-action-grid{grid-template-columns:repeat(3,1fr) !important}}@media(min-width:1024px){.bw-action-grid{grid-template-columns:repeat(4,1fr) !important}}"}</style>
       {/* First-run explainer, shown ONCE per run above the grid where it has
           room, instead of on top of an open card's teaching text. */}
-      {!coachSeen.options&&!optHelp&&<div style={{marginBottom:12}}>
+      {/* Sequenced behind the "How plans work" coach that ScenarioPlayer shows
+          on the same screen — two mentor cards stacked at once is noise. */}
+      {!coachSeen.options&&!optHelp&&coachSeen.plan&&<div style={{marginBottom:12}}>
         <CoachBubble title="Two different saves"
           body={"**Add to plan** — the steps you'd actually take now. Only these get answered by the readings when you commit. They do NOT go to your tray.\n\n**Mark for review** — a bookmark for later. It goes to your tray and returns in the debrief with a deeper read. It never affects the plan."}
           dismissLabel="Got it"
@@ -298,7 +303,7 @@ export function ActionPanel(props){
                 if(popNotIndicated)addStyle={flex:1,padding:"11px 0",borderRadius:10,fontWeight:700,fontSize:12.5,cursor:"pointer",fontFamily:t.FONT.body,background:"rgba("+t.CRIT_RGB+",0.16)",border:"1.5px solid rgba("+t.CRIT_RGB+",0.6)",color:t.COLOR.critical};
                 else if(popInPlan)addStyle={flex:1,padding:"11px 0",borderRadius:10,fontWeight:700,fontSize:12.5,cursor:"pointer",fontFamily:t.FONT.body,background:"rgba("+t.ACCENT_RGB+",0.14)",border:"1.5px solid rgba("+t.ACCENT_RGB+",0.6)",color:t.COLOR.boldTerm};
                 else addStyle=Object.assign({},t.cta("primary"),{flex:1,width:"auto",padding:"11px 0",fontSize:12.5,borderRadius:10});
-                return(<button onClick={function(){togglePlan(pop.id,pop.ty);}} style={addStyle}>{popNotIndicated?"✓ In plan — reconsider":popInPlan?"✓ In plan":"Add to plan"}</button>);
+                return(<button onClick={function(){togglePlan(pop.id,pop.ty);}} style={addStyle}>{popNotIndicated?"In plan — tap to remove":popInPlan?"✓ In plan":"Add to plan"}</button>);
               })()}
               <button disabled={popLoading} onClick={function(){
                 if(popLoading)return;

@@ -50,6 +50,23 @@ function actionIds(actions){
 // Insight cards auto-fill from the case's own teaching (owner decision
 // 2026-07-10): one keeper per intervene phase, built from that phase's top
 // tied-correct action + its rationale (fb). No new content is generated.
+// Authored label wins over the pack default everywhere the player sees an
+// action name — the same rule ActionPanel applies to the tiles. Added
+// 2026-07-29: the round recap and the insight cards still read the registry, so
+// a case that authored "NS bolus 5 mL/kg" was recapped as "Bolus NS 20 mL/kg IV".
+// Falls back to the pack label, then the other pack (procedures sometimes land
+// in the meds list), then the raw id.
+//
+// Must stay at MODULE scope — it is called from several components in this file.
+function actionLabel(kind, id, entry) {
+  var authored = entry && typeof entry.label === "string" ? entry.label.replace(/[*_`]/g, "").replace(/\s+/g, " ").trim() : "";
+  if (authored) return authored;
+  var reg = kind === "tools" ? ALL_TOOLS[id] : ALL_MEDS[id];
+  if (reg) return reg.label;
+  var cross = kind === "tools" ? ALL_MEDS[id] : ALL_TOOLS[id];
+  return cross ? cross.label : id;
+}
+
 function phaseInsight(ph){
   if(!ph||!ph.actions)return null;
   var found=null;
@@ -60,7 +77,7 @@ function phaseInsight(ph){
       if(found)return;
       var e=coll[id];
       if(e&&e.priority==="tied-correct"){
-        var label=kind==="tools"?(isCustomTool(id)?(e.label||id):(ALL_TOOLS[id]?ALL_TOOLS[id].label:id)):(isCustomMed(id)?(e.label||id):(ALL_MEDS[id]?ALL_MEDS[id].label:id));
+        var label=actionLabel(kind,id,e);
         var body=e.fb?e.fb.split(".").slice(0,2).join(".").trim()+".":"A key step that made the difference in this case.";
         found={id:"insight:"+(ph.id||ph.phaseIndex||"p")+":"+id,title:label,body:body};
       }
@@ -138,7 +155,7 @@ export function ScenarioPlayer(props){
         var e=coll[id];
         if(e&&e.priority==="tied-correct"){
           if(_seenMustHave[id])return;_seenMustHave[id]=true;
-          var label=kind==="tools"?(isCustomTool(id)?(e.label||id):(ALL_TOOLS[id]?ALL_TOOLS[id].label:id)):(isCustomMed(id)?(e.label||id):(ALL_MEDS[id]?ALL_MEDS[id].label:id));
+          var label=actionLabel(kind,id,e);
           correctActions.push({name:label,toolId:kind==="tools"?id:null,medType:kind==="meds"?lookupMedType(id):null,fb:e.fb?e.fb.split(".")[0]+".":"",pri:e.pri,type:kind==="tools"?"tool":"med",userSelected:!!sel[id],round:phx.round||1});
         }
       });
@@ -151,7 +168,7 @@ export function ScenarioPlayer(props){
       Object.keys(cbColl).forEach(function(id){
         var ce=cbColl[id];
         if(ce&&ce.priority==="tied-correct"){
-          var clabel=kind==="tools"?(isCustomTool(id)?(ce.label||id):(ALL_TOOLS[id]?ALL_TOOLS[id].label:id)):(isCustomMed(id)?(ce.label||id):(ALL_MEDS[id]?ALL_MEDS[id].label:id));
+          var clabel=actionLabel(kind,id,ce);
           correctActions.push({name:clabel,toolId:kind==="tools"?id:null,medType:kind==="meds"?lookupMedType(id):null,fb:ce.fb?ce.fb.split(".")[0]+".":"",pri:ce.pri,type:kind==="tools"?"tool":"med",userSelected:!!cbSel[id],round:3,isCurveball:true});
         }
       });
@@ -340,7 +357,7 @@ export function ScenarioPlayer(props){
             var coll=phase1.actions[kind]||{};
             Object.keys(coll).forEach(function(id){
               if(p1Sel[id]){
-                var lbl=kind==="tools"?(isCustomTool(id)?(coll[id].label||id):(ALL_TOOLS[id]?ALL_TOOLS[id].label:id)):(isCustomMed(id)?(coll[id].label||id):(ALL_MEDS[id]?ALL_MEDS[id].label:id));
+                var lbl=actionLabel(kind,id,coll[id]);
                 choices.push(lbl);
               }
             });

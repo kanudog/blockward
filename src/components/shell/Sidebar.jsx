@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useScenarios } from "../../hooks/useScenarios.js";
 import { useProgress } from "../../hooks/useProgress.js";
 import { useTokens } from "../theme/themeStore.js";
+import { useVerbosityStore, LEVELS, LEVEL_LABEL, LEVEL_BLURB } from "../../lib/explain/verbosity.js";
 
 var VITAL_REF=[
   {age:"Neonate (0-28d)",hr:"120-160",rr:"30-60",sbp:"60-80",dbp:"30-50"},
@@ -14,6 +15,8 @@ var VITAL_REF=[
 
 export function Sidebar(props){
   var t=useTokens();
+  var level=useVerbosityStore(function(s){return s.level;});
+  var setLevel=useVerbosityStore(function(s){return s.setLevel;});
   var open=props.open;var onClose=props.onClose;var onRequestClearAll=props.onRequestClearAll;
   var _tab=useState("ref");var tab=_tab[0];var setTab=_tab[1];
   var scn=useScenarios();var allScenarios=scn.allScenarios;
@@ -78,6 +81,27 @@ export function Sidebar(props){
       </div>}
       {tab==="settings"&&<div>
         <h3 style={{fontSize:14,fontWeight:700,color:t.COLOR.accent,marginBottom:10}}>Settings</h3>
+        {/* Owner direction 2026-07-30: how much teaching text to show. Applies
+            to explanations, feedback, deep dives and the debrief — never to the
+            narrator, the updates, or the findings. Changeable at any time,
+            including mid-case. */}
+        <div style={{marginBottom:16}}>
+          <div style={{fontSize:12,fontWeight:700,color:t.COLOR.ink2,marginBottom:2}}>Explanation detail</div>
+          <div style={{fontSize:10.5,color:t.COLOR.ink3,lineHeight:1.5,marginBottom:7}}>
+            How much the mentor says. The story and the findings read the same either way.
+          </div>
+          <div style={{display:"flex",gap:5,marginBottom:6}}>
+            {LEVELS.map(function(lv){
+              var on=level===lv;
+              return(<button key={lv} onClick={function(){setLevel(lv);}}
+                style={{flex:1,padding:"7px 0",borderRadius:8,fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:t.FONT.body,
+                  background:on?"rgba("+t.ACCENT_RGB+",0.14)":t.COLOR.btnNeutralBg,
+                  border:"1px solid "+(on?"rgba("+t.ACCENT_RGB+",0.45)":"transparent"),
+                  color:on?t.COLOR.accent:t.COLOR.ink3}}>{LEVEL_LABEL[lv]}</button>);
+            })}
+          </div>
+          <div style={{fontSize:10.5,color:t.COLOR.ink3,lineHeight:1.5,minHeight:30}}>{LEVEL_BLURB[level]}</div>
+        </div>
         <button onClick={onRequestClearAll} style={{width:"100%",padding:"10px 0",borderRadius:10,fontWeight:700,fontSize:13,background:"rgba("+t.CRIT_RGB+",0.14)",color:t.COLOR.critical,border:"1px solid rgba("+t.CRIT_RGB+",0.30)",cursor:"pointer",marginBottom:12}}>Clear All Data</button>
         <div style={{fontSize:11,color:t.COLOR.ink3,lineHeight:1.6}}>
           <p>Block Ward v1.6</p>

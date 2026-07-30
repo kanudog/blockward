@@ -9,6 +9,7 @@ import { resolveSlotText, SYNTHESIZED_FB_FALLBACK } from "../../lib/scenarios/sl
 import { useScenariosStore } from "../../stores/scenariosStore.js";
 import { ToolIcon, MedIcon } from "./icons.jsx";
 import { TextBlock } from "../shared/TextBlock.jsx";
+import { ExplainBody } from "../shared/ExplainBody.jsx";
 import { useModalGuard } from "../shared/useModalGuard.js";
 import { useTokens } from "../theme/themeStore.js";
 import { usePlayerStore } from "../../stores/playerStore.js";
@@ -278,9 +279,9 @@ export function ActionPanel(props){
                 <AlertTriangle size={16} color={t.COLOR.critical} style={{flexShrink:0}}/>
                 <span style={{fontSize:13,fontWeight:800,color:t.COLOR.critical,fontFamily:t.FONT.body}}>Not indicated right now</span>
               </div>
-              <TextBlock text={pop.info.fb} style={{fontSize:13,color:t.COLOR.ink2,lineHeight:1.55}}/>
+              <ExplainBody raw={pop.info.fb} style={{fontSize:13,lineHeight:1.55}}/>
             </div>):
-            (<TextBlock text={pop.info.fb} style={{fontSize:13,color:t.COLOR.ink2,lineHeight:1.55}}/>)}
+            (<ExplainBody raw={pop.info.fb} style={{fontSize:13,lineHeight:1.55}}/>)}
           </div>
           <div style={{padding:"10px 18px 14px",borderTop:"1px solid "+t.COLOR.hairline,flexShrink:0}}>
             {/* Owner direction 2026-07-29: this explainer used to render HERE, in

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Trophy, Plus, Minus, Search, Check, Zap, Droplets, Bookmark, Lightbulb } from "lucide-react";
 import { SceneStage } from "./SceneStage.jsx";
 import { TextBlock } from "../shared/TextBlock.jsx";
+import { ExplainBody } from "../shared/ExplainBody.jsx";
 import { ChapterBar } from "../shared/ChapterBar.jsx";
 import { ALL_TOOLS, ALL_MEDS, isCustomTool, isCustomMed } from "../../lib/scenarios/packs/index.js";
 import { usePlayerStore } from "../../stores/playerStore.js";
@@ -172,7 +173,7 @@ export function Debrief(props){
     </div>
     <div style={Object.assign({},t.surface("card"),{padding:t.SPACE.pad,marginBottom:14},rise(3))}>
       <div style={Object.assign({},t.label(),{marginBottom:6})}>Your mentor</div>
-      <TextBlock text={sc.debrief.summary} style={{fontSize:13,color:t.COLOR.ink2,lineHeight:1.6}}/>
+      <ExplainBody raw={sc.debrief.summary} style={{fontSize:13,lineHeight:1.6}}/>
     </div>
     {/* Phase 4 (#7): the run's collected insight cards — keepsakes that
         persist with the learner (durable collection is engine-side). */}
@@ -187,7 +188,7 @@ export function Debrief(props){
             </div>
             <div style={{fontFamily:t.FONT.display,fontSize:13,fontWeight:700,color:t.COLOR.ink,marginTop:8,lineHeight:1.25}}>{card.title}</div>
             <div style={{marginTop:4}}>
-              <TextBlock text={card.body} style={{fontSize:11,color:t.COLOR.ink2,lineHeight:1.5}}/>
+              <ExplainBody raw={card.body} style={{fontSize:11,lineHeight:1.5}}/>
             </div>
             <div style={{marginTop:9}}><span style={t.chip("accent")}>Keeper</span></div>
           </div>);
@@ -236,7 +237,7 @@ export function Debrief(props){
               {(function(){
                 var parsedDeep=deep?parseDeepDiveContent(deep):null;
                 if(parsedDeep)return(<div>
-                  <TextBlock text={parsedDeep.body} style={{fontSize:12,color:t.COLOR.ink2,lineHeight:1.6}}/>
+                  <ExplainBody raw={parsedDeep.body} style={{fontSize:12,lineHeight:1.6}}/>
                   {takeawayPill(k,parsedDeep.tldr)}
                 </div>);
                 return <TextBlock text={fallbackText} style={{fontSize:12,color:t.COLOR.ink3,lineHeight:1.5}}/>;
@@ -256,7 +257,7 @@ export function Debrief(props){
             <span style={{fontSize:9,color:t.COLOR.ink3}}>{it.phase}</span>
             {it.why&&<span style={{color:t.COLOR.positiveText,marginLeft:4}}>{open?<Minus size={12}/>:<Plus size={12}/>}</span>}
           </button>
-          {open&&it.why&&<div style={{padding:"0 10px 10px"}}><TextBlock text={it.why} style={{fontSize:11,color:t.COLOR.ink2,lineHeight:1.5}}/></div>}
+          {open&&it.why&&<div style={{padding:"0 10px 10px"}}><ExplainBody raw={it.why} style={{fontSize:11,lineHeight:1.5}}/></div>}
         </div>);})}
       </div>}
     </div>}
@@ -271,7 +272,7 @@ export function Debrief(props){
           </button>
           {open&&<div style={{padding:"0 10px 10px"}}>
             <p style={{fontSize:11,color:t.COLOR.attentionText,lineHeight:1.5,marginTop:0,marginBottom:0}}>{note}</p>
-            {it.why&&<TextBlock text={it.why} style={{fontSize:11,color:t.COLOR.ink2,lineHeight:1.5,marginTop:4}}/>}
+            {it.why&&<ExplainBody raw={it.why} style={{fontSize:11,lineHeight:1.5,marginTop:4}}/>}
           </div>}
         </div>);})}
       </div>}
@@ -321,7 +322,7 @@ export function Debrief(props){
                 </button>
                 {open&&<div style={{padding:"0 10px 10px"}}>
                   <div style={{fontSize:9,color:t.COLOR.ink3,marginBottom:4}}>{entry.phase}</div>
-                  <TextBlock text={entry.lab.why} style={{fontSize:12,color:t.COLOR.ink2,lineHeight:1.5}}/>
+                  <ExplainBody raw={entry.lab.why} style={{fontSize:12,lineHeight:1.5}}/>
                 </div>}
               </div>
             );})}
@@ -348,7 +349,7 @@ export function Debrief(props){
             <span style={{fontWeight:600,fontSize:13.5,fontFamily:t.FONT.display}}>{d.title||"Deep dive"}</span><span style={{color:t.COLOR.boldTerm}}>{expI==="pdd"+i?<Minus size={16}/>:<Plus size={16}/>}</span></button>
           {expI==="pdd"+i&&<div style={{padding:"0 12px 12px"}}>
             {hasBody
-              ?<TextBlock text={parsed.body} style={{fontSize:13,color:t.COLOR.ink2,lineHeight:1.6}}/>
+              ?<ExplainBody raw={parsed.body} style={{fontSize:13,lineHeight:1.6}}/>
               :<p style={{fontSize:12,color:t.COLOR.ink3,fontStyle:"italic",lineHeight:1.5,margin:0}}>Preparing…</p>}
             {parsed&&takeawayPill("pdd"+i,parsed.tldr)}
           </div>}
@@ -358,7 +359,7 @@ export function Debrief(props){
         <button onClick={function(){setExpI(expI===i?null:i);}} style={{width:"100%",textAlign:"left",padding:12,display:"flex",justifyContent:"space-between",background:"none",border:"none",cursor:"pointer",color:t.COLOR.ink,fontFamily:t.FONT.body}}>
           <span style={{fontWeight:600,fontSize:13.5,fontFamily:t.FONT.display}}>{e.title}</span><span style={{color:t.COLOR.boldTerm}}>{expI===i?<Minus size={16}/>:<Plus size={16}/>}</span></button>
         {expI===i&&<div style={{padding:"0 12px 12px"}}>
-          <TextBlock text={e.content} style={{fontSize:13,color:t.COLOR.ink2,lineHeight:1.6}}/>
+          <ExplainBody raw={{plain:e.tldr,detail:e.content}} style={{fontSize:13,lineHeight:1.6}}/>
           {takeawayPill("e"+i,e.tldr)}
         </div>}</div>);})}
     {sc.curveball&&sc.curveball.teaches&&(<div><h3 style={{fontSize:16,fontWeight:600,fontFamily:t.FONT.display,color:t.COLOR.ink,marginTop:16,marginBottom:10}}>Event deep dive</h3>
@@ -366,7 +367,7 @@ export function Debrief(props){
         <button onClick={function(){setExpI(expI===k?null:k);}} style={{width:"100%",textAlign:"left",padding:12,display:"flex",justifyContent:"space-between",background:"none",border:"none",cursor:"pointer",color:t.COLOR.ink,fontFamily:t.FONT.body}}>
           <span style={{fontWeight:600,fontSize:13.5,fontFamily:t.FONT.display}}>{te.title}</span><span style={{color:t.COLOR.boldTerm}}>{expI===k?<Minus size={16}/>:<Plus size={16}/>}</span></button>
         {expI===k&&<div style={{padding:"0 12px 12px"}}>
-          <TextBlock text={te.content} style={{fontSize:13,color:t.COLOR.ink2,lineHeight:1.6}}/>
+          <ExplainBody raw={{plain:te.tldr,detail:te.content}} style={{fontSize:13,lineHeight:1.6}}/>
           {takeawayPill(k,te.tldr)}
         </div>}</div>);})}</div>)}
     {skippedActions&&skippedActions.length>0&&<div style={{marginBottom:16,marginTop:8,borderRadius:t.RADIUS.md,padding:12,background:"rgba("+t.ATTN_RGB+",0.08)",border:"1px solid rgba("+t.ATTN_RGB+",0.28)"}}>

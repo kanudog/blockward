@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "check:systems": "node scripts/check-body-systems.mjs"
+    "check:systems": "node scripts/check-body-systems.mjs",
+    "check:verbosity": "node scripts/check-verbosity.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.577.0",

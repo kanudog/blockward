@@ -4,7 +4,7 @@
 // the eager deep-dive kick with the in-flight guard); restyled onto tokens.
 // Mark for Review sits on a solid amber-tinted surface in the sticky footer.
 import { Modal } from "./Modal.jsx";
-import { TextBlock } from "./TextBlock.jsx";
+import { ExplainBody } from "./ExplainBody.jsx";
 import { useTokens } from "../theme/themeStore.js";
 import { usePlayerStore } from "../../stores/playerStore.js";
 import { expandSingleMarkedItem } from "../../lib/ai/client.js";
@@ -48,7 +48,7 @@ export function WhyModal(props) {
     <p style={{ fontSize: 10, color: t.COLOR.ink3, marginTop: 6, marginBottom: 0, textAlign: "center", lineHeight: 1.4 }}>{marked ? "Waiting in your review tray — it deepens by the debrief." : "Save this to revisit at the end. Never graded."}</p>
   </div>) : null;
   return (<Modal open={open} onClose={onClose} title={title} kicker="Your mentor · why it matters" footer={footer}>
-    <TextBlock text={body || ""} style={{ fontSize: 13, color: t.COLOR.ink2, lineHeight: 1.6 }}/>
+    <ExplainBody raw={body}/>
   </Modal>);
 }
 

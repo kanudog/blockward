@@ -26,7 +26,7 @@ import { parseGCS, isGcsText, gcsProseConflicts } from "../src/lib/scenarios/gcs
 //               scripts/gen-contract-cases.mjs, kept as a regression record of
 //               what the prompt produced on the day its contracts were fixed
 const CASES = [
-  { dir: "../src/lib/scenarios/generated/", files: ["breathing-harder.json", "ten-feet-down.json"] },
+  { dir: "../src/lib/scenarios/generated/", files: ["breathing-harder.json", "ten-feet-down.json", "rash-that-wont-blanch.json"] },
   { dir: "./fixtures/", files: ["gen-trauma-tbi.json", "gen-meningococcemia.json", "gen-myocarditis.json", "gen-bronchiolitis.json", "gen-arrest-hyperk.json"] }
 ];
 

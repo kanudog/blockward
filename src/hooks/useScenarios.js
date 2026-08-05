@@ -2,8 +2,9 @@ import { useScenariosStore } from "../stores/scenariosStore.js";
 import { SC1, SC2, SC3, SC4, SC5 } from "../lib/scenarios/builtIn.js";
 import BREATHING_HARDER from "../lib/scenarios/generated/breathing-harder.json";
 import TEN_FEET_DOWN from "../lib/scenarios/generated/ten-feet-down.json";
+import RASH_WONT_BLANCH from "../lib/scenarios/generated/rash-that-wont-blanch.json";
 
-var BUILT_IN=[SC1,SC2,SC3,SC4,SC5,BREATHING_HARDER,TEN_FEET_DOWN];
+var BUILT_IN=[SC1,SC2,SC3,SC4,SC5,BREATHING_HARDER,TEN_FEET_DOWN,RASH_WONT_BLANCH];
 
 // Share links are size-capped (the encoded URL must stay under ~4000 chars or
 // shareScenario refuses to send it), so the minifier keeps only what a

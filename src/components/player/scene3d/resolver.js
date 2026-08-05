@@ -131,6 +131,33 @@ export function createSceneState(meta) {
   };
 }
 
+// Words that mean "not yet" — the thing is being readied, considered, or
+// ordered, not attached to the patient.
+//
+// Added 2026-07-30 after testing real intervention labels through this scanner.
+// "Prepare intubation kit at bedside" contains "intubat", so committing it drew
+// an ENDOTRACHEAL TUBE on a child who had not been intubated — the avatar
+// showed the airway you were only getting ready for. The same trap sits behind
+// "have suction ready", "consider a chest tube", "order a Foley".
+//
+// The guard is deliberately LOCAL and TIGHT — a 22-character window either
+// side of the match, not the whole sentence. Both bounds were learned by test:
+//   * A 40-char backward window let "The team is preparing to intubate while
+//     the nasal cannula stays in place" suppress the CANNULA as well as the
+//     tube, because "preparing" was still inside the window when the scanner
+//     reached "nasal cannula". The hedge must govern only the phrase it sits
+//     against.
+//   * Backward-only missed trailing hedges: "Have suction ready at the
+//     bedside" puts the qualifier AFTER the noun, so suction was placed.
+var HEDGE_BEFORE = /\b(?:prepar\w*|readied|standby|stand by|consider\w*|anticipat\w*|order\w*|plan\w*|about to|set up for|draw up|drawn up|have)\b[^.;]{0,22}$/;
+var HEDGE_AFTER = /^[^.;]{0,22}\b(?:ready|readied|available|on standby|standby|at (?:the )?bedside|if needed|in case|as needed|kit|tray)\b/;
+var WINDOW = 22;
+function hedged(low, idx, len) {
+  var before = low.slice(Math.max(0, idx - WINDOW), idx);
+  var after = low.slice(idx + len, idx + len + WINDOW + 12);
+  return HEDGE_BEFORE.test(before) || HEDGE_AFTER.test(after);
+}
+
 // scanText(state, text) -> new state with everything the content names.
 // Unknown descriptions match nothing and are skipped — the guarantee that
 // makes small-model authorship safe.
@@ -139,12 +166,19 @@ export function scanText(state, text) {
   var next = clone(state);
   var matched = [];
   REGISTRY.forEach(function (r) {
-    var i, idx;
+    var i, idx, from;
     for (i = 0; i < r.phrases.length; i++) {
-      idx = low.indexOf(r.phrases[i]);
-      if (idx >= 0) {
-        matched.push({ id: r.id, limb: r.limbed ? findLimb(low, idx) : "" });
-        return;
+      // Walk every occurrence: the first mention may be hedged ("prepare the
+      // intubation kit") while a later one is real ("tube is in").
+      from = 0;
+      while (true) {
+        idx = low.indexOf(r.phrases[i], from);
+        if (idx < 0) break;
+        if (!hedged(low, idx, r.phrases[i].length)) {
+          matched.push({ id: r.id, limb: r.limbed ? findLimb(low, idx) : "" });
+          return;
+        }
+        from = idx + r.phrases[i].length;
       }
     }
   });

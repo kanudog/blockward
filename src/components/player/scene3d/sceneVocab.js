@@ -27,14 +27,24 @@ export var SCENE_VOCAB = [
   { id: "line-two-prong", family: "A", realName: "Nasal cannula", phrases: ["nasal cannula", "oxygen cannula", "o2 cannula"] },
   { id: "cover-reservoir", family: "A", realName: "Non-rebreather mask", phrases: ["non-rebreather", "non rebreather", "nonrebreather", "nrb", "reservoir mask"] },
   { id: "cover-loose", family: "A", realName: "Oxygen face mask", phrases: ["oxygen mask", "o2 mask", "simple face mask", "simple mask", "venturi"] },
-  { id: "mist-cover", family: "A", realName: "Nebulizer mask", phrases: ["nebulizer", "nebulized", "nebuliser", "neb mask", "aerosol mask"] },
-  { id: "tube-mouth-central", family: "A", realName: "Endotracheal tube (intubated)", phrases: ["intubat", "endotracheal", "et tube", "breathing tube down"] },
+  // "nebuliz" as a stem: real labels say "continuous albuterol nebulization",
+  // which the longer spellings missed entirely.
+  { id: "mist-cover", family: "A", realName: "Nebulizer mask", phrases: ["nebuliz", "nebulis", "neb mask", "aerosol mask", "continuous albuterol"] },
+  // RSI wording added 2026-07-30: "Perform RSI and secure definitive airway"
+  // is how the generator actually labels intubation, and none of the previous
+  // phrases matched it — so the one action that definitely puts in a tube drew
+  // nothing, while "prepare intubation kit" drew one. Exactly backwards.
+  { id: "tube-mouth-central", family: "A", realName: "Endotracheal tube (intubated)", phrases: ["intubat", "endotracheal", "et tube", "ett ", "breathing tube down", "rapid sequence", "definitive airway", "secure the airway", "secured the airway"] },
   { id: "port-neck", family: "A", realName: "Tracheostomy", phrases: ["tracheostomy", "tracheotomy", "trach collar", "trach tube", "trach in place"] },
   { id: "tube-nose-cheek", family: "A", realName: "Nasogastric / orogastric tube", phrases: ["nasogastric", "ng tube", "og tube", "orogastric", "feeding tube taped"] },
 
   // ---- L: lines & pouches --------------------------------------------------
   { id: "patch-scalp-access", family: "L", realName: "Scalp IV", phrases: ["scalp iv", "scalp vein", "scalp line"] },
-  { id: "patch-limb-access", family: "L", realName: "Peripheral IV / access", phrases: ["iv in place", "iv access", "peripheral iv", "iv line", "iv catheter", "saline lock", "gauge iv", "iv in her", "iv in his"], limbed: true },
+  // Arterial-line wording folded in here rather than given its own id: an
+  // a-line is vascular access on a limb and the limb-patch is the right visual.
+  // (A separate "port-chest" id for central lines was tried and removed — the
+  // renderer has no case for it, so it drew nothing at all.)
+  { id: "patch-limb-access", family: "L", realName: "Vascular access (IV / arterial line)", phrases: ["iv in place", "iv access", "peripheral iv", "iv line", "iv catheter", "saline lock", "gauge iv", "iv in her", "iv in his", "arterial line", "a-line", "art line"], limbed: true },
   { id: "pouch-on-stand", family: "L", realName: "IV fluid / infusion bag", phrases: ["infusion running", "iv fluids running", "maintenance fluids", "drip running"] },
   { id: "port-belly", family: "L", realName: "Gastrostomy button (G-tube)", phrases: ["g-tube", "g tube", "gastrostomy", "peg tube", "feeding button"] },
   { id: "tube-side-torso", family: "L", realName: "Chest tube", phrases: ["chest tube", "thoracostomy", "chest drain", "pigtail catheter"] },

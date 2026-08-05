@@ -1,0 +1,737 @@
+{
+  "schemaVersion": "5.4.1",
+  "id": "teen-myocarditis-chf",
+  "title": "Heartbreak at Fourteen",
+  "subtitle": "A teenager in florid heart failure — find the pump problem before it finds you",
+  "patientCard": {
+    "name": "Trevor Walsh",
+    "ageLabel": "14 years old",
+    "weightKg": 58,
+    "sex": "M",
+    "cc": "decompensated heart failure from viral myocarditis"
+  },
+  "presentation": {
+    "routeOfPresentation": "ems",
+    "report": "Paramedics rolling in with a 14-year-old male, Trevor Walsh, 58 kg. Mom called 911 for worsening shortness of breath over two days — he's been telling her it's 'just a cold' but tonight he couldn't lie flat. No prior cardiac history, no meds, no known allergies. He had a week of flu-like illness about ten days ago that seemed to resolve. En route, SpO2 was 88% on room air, so we put him on a non-rebreather; he came up to 94%. HR has been consistently 128-136, BP 88/58 throughout. He's alert but scared.",
+    "learnMore": "Viral myocarditis in adolescents most commonly follows an enteroviral illness — Coxsackievirus B is the classic culprit, though adenovirus and parvovirus B19 are well-represented in older teens. The inflammatory infiltrate damages myocytes directly, and the resulting cardiomyopathy can progress from subclinical to fulminant within days. The presentation often mimics respiratory illness, and many teens downplay or hide symptoms until they're in overt failure."
+  },
+  "norms": {
+    "hr": [
+      60,
+      100
+    ],
+    "rr": [
+      12,
+      20
+    ],
+    "sbp": [
+      100,
+      130
+    ],
+    "dbp": [
+      60,
+      85
+    ],
+    "spo2": [
+      95,
+      100
+    ],
+    "temp": [
+      36.5,
+      37.5
+    ]
+  },
+  "phases": [
+    {
+      "phaseIndex": 0,
+      "id": "assess",
+      "stageType": "assess",
+      "title": "First Look",
+      "narrative": "Trevor is sitting upright on the stretcher, leaning forward slightly with his hands on his knees — he won't lie back. He looks pale and genuinely scared, answering questions in short sentences because longer ones wind him. His neck veins are visibly distended at 45 degrees. You can see the NRB mask on his face and hear him working to breathe before you've even placed a stethoscope. He says the shortness of breath started two days ago and is much worse tonight, and he admits he felt 'off' for about a week after a cold he had ten days back.",
+      "vitals": [
+        {
+          "id": "hr",
+          "label": "Heart Rate",
+          "value": "134",
+          "unit": "bpm",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[0].vitals.hr.why",
+          "why": null
+        },
+        {
+          "id": "rr",
+          "label": "Resp Rate",
+          "value": "32",
+          "unit": "breaths/min",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[0].vitals.rr.why",
+          "why": null
+        },
+        {
+          "id": "bp",
+          "label": "Blood Pressure",
+          "value": "88/58",
+          "unit": "mmHg",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[0].vitals.bp.why",
+          "why": null
+        },
+        {
+          "id": "spo2",
+          "label": "SpO2",
+          "value": "94",
+          "unit": "%",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[0].vitals.spo2.why",
+          "why": null
+        },
+        {
+          "id": "temp",
+          "label": "Temperature",
+          "value": "37.8",
+          "unit": "°C",
+          "bad": false,
+          "cat": "vital",
+          "_slotRef": "phase[0].vitals.temp.why",
+          "why": null
+        },
+        {
+          "id": "cap",
+          "label": "Cap Refill",
+          "value": "4 sec",
+          "unit": "",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[0].vitals.cap.why",
+          "why": null
+        }
+      ],
+      "signs": [
+        {
+          "id": "mentalStatus",
+          "label": "Mental Status",
+          "finding": "Alert and oriented, answers questions appropriately but responds in short phrases to minimize respiratory effort. GCS 15 (E4 V5 M6). Visibly anxious.",
+          "sys": "Neuro",
+          "bad": false,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.mentalStatus.why",
+          "why": null
+        },
+        {
+          "id": "breathSounds",
+          "label": "Breath Sounds",
+          "finding": "Diffuse fine crackles audible bilaterally from mid-lung to bases. No wheeze. Accessory muscle use present — subcostal and intercostal retractions visible. Speaks in 3-4 word sentences.",
+          "sys": "Respiratory",
+          "pos": "bilateral bases and mid-zones",
+          "bad": true,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.breathSounds.why",
+          "why": null
+        },
+        {
+          "id": "heartSounds",
+          "label": "Heart Sounds",
+          "finding": "S1 and S2 present but distant. A soft S3 gallop is audible at the apex. No murmur. Heart sounds are regular.",
+          "sys": "Cardiovascular",
+          "pos": "apex",
+          "bad": true,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.heartSounds.why",
+          "why": null
+        },
+        {
+          "id": "jvd",
+          "label": "Neck Veins",
+          "finding": "Jugular venous distension visible with head of bed at 45 degrees. Estimated JVP 12-14 cm H2O.",
+          "sys": "Cardiovascular",
+          "pos": "neck",
+          "bad": true,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.jvd.why",
+          "why": null
+        },
+        {
+          "id": "peripheralPerfusion",
+          "label": "Peripheral Perfusion",
+          "finding": "Extremities are cool and mottled to the mid-forearm and mid-calf bilaterally. Radial pulses weak and thready; brachial and femoral pulses palpable but diminished.",
+          "sys": "Cardiovascular",
+          "pos": "all four extremities",
+          "bad": true,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.peripheralPerfusion.why",
+          "why": null
+        },
+        {
+          "id": "abdomen",
+          "label": "Abdomen",
+          "finding": "Mildly distended. Liver edge palpable 4 cm below the right costal margin. Non-tender. No splenomegaly. Bowel sounds present.",
+          "sys": "GI/Hydration",
+          "pos": "right upper quadrant",
+          "bad": true,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.abdomen.why",
+          "why": null
+        },
+        {
+          "id": "peripheralEdema",
+          "label": "Peripheral Edema",
+          "finding": "2+ pitting edema noted bilaterally to the mid-shin. Sacral edema absent.",
+          "sys": "Integumentary",
+          "pos": "bilateral lower extremities",
+          "bad": true,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.peripheralEdema.why",
+          "why": null
+        },
+        {
+          "id": "skinColor",
+          "label": "Skin / Color",
+          "finding": "Pale, slightly mottled. No rash, no petechiae. Lips have a faint dusky tinge at rest. No diaphoresis.",
+          "sys": "Integumentary",
+          "bad": true,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.skinColor.why",
+          "why": null
+        }
+      ],
+      "labs": [
+        {
+          "id": "bnp",
+          "name": "BNP",
+          "value": "1840",
+          "unit": "pg/mL",
+          "ref": "<100",
+          "bad": true,
+          "critical": true,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.bnp.why",
+          "why": null
+        },
+        {
+          "id": "troponin",
+          "name": "Troponin I",
+          "value": "3.8",
+          "unit": "ng/mL",
+          "ref": "<0.04",
+          "bad": true,
+          "critical": true,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.troponin.why",
+          "why": null
+        },
+        {
+          "id": "lactate",
+          "name": "Lactate",
+          "value": "4.6",
+          "unit": "mmol/L",
+          "ref": "0.5-2.0",
+          "bad": true,
+          "critical": true,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.lactate.why",
+          "why": null
+        },
+        {
+          "id": "sodium",
+          "name": "Sodium",
+          "value": "134",
+          "unit": "mEq/L",
+          "ref": "136-145",
+          "bad": true,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.sodium.why",
+          "why": null
+        },
+        {
+          "id": "potassium",
+          "name": "Potassium",
+          "value": "4.1",
+          "unit": "mEq/L",
+          "ref": "3.5-5.0",
+          "bad": false,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.potassium.why",
+          "why": null
+        },
+        {
+          "id": "creatinine",
+          "name": "Creatinine",
+          "value": "1.2",
+          "unit": "mg/dL",
+          "ref": "0.6-1.2",
+          "bad": false,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.creatinine.why",
+          "why": null
+        },
+        {
+          "id": "glucose",
+          "name": "Glucose",
+          "value": "112",
+          "unit": "mg/dL",
+          "ref": "70-140",
+          "bad": false,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.glucose.why",
+          "why": null
+        },
+        {
+          "id": "wbc",
+          "name": "WBC",
+          "value": "11.2",
+          "unit": "x10³/µL",
+          "ref": "4.5-13.0",
+          "bad": false,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.wbc.why",
+          "why": null
+        },
+        {
+          "id": "pH",
+          "name": "pH (VBG)",
+          "value": "7.28",
+          "unit": "",
+          "ref": "7.32-7.42",
+          "bad": true,
+          "critical": true,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.pH.why",
+          "why": null
+        },
+        {
+          "id": "pco2",
+          "name": "pCO2 (VBG)",
+          "value": "38",
+          "unit": "mmHg",
+          "ref": "41-51",
+          "bad": false,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.pco2.why",
+          "why": null
+        },
+        {
+          "id": "hco3",
+          "name": "HCO3 (VBG)",
+          "value": "17",
+          "unit": "mEq/L",
+          "ref": "22-29",
+          "bad": true,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.hco3.why",
+          "why": null
+        }
+      ],
+      "actions": {
+        "tools": {},
+        "meds": {}
+      }
+    },
+    {
+      "phaseIndex": 1,
+      "id": "intervene",
+      "stageType": "intervene",
+      "title": "Stabilize and Support",
+      "narrative": "Cardiology is at the bedside. Trevor's oxygen requirement is real and his hemodynamics are precarious — BP of 88/58 with a lactate of 4.6 means this heart is not keeping up. He's volume-overloaded clinically (bilateral crackles, JVD, hepatomegaly, peripheral edema) but his cardiac output is so depressed that his kidneys have been retaining fluid, not excreting it. The challenge here is that he needs offloading AND forward flow support at the same time — and he cannot tolerate a fluid challenge. An 18g peripheral IV is now in the right antecubital; it infuses well. You have IV access, the monitor is on, and Cardiology is standing next to you with their arms crossed waiting to see what you'll do first.",
+      "vitals": [
+        {
+          "id": "hr",
+          "label": "Heart Rate",
+          "value": "134",
+          "unit": "bpm",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[1].vitals.hr.why",
+          "why": null
+        },
+        {
+          "id": "rr",
+          "label": "Resp Rate",
+          "value": "32",
+          "unit": "breaths/min",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[1].vitals.rr.why",
+          "why": null
+        },
+        {
+          "id": "bp",
+          "label": "Blood Pressure",
+          "value": "88/58",
+          "unit": "mmHg",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[1].vitals.bp.why",
+          "why": null
+        },
+        {
+          "id": "spo2",
+          "label": "SpO2",
+          "value": "94",
+          "unit": "%",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[1].vitals.spo2.why",
+          "why": null
+        },
+        {
+          "id": "temp",
+          "label": "Temperature",
+          "value": "37.8",
+          "unit": "°C",
+          "bad": false,
+          "cat": "vital",
+          "_slotRef": "phase[1].vitals.temp.why",
+          "why": null
+        },
+        {
+          "id": "cap",
+          "label": "Cap Refill",
+          "value": "4 sec",
+          "unit": "",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[1].vitals.cap.why",
+          "why": null
+        }
+      ],
+      "signs": [
+        {
+          "id": "breathSoundsInt",
+          "label": "Breath Sounds",
+          "finding": "Persistent bilateral crackles, mid-zones to bases. Work of breathing unchanged from initial assessment — still using accessory muscles, 3-4 word sentences.",
+          "sys": "Respiratory",
+          "pos": "bilateral",
+          "bad": true,
+          "cat": "clinical",
+          "_slotRef": "phase[1].signs.breathSoundsInt.why",
+          "why": null
+        },
+        {
+          "id": "ecgFinding",
+          "label": "ECG Findings",
+          "finding": "Sinus tachycardia at 134 bpm. Low-voltage QRS complexes in limb leads. Diffuse non-specific ST-T wave changes. No ST-segment elevation. PR interval 164 ms. QTc 448 ms.",
+          "sys": "Cardiovascular",
+          "bad": true,
+          "cat": "clinical",
+          "_slotRef": "phase[1].signs.ecgFinding.why",
+          "why": null
+        },
+        {
+          "id": "venousAccess",
+          "label": "IV Access",
+          "finding": "18g peripheral IV in right antecubital, patent, infusing well. No central access.",
+          "sys": "Lines & devices",
+          "pos": "right antecubital",
+          "bad": false,
+          "cat": "clinical",
+          "_slotRef": "phase[1].signs.venousAccess.why",
+          "why": null
+        },
+        {
+          "id": "pulseQuality",
+          "label": "Pulse Quality",
+          "finding": "Central pulses (femoral, carotid) palpable but reduced in volume. Peripheral pulses (radial, dorsalis pedis) weak and thready bilaterally.",
+          "sys": "Cardiovascular",
+          "bad": true,
+          "cat": "clinical",
+          "_slotRef": "phase[1].signs.pulseQuality.why",
+          "why": null
+        }
+      ],
+      "labs": [
+        {
+          "id": "echoEF",
+          "name": "Echo EF (POC)",
+          "value": "22",
+          "unit": "%",
+          "ref": "55-70",
+          "bad": true,
+          "critical": true,
+          "cat": "lab",
+          "_slotRef": "phase[1].labs.echoEF.why",
+          "why": null
+        },
+        {
+          "id": "echoWallMotion",
+          "name": "Echo Wall Motion",
+          "value": "Globally reduced",
+          "unit": "",
+          "ref": "Normal",
+          "bad": true,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[1].labs.echoWallMotion.why",
+          "why": null
+        },
+        {
+          "id": "chestXrayResult",
+          "name": "CXR Cardiomegaly",
+          "value": "CTR 0.62",
+          "unit": "",
+          "ref": "<0.50",
+          "bad": true,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[1].labs.chestXrayResult.why",
+          "why": null
+        },
+        {
+          "id": "chestXrayEdema",
+          "name": "CXR Pulmonary Edema",
+          "value": "Bilateral perihilar infiltrates with Kerley B lines",
+          "unit": "",
+          "ref": "Clear lung fields",
+          "bad": true,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[1].labs.chestXrayEdema.why",
+          "why": null
+        },
+        {
+          "id": "magnesium",
+          "name": "Magnesium",
+          "value": "1.9",
+          "unit": "mg/dL",
+          "ref": "1.6-2.6",
+          "bad": false,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[1].labs.magnesium.why",
+          "why": null
+        },
+        {
+          "id": "alt",
+          "name": "ALT",
+          "value": "68",
+          "unit": "U/L",
+          "ref": "7-56",
+          "bad": true,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[1].labs.alt.why",
+          "why": null
+        },
+        {
+          "id": "ast",
+          "name": "AST",
+          "value": "74",
+          "unit": "U/L",
+          "ref": "10-40",
+          "bad": true,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[1].labs.ast.why",
+          "why": null
+        },
+        {
+          "id": "phosphorus",
+          "name": "Phosphorus",
+          "value": "4.0",
+          "unit": "mg/dL",
+          "ref": "2.5-4.5",
+          "bad": false,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[1].labs.phosphorus.why",
+          "why": null
+        }
+      ],
+      "actions": {
+        "tools": {
+          "vsMonitor": {
+            "id": "vsMonitor",
+            "label": "Connect to vital signs monitor",
+            "priority": "correct",
+            "_slotRef": "phase[1].actions.tools.vsMonitor.fb",
+            "fb": null
+          },
+          "echocardiogram": {
+            "id": "echocardiogram",
+            "label": "Obtain bedside echocardiogram",
+            "priority": "tied-correct",
+            "_slotRef": "phase[1].actions.tools.echocardiogram.fb",
+            "fb": null
+          },
+          "ecg12Lead": {
+            "id": "ecg12Lead",
+            "label": "Obtain 12-lead ECG",
+            "priority": "correct",
+            "_slotRef": "phase[1].actions.tools.ecg12Lead.fb",
+            "fb": null
+          },
+          "chestXray": {
+            "id": "chestXray",
+            "label": "Order portable chest X-ray",
+            "priority": "correct",
+            "_slotRef": "phase[1].actions.tools.chestXray.fb",
+            "fb": null
+          },
+          "aLine": {
+            "id": "aLine",
+            "label": "Place arterial line for continuous BP monitoring",
+            "priority": "correct",
+            "_slotRef": "phase[1].actions.tools.aLine.fb",
+            "fb": null
+          },
+          "callCardiology": {
+            "id": "callCardiology",
+            "label": "Activate Cardiology team at bedside",
+            "priority": "correct",
+            "_slotRef": "phase[1].actions.tools.callCardiology.fb",
+            "fb": null
+          },
+          "callPICU": {
+            "id": "callPICU",
+            "label": "Initiate PICU transfer request",
+            "priority": "tied-correct",
+            "_slotRef": "phase[1].actions.tools.callPICU.fb",
+            "fb": null
+          },
+          "headOfBedElevation": {
+            "id": "headOfBedElevation",
+            "label": "Elevate head of bed to 30-45 degrees",
+            "priority": "correct",
+            "_slotRef": "phase[1].actions.tools.headOfBedElevation.fb",
+            "fb": null
+          },
+          "nsBolus": {
+            "id": "nsBolus",
+            "label": "Administer NS 20 mL/kg IV bolus (1160 mL)",
+            "priority": "distractor-clinical",
+            "_slotRef": "phase[1].actions.tools.nsBolus.fb",
+            "fb": null
+          },
+          "lumbarPuncture": {
+            "id": "lumbarPuncture",
+            "label": "Perform lumbar puncture",
+            "priority": "distractor-misc",
+            "_slotRef": "phase[1].actions.tools.lumbarPuncture.fb",
+            "fb": null
+          }
+        },
+        "meds": {
+          "furosemide": {
+            "id": "furosemide",
+            "label": "Give furosemide 1 mg/kg IV (58 mg)",
+            "priority": "tied-correct",
+            "_slotRef": "phase[1].actions.meds.furosemide.fb",
+            "fb": null
+          },
+          "milrinone": {
+            "id": "milrinone",
+            "label": "Start milrinone infusion 0.5 mcg/kg/min IV",
+            "priority": "tied-correct",
+            "_slotRef": "phase[1].actions.meds.milrinone.fb",
+            "fb": null
+          },
+          "dobutamine": {
+            "id": "dobutamine",
+            "label": "Start dobutamine infusion 5 mcg/kg/min IV",
+            "priority": "correct",
+            "_slotRef": "phase[1].actions.meds.dobutamine.fb",
+            "fb": null
+          },
+          "norepinephrine": {
+            "id": "norepinephrine",
+            "label": "Start norepinephrine 0.05 mcg/kg/min IV",
+            "priority": "distractor-clinical",
+            "_slotRef": "phase[1].actions.meds.norepinephrine.fb",
+            "fb": null
+          },
+          "epiIV": {
+            "id": "epiIV",
+            "label": "Give epinephrine IV push 0.01 mg/kg (0.58 mg)",
+            "priority": "distractor-clinical",
+            "_slotRef": "phase[1].actions.meds.epiIV.fb",
+            "fb": null
+          },
+          "adenosine": {
+            "id": "adenosine",
+            "label": "Give adenosine 0.1 mg/kg IV (5.8 mg) for tachycardia",
+            "priority": "distractor-clinical",
+            "_slotRef": "phase[1].actions.meds.adenosine.fb",
+            "fb": null
+          },
+          "mannitol": {
+            "id": "mannitol",
+            "label": "Give mannitol 0.5 g/kg IV (29 g) for diuresis",
+            "priority": "distractor-pack",
+            "_slotRef": "phase[1].actions.meds.mannitol.fb",
+            "fb": null
+          },
+          "lorazepam": {
+            "id": "lorazepam",
+            "label": "Give lorazepam 0.1 mg/kg IV for anxiety (5.8 mg)",
+            "priority": "distractor-misc",
+            "_slotRef": "phase[1].actions.meds.lorazepam.fb",
+            "fb": null
+          }
+        }
+      }
+    }
+  ],
+  "reassessment": {
+    "narrative": "Thirty minutes after furosemide and milrinone: Trevor has produced 280 mL of urine — his kidneys woke right up once you gave them both a diuretic and some forward flow. His work of breathing is noticeably less — he's tolerating longer sentences and the accessory muscle use has backed off. The crackles are still there but less prominent at the right base. His HR has come down from 134 to 116 and his BP has climbed to 98/66. SpO2 on NRB is now 97%. Cap refill is still 3 seconds, but the mottling on his legs has lightened. He's scared but cooperative, and he keeps asking if he's going to be okay — which is a good sign: a kid who's asking questions is a kid whose brain is being perfused.",
+    "vitals": {
+      "hr": "116",
+      "rr": "24",
+      "bp": "98/66",
+      "spo2": "97",
+      "temp": "37.8",
+      "cap": "3 sec"
+    },
+    "outcome": "transferred-icu",
+    "stabilizationSummary": "Trevor is hemodynamically improving with furosemide diuresis and milrinone on board; he's stable enough for transport. PICU has been alerted and a bed is ready — he'll need ongoing inotropic support, serial echos, and likely central access upstairs. Cardiology is accompanying the transport."
+  },
+  "debrief": {
+    "summary": "Trevor presented in cardiogenic shock from fulminant viral myocarditis — the diagnostic trap here is that he looked like a respiratory case until you put the pieces together: the S3 gallop, JVD at 45 degrees, hepatomegaly, and bilateral crackles all pointed to the pump, not the lungs. His lactate of 4.6 with cool extremities and a BP of 88/58 confirmed this was low-output shock, not sepsis. The right move was simultaneous diuresis to offload the congested ventricle and inotropic support to boost forward flow — furosemide and milrinone working together, not one without the other. The trap for learners is the temptation to bolus a hypotensive teenager, which would have made this dramatically worse.",
+    "keyTeaching": [
+      "In cardiogenic shock, a fluid bolus for hypotension worsens ventricular filling pressure without improving stroke volume — it floods an already-drowning heart.",
+      "The S3 gallop, JVD, hepatomegaly, and bilateral crackles form a recognizable bedside signature of decompensated heart failure — you don't need the echo to start treatment.",
+      "Milrinone is a phosphodiesterase-3 inhibitor that increases inotropy AND vasodilates — it improves forward flow and reduces afterload simultaneously, which is ideal for low-output cardiogenic shock.",
+      "Furosemide alone in a low-output state can drop preload so fast it worsens shock — it needs inotropic support running concurrently to work safely.",
+      "Sinus tachycardia in heart failure is a compensatory response, not a primary arrhythmia — treating it with adenosine removes the only mechanism keeping cardiac output up and can precipitate cardiovascular collapse."
+    ],
+    "physiologyDeepDive": [
+      {
+        "id": "starling-failure",
+        "title": "The Starling Curve in Myocarditis",
+        "_slotRef": "debrief.physiologyDeepDive.starling-failure.content",
+        "content": null
+      },
+      {
+        "id": "milrinone-mechanism",
+        "title": "How Milrinone Rescues a Failing Heart",
+        "_slotRef": "debrief.physiologyDeepDive.milrinone-mechanism.content",
+        "content": null
+      },
+      {
+        "id": "cardiogenic-vs-septic-shock",
+        "title": "Telling Cardiogenic from Septic Shock at the Bedside",
+        "_slotRef": "debrief.physiologyDeepDive.cardiogenic-vs-septic-shock.content",
+        "content": null
+      },
+      {
+        "id": "furosemide-timing",
+        "title": "Why Timing and Co-therapy Matter with Furosemide",
+        "_slotRef": "debrief.physiologyDeepDive.furosemide-timing.content",
+        "content": null
+      }
+    ]
+  },
+  "visuals": [
+    "oxygen mask",
+    "diaphoretic"
+  ]
+}

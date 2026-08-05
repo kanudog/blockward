@@ -17,59 +17,19 @@ import { guessSys, SYS_ICON, orderSystems, LINES } from "./bodySystems.js";
 import { useTokens } from "../theme/themeStore.js";
 import { usePlayerStore } from "../../stores/playerStore.js";
 import { expandSingleMarkedItem } from "../../lib/ai/client.js";
+import { GCS_SCALE, parseGCS, isGcsText, gcsProseConflicts } from "../../lib/scenarios/gcs.js";
 
 // ---- scoring tools ----------------------------------------------------------
-// Standard scales. The child's level in each category is highlighted; total is
-// the sum. GCS is fully broken down; other named scores fall back to their
-// stated value until their scale is added.
-var GCS_SCALE = {
-  Eye: { key: "E", max: 4, levels: [[4, "Spontaneous"], [3, "To speech"], [2, "To pain"], [1, "None"]] },
-  Verbal: { key: "V", max: 5, levels: [[5, "Oriented / coos & babbles"], [4, "Confused / irritable cry"], [3, "Inappropriate words / cries to pain"], [2, "Incomprehensible / moans"], [1, "None"]] },
-  Motor: { key: "M", max: 6, levels: [[6, "Obeys / normal movement"], [5, "Localizes pain"], [4, "Withdraws to pain"], [3, "Abnormal flexion"], [2, "Extension"], [1, "None"]] }
-};
+// GCS_SCALE + parseGCS live in lib/scenarios/gcs.js (plain .js) so the coverage
+// checks can import and exercise the REAL parser rather than a copy of it.
+// Other named scores (FAST, Aldrete, PEWS, Westley, Wong-Baker, FLACC, Apgar)
+// have no scale table yet; scoreKind returns null for them and the finding
+// renders as ordinary prose, which degrades cleanly.
 
 function scoreKind(sign) {
   var t = ((sign.label || "") + " " + (sign.finding || "")).toLowerCase();
-  if (t.indexOf("gcs") >= 0 || t.indexOf("glasgow") >= 0) return "gcs";
+  if (isGcsText(t)) return "gcs";
   return null;
-}
-
-// Pull E / V / M (and total) out of free text.
-//
-// Play-test fix 2026-07-29: the original used \bE / \bV / \bM, which requires a
-// word boundary before each letter. That holds for the spaced form "E4 V4 M6"
-// but NOT for the compact form "(E3V2M4)" — between "3" and "V" both sides are
-// word characters, so there is no boundary, V and M never matched, hasParts was
-// false, and the whole scoring breakdown silently collapsed to a bare total.
-// A TBI case shipped exactly that form and lost its breakdown. Try the compact
-// triple first, then fall back to the spaced/labelled forms.
-function parseGCS(text) {
-  var s = String(text || "");
-  var e = null, v = null, m = null;
-  var triple = s.match(/E\s*[:=]?\s*(\d)\s*[,/·]?\s*V\s*[:=]?\s*(\d)\s*[,/·]?\s*M\s*[:=]?\s*(\d)/i);
-  if (triple) {
-    e = parseInt(triple[1], 10); v = parseInt(triple[2], 10); m = parseInt(triple[3], 10);
-  } else {
-    function g(re) { var x = s.match(re); return x ? parseInt(x[1], 10) : null; }
-    e = g(/(?:^|[^A-Za-z])E\s*[:=]?\s*(\d)/i);
-    v = g(/(?:^|[^A-Za-z])V\s*[:=]?\s*(\d)/i);
-    m = g(/(?:^|[^A-Za-z])M\s*[:=]?\s*(\d)/i);
-  }
-  var hasParts = e != null && v != null && m != null;
-  // Only trust component sums that are actually in range (3–15).
-  var sum = hasParts ? e + v + m : null;
-  if (hasParts && (e < 1 || e > 4 || v < 1 || v > 5 || m < 1 || m > 6)) hasParts = false;
-  var stated = s.match(/gcs[^\d]{0,12}(\d{1,2})/i);
-  var statedTotal = stated ? parseInt(stated[1], 10) : null;
-  return {
-    e: e, v: v, m: m,
-    total: hasParts ? sum : statedTotal,
-    statedTotal: statedTotal,
-    // Surfaces a generator error rather than hiding it: when the case states a
-    // total that disagrees with its own E/V/M, the learner should see both.
-    mismatch: !!(hasParts && statedTotal != null && statedTotal !== sum),
-    hasParts: hasParts
-  };
 }
 
 export function FocusedExam(props) {
@@ -152,6 +112,18 @@ export function FocusedExam(props) {
           {"This case states GCS " + p.statedTotal + ", but E" + p.e + " + V" + p.v + " + M" + p.m + " adds to " + (p.e + p.v + p.m) + ". The components are shown below — trust them over the stated total."}
         </span>
       </div>}
+      {/* The other half of the same problem: components whose NUMBERS agree with
+          the stated total but disagree with the WORDS beside them (a case scored
+          "withdraws purposelessly to pain" as M3, which is abnormal flexion —
+          withdrawal is M4). The arithmetic check above cannot see this. */}
+      {gcsProseConflicts((sign.finding || "") + " " + (sign.label || ""), p).map(function (c, ci) {
+        return (<div key={ci} style={{ display: "flex", alignItems: "flex-start", gap: 6, padding: "7px 9px", marginBottom: 8, borderRadius: 8, background: "rgba(" + t.ATTN_RGB + ",0.12)", border: "1px solid rgba(" + t.ATTN_RGB + ",0.4)" }}>
+          <AlertTriangle size={13} color={t.COLOR.attention} style={{ flexShrink: 0, marginTop: 1 }}/>
+          <span style={{ fontSize: 11, color: t.COLOR.attentionText, lineHeight: 1.45, fontFamily: t.FONT.body }}>
+            {"This case scores " + c.category + " as " + c.emitted + " (" + GCS_SCALE[c.category].levels.filter(function (lv) { return lv[0] === c.emitted; }).map(function (lv) { return lv[1]; })[0] + "), but describes “" + c.phrase + "”, which is " + c.category + " " + c.implied + ". Go by the description, not the number."}
+          </span>
+        </div>);
+      })}
       {Object.keys(GCS_SCALE).map(function (cat) {
         var def = GCS_SCALE[cat];
         return (<div key={cat} style={{ marginBottom: 8 }}>
@@ -267,11 +239,12 @@ export function FocusedExam(props) {
       <SceneStage sc={props.sc} height={190} framing="figure" bare={true}/>
     </div>
 
-    {/* The mechanic, stated plainly. Nothing in this section is scored — the
-        learner reads to build a picture and saves what they want explained. */}
+    {/* Keeps the one affordance a learner cannot guess at — that a finding can
+        be saved for the debrief. The "nothing here is graded" disclaimer that
+        used to sit here (and again on the section header) was removed on owner
+        direction 2026-08-05: said twice on one screen it read as hedging. */}
     <div style={{ textAlign: "center", fontSize: 11, color: t.COLOR.ink3, fontFamily: t.FONT.body, marginBottom: 8, lineHeight: 1.5 }}>
-      Read the exam to build your picture. Nothing here is graded — save anything
-      you want explained in the debrief.
+      Save anything you want explained in the debrief.
     </div>
 
     <div style={{ display: "flex", justifyContent: "center", gap: 6, marginBottom: 9 }}>

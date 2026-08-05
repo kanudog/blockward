@@ -1,0 +1,716 @@
+{
+  "schemaVersion": "5.4.1",
+  "id": "ped-tbi-forearm-fx",
+  "title": "Impact Zone",
+  "subtitle": "A school-age pedestrian down after a high-speed strike — brain and bone both at risk",
+  "patientCard": {
+    "name": "Cole Merritt",
+    "ageLabel": "8 years old",
+    "weightKg": 25,
+    "sex": "M",
+    "cc": "closed head injury and open forearm fracture after pedestrian vs. car"
+  },
+  "presentation": {
+    "routeOfPresentation": "ems",
+    "report": "We've got an 8-year-old male, Cole, struck by a vehicle — witnesses say it was going about 35 mph. He was unresponsive on scene, GCS around 6 initially; he's opened his eyes a couple of times en route so he's up to around 9 now. C-spine is immobilized. Right forearm has an open fracture — we've got a saline-soaked dressing on it, bleeding is controlled. Two large-bore IVs in place, both peripheral. He got 250 mL of normal saline on the way in. BP has been borderline — last reading was 88/58. No obvious abdominal distension, chest is equal bilaterally. No known allergies, no PMH.",
+    "learnMore": "Pediatric traumatic brain injury following pedestrian-vehicle collisions carries high mortality, largely driven by secondary injury from hypotension and hypoxia. In kids, hypotension is a late and ominous sign — a systolic below 90 in an 8-year-old means the cardiovascular reserve is nearly exhausted. The open forearm fracture needs emergent wound care and orthopedic input but is not the immediate life threat — the brain is."
+  },
+  "norms": {
+    "hr": [
+      70,
+      110
+    ],
+    "rr": [
+      18,
+      25
+    ],
+    "sbp": [
+      85,
+      115
+    ],
+    "dbp": [
+      55,
+      75
+    ],
+    "spo2": [
+      95,
+      100
+    ],
+    "temp": [
+      36.5,
+      37.5
+    ]
+  },
+  "phases": [
+    {
+      "phaseIndex": 0,
+      "id": "assess",
+      "stageType": "assess",
+      "title": "Primary Survey",
+      "narrative": "Cole arrives strapped to a backboard with a c-collar in place, eyes closed. His right forearm has a saline-soaked dressing over the wound site; the gauze is slightly blood-stained but not actively saturating. He opens his eyes briefly when you call his name but does not track or respond to commands. Two peripheral IVs are visible — one in each antecubital fossa. Chest rise is equal and breath sounds are clear bilaterally on quick auscultation. Abdomen is soft and non-distended. Skin is pale and cool to the touch peripherally.",
+      "vitals": [
+        {
+          "id": "hr",
+          "label": "Heart Rate",
+          "value": "118",
+          "unit": "bpm",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[0].vitals.hr.why",
+          "why": null
+        },
+        {
+          "id": "rr",
+          "label": "Resp Rate",
+          "value": "22",
+          "unit": "br/min",
+          "bad": false,
+          "cat": "vital",
+          "_slotRef": "phase[0].vitals.rr.why",
+          "why": null
+        },
+        {
+          "id": "bp",
+          "label": "Blood Pressure",
+          "value": "88/58",
+          "unit": "mmHg",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[0].vitals.bp.why",
+          "why": null
+        },
+        {
+          "id": "spo2",
+          "label": "SpO2",
+          "value": "94",
+          "unit": "%",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[0].vitals.spo2.why",
+          "why": null
+        },
+        {
+          "id": "temp",
+          "label": "Temperature",
+          "value": "36.2",
+          "unit": "°C",
+          "bad": false,
+          "cat": "vital",
+          "_slotRef": "phase[0].vitals.temp.why",
+          "why": null
+        },
+        {
+          "id": "cap",
+          "label": "Cap Refill",
+          "value": "4 sec",
+          "unit": "",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[0].vitals.cap.why",
+          "why": null
+        }
+      ],
+      "signs": [
+        {
+          "id": "mentalStatus",
+          "label": "Mental Status",
+          "finding": "Opens eyes to voice, no spontaneous speech, withdraws from nail-bed pressure but does not localize. GCS 9 (E3 V2 M4).",
+          "sys": "Neuro",
+          "bad": true,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.mentalStatus.why",
+          "why": null
+        },
+        {
+          "id": "pupils",
+          "label": "Pupils",
+          "finding": "Right pupil 4 mm and briskly reactive; left pupil 4 mm and briskly reactive. No anisocoria at this time.",
+          "sys": "Neuro",
+          "bad": false,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.pupils.why",
+          "why": null
+        },
+        {
+          "id": "breathSounds",
+          "label": "Breath Sounds",
+          "finding": "Clear and equal bilaterally throughout all fields. No wheeze, crackle, or asymmetry.",
+          "sys": "Respiratory",
+          "bad": false,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.breathSounds.why",
+          "why": null
+        },
+        {
+          "id": "heartSounds",
+          "label": "Heart Sounds",
+          "finding": "Regular rate and rhythm, S1 and S2 present, no murmur audible.",
+          "sys": "Cardiovascular",
+          "bad": false,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.heartSounds.why",
+          "why": null
+        },
+        {
+          "id": "skinPerfusion",
+          "label": "Skin Perfusion",
+          "finding": "Pale, cool, and mottled peripherally. Skin color and temperature improve proximally toward the trunk.",
+          "sys": "Cardiovascular",
+          "pos": "extremities",
+          "bad": true,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.skinPerfusion.why",
+          "why": null
+        },
+        {
+          "id": "abdomen",
+          "label": "Abdomen",
+          "finding": "Soft, flat, non-distended. No guarding or rigidity on palpation. No palpable masses.",
+          "sys": "GI/Hydration",
+          "bad": false,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.abdomen.why",
+          "why": null
+        },
+        {
+          "id": "forearmWound",
+          "label": "Right Forearm",
+          "finding": "Open fracture mid-shaft radius/ulna with visible bone through a 3 cm wound. Saline-soaked dressing in place, bleeding controlled. Distal pulse palpable at the radial artery.",
+          "sys": "Musculoskeletal",
+          "pos": "right forearm",
+          "bad": true,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.forearmWound.why",
+          "why": null
+        },
+        {
+          "id": "scalp",
+          "label": "Scalp / Head",
+          "finding": "A 4 cm boggy hematoma over the right parietal region. No step-off palpated. No Battle sign or raccoon eyes.",
+          "sys": "HEENT",
+          "pos": "right parietal",
+          "bad": true,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.scalp.why",
+          "why": null
+        },
+        {
+          "id": "ivAccess",
+          "label": "IV Access",
+          "finding": "Two 18-gauge peripheral IVs — one in each antecubital fossa — placed by EMS, both patent and flushing well.",
+          "sys": "Lines & devices",
+          "bad": false,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.ivAccess.why",
+          "why": null
+        }
+      ],
+      "labs": [
+        {
+          "id": "hgb",
+          "name": "Hemoglobin",
+          "value": "9.8",
+          "unit": "g/dL",
+          "ref": "11.5-15.5",
+          "bad": true,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.hgb.why",
+          "why": null
+        },
+        {
+          "id": "hct",
+          "name": "Hematocrit",
+          "value": "29",
+          "unit": "%",
+          "ref": "35-45",
+          "bad": true,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.hct.why",
+          "why": null
+        },
+        {
+          "id": "glucose",
+          "name": "Glucose",
+          "value": "112",
+          "unit": "mg/dL",
+          "ref": "60-140",
+          "bad": false,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.glucose.why",
+          "why": null
+        },
+        {
+          "id": "lactate",
+          "name": "Lactate",
+          "value": "3.8",
+          "unit": "mmol/L",
+          "ref": "0.5-2.0",
+          "bad": true,
+          "critical": true,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.lactate.why",
+          "why": null
+        },
+        {
+          "id": "ph",
+          "name": "pH",
+          "value": "7.28",
+          "unit": "",
+          "ref": "7.35-7.45",
+          "bad": true,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.ph.why",
+          "why": null
+        },
+        {
+          "id": "pco2",
+          "name": "pCO2",
+          "value": "32",
+          "unit": "mmHg",
+          "ref": "35-45",
+          "bad": true,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.pco2.why",
+          "why": null
+        },
+        {
+          "id": "hco3",
+          "name": "HCO3",
+          "value": "15",
+          "unit": "mmol/L",
+          "ref": "20-26",
+          "bad": true,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.hco3.why",
+          "why": null
+        },
+        {
+          "id": "sodium",
+          "name": "Sodium",
+          "value": "138",
+          "unit": "mmol/L",
+          "ref": "135-145",
+          "bad": false,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.sodium.why",
+          "why": null
+        },
+        {
+          "id": "potassium",
+          "name": "Potassium",
+          "value": "3.9",
+          "unit": "mmol/L",
+          "ref": "3.5-5.0",
+          "bad": false,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.potassium.why",
+          "why": null
+        },
+        {
+          "id": "inr",
+          "name": "INR",
+          "value": "1.1",
+          "unit": "",
+          "ref": "0.8-1.2",
+          "bad": false,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.inr.why",
+          "why": null
+        }
+      ],
+      "actions": {
+        "tools": {},
+        "meds": {}
+      }
+    },
+    {
+      "phaseIndex": 1,
+      "id": "intervene",
+      "stageType": "intervene",
+      "title": "Stabilization and Neuroprotection",
+      "narrative": "Cole is now on your monitor. His SpO2 is sitting at 94% and he's breathing spontaneously but not reliably — his respiratory effort is irregular, with occasional short apneic pauses of 2-3 seconds. His GCS has not improved since arrival and his pressure is still borderline. With a GCS of 9 and decreasing respiratory reliability, you have a short window to decide whether to secure the airway before he deteriorates further. You also need to address his hemodynamic picture — the 250 mL he got in the field barely touched his pressure, and his lactate tells you his tissues are not happy. The open forearm fracture needs a clean dressing and orthopedic consult but will wait until the brain and the blood pressure are sorted.",
+      "vitals": [
+        {
+          "id": "hr",
+          "label": "Heart Rate",
+          "value": "122",
+          "unit": "bpm",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[1].vitals.hr.why",
+          "why": null
+        },
+        {
+          "id": "rr",
+          "label": "Resp Rate",
+          "value": "20",
+          "unit": "br/min",
+          "bad": false,
+          "cat": "vital",
+          "_slotRef": "phase[1].vitals.rr.why",
+          "why": null
+        },
+        {
+          "id": "bp",
+          "label": "Blood Pressure",
+          "value": "86/56",
+          "unit": "mmHg",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[1].vitals.bp.why",
+          "why": null
+        },
+        {
+          "id": "spo2",
+          "label": "SpO2",
+          "value": "94",
+          "unit": "%",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[1].vitals.spo2.why",
+          "why": null
+        },
+        {
+          "id": "temp",
+          "label": "Temperature",
+          "value": "36.1",
+          "unit": "°C",
+          "bad": false,
+          "cat": "vital",
+          "_slotRef": "phase[1].vitals.temp.why",
+          "why": null
+        },
+        {
+          "id": "cap",
+          "label": "Cap Refill",
+          "value": "4 sec",
+          "unit": "",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[1].vitals.cap.why",
+          "why": null
+        }
+      ],
+      "signs": [
+        {
+          "id": "mentalStatus2",
+          "label": "Mental Status",
+          "finding": "Eyes open to voice only, no verbal response, withdraws to pain. GCS 9 (E3 V2 M4). No change from initial exam.",
+          "sys": "Neuro",
+          "bad": true,
+          "cat": "clinical",
+          "_slotRef": "phase[1].signs.mentalStatus2.why",
+          "why": null
+        },
+        {
+          "id": "pupils2",
+          "label": "Pupils",
+          "finding": "Right 4 mm briskly reactive; left 4 mm briskly reactive. Symmetric, no new anisocoria.",
+          "sys": "Neuro",
+          "bad": false,
+          "cat": "clinical",
+          "_slotRef": "phase[1].signs.pupils2.why",
+          "why": null
+        },
+        {
+          "id": "airwayPatency",
+          "label": "Airway Patency",
+          "finding": "Airway patent with chin-lift maintained. Intermittent apneic pauses of 2-3 seconds observed. No stridor or gurgling.",
+          "sys": "Respiratory",
+          "bad": true,
+          "cat": "clinical",
+          "_slotRef": "phase[1].signs.airwayPatency.why",
+          "why": null
+        },
+        {
+          "id": "perfusion2",
+          "label": "Peripheral Perfusion",
+          "finding": "Extremities remain pale and cool. Mottling visible from the knees and elbows distally. Radial pulses weak and thready bilaterally.",
+          "sys": "Cardiovascular",
+          "pos": "extremities",
+          "bad": true,
+          "cat": "clinical",
+          "_slotRef": "phase[1].signs.perfusion2.why",
+          "why": null
+        },
+        {
+          "id": "forearmDressing",
+          "label": "Forearm Dressing",
+          "finding": "Right forearm wound dressing intact. Minimal fresh blood staining — no active hemorrhage through the dressing.",
+          "sys": "Musculoskeletal",
+          "pos": "right forearm",
+          "bad": false,
+          "cat": "clinical",
+          "_slotRef": "phase[1].signs.forearmDressing.why",
+          "why": null
+        },
+        {
+          "id": "cspineDevice",
+          "label": "C-Spine & Backboard",
+          "finding": "Cervical collar in place, appropriately sized. Patient still on long backboard from EMS. Spinal precautions maintained.",
+          "sys": "Lines & devices",
+          "bad": false,
+          "cat": "clinical",
+          "_slotRef": "phase[1].signs.cspineDevice.why",
+          "why": null
+        }
+      ],
+      "labs": [
+        {
+          "id": "hgb2",
+          "name": "Hemoglobin",
+          "value": "9.4",
+          "unit": "g/dL",
+          "ref": "11.5-15.5",
+          "bad": true,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[1].labs.hgb2.why",
+          "why": null
+        },
+        {
+          "id": "lactate2",
+          "name": "Lactate",
+          "value": "4.1",
+          "unit": "mmol/L",
+          "ref": "0.5-2.0",
+          "bad": true,
+          "critical": true,
+          "cat": "lab",
+          "_slotRef": "phase[1].labs.lactate2.why",
+          "why": null
+        },
+        {
+          "id": "glucose2",
+          "name": "Glucose",
+          "value": "118",
+          "unit": "mg/dL",
+          "ref": "60-140",
+          "bad": false,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[1].labs.glucose2.why",
+          "why": null
+        },
+        {
+          "id": "sodium2",
+          "name": "Sodium",
+          "value": "137",
+          "unit": "mmol/L",
+          "ref": "135-145",
+          "bad": false,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[1].labs.sodium2.why",
+          "why": null
+        },
+        {
+          "id": "plt",
+          "name": "Platelets",
+          "value": "198",
+          "unit": "x10³/µL",
+          "ref": "150-400",
+          "bad": false,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[1].labs.plt.why",
+          "why": null
+        },
+        {
+          "id": "wbc",
+          "name": "WBC",
+          "value": "11.2",
+          "unit": "x10³/µL",
+          "ref": "5.0-13.0",
+          "bad": false,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[1].labs.wbc.why",
+          "why": null
+        }
+      ],
+      "actions": {
+        "tools": {
+          "vsMonitor": {
+            "id": "vsMonitor",
+            "label": "Connect to vital signs monitor",
+            "priority": "correct",
+            "_slotRef": "phase[1].actions.tools.vsMonitor.fb",
+            "fb": null
+          },
+          "intubationKit": {
+            "id": "intubationKit",
+            "label": "Perform RSI and secure airway",
+            "priority": "tied-correct",
+            "_slotRef": "phase[1].actions.tools.intubationKit.fb",
+            "fb": null
+          },
+          "etco2": {
+            "id": "etco2",
+            "label": "Attach end-tidal CO2 monitor",
+            "priority": "correct",
+            "_slotRef": "phase[1].actions.tools.etco2.fb",
+            "fb": null
+          },
+          "headOfBedElevation": {
+            "id": "headOfBedElevation",
+            "label": "Elevate head of bed to 30°",
+            "priority": "correct",
+            "_slotRef": "phase[1].actions.tools.headOfBedElevation.fb",
+            "fb": null
+          },
+          "eFastExam": {
+            "id": "eFastExam",
+            "label": "Perform eFAST examination",
+            "priority": "correct",
+            "_slotRef": "phase[1].actions.tools.eFastExam.fb",
+            "fb": null
+          },
+          "headCt": {
+            "id": "headCt",
+            "label": "Order CT head (non-contrast)",
+            "priority": "correct",
+            "_slotRef": "phase[1].actions.tools.headCt.fb",
+            "fb": null
+          },
+          "callNeurosurgery": {
+            "id": "callNeurosurgery",
+            "label": "Activate neurosurgery consult",
+            "priority": "correct",
+            "_slotRef": "phase[1].actions.tools.callNeurosurgery.fb",
+            "fb": null
+          },
+          "lumbarPuncture": {
+            "id": "lumbarPuncture",
+            "label": "Perform lumbar puncture",
+            "priority": "distractor-clinical",
+            "_slotRef": "phase[1].actions.tools.lumbarPuncture.fb",
+            "fb": null
+          },
+          "pressureDressing": {
+            "id": "pressureDressing",
+            "label": "Apply pressure dressing to forearm",
+            "priority": "distractor-pack",
+            "_slotRef": "phase[1].actions.tools.pressureDressing.fb",
+            "fb": null
+          }
+        },
+        "meds": {
+          "ketamine": {
+            "id": "ketamine",
+            "label": "Give ketamine 1.5 mg/kg IV (37.5 mg) for RSI induction",
+            "priority": "tied-correct",
+            "_slotRef": "phase[1].actions.meds.ketamine.fb",
+            "fb": null
+          },
+          "rocuronium": {
+            "id": "rocuronium",
+            "label": "Give rocuronium 1.2 mg/kg IV (30 mg) for RSI paralysis",
+            "priority": "tied-correct",
+            "_slotRef": "phase[1].actions.meds.rocuronium.fb",
+            "fb": null
+          },
+          "nsBolus": {
+            "id": "nsBolus",
+            "label": "Give NS 10 mL/kg IV bolus (250 mL) for hypotension",
+            "priority": "tied-correct",
+            "_slotRef": "phase[1].actions.meds.nsBolus.fb",
+            "fb": null
+          },
+          "fentanyl": {
+            "id": "fentanyl",
+            "label": "Give fentanyl 1 mcg/kg IV (25 mcg) for pre-RSI analgesia",
+            "priority": "correct",
+            "_slotRef": "phase[1].actions.meds.fentanyl.fb",
+            "fb": null
+          },
+          "mannitol": {
+            "id": "mannitol",
+            "label": "Give mannitol 0.5 g/kg IV (12.5 g) for ICP reduction",
+            "priority": "distractor-clinical",
+            "_slotRef": "phase[1].actions.meds.mannitol.fb",
+            "fb": null
+          },
+          "hypertonicSaline": {
+            "id": "hypertonicSaline",
+            "label": "Give 3% saline 3 mL/kg IV (75 mL) for suspected elevated ICP",
+            "priority": "distractor-clinical",
+            "_slotRef": "phase[1].actions.meds.hypertonicSaline.fb",
+            "fb": null
+          },
+          "epiIV": {
+            "id": "epiIV",
+            "label": "Give epinephrine 0.01 mg/kg IV (0.25 mg) for refractory hypotension",
+            "priority": "distractor-pack",
+            "_slotRef": "phase[1].actions.meds.epiIV.fb",
+            "fb": null
+          },
+          "lorazepam": {
+            "id": "lorazepam",
+            "label": "Give lorazepam 0.1 mg/kg IV (2.5 mg) for seizure prophylaxis",
+            "priority": "distractor-misc",
+            "_slotRef": "phase[1].actions.meds.lorazepam.fb",
+            "fb": null
+          }
+        }
+      }
+    }
+  ],
+  "reassessment": {
+    "narrative": "Fifteen minutes after RSI, Cole is intubated — tube confirmed at 21 cm at the lip by waveform capnography, EtCO2 reading 38 mmHg, chest rise equal bilaterally. Following the 250 mL NS bolus his systolic has come up to 98 and cap refill has improved to 3 seconds. He's on a transport ventilator set at a rate of 20, tidal volume 200 mL (8 mL/kg), FiO2 60% — SpO2 is now 99%. Pupils remain equal and reactive, no signs of herniation. The eFAST was negative for free fluid. Neurosurgery is aware, CT head is ordered, and PICU has a bed.",
+    "vitals": {
+      "hr": "104",
+      "rr": "20",
+      "bp": "98/64",
+      "spo2": "99",
+      "temp": "36.3",
+      "cap": "3 sec"
+    },
+    "outcome": "transferred-icu",
+    "stabilizationSummary": "Cole is intubated and hemodynamically stabilized — BP responding to fluid resuscitation, SpO2 normalized on the vent, EtCO2 in target range. He's been transferred to the PICU with neurosurgery and orthopedics both on notice for definitive management of his TBI and open forearm fracture."
+  },
+  "debrief": {
+    "summary": "Cole presented after a high-energy pedestrian-vehicle collision with a GCS of 9, borderline hypotension, and an open forearm fracture. The core challenge was managing competing priorities simultaneously: a threatened airway from a declining GCS, hypotension that worsens secondary brain injury, and an open fracture that needs care but is not the immediate killer. Timely RSI secured the airway and eliminated the intermittent apneic pauses; careful fluid resuscitation brought his pressure into an acceptable range without over-loading the injured brain. The eFAST was appropriately negative, and the CT head was ordered as part of the systematic workup rather than an isolated reflex.",
+    "keyTeaching": [
+      "In pediatric TBI, hypotension is a secondary brain injury driver — a single episode of SBP below age-appropriate targets worsens outcomes independently of the initial injury severity.",
+      "GCS ≤8, declining GCS trajectory, or unreliable airway protection are each sufficient indications for RSI in pediatric head trauma — wait too long and the intubation gets harder.",
+      "Ketamine for RSI induction in TBI is no longer contraindicated — current evidence shows it is safe and hemodynamically favorable compared to agents that drop blood pressure.",
+      "Hypertonic saline and mannitol are reserved for signs of herniation (blown pupil, Cushing response, acute neurologic deterioration) — they are not routine for an altered, non-herniating TBI patient.",
+      "The open forearm fracture requires orthopedic management and antibiotics, but it does not compete with airway and hemodynamics — correct triage sequencing prevents distraction by a visible but non-life-threatening injury."
+    ],
+    "physiologyDeepDive": [
+      {
+        "id": "secondary-brain-injury",
+        "title": "Secondary Brain Injury: Hypoxia and Hypotension",
+        "_slotRef": "debrief.physiologyDeepDive.secondary-brain-injury.content",
+        "content": null
+      },
+      {
+        "id": "rsi-in-tbi",
+        "title": "RSI Drug Selection in Pediatric TBI",
+        "_slotRef": "debrief.physiologyDeepDive.rsi-in-tbi.content",
+        "content": null
+      },
+      {
+        "id": "hyperosmolar-therapy",
+        "title": "When to Use Hyperosmolar Therapy in TBI",
+        "_slotRef": "debrief.physiologyDeepDive.hyperosmolar-therapy.content",
+        "content": null
+      }
+    ]
+  },
+  "visuals": [
+    "c-collar",
+    "wound dressing",
+    "diaphoretic"
+  ]
+}

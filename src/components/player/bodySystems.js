@@ -15,8 +15,12 @@
 //
 // Three changes fix the whole class of bug:
 //
-//   1. An explicit `sign.sys` from the generator always wins. The prompt now
-//      requires it, so the heuristic below is a fallback for legacy cases.
+//   1. An explicit `sign.sys` from the generator always wins.
+//      CAUTION (audit 2026-08-05): the prompt marks `sys` REQUIRED, but the
+//      5.4.1 orchestrator emits it on ZERO signs — every legacy-schema case
+//      carries it (44/44) and every 5.4.1 case does not (0/91). So the
+//      heuristic below is NOT a legacy fallback, it is the primary path for
+//      current output. Treat it as load-bearing and keep check:systems green.
 //   2. The LABEL is matched before the finding prose. The label is the subject
 //      of the finding; the prose is commentary that happens to mention other
 //      organs ("trachea midline", "not tender", "flushing well").
@@ -54,6 +58,13 @@ var SYS_ALIAS = {
   "gi": "GI/Hydration", "gi/hydration": "GI/Hydration", "gastrointestinal": "GI/Hydration",
   "abdomen": "GI/Hydration", "abdominal": "GI/Hydration", "hydration": "GI/Hydration",
   "renal": "Renal", "gu": "Renal", "genitourinary": "Renal", "kidney": "Renal",
+  // Spellings seen in real generated output that used to fall through to the
+  // heuristic (audit 2026-08-05). "vascular" appeared on IV/line findings in
+  // four cases and was silently discarded.
+  "vascular": LINES, "iv": LINES, "line": LINES,
+  "endocrine": "Other", "endocrinology": "Other", "metabolic": "Other",
+  "heme": "Other", "hematologic": "Other", "haematologic": "Other",
+  "id": "Other", "infectious": "Other", "psych": "Other", "psychiatric": "Other",
   "msk": "Musculoskeletal", "musculoskeletal": "Musculoskeletal", "ortho": "Musculoskeletal",
   "extremities": "Musculoskeletal",
   "skin": "Integumentary", "integumentary": "Integumentary", "derm": "Integumentary",
@@ -110,9 +121,14 @@ var RULES = [
     "edema", "peripheral pulse", "central pulse", "blood pressure", "hypotens",
     "hypertens", "brady", "tachycard"]],
 
-  ["GI/Hydration", ["abdom", "bowel", "peritone", "guard", "rebound", "vomit",
+  // "guard" and "rebound" used to sit here bare, which filed a FORELIMB
+  // fracture under GI: "Reports pain 8/10 at the left forearm… guarding the
+  // arm" (a real shipped case). Both are now required to name the abdomen —
+  // any genuinely abdominal finding is already caught by "abdom"/"peritone".
+  ["GI/Hydration", ["abdom", "bowel", "peritone", "vomit",
     "emesis", "diarrhea", "stool", "hepat", "splenomeg", "liver edge", "ascites",
-    "hydrat", "oral intake", "feed", "npo", "distend"]],
+    "hydrat", "oral intake", "feed", "npo", "distend",
+    "involuntary guarding", "rebound tender"]],
 
   ["Renal", ["renal", "urin", "kidney", "diaper", "oligur", "anur", "void",
     "bladder", "flank", "genital"]],

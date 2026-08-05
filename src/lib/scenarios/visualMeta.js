@@ -2,28 +2,15 @@
 // pre-Phase-4b TOOLS / MEDS objects in builtIn.js so the registry itself
 // can stay display-pure (id + label + pack only).
 //
-// TOOL_VISUAL_META[id].iconName is the discriminator that ToolIcon
-// switches on. New pack tools without an iconName entry fall through to
-// the generic ToolIcon default. Same model for MedIcon: it switches on
-// medType.
-
-export const TOOL_VISUAL_META = {
-  // Pre-Phase-4b — port verbatim, these have hand-drawn SVGs in icons.jsx.
-  glucometer:   { iconName: "glucometer" },
-  stethoscope:  { iconName: "stethoscope" },
-  bvm:          { iconName: "bvm" },
-  bvmReady:     { iconName: "bvmReady" },
-  suction:      { iconName: "suction" },
-  o2Mask:       { iconName: "o2mask" },     // ToolIcon case is lowercase; id is canonical-cased.
-  ivKit:        { iconName: "ivKit" },
-  defib:        { iconName: "defib" },
-  thermometer:  { iconName: "thermometer" },
-  needleDecomp: { iconName: "needleDecomp" },
-  pupilCheck:   { iconName: "pupilCheck" },
-  peakFlow:     { iconName: "peakFlow" },
-  capRefill:    { iconName: "capRefill" }   // restored to universal pack post-Phase-4b review.
-  // All other new pack tools fall through to ToolIcon default (Activity icon).
-};
+// TOOLS: there is no indirection. ActionPanel passes the raw tool id straight
+// to <ToolIcon name={id}>, which switches on the id itself. A TOOL_VISUAL_META
+// map with an `iconName` field used to sit here; the audit of 2026-08-05 found
+// that nothing ever called it, so it and its toolIconName() lookup have been
+// removed rather than left to rot into a second source of truth. To give a new
+// tool an icon, add a `case "<id>"` to ToolIcon.
+//
+// MEDS still need this table: MedIcon switches on the ROUTE (iv/neb/oral/push/
+// protocol), not the med id, and the tile background uses the colour.
 
 export const MED_VISUAL_META = {
   // universal pack
@@ -92,6 +79,12 @@ export const MED_VISUAL_META = {
   gentamicin:           { color: "#00b894", medType: "iv"   },
   acyclovir:            { color: "#00b894", medType: "iv"   },
   oseltamivir:          { color: "#55efc4", medType: "oral" },
+  // Meta-action. mtpActivation is registered as a TOOL, but generators
+  // regularly file it under meds (ActionPanel cross-looks-up ids that land in
+  // the wrong list). When that happens this entry gives it the protocol
+  // clipboard instead of a generic IV bag — previously the "protocol" MedIcon
+  // case was unreachable art because no med produced that route.
+  mtpActivation:        { color: "#b2bec3", medType: "protocol" },
   // toxicologyAntidotes
   naloxone:             { color: "#fdcb6e", medType: "push" },
   flumazenil:           { color: "#fdcb6e", medType: "push" },
@@ -107,7 +100,4 @@ export function medColor(id) {
 }
 export function medType(id) {
   return (MED_VISUAL_META[id] && MED_VISUAL_META[id].medType) || "iv";
-}
-export function toolIconName(id) {
-  return (TOOL_VISUAL_META[id] && TOOL_VISUAL_META[id].iconName) || null;
 }

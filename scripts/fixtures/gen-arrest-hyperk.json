@@ -1,0 +1,661 @@
+{
+  "schemaVersion": "5.4.1",
+  "id": "hyperkalemia-dialysis-arrest",
+  "title": "Flatline on the Dialysis Unit",
+  "subtitle": "A 10-year-old codes mid-run — the rhythm tells you where to start",
+  "patientCard": {
+    "name": "Connor Walsh",
+    "ageLabel": "10 years old",
+    "weightKg": 32,
+    "sex": "M",
+    "cc": "pulseless arrest during hemodialysis"
+  },
+  "presentation": {
+    "routeOfPresentation": "transfer",
+    "report": "This is Connor Walsh, 10 years old, 32 kilograms, with end-stage renal disease on maintenance hemodialysis three times a week. He came in for his usual Monday session and about 40 minutes into the run the monitor alarmed — he went unresponsive and lost his pulse. We called the code team immediately. Dialysis was paused. He has no pulse; the monitor is showing a wide-complex rhythm that looks almost sinusoidal. No pulse since approximately 3 minutes ago. His last potassium before the run — checked Friday — was 6.8.",
+    "learnMore": "Hyperkalemia-induced cardiac arrest is a well-recognized complication of dialysis, particularly in patients who present to their session with an already-elevated baseline potassium. The classic ECG progression — peaked T waves, PR prolongation, wide QRS, sine-wave pattern, ventricular fibrillation or asystole — can advance rapidly. Calcium is the membrane stabilizer that buys time; definitive treatment is removal of potassium from the body, and resuming dialysis is the most efficient way to do that in this patient."
+  },
+  "norms": {
+    "hr": [
+      60,
+      100
+    ],
+    "rr": [
+      16,
+      22
+    ],
+    "sbp": [
+      90,
+      120
+    ],
+    "dbp": [
+      60,
+      80
+    ],
+    "spo2": [
+      95,
+      100
+    ],
+    "temp": [
+      36.5,
+      37.5
+    ]
+  },
+  "phases": [
+    {
+      "phaseIndex": 0,
+      "id": "assess",
+      "stageType": "assess",
+      "title": "Rapid Assessment",
+      "narrative": "Connor is lying supine on the dialysis chair, completely unresponsive with eyes closed. His dialysis access — a tunneled right internal jugular catheter — is clamped off; the machine has been paused. He is deeply pale with mottled, cool extremities and no visible respiratory effort. The monitor shows a wide, nearly sinusoidal complex at a rate around 30 — no organized P waves visible. There is no palpable pulse centrally or peripherally.",
+      "vitals": [
+        {
+          "id": "hr",
+          "label": "Heart Rate",
+          "value": "28",
+          "unit": "bpm",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[0].vitals.hr.why",
+          "why": null
+        },
+        {
+          "id": "rr",
+          "label": "Resp Rate",
+          "value": "0",
+          "unit": "br/min",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[0].vitals.rr.why",
+          "why": null
+        },
+        {
+          "id": "bp",
+          "label": "Blood Pressure",
+          "value": "0/0",
+          "unit": "mmHg",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[0].vitals.bp.why",
+          "why": null
+        },
+        {
+          "id": "spo2",
+          "label": "SpO2",
+          "value": "---",
+          "unit": "%",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[0].vitals.spo2.why",
+          "why": null
+        },
+        {
+          "id": "temp",
+          "label": "Temperature",
+          "value": "36.6",
+          "unit": "°C",
+          "bad": false,
+          "cat": "vital",
+          "_slotRef": "phase[0].vitals.temp.why",
+          "why": null
+        },
+        {
+          "id": "cap",
+          "label": "Cap Refill",
+          "value": ">5 sec",
+          "unit": "",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[0].vitals.cap.why",
+          "why": null
+        }
+      ],
+      "signs": [
+        {
+          "id": "mentalStatus",
+          "label": "Mental Status",
+          "finding": "Unresponsive to voice and painful stimuli. No eye opening, no motor response, no verbal response. GCS 3 (E1 V1 M1).",
+          "sys": "Neuro",
+          "bad": true,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.mentalStatus.why",
+          "why": null
+        },
+        {
+          "id": "pupils",
+          "label": "Pupils",
+          "finding": "Pupils 5 mm bilaterally, minimally reactive to light.",
+          "sys": "Neuro",
+          "pos": "bilateral",
+          "bad": true,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.pupils.why",
+          "why": null
+        },
+        {
+          "id": "rhythm",
+          "label": "Cardiac Rhythm",
+          "finding": "Wide, nearly sinusoidal QRS complexes at approximately 28 per minute. No discernible P waves. Appears as a pre-fibrillatory sine-wave pattern.",
+          "sys": "Cardiovascular",
+          "bad": true,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.rhythm.why",
+          "why": null
+        },
+        {
+          "id": "pulse",
+          "label": "Pulse",
+          "finding": "No palpable pulse at the carotid or femoral artery bilaterally.",
+          "sys": "Cardiovascular",
+          "pos": "central",
+          "bad": true,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.pulse.why",
+          "why": null
+        },
+        {
+          "id": "breathSounds",
+          "label": "Breath Sounds",
+          "finding": "No spontaneous respiratory effort. No air entry bilaterally on auscultation prior to BVM ventilation.",
+          "sys": "Respiratory",
+          "bad": true,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.breathSounds.why",
+          "why": null
+        },
+        {
+          "id": "skin",
+          "label": "Skin",
+          "finding": "Deeply pale and mottled from trunk to extremities. Extremities cool to touch above the wrists and ankles.",
+          "sys": "Integumentary",
+          "pos": "diffuse",
+          "bad": true,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.skin.why",
+          "why": null
+        },
+        {
+          "id": "abdomen",
+          "label": "Abdomen",
+          "finding": "Soft, non-distended abdomen. No organomegaly palpated. No peritoneal signs.",
+          "sys": "GI/Hydration",
+          "bad": false,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.abdomen.why",
+          "why": null
+        },
+        {
+          "id": "dialysisAccess",
+          "label": "Dialysis Access",
+          "finding": "Tunneled right internal jugular hemodialysis catheter in place, currently clamped. Site is clean with no signs of infection or infiltration.",
+          "sys": "Lines & devices",
+          "pos": "right internal jugular",
+          "bad": false,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.dialysisAccess.why",
+          "why": null
+        }
+      ],
+      "labs": [
+        {
+          "id": "potassium",
+          "name": "Potassium",
+          "value": "8.9",
+          "unit": "mEq/L",
+          "ref": "3.5-5.0",
+          "bad": true,
+          "critical": true,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.potassium.why",
+          "why": null
+        },
+        {
+          "id": "sodium",
+          "name": "Sodium",
+          "value": "138",
+          "unit": "mEq/L",
+          "ref": "135-145",
+          "bad": false,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.sodium.why",
+          "why": null
+        },
+        {
+          "id": "glucose",
+          "name": "Glucose",
+          "value": "94",
+          "unit": "mg/dL",
+          "ref": "60-140",
+          "bad": false,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.glucose.why",
+          "why": null
+        },
+        {
+          "id": "ph",
+          "name": "pH",
+          "value": "7.18",
+          "unit": "",
+          "ref": "7.35-7.45",
+          "bad": true,
+          "critical": true,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.ph.why",
+          "why": null
+        },
+        {
+          "id": "pco2",
+          "name": "pCO2",
+          "value": "38",
+          "unit": "mmHg",
+          "ref": "35-45",
+          "bad": false,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.pco2.why",
+          "why": null
+        },
+        {
+          "id": "hco3",
+          "name": "HCO3",
+          "value": "14",
+          "unit": "mEq/L",
+          "ref": "22-26",
+          "bad": true,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.hco3.why",
+          "why": null
+        },
+        {
+          "id": "ionizedCalcium",
+          "name": "Ionized Calcium",
+          "value": "0.92",
+          "unit": "mmol/L",
+          "ref": "1.12-1.32",
+          "bad": true,
+          "critical": true,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.ionizedCalcium.why",
+          "why": null
+        },
+        {
+          "id": "creatinine",
+          "name": "Creatinine",
+          "value": "9.4",
+          "unit": "mg/dL",
+          "ref": "0.5-1.0",
+          "bad": true,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.creatinine.why",
+          "why": null
+        },
+        {
+          "id": "wbc",
+          "name": "WBC",
+          "value": "7.2",
+          "unit": "x10³/µL",
+          "ref": "4.5-13.0",
+          "bad": false,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.wbc.why",
+          "why": null
+        }
+      ],
+      "actions": {
+        "tools": {},
+        "meds": {}
+      }
+    },
+    {
+      "phaseIndex": 1,
+      "id": "intervene",
+      "stageType": "intervene",
+      "title": "Code Management",
+      "narrative": "The code team is assembled. Connor has been pulled flat on the dialysis chair, now recumbent. A team member is at the head managing the airway with a BVM and 100% oxygen. Another is about to start chest compressions. The dialysis machine is off and the circuit is clamped. His tunneled IJ catheter is accessible. The wide sinusoidal rhythm persists on the monitor — no shockable morphology, no organized P waves. The team needs to address the underlying cause while running the arrest.",
+      "vitals": [
+        {
+          "id": "hr",
+          "label": "Heart Rate",
+          "value": "28",
+          "unit": "bpm",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[1].vitals.hr.why",
+          "why": null
+        },
+        {
+          "id": "rr",
+          "label": "Resp Rate",
+          "value": "0",
+          "unit": "br/min",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[1].vitals.rr.why",
+          "why": null
+        },
+        {
+          "id": "bp",
+          "label": "Blood Pressure",
+          "value": "0/0",
+          "unit": "mmHg",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[1].vitals.bp.why",
+          "why": null
+        },
+        {
+          "id": "spo2",
+          "label": "SpO2",
+          "value": "---",
+          "unit": "%",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[1].vitals.spo2.why",
+          "why": null
+        },
+        {
+          "id": "temp",
+          "label": "Temperature",
+          "value": "36.6",
+          "unit": "°C",
+          "bad": false,
+          "cat": "vital",
+          "_slotRef": "phase[1].vitals.temp.why",
+          "why": null
+        },
+        {
+          "id": "cap",
+          "label": "Cap Refill",
+          "value": ">5 sec",
+          "unit": "",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[1].vitals.cap.why",
+          "why": null
+        }
+      ],
+      "signs": [
+        {
+          "id": "rhythmUpdate",
+          "label": "Cardiac Rhythm",
+          "finding": "Persistent wide sinusoidal complexes at 28 per minute on continuous monitoring. No P waves. No transition toward a shockable rhythm.",
+          "sys": "Cardiovascular",
+          "bad": true,
+          "cat": "clinical",
+          "_slotRef": "phase[1].signs.rhythmUpdate.why",
+          "why": null
+        },
+        {
+          "id": "airwayPatency",
+          "label": "Airway",
+          "finding": "Jaw relaxed, airway patent without adjunct. BVM ventilation in progress with good chest rise bilaterally confirmed by the airway provider.",
+          "sys": "Respiratory",
+          "bad": false,
+          "cat": "clinical",
+          "_slotRef": "phase[1].signs.airwayPatency.why",
+          "why": null
+        },
+        {
+          "id": "ivAccess",
+          "label": "Vascular Access",
+          "finding": "Tunneled right IJ hemodialysis catheter is the only current IV access. Catheter is patent and aspirates blood freely. No peripheral IV is in place.",
+          "sys": "Lines & devices",
+          "pos": "right internal jugular",
+          "bad": false,
+          "cat": "clinical",
+          "_slotRef": "phase[1].signs.ivAccess.why",
+          "why": null
+        }
+      ],
+      "labs": [
+        {
+          "id": "potassiumRepeat",
+          "name": "Potassium (repeat)",
+          "value": "9.1",
+          "unit": "mEq/L",
+          "ref": "3.5-5.0",
+          "bad": true,
+          "critical": true,
+          "cat": "lab",
+          "_slotRef": "phase[1].labs.potassiumRepeat.why",
+          "why": null
+        },
+        {
+          "id": "ionizedCalciumRepeat",
+          "name": "Ionized Calcium (repeat)",
+          "value": "0.90",
+          "unit": "mmol/L",
+          "ref": "1.12-1.32",
+          "bad": true,
+          "critical": true,
+          "cat": "lab",
+          "_slotRef": "phase[1].labs.ionizedCalciumRepeat.why",
+          "why": null
+        },
+        {
+          "id": "hemoglobin",
+          "name": "Hemoglobin",
+          "value": "9.8",
+          "unit": "g/dL",
+          "ref": "9.0-13.0",
+          "bad": false,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[1].labs.hemoglobin.why",
+          "why": null
+        },
+        {
+          "id": "magnesium",
+          "name": "Magnesium",
+          "value": "1.9",
+          "unit": "mg/dL",
+          "ref": "1.7-2.5",
+          "bad": false,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[1].labs.magnesium.why",
+          "why": null
+        },
+        {
+          "id": "lactate",
+          "name": "Lactate",
+          "value": "7.8",
+          "unit": "mmol/L",
+          "ref": "0.5-2.0",
+          "bad": true,
+          "critical": true,
+          "cat": "lab",
+          "_slotRef": "phase[1].labs.lactate.why",
+          "why": null
+        }
+      ],
+      "actions": {
+        "tools": {
+          "cprCompressions": {
+            "id": "cprCompressions",
+            "label": "Start chest compressions",
+            "priority": "tied-correct",
+            "_slotRef": "phase[1].actions.tools.cprCompressions.fb",
+            "fb": null
+          },
+          "bvm": {
+            "id": "bvm",
+            "label": "Ventilate with BVM at 100% O2",
+            "priority": "tied-correct",
+            "_slotRef": "phase[1].actions.tools.bvm.fb",
+            "fb": null
+          },
+          "vsMonitor": {
+            "id": "vsMonitor",
+            "label": "Connect to vital signs monitor",
+            "priority": "correct",
+            "_slotRef": "phase[1].actions.tools.vsMonitor.fb",
+            "fb": null
+          },
+          "ecg12Lead": {
+            "id": "ecg12Lead",
+            "label": "Obtain 12-lead ECG",
+            "priority": "correct",
+            "_slotRef": "phase[1].actions.tools.ecg12Lead.fb",
+            "fb": null
+          },
+          "pulseCheck": {
+            "id": "pulseCheck",
+            "label": "Perform pulse check",
+            "priority": "correct",
+            "_slotRef": "phase[1].actions.tools.pulseCheck.fb",
+            "fb": null
+          },
+          "intubationKit": {
+            "id": "intubationKit",
+            "label": "Prepare intubation kit",
+            "priority": "correct",
+            "_slotRef": "phase[1].actions.tools.intubationKit.fb",
+            "fb": null
+          },
+          "defib": {
+            "id": "defib",
+            "label": "Charge defibrillator for shock",
+            "priority": "distractor-clinical",
+            "_slotRef": "phase[1].actions.tools.defib.fb",
+            "fb": null
+          },
+          "callPICU": {
+            "id": "callPICU",
+            "label": "Notify PICU team",
+            "priority": "correct",
+            "_slotRef": "phase[1].actions.tools.callPICU.fb",
+            "fb": null
+          },
+          "lumbarPuncture": {
+            "id": "lumbarPuncture",
+            "label": "Perform lumbar puncture",
+            "priority": "distractor-misc",
+            "_slotRef": "phase[1].actions.tools.lumbarPuncture.fb",
+            "fb": null
+          }
+        },
+        "meds": {
+          "calciumChloride": {
+            "id": "calciumChloride",
+            "label": "Give calcium chloride 20 mg/kg IV (640 mg)",
+            "priority": "tied-correct",
+            "_slotRef": "phase[1].actions.meds.calciumChloride.fb",
+            "fb": null
+          },
+          "epiIV": {
+            "id": "epiIV",
+            "label": "Give epinephrine 0.01 mg/kg IV (0.32 mg)",
+            "priority": "tied-correct",
+            "_slotRef": "phase[1].actions.meds.epiIV.fb",
+            "fb": null
+          },
+          "sodiumBicarb": {
+            "id": "sodiumBicarb",
+            "label": "Give sodium bicarbonate 1 mEq/kg IV (32 mEq)",
+            "priority": "tied-correct",
+            "_slotRef": "phase[1].actions.meds.sodiumBicarb.fb",
+            "fb": null
+          },
+          "regularInsulin": {
+            "id": "regularInsulin",
+            "label": "Give regular insulin 0.1 units/kg IV (3.2 units) with dextrose",
+            "priority": "correct",
+            "_slotRef": "phase[1].actions.meds.regularInsulin.fb",
+            "fb": null
+          },
+          "dextroseBolus": {
+            "id": "dextroseBolus",
+            "label": "Give dextrose 0.5 g/kg IV (16 g, D25W 64 mL) with insulin",
+            "priority": "correct",
+            "_slotRef": "phase[1].actions.meds.dextroseBolus.fb",
+            "fb": null
+          },
+          "adenosine": {
+            "id": "adenosine",
+            "label": "Give adenosine 0.1 mg/kg IV (3.2 mg) for wide-complex rhythm",
+            "priority": "distractor-clinical",
+            "_slotRef": "phase[1].actions.meds.adenosine.fb",
+            "fb": null
+          },
+          "amiodarone": {
+            "id": "amiodarone",
+            "label": "Give amiodarone 5 mg/kg IV (160 mg) for wide-complex arrest",
+            "priority": "distractor-clinical",
+            "_slotRef": "phase[1].actions.meds.amiodarone.fb",
+            "fb": null
+          },
+          "mannitol": {
+            "id": "mannitol",
+            "label": "Give mannitol 0.5 g/kg IV for cerebral edema",
+            "priority": "distractor-misc",
+            "_slotRef": "phase[1].actions.meds.mannitol.fb",
+            "fb": null
+          },
+          "calciumGluconate": {
+            "id": "calciumGluconate",
+            "label": "Give calcium gluconate 60 mg/kg IV (1920 mg) as membrane stabilizer",
+            "priority": "distractor-pack",
+            "_slotRef": "phase[1].actions.meds.calciumGluconate.fb",
+            "fb": null
+          }
+        }
+      }
+    }
+  ],
+  "reassessment": {
+    "narrative": "After two minutes of high-quality CPR with BVM ventilation, calcium chloride was pushed through the tunneled IJ catheter, followed immediately by epinephrine and sodium bicarbonate. The dialysis team has been asked to resume the machine on a low-potassium bath as soon as ROSC is achieved. Approximately 90 seconds after the calcium push, the sinusoidal pattern begins to narrow — QRS duration tightening from the wide, merging waveform toward something more recognizable. At the next pulse check, a weak but palpable carotid pulse is present at a rate of 52. SpO2 begins to register at 88% as perfusion improves. The rhythm on the monitor shows sinus bradycardia with a still-wide but significantly improved QRS. Insulin-dextrose infusion is underway to shift potassium into cells pending resumption of dialysis.",
+    "vitals": {
+      "hr": "58",
+      "rr": "12",
+      "bp": "72/44",
+      "spo2": "91",
+      "temp": "36.5",
+      "cap": "4 sec"
+    },
+    "outcome": "transferred-icu",
+    "stabilizationSummary": "Connor achieved ROSC approximately two minutes after calcium chloride administration with concurrent CPR and epinephrine. He is intubated and on transport ventilator settings, with dialysis resuming on a low-potassium bath. The PICU team is at bedside; plan is ongoing dialysis, serial potassium checks, and cardiac monitoring in the unit."
+  },
+  "debrief": {
+    "summary": "Connor arrested from severe hyperkalemia during his dialysis session — a recognized and preventable complication in ESRD patients who arrive to their run already critically elevated. The sine-wave pattern on his monitor was the giveaway: this is not a VF arrest you shock, and it is not a toxin or structural problem you diagnose with a lumbar puncture. This is a potassium problem you treat with calcium first and then work through the full acronym of K-lowering strategies. The calcium bought the time, the epinephrine supported perfusion during the arrest, and sodium bicarbonate shifted the equilibrium away from the myocardial membrane toxicity. Definitive treatment — dialysis itself — was already at the bedside.",
+    "keyTeaching": [
+      "A sine-wave or wide sinusoidal QRS pattern in a dialysis patient is hyperkalemia until proven otherwise — treat immediately without waiting for labs to confirm.",
+      "Calcium chloride (not gluconate) is the preferred membrane stabilizer in arrest — it delivers three times more elemental calcium per milliliter and works in under a minute.",
+      "The sine-wave rhythm of severe hyperkalemia is NOT shockable; defibrillation will not convert it and wastes critical time in the arrest.",
+      "Sodium bicarbonate shifts potassium intracellularly by raising pH and is an important bridge in acidotic ESRD patients who cannot rapidly excrete potassium renally.",
+      "Resuming dialysis on a low-potassium bath is the definitive treatment — all other maneuvers buy time until the machine can do its job."
+    ],
+    "physiologyDeepDive": [
+      {
+        "id": "hyperkalemia-cardiac-toxicity",
+        "title": "How high potassium poisons the myocardium",
+        "_slotRef": "debrief.physiologyDeepDive.hyperkalemia-cardiac-toxicity.content",
+        "content": null
+      },
+      {
+        "id": "calcium-membrane-stabilization",
+        "title": "Calcium as a membrane stabilizer — mechanism and drug choice",
+        "_slotRef": "debrief.physiologyDeepDive.calcium-membrane-stabilization.content",
+        "content": null
+      },
+      {
+        "id": "k-lowering-strategies",
+        "title": "The full toolkit for hyperkalemia: shift, excrete, antagonize",
+        "_slotRef": "debrief.physiologyDeepDive.k-lowering-strategies.content",
+        "content": null
+      },
+      {
+        "id": "bicarb-in-arrest",
+        "title": "When sodium bicarbonate belongs in a code",
+        "_slotRef": "debrief.physiologyDeepDive.bicarb-in-arrest.content",
+        "content": null
+      }
+    ]
+  },
+  "visuals": []
+}

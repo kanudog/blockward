@@ -26,7 +26,9 @@ export function ToolIcon({name, size=24, color="#4ECDC4"}) {
     case "capRefill": return <Timer size={size} color={color} strokeWidth={2}/>;
     case "needleDecomp": return <svg style={s} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="2" x2="12" y2="16"/><path d="M8 12l4 4 4-4"/><circle cx="12" cy="20" r="2"/></svg>;
     case "pupilCheck": return <Eye size={size} color={color} strokeWidth={2}/>;
-    case "epiPen": return <svg style={s} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="2" width="6" height="16" rx="2"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="9" y1="6" x2="15" y2="6"/><circle cx="12" cy="10" r="1" fill={color}/></svg>;
+    // (an `epiPen` case lived here and matched no registry id in either pack —
+    // removed 2026-08-05. IM epinephrine is the med `epiIM`, which renders
+    // through MedIcon's push route, not through ToolIcon.)
     case "peakFlow": return <Wind size={size} color={color} strokeWidth={2}/>;
     // --- Airway / breathing ---
     case "hfnc": return <Fan size={size} color={color} strokeWidth={2}/>;

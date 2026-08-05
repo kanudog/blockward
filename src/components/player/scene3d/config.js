@@ -55,6 +55,7 @@ export var ACCESSORY_CATALOG = [
   { id: "tone-pale", family: "S", label: "Pale tone shift", note: "Whole-figure pale shift, face included." },
   { id: "tint-cool-rims", family: "S", label: "Cool rims tint", note: "Blue-cool tint at the lips, hands, and feet." },
   { id: "sheen-droplets", family: "S", label: "Brow droplets", note: "Sweat droplets at the brow." },
+  { id: "tint-warm-cheeks", family: "S", label: "Warm cheek tint", note: "Soft warm flush across both cheeks." },
   { id: "rim-swollen", family: "S", label: "Swollen rim", note: "Puffy rim at the mouth." },
   { id: "collar-neck-support", family: "S", label: "Neck support collar", note: "Rigid support collar." },
   { id: "wrap-thermal-torso", family: "S", label: "Thermal torso wrap", note: "Warming/cooling wrap around the torso." },

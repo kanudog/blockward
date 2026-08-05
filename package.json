@@ -10,6 +10,9 @@
     "check:systems": "node scripts/check-body-systems.mjs",
     "check:verbosity": "node scripts/check-verbosity.mjs",
     "check:accessories": "node scripts/check-accessories.mjs",
+    "check:contracts": "node scripts/check-contracts.mjs",
+    "check:corpus": "node scripts/check-corpus.mjs",
+    "check": "npm run check:systems && npm run check:accessories && npm run check:verbosity && npm run check:contracts && npm run check:corpus",
     "audit": "node scripts/audit-coverage.mjs"
   },
   "dependencies": {

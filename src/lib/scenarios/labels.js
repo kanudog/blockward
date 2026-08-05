@@ -31,3 +31,16 @@ export function replaceIdsWithLabels(text){
   });
   return out;
 }
+
+// Owner correction 2026-08-05: the chief complaint is authored as a bare
+// phrase ("multisystem trauma after 10-foot fall") because it is designed to
+// read inline, but every surface that shows it renders it as its own line
+// after a "CC:" label — where a lowercase first letter reads like a typo. Only
+// the FIRST character is touched: "pRBC transfusion" and "cc of blood" keep
+// their internal casing, and an already-capitalised phrase is returned as-is.
+export function sentenceCase(text){
+  if(!text||typeof text!=="string")return text;
+  var s=text.replace(/^\s+/,"");
+  if(!s)return text;
+  return s.charAt(0).toUpperCase()+s.slice(1);
+}

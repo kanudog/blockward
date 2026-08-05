@@ -22,7 +22,7 @@ import { ChapterBar } from "../shared/ChapterBar.jsx";
 import { ReviewTray } from "../shared/ReviewTray.jsx";
 import { CoachBubble } from "../shared/CoachBubble.jsx";
 import { ToolIcon, MedIcon } from "./icons.jsx";
-import { replaceIdsWithLabels } from "../../lib/scenarios/labels.js";
+import { replaceIdsWithLabels, sentenceCase } from "../../lib/scenarios/labels.js";
 import { expectedRangesFor } from "../../lib/scenarios/ranges.js";
 import { useTokens } from "../theme/themeStore.js";
 import { GOOGLE_FONTS_CSS } from "../theme/tokens.js";
@@ -65,6 +65,22 @@ function actionLabel(kind, id, entry) {
   if (reg) return reg.label;
   var cross = kind === "tools" ? ALL_MEDS[id] : ALL_TOOLS[id];
   return cross ? cross.label : id;
+}
+
+// The five reassessment.outcome values the generator is required to choose
+// between. Until 2026-08-05 nothing read the field, so a patient prepped for
+// theatre and a patient going home to the ward both ended on "Steady again."
+// The headline now names what actually happened to this child.
+var OUTCOME_BEAT = {
+  "stabilized": { title: "Steady again.", line: "Your plan worked. Here's how things responded:" },
+  "admitted-floor": { title: "Well enough to go up.", line: "Stable for the ward. Here's how things responded:" },
+  "transferred-icu": { title: "Stable enough to move.", line: "Handing off to the PICU. Here's how things responded:" },
+  "transferred-or": { title: "Stable enough for theatre.", line: "Surgery is ready. Here's how things responded:" },
+  "transferred-hospital": { title: "Packaged for transport.", line: "Heading to a higher level of care. Here's how things responded:" }
+};
+function outcomeBeat(sc){
+  var key = sc && sc.reassessment && sc.reassessment.outcome;
+  return OUTCOME_BEAT[key] || OUTCOME_BEAT.stabilized;
 }
 
 function phaseInsight(ph){
@@ -270,7 +286,7 @@ export function ScenarioPlayer(props){
             <div><span style={{color:t.COLOR.ink3}}>Age: </span><strong>{sc.patient.ageLabel}</strong></div>
             <div><span style={{color:t.COLOR.ink3}}>Wt: </span><strong>{sc.patient.weightKg+" kg"}</strong></div>
             <div><span style={{color:t.COLOR.ink3}}>Sex: </span><strong>{sc.patient.sex}</strong></div></div>
-          <div style={{fontSize:13,marginBottom:8}}><span style={{color:t.COLOR.ink3}}>CC: </span><strong>{sc.patient.cc}</strong></div>
+          <div style={{fontSize:13,marginBottom:8}}><span style={{color:t.COLOR.ink3}}>CC: </span><strong>{sentenceCase(sc.patient.cc)}</strong></div>
           <div style={Object.assign({},t.label(),{color:t.COLOR.boldTerm,marginTop:10,marginBottom:6})}>Report</div>
           <TextBlock text={sc.emsReport||(sc.presentation&&sc.presentation.report)||sc.patient.history} style={{fontSize:13,color:t.COLOR.ink2,lineHeight:1.6}}/>
         </div>
@@ -465,8 +481,8 @@ export function ScenarioPlayer(props){
               {[<Sparkles/>,<Star/>,<Trophy/>,<Zap/>,<Shield/>,<Sparkles/>].map(function(e,i){return(<span key={i} className="bw-confetti" style={{position:"absolute",left:(10+i*15)+"%",color:i%2===0?t.COLOR.attention:t.COLOR.accent,animationDelay:(i*0.15)+"s"}}>{e}</span>);})}
             </div>
           </div>
-          <h2 style={{fontSize:26,fontWeight:600,fontFamily:t.FONT.display,color:t.COLOR.positive,marginTop:0,marginBottom:4}}>Steady again.</h2>
-          <p style={{fontSize:14,color:t.COLOR.ink2,marginBottom:20}}>Your plan worked. Here's how things responded:</p>
+          <h2 style={{fontSize:26,fontWeight:600,fontFamily:t.FONT.display,color:t.COLOR.positive,marginTop:0,marginBottom:4}}>{outcomeBeat(sc).title}</h2>
+          <p style={{fontSize:14,color:t.COLOR.ink2,marginBottom:20}}>{outcomeBeat(sc).line}</p>
           <div className="bw-vn" style={{display:"inline-flex",gap:10,flexWrap:"wrap",justifyContent:"center",marginBottom:20}}>
             {(function(){
               var re=sc.reassessment&&sc.reassessment.vitals;

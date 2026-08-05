@@ -69,7 +69,7 @@ for(const [label,kind,shouldRender,note] of checks){
   console.log(`  ${ok?"PASS":"FAIL"}  ${label.slice(0,46).padEnd(46)} -> ${got.length?got.join(", "):"(none)"}   [${note}]`);
 }
 // the critical narrative case: a hedge must not suppress an unrelated real item
-import { createSceneState as cs2, scanText } from "../src/components/player/scene3d/resolver.js";
+import { createSceneState as cs2, scanText, sceneProps } from "../src/components/player/scene3d/resolver.js";
 let st2 = cs2({ageBand:"C",sexVariant:"v1",paletteSeed:"t"});
 st2 = scanText(st2, "The team is preparing to intubate while the nasal cannula stays in place.");
 const ids2 = (st2.accessories||[]).map(a=>a.id||a);
@@ -77,5 +77,60 @@ const hasCannula = ids2.includes("line-two-prong");
 const hasTube = ids2.includes("tube-mouth-central");
 console.log(`  ${hasCannula&&!hasTube?"PASS":"FAIL"}  mixed sentence: cannula kept=${hasCannula}, tube suppressed=${!hasTube}`);
 hasCannula&&!hasTube?pass++:fail++;
+
+console.log("\n=== REGRESSION: negation and intraosseous access (2026-08-05) ===");
+// Real generated case wrote "No urticaria." and the figure wore HIVES; and put
+// the child's only access in a left tibial IO, which had no vocabulary at all.
+const negCases = [
+  ["Coalescing purpuric patches at the flanks. No urticaria.", "marks-cluster", false, "ruled-out hives must NOT render"],
+  ["Scattered petechiae across the trunk.", "marks-scattered", true, "a real rash still renders"],
+  ["No petechiae or purpura anywhere.", "marks-scattered", false, "ruled-out petechiae must NOT render"],
+  ["Non-blanching purple spots over the belly.", "marks-scattered", true, "'non-blanching' must not read as a negation"],
+  ["There is no cast on the left arm.", "shell-limb", false, "negated cast must NOT render"],
+  ["Left tibial IO on scene, confirmed good flow.", "patch-limb-access", true, "intraosseous access renders"],
+  ["The IO site in the left tibia is patent.", "patch-limb-access", true, "IO site phrasing renders"],
+];
+for (const [text, id, want, why] of negCases) {
+  const ids = (scanText(base(), text).accessories || []).map(a => String(a).split("@")[0]);
+  const got = ids.indexOf(id) >= 0;
+  const ok = got === want;
+  if (!ok) fail++;
+  console.log("  " + (ok ? "PASS" : "FAIL") + "  " + why.padEnd(46) + "  [" + text.slice(0, 44) + "]");
+  pass += ok ? 1 : 0;
+}
+
+// The IO must carry its LIMB, or the infusion line runs to the wrong place.
+const ioLimb = (scanText(base(), "Left tibial IO on scene, confirmed good flow.").accessories || [])
+  .filter(a => String(a).indexOf("patch-limb-access") === 0)[0] || "";
+{
+  const ok = ioLimb.indexOf("@left-leg") > 0;
+  if (!ok) fail++; else pass++;
+  console.log("  " + (ok ? "PASS" : "FAIL") + "  left tibial IO resolves to the left leg           [" + ioLimb + "]");
+}
+
+
+// One device named twice must not become two devices (real case: "Left tibial
+// IO in place" then "The IO line is functioning" -> a cannula on BOTH the left
+// leg and the default right arm).
+{
+  let st = base();
+  st = scanText(st, "Left tibial IO in place, secure dressing.");
+  st = scanText(st, "The IO line is functioning.");
+  const ids = sceneProps(st).accessories.filter(a => String(a).indexOf("patch-limb-access") === 0);
+  const ok = ids.length === 1 && ids[0].indexOf("@left-leg") > 0;
+  if (!ok) fail++; else pass++;
+  console.log("  " + (ok ? "PASS" : "FAIL") + "  one IO mentioned twice stays ONE device        [" + ids.join(", ") + "]");
+}
+// Access genuinely in two places is still two devices.
+{
+  let st = base();
+  st = scanText(st, "IV access in the left hand.");
+  st = scanText(st, "A second IV line in the right hand.");
+  const ids = sceneProps(st).accessories.filter(a => String(a).indexOf("patch-limb-access") === 0);
+  const ok = ids.length === 2;
+  if (!ok) fail++; else pass++;
+  console.log("  " + (ok ? "PASS" : "FAIL") + "  two real sites stay TWO devices                [" + ids.join(", ") + "]");
+}
+
 console.log(`\n${pass} passed, ${fail} failed`);
 if (fail > 0) process.exit(1);

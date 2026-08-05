@@ -81,10 +81,13 @@ export function buildRunSceneState(sc, snap) {
         var label = coll[id].label || id;
         // every committed give (meds collection) hangs one more pouch — the
         // DIRECTION §4 accumulation rule mapped onto the run's shape. Tools
-        // scan for equipment (a cannula, a collar) without forcing a pouch.
+        // scan for equipment (a cannula, a collar) without forcing a pouch,
+        // and anything a tool brings that we cannot draw on the patient is
+        // staged on the side table (the id tells the resolver which tools are
+        // decisions rather than objects).
         st = kind === "meds"
-          ? applyIntervention(st, "Give " + label + ".")
-          : applyIntervention(st, label);
+          ? applyIntervention(st, "Give " + label + ".", { id: id, kind: "meds" })
+          : applyIntervention(st, label, { id: id, kind: "tools" });
       });
     });
   });

@@ -47,7 +47,11 @@ export function AssessPanel(props){
   var prevAssess=props.prevAssess||null;
   var phaseIdx=props.phaseIdx!==undefined?props.phaseIdx:0;
   var _why=useState(null);var whyTarget=_why[0];var setWhyTarget=_why[1];
-  var _open=useState("char");var openSec=_open[0];var setOpenSec=_open[1];
+  // Owner direction 2026-08-05: every section starts COLLAPSED. The learner
+  // opens Exam, Vitals and Labs in whatever order they want to work — nothing
+  // is pre-opened for them. (secOpen still force-opens everything post-submit
+  // so the reveal shows all three at once.)
+  var _open=useState(null);var openSec=_open[0];var setOpenSec=_open[1];
   var _hint=useState(false);var hint=_hint[0];var setHint=_hint[1];
   var hypotheses=usePlayerStore(function(s){return s.hypotheses;});
   var setHypothesis=usePlayerStore(function(s){return s.setHypothesis;});
@@ -167,7 +171,7 @@ export function AssessPanel(props){
     {/* Owner direction 2026-07-29: findings are exploration, not a hunt. The
         monitor and the labs are where the learner commits to a judgement; the
         exam is where they build the picture. The copy now says so. */}
-    <Section title="Exam" task="Read the findings — nothing here is graded." open={secOpen("char")} onToggle={function(){toggleSec("char");}}>
+    <Section title="Exam" task="Assess the patient." open={secOpen("char")} onToggle={function(){toggleSec("char");}}>
       <FocusedExam signs={curSigns} phaseIdx={phaseIdx} sc={sc}
         cycleRate={parseFloat(vVal(vit.rr))||22} responseSec={parseFloat(vVal(vit.cap))||1.5}/>
     </Section>

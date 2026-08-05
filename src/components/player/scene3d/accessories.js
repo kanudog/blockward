@@ -219,24 +219,36 @@ var APPLY = {
 
 // ---- family L — lines & pouches -----------------------------------------
 
+// Owner correction 2026-08-05: the access patch used to draw its own line up to
+// a bare point on the pole, so a patient with an IV and nothing running had
+// tubing climbing to an empty hook. A line is only real when something is
+// HANGING to feed it, so the line now belongs to the BAG (see
+// "pouch-on-stand" below) and the patch draws only the cannula and its tape.
 APPLY["patch-limb-access"] = function (fig, refs, g, worldRoot, limb) {
-  // taped patch on the resolved limb + a thin sagging line up to the stand
   var p = limbPart(fig, limb);
   var zf = p.d / 2 + 0.02;
   box(p.seg, 0.3, 0.18, 0.06, mat(0xf2f6fa, 0.7), 0, -p.len * 0.6, zf);
   box(p.seg, 0.34, 0.07, 0.045, mat(TAPE, 0.8), 0, -p.len * 0.48, zf + 0.01);
-  var anchor = worldPoint(worldRoot, p.seg, 0, -p.len * 0.62, zf + 0.04);
-  var hook = new THREE.Vector3(refs.standXZ.x + 0.34, 1.3, refs.standXZ.z);
-  tube(g, [
-    hook,
-    new THREE.Vector3((hook.x + anchor.x) / 2, Math.min(hook.y, anchor.y) - 0.1, (hook.z + anchor.z) / 2 + 0.3),
-    anchor
-  ], 0.013, TUBING);
 };
 
-APPLY["pouch-on-stand"] = function (fig, refs, g) {
+// Where an infusion line should END on the patient: the named IV site if the
+// case established one, otherwise the default right arm (the same default
+// entryFor() uses when no limb is stated). Returns a world point.
+function infusionAnchor(fig, refs, worldRoot) {
+  var site = worldRoot.userData.ivSite;
+  if (site && site.kind === "scalp") {
+    var h = fig.dims.headS;
+    return worldPoint(worldRoot, fig.parts.headG, 0.54 * h, 0.16 * h, 0.08 * h);
+  }
+  var p = limbPart(fig, (site && site.limb) || "");
+  return worldPoint(worldRoot, p.seg, 0, -p.len * 0.62, p.d / 2 + 0.06);
+}
+
+APPLY["pouch-on-stand"] = function (fig, refs, g, worldRoot) {
   // ACCUMULATES: one pouch per occurrence, cap 4; a pump box clamps onto
-  // the pole as soon as any pouch is present
+  // the pole as soon as any pouch is present. The FIRST bag also runs the
+  // infusion line down to the patient's access site — one line, however many
+  // bags are hanging, which is how a real pole is set up.
   var n = g.userData.pouchCount || 0;
   if (n >= 4) return;
   g.userData.pouchCount = n + 1;
@@ -245,21 +257,26 @@ APPLY["pouch-on-stand"] = function (fig, refs, g) {
     g.userData.pumpAdded = true;
     box(g, 0.22, 0.3, 0.16, mat(UNIT, 0.6), refs.standXZ.x + 0.11, 1.12, refs.standXZ.z);
     box(g, 0.16, 0.05, 0.02, mat(0x9fd8c6, 0.4), refs.standXZ.x + 0.11, 1.2, refs.standXZ.z + 0.09);
+    var drip = new THREE.Vector3(
+      refs.standXZ.x + POUCH_SLOTS[0][0],
+      1.30,
+      refs.standXZ.z + POUCH_SLOTS[0][1]
+    );
+    var anchor = infusionAnchor(fig, refs, worldRoot);
+    tube(g, [
+      drip,
+      new THREE.Vector3((drip.x + anchor.x) / 2, Math.min(drip.y, anchor.y) - 0.1, (drip.z + anchor.z) / 2 + 0.3),
+      anchor
+    ], 0.013, TUBING);
   }
 };
 
 APPLY["patch-scalp-access"] = function (fig, refs, g, worldRoot) {
+  // Cannula + tape only; the line is the bag's, same rule as the limb patch.
   var h = fig.dims.headS;
   var headG = fig.parts.headG;
   box(headG, 0.08, 0.16 * h, 0.24 * h, mat(0xf2f6fa, 0.7), 0.5 * h, 0.12 * h, 0.08 * h);
   box(headG, 0.06, 0.22 * h, 0.1 * h, mat(TAPE, 0.8), 0.51 * h, 0.12 * h, 0.08 * h);
-  var anchor = worldPoint(worldRoot, headG, 0.54 * h, 0.16 * h, 0.08 * h);
-  var hook = new THREE.Vector3(refs.standXZ.x + 0.34, 1.3, refs.standXZ.z);
-  tube(g, [
-    hook,
-    new THREE.Vector3((hook.x + anchor.x) / 2, Math.max(hook.y, anchor.y) + 0.08, (hook.z + anchor.z) / 2 + 0.15),
-    anchor
-  ], 0.012, TUBING);
 };
 
 APPLY["port-belly"] = function (fig) {
@@ -439,6 +456,16 @@ APPLY["sheen-droplets"] = function (fig) {
   box(headG, 0.05 * h, 0.06 * h, 0.03, m, -0.2 * h, 0.3 * h, 0.435 * h);
   box(headG, 0.05 * h, 0.06 * h, 0.03, m, 0, 0.34 * h, 0.435 * h);
   box(headG, 0.05 * h, 0.06 * h, 0.03, m, 0.18 * h, 0.28 * h, 0.435 * h);
+};
+
+APPLY["tint-warm-cheeks"] = function (fig) {
+  // Warm flush across both cheeks, clear of the eyes and mouth so the face
+  // texture underneath still reads.
+  var h = fig.dims.headS;
+  var headG = fig.parts.headG;
+  var m = mat(0xe08a72, 0.75);
+  box(headG, 0.2 * h, 0.13 * h, 0.02, m, -0.27 * h, -0.05 * h, 0.435 * h);
+  box(headG, 0.2 * h, 0.13 * h, 0.02, m, 0.27 * h, -0.05 * h, 0.435 * h);
 };
 
 APPLY["rim-swollen"] = function (fig) {
@@ -743,7 +770,18 @@ APPLY["shade-eyes-band"] = function (fig) {
 export function applyAccessories(fig, refs, ids, worldRoot) {
   var g = new THREE.Group();
   worldRoot.add(g);
-  (ids || []).forEach(function (raw) {
+  var list = ids || [];
+  // Cross-item context, resolved BEFORE the loop so list order cannot matter:
+  // the infusion line needs to know where on the patient it should land, and
+  // that lives on a different entry than the bag that draws it.
+  var site = null;
+  list.forEach(function (raw) {
+    var parts = String(raw).split("@");
+    if (parts[0] === "patch-limb-access") site = { kind: "limb", limb: parts[1] || "" };
+    else if (parts[0] === "patch-scalp-access" && !site) site = { kind: "scalp", limb: "" };
+  });
+  worldRoot.userData.ivSite = site;
+  list.forEach(function (raw) {
     var parts = String(raw).split("@");
     var fn = APPLY[parts[0]];
     if (fn) fn(fig, refs, g, worldRoot, parts[1] || "");

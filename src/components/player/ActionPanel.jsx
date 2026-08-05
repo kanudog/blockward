@@ -51,6 +51,12 @@ function resolveEntry(id, actionEntry, registry, otherRegistry, isCustom, kind) 
   }
   var reg = registry[id];
   if (reg) return Object.assign({}, reg, { label: authored || reg.label });
+  // Case drift: generators emit `o2mask` about as often as the canonical
+  // `o2Mask` (both appear across the real corpus). A pure-casing miss used to
+  // fall all the way through to "unregistered", losing the registry label and
+  // the pack. Match case-insensitively before giving up.
+  var ciKey = Object.keys(registry).find(function (k) { return k.toLowerCase() === String(id).toLowerCase(); });
+  if (ciKey) return Object.assign({}, registry[ciKey], { label: authored || registry[ciKey].label });
   // Not in its own registry — try the other one (the generator has put
   // procedures like `bloodCultures` in the meds list).
   var cross = otherRegistry[id];

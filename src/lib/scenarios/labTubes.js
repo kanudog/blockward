@@ -40,17 +40,33 @@ var RULES = [
   { tube: "gold", kw: ["sodium", "na", "potassium", "k", "chloride", "cl", "co2", "bun", "urea", "creatinine", "creat", "cr", "egfr", "calcium", "ca", "magnesium", "mg", "phosph", "phos", "alt", "ast", "alp", "alk phos", "ggt", "bilirubin", "bili", "albumin", "protein", "crp", "procalcitonin", "troponin", "ck", "ckmb", "bnp", "lipase", "amylase", "osmol", "ketone", "bhb", "cortisol", "tsh", "lipase", "panel", "chem", "cmp", "bmp", "lft", "electrolyte", "metabolic"] }
 ];
 
+// Generators write the same analyte several ways. Fold the spellings that
+// differ only in glyph onto the ascii the rules are written in, or the lab
+// lands in the gold catch-all: real cases ship "HCO₃", "HCO₃⁻" and "pCO₂"
+// alongside "HCO3" and "pCO2", which used to split one VBG across two panels.
+var SUBSCRIPTS = { "₀": "0", "₁": "1", "₂": "2", "₃": "3", "₄": "4", "₅": "5", "₆": "6", "₇": "7", "₈": "8", "₉": "9" };
+function normalize(text) {
+  return text.toLowerCase()
+    .replace(/[₀-₉]/g, function (c) { return SUBSCRIPTS[c] || c; })
+    .replace(/[⁻⁺]/g, "");
+}
+
 function matchKw(text, kw) {
   // Word-ish boundary so short keys ("na", "k", "cr") don't match inside
   // longer words ("name", "alkaline", "creatinine"). Escape regex specials.
+  //
+  // The trailing boundary allows an optional plural "s": the rules are written
+  // singular ("platelet", "culture") but cases write "Platelets" and "Blood
+  // Cultures", and demanding a non-alphanumeric character straight after the
+  // keyword sent both to the gold catch-all — a CBC result under Chemistry.
   var esc = kw.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  var re = new RegExp("(^|[^a-z0-9])" + esc + "([^a-z0-9]|$)");
+  var re = new RegExp("(^|[^a-z0-9])" + esc + "s?([^a-z0-9]|$)");
   return re.test(text);
 }
 
 // Resolve one lab to its tube descriptor. Always returns a tube (gold default).
 export function tubeForLab(lab) {
-  var text = (((lab && lab.name) || "") + " " + ((lab && lab.id) || "")).toLowerCase();
+  var text = normalize(((lab && lab.name) || "") + " " + ((lab && lab.id) || ""));
   for (var i = 0; i < RULES.length; i++) {
     var rule = RULES[i];
     for (var j = 0; j < rule.kw.length; j++) {

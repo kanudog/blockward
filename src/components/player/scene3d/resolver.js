@@ -50,7 +50,18 @@ var LIMBS = [
   ["left arm", "left-arm"], ["left leg", "left-leg"],
   ["right arm", "right-arm"], ["right leg", "right-leg"],
   ["left hand", "left-arm"], ["right hand", "right-arm"],
-  ["left foot", "left-leg"], ["right foot", "left-leg"]
+  // "right foot" used to map to left-leg — a straight typo that put every
+  // right-foot finding on the wrong side.
+  ["left foot", "left-leg"], ["right foot", "right-leg"],
+  // Bone landmarks, so "left tibial IO" and "right humeral IO" land on the
+  // limb they name rather than falling back to the default right arm.
+  ["left tibia", "left-leg"], ["right tibia", "right-leg"],
+  ["left shin", "left-leg"], ["right shin", "right-leg"],
+  ["left femur", "left-leg"], ["right femur", "right-leg"],
+  ["left humer", "left-arm"], ["right humer", "right-arm"],
+  ["left antecub", "left-arm"], ["right antecub", "right-arm"],
+  ["left wrist", "left-arm"], ["right wrist", "right-arm"],
+  ["left forearm", "left-arm"], ["right forearm", "right-arm"]
 ];
 
 // Text-driven pose, in priority order (first match wins). An accessory
@@ -73,6 +84,26 @@ var FACE_RULES = [
 // Any of these verbs in an intervention hangs one more stand pouch.
 var GIVE_VERBS = ["give", "gives", "given", "start", "starts", "started", "hang", "hangs", "push", "pushed", "bolus", "administer", "administered", "infuse", "infusing", "transfuse", "load", "loading"];
 var POUCH_CAP = 4;
+
+// Owner direction 2026-08-05: as interventions are selected, the kit they bring
+// should appear at the bedside. Anything we can draw on the patient already is
+// (scanText put it there); anything given IV hangs on the pole; EVERYTHING ELSE
+// physical lands on the side table.
+//
+// These ids are the exceptions — decisions and bare-handed assessments. Calling
+// a team, activating a protocol, elevating the head of the bed or counting a
+// GCS puts no object down, so staging one would be scenery the case never
+// earned. Imaging is ordered, not unpacked at the bedside. Everything not
+// listed here is treated as a physical thing a nurse would set down.
+var NO_BEDSIDE_OBJECT = {
+  callRapidResponse: 1, callAnesthesia: 1, callSurgery: 1, callBloodBank: 1,
+  callPoisonControl: 1, callNeurosurgery: 1, callCardiology: 1, callPICU: 1,
+  mtpActivation: 1,
+  gcsAssessment: 1, pupilCheck: 1, capRefill: 1, pulseCheck: 1,
+  headOfBedElevation: 1, seizurePrecautions: 1, cSpine: 1, extremityElevation: 1,
+  valsalva: 1, fundoscopy: 1,
+  chestXray: 1, abdomenXray: 1, headCt: 1, abdomenCt: 1, mri: 1, echocardiogram: 1
+};
 
 function clone(state) {
   return {
@@ -97,9 +128,16 @@ function findLimb(low, idx) {
   return "";
 }
 
-// entries are "id" (default placement) or "id@limb"
+// Entries are "id" (limb UNSTATED — the renderer falls back to the right arm)
+// or "id@limb" (a limb the content actually named).
+//
+// The right arm used to be folded into the bare form, which made "the case said
+// right arm" and "the case said nothing" the same string. That is fine for
+// drawing — both render on the right arm — but it makes them impossible to tell
+// apart when de-duplicating, so an explicitly right-arm IV looked like a stray
+// unplaced one and got dropped. An explicitly named limb now always carries it.
 function entryFor(id, limb) {
-  return limb && limb !== "right-arm" ? id + "@" + limb : id;
+  return limb ? id + "@" + limb : id;
 }
 
 function hasWord(low, word) {
@@ -158,6 +196,24 @@ function hedged(low, idx, len) {
   return HEDGE_BEFORE.test(before) || HEDGE_AFTER.test(after);
 }
 
+// A RULED-OUT finding must not be drawn. Same shape as the hedge guard, the
+// opposite failure: a real meningococcaemia case wrote "…coalescing into
+// irregular purpuric patches at the flanks. No urticaria." and the figure came
+// up wearing HIVES — the app drew the one differential the case had explicitly
+// excluded. Negations are how clinicians write ("no rash", "without
+// petechiae", "denies swelling"), so this is common, not exotic.
+//
+// The window is tight (18 chars) and backward-only, for the same reason the
+// hedge window is: a negation governs the phrase it sits against, not the rest
+// of the sentence. "No urticaria, but scattered petechiae are present" must
+// suppress the hives and keep the petechiae.
+//
+// "non-blanching" is safe: \bno\b cannot match inside "non".
+var NEGATED_BEFORE = /\b(?:no|not|without|denies|denied|negative for|free of|absent|resolved|never|there is no|there are no)\b[^.;,]{0,18}$/;
+function negated(low, idx) {
+  return NEGATED_BEFORE.test(low.slice(Math.max(0, idx - 30), idx));
+}
+
 // scanText(state, text) -> new state with everything the content names.
 // Unknown descriptions match nothing and are skipped — the guarantee that
 // makes small-model authorship safe.
@@ -174,7 +230,12 @@ export function scanText(state, text) {
       while (true) {
         idx = low.indexOf(r.phrases[i], from);
         if (idx < 0) break;
-        if (!hedged(low, idx, r.phrases[i].length)) {
+        // Every vocab phrase is word-initial (stems like "intubat" and
+        // "nebuliz" included), so a match must start at a word boundary.
+        // Without this "Place NG Tube" matched the gastrostomy phrase "g tube"
+        // inside "ng tube" and drew a G-button on a child who had an NG.
+        var startsWord = idx === 0 || !/[a-z]/.test(low.charAt(idx - 1));
+        if (startsWord && !hedged(low, idx, r.phrases[i].length) && !negated(low, idx)) {
           matched.push({ id: r.id, limb: r.limbed ? findLimb(low, idx) : "" });
           return;
         }
@@ -215,7 +276,15 @@ export function scanText(state, text) {
   }
   for (f = 0; f < FACE_RULES.length; f++) {
     if (FACE_RULES[f].phrases.some(function (ph) { return low.indexOf(ph) >= 0; })) {
-      next.face = { eyes: FACE_RULES[f].eyes, mouth: FACE_RULES[f].mouth };
+      // A face rule must not contradict the pose it sits on. "Unresponsive and
+      // lethargic" matched the drowsy rule and rendered HEAVY (half-open) lids
+      // on a child the pose had already laid down with eyes CLOSED — the pose
+      // is the stronger statement, so it keeps the eyes.
+      var eyesClosedByPose = next.pose === "lying-eyes-closed" || next.pose === "curled-side";
+      next.face = {
+        eyes: eyesClosedByPose ? "closed" : FACE_RULES[f].eyes,
+        mouth: FACE_RULES[f].mouth
+      };
       break;
     }
   }
@@ -228,24 +297,27 @@ export function scanText(state, text) {
   return next;
 }
 
-// applyIntervention(state, text) — everything scanText does, PLUS the append
-// rules: any give/start/hang adds one stand pouch (cap 4); a "bring … to the
-// bedside" stages what it names (or a generic item).
-export function applyIntervention(state, text) {
+// applyIntervention(state, text, opts) — everything scanText does, PLUS the
+// append rules:
+//   * any give/start/hang hangs one more bag on the pole (cap 4), and the bag
+//     runs the infusion line down to the access site;
+//   * a selected tool that put nothing on the patient stages its kit on the
+//     side table, unless it is a decision or a bare-handed assessment.
+// opts: { id, kind } — the registry id and "tools"|"meds" of the selection.
+// Both optional; without an id nothing is staged (the narrative scan path uses
+// scanText directly and must not furnish the room).
+export function applyIntervention(state, text, opts) {
   var low = String(text || "").toLowerCase();
   var before = state.accessories.length;
   var pouchBefore = state.pouchCount;
   var next = scanText(state, text);
-  if (GIVE_VERBS.some(function (v) { return hasWord(low, v); })) {
-    next.pouchCount = Math.min(pouchBefore + 1, POUCH_CAP);
-  }
-  if (low.indexOf("bedside") >= 0) {
-    var added = next.accessories.slice(before);
-    if (added.length) {
-      next.stagedItems = next.stagedItems.concat(added);
-    } else {
-      next.stagedItems = next.stagedItems.concat(["table-side"]);
-    }
+  var id = (opts && opts.id) || "";
+  var isMed = !!(opts && opts.kind === "meds");
+  var gave = GIVE_VERBS.some(function (v) { return hasWord(low, v); });
+  if (gave) next.pouchCount = Math.min(pouchBefore + 1, POUCH_CAP);
+  var wornSomething = next.accessories.length > before;
+  if (!wornSomething && !gave && !isMed && id && !NO_BEDSIDE_OBJECT[id]) {
+    next.stagedItems = next.stagedItems.concat(["table-side"]);
   }
   return next;
 }
@@ -263,6 +335,22 @@ export function stabilize(state) {
 // plain nasal cannula matched from a different sentence is dropped, so the
 // figure never wears two cannulas.
 function baseId(e) { return e.split("@")[0]; }
+
+// One device mentioned twice must not become two devices. A real case named the
+// same intraosseous line in a finding ("Left tibial IO in place") and again in
+// the next phase's narrative ("The IO line is functioning"): the first resolved
+// to the left leg, the second named no limb and so landed on the default right
+// arm, and the child ended up wearing two cannulas.
+//
+// The rule: a PLACED entry (one that names a limb) always beats the unplaced
+// entry for the same id. Two entries that each name a limb are kept — a patient
+// really can have access in both arms.
+function dropUnplacedDuplicates(list) {
+  var placed = {};
+  list.forEach(function (e) { if (e.indexOf("@") > 0) placed[baseId(e)] = true; });
+  return list.filter(function (e) { return e.indexOf("@") > 0 || !placed[baseId(e)]; });
+}
+
 function finalizeSuppress(list) {
   var present = {};
   list.forEach(function (e) { present[baseId(e)] = true; });
@@ -270,7 +358,7 @@ function finalizeSuppress(list) {
   Object.keys(present).forEach(function (id) {
     (SUPPRESSES[id] || []).forEach(function (s) { kill[s] = true; });
   });
-  return list.filter(function (e) { return !kill[baseId(e)]; });
+  return dropUnplacedDuplicates(list.filter(function (e) { return !kill[baseId(e)]; }));
 }
 
 // sceneProps(state) -> the SceneView prop slice. Pouches repeat their id

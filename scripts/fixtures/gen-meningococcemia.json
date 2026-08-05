@@ -1,0 +1,720 @@
+{
+  "schemaVersion": "5.4.1",
+  "id": "meningococcemia-toddler",
+  "title": "Lights Out",
+  "subtitle": "A three-year-old with fever, rash, and a look that stops you cold.",
+  "patientCard": {
+    "name": "Clara Hensley",
+    "ageLabel": "3 years old",
+    "weightKg": 14,
+    "sex": "F",
+    "cc": "meningococcemia with petechial rash and septic shock"
+  },
+  "presentation": {
+    "routeOfPresentation": "ems",
+    "report": "We're bringing you a three-year-old girl, Clara, picked up from home about twenty minutes ago. Mom called 911 when she noticed a rash spreading across Clara's legs and trunk over the past few hours — started as a few spots this morning, now covering her thighs and abdomen. She's had fever since yesterday, 39.8 at home, been fussy and refusing to eat. On scene she was really irritable, crying at our touch, curling away from us, and clearly photophobic — mom had to dim the lights in the house. No vomiting or seizures. No medications given at home. We've got one 22g peripheral IV in the right AC, wide open, but we held fluids pending your orders. GCS on scene was 11.",
+    "learnMore": "Neisseria meningitidis spreads by respiratory droplet and can progress from prodrome to fulminant septicemia in hours. The non-blanching petechial or purpuric rash is the hallmark of meningococcemia and reflects endovascular invasion with microthrombi formation. In children under five, meningococcal disease remains one of the fastest-moving pediatric emergencies you will face — time to antibiotics is the single most modifiable outcome driver."
+  },
+  "norms": {
+    "hr": [
+      80,
+      120
+    ],
+    "rr": [
+      22,
+      34
+    ],
+    "sbp": [
+      88,
+      112
+    ],
+    "dbp": [
+      50,
+      70
+    ],
+    "spo2": [
+      95,
+      100
+    ],
+    "temp": [
+      36.5,
+      37.5
+    ]
+  },
+  "phases": [
+    {
+      "phaseIndex": 0,
+      "id": "assess",
+      "stageType": "assess",
+      "title": "First Look",
+      "narrative": "Clara is curled on her side under the bright overhead lights, knees drawn up, eyes squeezed shut. She whimpers when you approach and tries to turn away from the light — her mom reaches over the rail to hold her hand and she startles even at that. Petechiae are visible across both thighs, the lower abdomen, and a few scattered spots on her chest; they are non-blanching on pressure. Her skin is flushed and hot to touch centrally but her hands and feet feel notably cooler. The 22g IV in the right antecubital is confirmed patent.",
+      "vitals": [
+        {
+          "id": "hr",
+          "label": "Heart Rate",
+          "value": "176",
+          "unit": "bpm",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[0].vitals.hr.why",
+          "why": null
+        },
+        {
+          "id": "rr",
+          "label": "Resp Rate",
+          "value": "34",
+          "unit": "br/min",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[0].vitals.rr.why",
+          "why": null
+        },
+        {
+          "id": "bp",
+          "label": "Blood Pressure",
+          "value": "78/44",
+          "unit": "mmHg",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[0].vitals.bp.why",
+          "why": null
+        },
+        {
+          "id": "spo2",
+          "label": "SpO2",
+          "value": "96",
+          "unit": "%",
+          "bad": false,
+          "cat": "vital",
+          "_slotRef": "phase[0].vitals.spo2.why",
+          "why": null
+        },
+        {
+          "id": "temp",
+          "label": "Temperature",
+          "value": "39.9",
+          "unit": "°C",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[0].vitals.temp.why",
+          "why": null
+        },
+        {
+          "id": "cap",
+          "label": "Cap Refill",
+          "value": "5 sec",
+          "unit": "",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[0].vitals.cap.why",
+          "why": null
+        }
+      ],
+      "signs": [
+        {
+          "id": "mentalStatus",
+          "label": "Mental Status",
+          "finding": "Irritable and inconsolable, cries when touched or moved. Opens eyes to voice, moans but no intelligible words, withdraws to painful stimulus. GCS 9 (E3 V2 M4).",
+          "sys": "Neuro",
+          "bad": true,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.mentalStatus.why",
+          "why": null
+        },
+        {
+          "id": "photophobia",
+          "label": "Photophobia",
+          "finding": "Squeezes eyes shut and turns away from overhead lighting. Settles only slightly when lights are dimmed.",
+          "sys": "Neuro",
+          "bad": true,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.photophobia.why",
+          "why": null
+        },
+        {
+          "id": "neckStiffness",
+          "label": "Neck Stiffness",
+          "finding": "Marked resistance to passive neck flexion. Kernig and Brudzinski signs positive.",
+          "sys": "Neuro",
+          "bad": true,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.neckStiffness.why",
+          "why": null
+        },
+        {
+          "id": "rash",
+          "label": "Skin Rash",
+          "finding": "Non-blanching petechiae scattered across bilateral thighs, lower abdomen, and chest wall. Several lower-extremity lesions coalescing into palpable purpuric plaques approximately 0.5–1 cm each.",
+          "sys": "Integumentary",
+          "pos": "bilateral lower extremities, abdomen, chest",
+          "bad": true,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.rash.why",
+          "why": null
+        },
+        {
+          "id": "perfusion",
+          "label": "Peripheral Perfusion",
+          "finding": "Extremities cool and mottled below the mid-forearm and mid-calf. Central skin warm and flushed.",
+          "sys": "Cardiovascular",
+          "pos": "extremities",
+          "bad": true,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.perfusion.why",
+          "why": null
+        },
+        {
+          "id": "heartSounds",
+          "label": "Heart Sounds",
+          "finding": "Tachycardic, S1 and S2 present, no murmur, no gallop audible.",
+          "sys": "Cardiovascular",
+          "bad": false,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.heartSounds.why",
+          "why": null
+        },
+        {
+          "id": "breathSounds",
+          "label": "Breath Sounds",
+          "finding": "Clear and equal bilaterally, no wheeze or crackles, good air movement throughout.",
+          "sys": "Respiratory",
+          "bad": false,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.breathSounds.why",
+          "why": null
+        },
+        {
+          "id": "abdomen",
+          "label": "Abdominal Exam",
+          "finding": "Soft, non-distended. Mild diffuse tenderness on palpation without guarding or rigidity. No hepatosplenomegaly detected.",
+          "sys": "GI/Hydration",
+          "bad": false,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.abdomen.why",
+          "why": null
+        },
+        {
+          "id": "ivAccess",
+          "label": "IV Access",
+          "finding": "22g peripheral IV in right antecubital fossa, patent, placed by EMS pre-arrival.",
+          "sys": "Lines & devices",
+          "bad": false,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.ivAccess.why",
+          "why": null
+        }
+      ],
+      "labs": [
+        {
+          "id": "wbc",
+          "name": "WBC",
+          "value": "3.2",
+          "unit": "×10³/µL",
+          "ref": "5.0-15.0",
+          "bad": true,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.wbc.why",
+          "why": null
+        },
+        {
+          "id": "hgb",
+          "name": "Hemoglobin",
+          "value": "11.4",
+          "unit": "g/dL",
+          "ref": "10.5-14.0",
+          "bad": false,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.hgb.why",
+          "why": null
+        },
+        {
+          "id": "plt",
+          "name": "Platelets",
+          "value": "62",
+          "unit": "×10³/µL",
+          "ref": "150-400",
+          "bad": true,
+          "critical": true,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.plt.why",
+          "why": null
+        },
+        {
+          "id": "lactate",
+          "name": "Lactate",
+          "value": "6.8",
+          "unit": "mmol/L",
+          "ref": "0.5-2.0",
+          "bad": true,
+          "critical": true,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.lactate.why",
+          "why": null
+        },
+        {
+          "id": "glucose",
+          "name": "Glucose",
+          "value": "74",
+          "unit": "mg/dL",
+          "ref": "60-140",
+          "bad": false,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.glucose.why",
+          "why": null
+        },
+        {
+          "id": "sodium",
+          "name": "Sodium",
+          "value": "132",
+          "unit": "mEq/L",
+          "ref": "135-145",
+          "bad": true,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.sodium.why",
+          "why": null
+        },
+        {
+          "id": "creatinine",
+          "name": "Creatinine",
+          "value": "0.5",
+          "unit": "mg/dL",
+          "ref": "0.2-0.6",
+          "bad": false,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.creatinine.why",
+          "why": null
+        },
+        {
+          "id": "pt",
+          "name": "PT/INR",
+          "value": "1.8",
+          "unit": "INR",
+          "ref": "0.8-1.2",
+          "bad": true,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.pt.why",
+          "why": null
+        },
+        {
+          "id": "fibrinogen",
+          "name": "Fibrinogen",
+          "value": "88",
+          "unit": "mg/dL",
+          "ref": "150-400",
+          "bad": true,
+          "critical": true,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.fibrinogen.why",
+          "why": null
+        },
+        {
+          "id": "pH",
+          "name": "pH",
+          "value": "7.18",
+          "unit": "",
+          "ref": "7.35-7.45",
+          "bad": true,
+          "critical": true,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.pH.why",
+          "why": null
+        },
+        {
+          "id": "pco2",
+          "name": "pCO2",
+          "value": "28",
+          "unit": "mmHg",
+          "ref": "35-45",
+          "bad": true,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.pco2.why",
+          "why": null
+        },
+        {
+          "id": "hco3",
+          "name": "HCO3",
+          "value": "10",
+          "unit": "mEq/L",
+          "ref": "20-26",
+          "bad": true,
+          "critical": true,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.hco3.why",
+          "why": null
+        }
+      ],
+      "actions": {
+        "tools": {},
+        "meds": {}
+      }
+    },
+    {
+      "phaseIndex": 1,
+      "id": "intervene",
+      "stageType": "intervene",
+      "title": "Treat and Stabilize",
+      "narrative": "Your team is at the bedside. Clara is still curled and whimpering, photophobic, with spreading purpura on her legs. The picture is unmistakable — this is meningococcemia with septic shock. You have a patent 22g IV in the right antecubital. Her airway is self-maintained for now, but she has an RR of 34 and work of breathing is increasing. Lungs remain clear. The clock is running: antibiotics within the first fifteen minutes of arrival, fluids now. The PICU fellow has been paged but hasn't arrived yet — you're running this.",
+      "vitals": [
+        {
+          "id": "hr",
+          "label": "Heart Rate",
+          "value": "176",
+          "unit": "bpm",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[1].vitals.hr.why",
+          "why": null
+        },
+        {
+          "id": "rr",
+          "label": "Resp Rate",
+          "value": "34",
+          "unit": "br/min",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[1].vitals.rr.why",
+          "why": null
+        },
+        {
+          "id": "bp",
+          "label": "Blood Pressure",
+          "value": "78/44",
+          "unit": "mmHg",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[1].vitals.bp.why",
+          "why": null
+        },
+        {
+          "id": "spo2",
+          "label": "SpO2",
+          "value": "96",
+          "unit": "%",
+          "bad": false,
+          "cat": "vital",
+          "_slotRef": "phase[1].vitals.spo2.why",
+          "why": null
+        },
+        {
+          "id": "temp",
+          "label": "Temperature",
+          "value": "39.9",
+          "unit": "°C",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[1].vitals.temp.why",
+          "why": null
+        },
+        {
+          "id": "cap",
+          "label": "Cap Refill",
+          "value": "5 sec",
+          "unit": "",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[1].vitals.cap.why",
+          "why": null
+        }
+      ],
+      "signs": [
+        {
+          "id": "mentalStatus2",
+          "label": "Mental Status",
+          "finding": "Still irritable and inconsolable, resisting examination. GCS 9 (E3 V2 M4), unchanged from arrival.",
+          "sys": "Neuro",
+          "bad": true,
+          "cat": "clinical",
+          "_slotRef": "phase[1].signs.mentalStatus2.why",
+          "why": null
+        },
+        {
+          "id": "workOfBreathing",
+          "label": "Work of Breathing",
+          "finding": "Subcostal and intercostal retractions now visible. Tachypneic at 34, but maintaining oxygen saturation without supplemental oxygen at this moment.",
+          "sys": "Respiratory",
+          "bad": true,
+          "cat": "clinical",
+          "_slotRef": "phase[1].signs.workOfBreathing.why",
+          "why": null
+        },
+        {
+          "id": "purpuraProgression",
+          "label": "Rash Progression",
+          "finding": "Several petechiae have coalesced into frank purpuric lesions on the bilateral lower extremities since arrival; new petechiae noted on left forearm.",
+          "sys": "Integumentary",
+          "pos": "bilateral lower extremities, left forearm",
+          "bad": true,
+          "cat": "clinical",
+          "_slotRef": "phase[1].signs.purpuraProgression.why",
+          "why": null
+        },
+        {
+          "id": "peripheralPulses",
+          "label": "Peripheral Pulses",
+          "finding": "Central pulses palpable but weak. Radial and dorsalis pedis pulses faint and thready. No absent pulses.",
+          "sys": "Cardiovascular",
+          "bad": true,
+          "cat": "clinical",
+          "_slotRef": "phase[1].signs.peripheralPulses.why",
+          "why": null
+        },
+        {
+          "id": "ivSite",
+          "label": "IV Site",
+          "finding": "22g peripheral IV right antecubital, patent, flushes without resistance, no extravasation.",
+          "sys": "Lines & devices",
+          "bad": false,
+          "cat": "clinical",
+          "_slotRef": "phase[1].signs.ivSite.why",
+          "why": null
+        }
+      ],
+      "labs": [
+        {
+          "id": "glucose2",
+          "name": "Glucose",
+          "value": "74",
+          "unit": "mg/dL",
+          "ref": "60-140",
+          "bad": false,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[1].labs.glucose2.why",
+          "why": null
+        },
+        {
+          "id": "potassium",
+          "name": "Potassium",
+          "value": "4.1",
+          "unit": "mEq/L",
+          "ref": "3.5-5.0",
+          "bad": false,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[1].labs.potassium.why",
+          "why": null
+        },
+        {
+          "id": "calcium",
+          "name": "Ionized Calcium",
+          "value": "0.98",
+          "unit": "mmol/L",
+          "ref": "1.12-1.32",
+          "bad": true,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[1].labs.calcium.why",
+          "why": null
+        },
+        {
+          "id": "crp",
+          "name": "CRP",
+          "value": "218",
+          "unit": "mg/L",
+          "ref": "0-10",
+          "bad": true,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[1].labs.crp.why",
+          "why": null
+        },
+        {
+          "id": "procalcitonin",
+          "name": "Procalcitonin",
+          "value": "88",
+          "unit": "ng/mL",
+          "ref": "0-0.5",
+          "bad": true,
+          "critical": true,
+          "cat": "lab",
+          "_slotRef": "phase[1].labs.procalcitonin.why",
+          "why": null
+        },
+        {
+          "id": "hgb2",
+          "name": "Hemoglobin",
+          "value": "11.0",
+          "unit": "g/dL",
+          "ref": "10.5-14.0",
+          "bad": false,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[1].labs.hgb2.why",
+          "why": null
+        }
+      ],
+      "actions": {
+        "tools": {
+          "vsMonitor": {
+            "id": "vsMonitor",
+            "label": "Connect to vital signs monitor",
+            "priority": "correct",
+            "_slotRef": "phase[1].actions.tools.vsMonitor.fb",
+            "fb": null
+          },
+          "ivKit": {
+            "id": "ivKit",
+            "label": "Place second large-bore peripheral IV",
+            "priority": "correct",
+            "_slotRef": "phase[1].actions.tools.ivKit.fb",
+            "fb": null
+          },
+          "o2Mask": {
+            "id": "o2Mask",
+            "label": "Apply non-rebreather face mask 15 L/min",
+            "priority": "correct",
+            "_slotRef": "phase[1].actions.tools.o2Mask.fb",
+            "fb": null
+          },
+          "bloodCultures": {
+            "id": "bloodCultures",
+            "label": "Draw blood cultures before first antibiotic dose",
+            "priority": "correct",
+            "_slotRef": "phase[1].actions.tools.bloodCultures.fb",
+            "fb": null
+          },
+          "callPICU": {
+            "id": "callPICU",
+            "label": "Activate PICU consult and early transfer planning",
+            "priority": "correct",
+            "_slotRef": "phase[1].actions.tools.callPICU.fb",
+            "fb": null
+          },
+          "lumbarPuncture": {
+            "id": "lumbarPuncture",
+            "label": "Perform lumbar puncture for CSF analysis",
+            "priority": "distractor-clinical",
+            "_slotRef": "phase[1].actions.tools.lumbarPuncture.fb",
+            "fb": null
+          },
+          "intubationKit": {
+            "id": "intubationKit",
+            "label": "Proceed to immediate RSI intubation",
+            "priority": "distractor-clinical",
+            "_slotRef": "phase[1].actions.tools.intubationKit.fb",
+            "fb": null
+          },
+          "headCt": {
+            "id": "headCt",
+            "label": "Order head CT before antibiotics",
+            "priority": "distractor-misc",
+            "_slotRef": "phase[1].actions.tools.headCt.fb",
+            "fb": null
+          }
+        },
+        "meds": {
+          "nsBolus": {
+            "id": "nsBolus",
+            "label": "Give NS 20 mL/kg IV bolus (280 mL) over 10 min",
+            "priority": "tied-correct",
+            "_slotRef": "phase[1].actions.meds.nsBolus.fb",
+            "fb": null
+          },
+          "ceftriaxone": {
+            "id": "ceftriaxone",
+            "label": "Give ceftriaxone 100 mg/kg IV (1,400 mg)",
+            "priority": "tied-correct",
+            "_slotRef": "phase[1].actions.meds.ceftriaxone.fb",
+            "fb": null
+          },
+          "vancomycin": {
+            "id": "vancomycin",
+            "label": "Give vancomycin 15 mg/kg IV (210 mg) over 60 min",
+            "priority": "correct",
+            "_slotRef": "phase[1].actions.meds.vancomycin.fb",
+            "fb": null
+          },
+          "epiIV": {
+            "id": "epiIV",
+            "label": "Start epinephrine infusion 0.05 mcg/kg/min IV",
+            "priority": "tied-correct",
+            "_slotRef": "phase[1].actions.meds.epiIV.fb",
+            "fb": null
+          },
+          "hydrocortisone": {
+            "id": "hydrocortisone",
+            "label": "Give hydrocortisone 2 mg/kg IV (28 mg)",
+            "priority": "correct",
+            "_slotRef": "phase[1].actions.meds.hydrocortisone.fb",
+            "fb": null
+          },
+          "dexamethasone": {
+            "id": "dexamethasone",
+            "label": "Give dexamethasone 0.15 mg/kg IV (2.1 mg) for meningitis",
+            "priority": "distractor-clinical",
+            "_slotRef": "phase[1].actions.meds.dexamethasone.fb",
+            "fb": null
+          },
+          "mannitol": {
+            "id": "mannitol",
+            "label": "Give mannitol 0.5 g/kg IV (7 g) for cerebral edema",
+            "priority": "distractor-clinical",
+            "_slotRef": "phase[1].actions.meds.mannitol.fb",
+            "fb": null
+          },
+          "acetaminophen": {
+            "id": "acetaminophen",
+            "label": "Give acetaminophen 15 mg/kg PR (210 mg) for fever",
+            "priority": "distractor-pack",
+            "_slotRef": "phase[1].actions.meds.acetaminophen.fb",
+            "fb": null
+          }
+        }
+      }
+    }
+  ],
+  "reassessment": {
+    "narrative": "Fifteen minutes after the NS bolus and ceftriaxone, Clara is slightly less inconsolable — she's still whimpering but has stopped the high-pitched screaming. Heart rate has come down from 176 to 154. Blood pressure has improved to 88/52 after a second bolus is given. Capillary refill is still prolonged at 4 seconds, and the purpuric lesions haven't grown new satellites in the last ten minutes. The epinephrine infusion is running and has been titrated up to 0.1 mcg/kg/min for persistent hypotension. SpO2 is holding at 98% on the non-rebreather. The PICU team has arrived and is at the bedside.",
+    "vitals": {
+      "hr": "154",
+      "rr": "30",
+      "bp": "88/52",
+      "spo2": "98",
+      "temp": "39.4",
+      "cap": "4 sec"
+    },
+    "outcome": "transferred-icu",
+    "stabilizationSummary": "Clara is hemodynamically responding to resuscitation — blood pressure has improved with two NS boluses and epinephrine infusion running at 0.1 mcg/kg/min. Ceftriaxone is on board and vancomycin is infusing. She is being transferred directly to the PICU for invasive monitoring, ongoing vasopressor management, and close watch for DIC progression."
+  },
+  "debrief": {
+    "summary": "Clara presented in classic fulminant meningococcemia — non-blanching purpuric rash, septic shock physiology, and meningeal signs all together. The combination of a markedly low WBC (leukopenia rather than leukocytosis), thrombocytopenia, and a plummeting fibrinogen told a story of early disseminated intravascular coagulation before that picture became fully obvious at the bedside. The two anchors of management here are identical to any pediatric septic shock: IV fluid resuscitation and antibiotics within the first hour — but meningococcemia adds urgency because this organism can tip from compensated shock to cardiovascular collapse in under thirty minutes. A vasoactive agent was needed here because the blood pressure did not normalize with fluids alone, which is exactly when epinephrine comes in for pediatric distributive shock.",
+    "keyTeaching": [
+      "Non-blanching petechiae in a febrile child must be treated as meningococcemia until proven otherwise — do not wait for cultures or a confirmed diagnosis before giving antibiotics.",
+      "In meningococcal sepsis, leukopenia (not leukocytosis) signals an overwhelming bacterial burden overwhelming the host's immune response and is a marker of severity.",
+      "Thrombocytopenia plus elevated PT/INR plus low fibrinogen is early DIC — the rash is a manifestation of this same process, not a separate finding.",
+      "Lumbar puncture is deferred when a child is in septic shock; the blood culture is sufficient to guide treatment and the LP can wait until the patient is stabilized.",
+      "Pediatric septic shock refractory to two or more fluid boluses requires a vasopressor — epinephrine is first-line in children because it provides both inotropy and vasopressor support."
+    ],
+    "physiologyDeepDive": [
+      {
+        "id": "meningococcal-pathogenesis",
+        "title": "How N. meningitidis moves so fast",
+        "_slotRef": "debrief.physiologyDeepDive.meningococcal-pathogenesis.content",
+        "content": null
+      },
+      {
+        "id": "dic-coagulopathy",
+        "title": "Purpura fulminans and DIC: why the clotting cascade runs in both directions at once",
+        "_slotRef": "debrief.physiologyDeepDive.dic-coagulopathy.content",
+        "content": null
+      },
+      {
+        "id": "pediatric-septic-shock-vasopressors",
+        "title": "When fluids aren't enough: vasoactive agents in pediatric distributive shock",
+        "_slotRef": "debrief.physiologyDeepDive.pediatric-septic-shock-vasopressors.content",
+        "content": null
+      }
+    ]
+  },
+  "visuals": [
+    "petechiae",
+    "flushed"
+  ]
+}

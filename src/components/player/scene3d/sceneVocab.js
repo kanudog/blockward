@@ -44,7 +44,13 @@ export var SCENE_VOCAB = [
   // a-line is vascular access on a limb and the limb-patch is the right visual.
   // (A separate "port-chest" id for central lines was tried and removed — the
   // renderer has no case for it, so it drew nothing at all.)
-  { id: "patch-limb-access", family: "L", realName: "Vascular access (IV / arterial line)", phrases: ["iv in place", "iv access", "peripheral iv", "iv line", "iv catheter", "saline lock", "gauge iv", "iv in her", "iv in his", "arterial line", "a-line", "art line"], limbed: true },
+  // Intraosseous phrases added 2026-08-05: a real generated case put the
+  // patient's ONLY access in a left tibial IO, named it five times across the
+  // narrative and two findings, and the figure showed nothing — there was no
+  // vocab for it. Worse, the infusion line then defaulted to the right arm on a
+  // child with no arm access at all. An IO is limb vascular access and the limb
+  // patch is the right visual, same reasoning as the arterial line above.
+  { id: "patch-limb-access", family: "L", realName: "Vascular access (IV / IO / arterial line)", phrases: ["iv in place", "iv access", "peripheral iv", "iv line", "iv catheter", "saline lock", "gauge iv", "iv in her", "iv in his", "arterial line", "a-line", "art line", "intraosseous", "io access", "io site", "io line", "io in place", "io is patent", "io needle", "io catheter", "tibial io", "humeral io"], limbed: true },
   { id: "pouch-on-stand", family: "L", realName: "IV fluid / infusion bag", phrases: ["infusion running", "iv fluids running", "maintenance fluids", "drip running"] },
   { id: "port-belly", family: "L", realName: "Gastrostomy button (G-tube)", phrases: ["g-tube", "g tube", "gastrostomy", "peg tube", "feeding button"] },
   { id: "tube-side-torso", family: "L", realName: "Chest tube", phrases: ["chest tube", "thoracostomy", "chest drain", "pigtail catheter"] },
@@ -52,7 +58,11 @@ export var SCENE_VOCAB = [
   { id: "pouch-drain-side", family: "L", realName: "Surgical drain", phrases: ["surgical drain", "jp drain", "jackson-pratt", "wound drain", "penrose"] },
 
   // ---- S: surface & limbs --------------------------------------------------
-  { id: "shell-limb", family: "S", realName: "Cast", phrases: ["cast on", "casted", "in a cast", "arm cast", "leg cast", "cast left", "cast right"], limbed: true },
+  // "cast leg" added 2026-08-05: the orchestrator prompt hands the generator
+  // that exact string as a recognized keyword (and uses it in its own worked
+  // example), but the phrase list only had the reversed "leg cast" — so the one
+  // spelling the model is told to emit matched nothing.
+  { id: "shell-limb", family: "S", realName: "Cast", phrases: ["cast on", "casted", "in a cast", "arm cast", "leg cast", "cast leg", "cast arm", "cast left", "cast right"], limbed: true },
   { id: "splint-limb", family: "S", realName: "Splint", phrases: ["splint", "splinted", "immobilized in a"], limbed: true },
   { id: "limb-out-of-line", family: "S", realName: "Deformity / unreduced fracture", phrases: ["obvious deformity", "angulated", "out of line", "grossly deformed", "visibly deformed"], limbed: true },
   { id: "band-tight-limb", family: "S", realName: "Tourniquet", phrases: ["tourniquet"], limbed: true },
@@ -61,14 +71,27 @@ export var SCENE_VOCAB = [
   { id: "wrap-head", family: "S", realName: "Head bandage", phrases: ["head bandage", "head wrap", "head dressing", "head injury", "head trauma", "scalp laceration"] },
   { id: "cover-eye", family: "S", realName: "Eye patch", phrases: ["eye patch", "eye bandage", "patch over the eye", "eye shield taped"] },
   { id: "ring-eye-shaded", family: "S", realName: "Periorbital bruising (black eye)", phrases: ["periorbital", "black eye", "raccoon eye", "eye bruising"] },
-  { id: "marks-scattered", family: "S", realName: "Petechiae / purpura / rash", phrases: ["petechiae", "petechial", "purpura", "non-blanching", "nonblanching", "maculopapular", "diffuse rash"] },
-  { id: "marks-cluster", family: "S", realName: "Hives (urticaria)", phrases: ["hives", "urticaria", "wheals", "urticarial"] },
+  // Lay phrasings added 2026-08-05. The EMS-report voice describes a
+  // non-blanching rash the way a parent or medic actually says it — "a rash
+  // that won't go away when you press on it" — and NONE of the clinical terms
+  // below matched that, so the defining finding of a meningococcaemia case
+  // rendered nothing unless the word "petechiae" happened to appear elsewhere.
+  // Non-blanching is the whole diagnostic point, so it has to resolve however
+  // it is worded.
+  { id: "marks-scattered", family: "S", realName: "Petechiae / purpura / rash", phrases: ["petechia", "petechial", "purpur", "non-blanching", "nonblanching", "non blanching", "maculopapular", "diffuse rash", "won't blanch", "wont blanch", "does not blanch", "doesn't blanch", "won't go away when you press", "doesn't go away when you press", "does not fade when you press", "doesn't fade when you press", "not fade with pressure", "stays when you press", "stay when you press", "stays when you push", "stay when you push", "doesn't disappear when you press"] },
+  // Urticaria is BLANCHING and raised — the opposite sign. Kept a separate id
+  // on purpose: a case that rules urticaria out must not draw it (see the
+  // negation guard in resolver.js).
+  { id: "marks-cluster", family: "S", realName: "Hives (urticaria)", phrases: ["hives", "urticaria", "wheals", "wheal", "urticarial", "welts", "raised itchy"] },
   { id: "patches-deep-tone", family: "S", realName: "Bruising / ecchymosis", phrases: ["ecchymos", "bruising", "contusion", "hematoma"] },
   { id: "line-closed-ticks", family: "S", realName: "Surgical incision / sutures", phrases: ["surgical incision", "sutures", "staples", "closed incision", "surgical site"] },
   { id: "patches-mottled", family: "S", realName: "Mottling", phrases: ["mottled", "mottling"] },
   { id: "tone-pale", family: "S", realName: "Pallor", phrases: ["pale", "pallor", "pallid", "ashen"] },
   { id: "tint-cool-rims", family: "S", realName: "Cyanosis", phrases: ["cyanosis", "cyanotic", "blue lips", "dusky", "perioral cyanosis", "acrocyanosis"] },
   { id: "sheen-droplets", family: "S", realName: "Diaphoresis", phrases: ["diaphor", "sweaty", "sweating", "perspir", "clammy"] },
+  // Added 2026-08-05: "flushed" is on the prompt's recognized-keyword list and
+  // had no vocab entry at all, so a febrile child rendered nothing for it.
+  { id: "tint-warm-cheeks", family: "S", realName: "Flushed (febrile) cheeks", phrases: ["flushed", "flushing of the", "facial flush", "febrile flush", "ruddy cheeks"] },
   { id: "rim-swollen", family: "S", realName: "Lip swelling / angioedema", phrases: ["lip swelling", "swollen lip", "angioedema", "lip swell", "facial swelling", "tongue swelling"] },
   { id: "collar-neck-support", family: "S", realName: "Cervical collar", phrases: ["c-collar", "c collar", "cervical collar", "neck brace", "cervical immobilization"] },
   { id: "wrap-thermal-torso", family: "S", realName: "Warming / cooling blanket", phrases: ["warming blanket", "cooling blanket", "forced-air warmer", "bair hugger"] },

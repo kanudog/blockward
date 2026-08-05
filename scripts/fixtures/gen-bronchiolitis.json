@@ -1,0 +1,625 @@
+{
+  "schemaVersion": "5.4.1",
+  "id": "severe-bronchiolitis-6mo",
+  "title": "Breathing Hard at Six Months",
+  "subtitle": "A winter infant fighting for every breath",
+  "patientCard": {
+    "name": "Oliver Hayes",
+    "ageLabel": "6 months",
+    "weightKg": 7.5,
+    "sex": "M",
+    "cc": "severe bronchiolitis with respiratory distress"
+  },
+  "presentation": {
+    "routeOfPresentation": "ems",
+    "report": "This is Oliver, a 6-month-old male brought in by EMS for worsening work of breathing over the past two days. Mom says he started with a runny nose and mild cough three days ago, then rapidly got worse — he's been grunting, retracting, and barely feeding since this morning. EMS placed him on 2 L/min nasal cannula about 15 minutes ago; his sat came up to 88% at scene and is now hanging around 90-91%. He's been irritable throughout but is now getting quieter, which mom says is unusual. No fever at home, no known sick contacts other than an older sibling with a cold last week.",
+    "learnMore": "Bronchiolitis is the most common lower respiratory tract infection in infants under 12 months, overwhelmingly caused by RSV. The disease peaks in winter months and causes small-airway obstruction from mucosal edema, mucus plugging, and sloughed epithelial cells — resulting in air trapping, V/Q mismatch, and the classic crackles-and-wheeze picture. A previously happy infant who is now going quiet is a red flag: it may mean fatigue rather than improvement."
+  },
+  "norms": {
+    "hr": [
+      100,
+      160
+    ],
+    "rr": [
+      25,
+      45
+    ],
+    "sbp": [
+      70,
+      100
+    ],
+    "dbp": [
+      40,
+      65
+    ],
+    "spo2": [
+      95,
+      100
+    ],
+    "temp": [
+      36.5,
+      37.5
+    ]
+  },
+  "phases": [
+    {
+      "phaseIndex": 0,
+      "id": "assess",
+      "stageType": "assess",
+      "title": "Initial Assessment",
+      "narrative": "Oliver is propped at a 45-degree angle on the gurney, leaning slightly forward — he's working so hard his whole body is moving with each breath. You can see subcostal and intercostal retractions on every cycle, and there's an audible grunt at the end of each exhale. On low-flow O2 via nasal cannula, his sat is holding at 90%, but he's breathing 72 times a minute and not getting much for it. He was crying when EMS arrived but has quieted down over the last few minutes. His skin looks dusky around the mouth and his extremities are cool to the mid-forearm.",
+      "vitals": [
+        {
+          "id": "hr",
+          "label": "Heart Rate",
+          "value": "188",
+          "unit": "bpm",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[0].vitals.hr.why",
+          "why": null
+        },
+        {
+          "id": "rr",
+          "label": "Resp Rate",
+          "value": "72",
+          "unit": "br/min",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[0].vitals.rr.why",
+          "why": null
+        },
+        {
+          "id": "bp",
+          "label": "Blood Pressure",
+          "value": "82/52",
+          "unit": "mmHg",
+          "bad": false,
+          "cat": "vital",
+          "_slotRef": "phase[0].vitals.bp.why",
+          "why": null
+        },
+        {
+          "id": "spo2",
+          "label": "SpO₂",
+          "value": "90",
+          "unit": "%",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[0].vitals.spo2.why",
+          "why": null
+        },
+        {
+          "id": "temp",
+          "label": "Temperature",
+          "value": "37.1",
+          "unit": "°C",
+          "bad": false,
+          "cat": "vital",
+          "_slotRef": "phase[0].vitals.temp.why",
+          "why": null
+        },
+        {
+          "id": "cap",
+          "label": "Cap Refill",
+          "value": "4 sec",
+          "unit": "",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[0].vitals.cap.why",
+          "why": null
+        }
+      ],
+      "signs": [
+        {
+          "id": "mentalStatus",
+          "label": "Mental Status",
+          "finding": "Initially crying on EMS arrival, now quiet and poorly interactive. Does not fix gaze on caregiver. GCS 12 (E3 V3 M6) — opens eyes to voice, crying but consolable, moves all extremities spontaneously.",
+          "sys": "Neuro",
+          "bad": true,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.mentalStatus.why",
+          "why": null
+        },
+        {
+          "id": "breathSounds",
+          "label": "Breath Sounds",
+          "finding": "Diffuse coarse crackles bilaterally throughout all lung fields, with expiratory wheeze louder at the bases. Prolonged expiratory phase. Air entry is diminished throughout but present bilaterally.",
+          "sys": "Respiratory",
+          "pos": "bilateral",
+          "bad": true,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.breathSounds.why",
+          "why": null
+        },
+        {
+          "id": "retractions",
+          "label": "Work of Breathing",
+          "finding": "Severe subcostal and intercostal retractions on every breath cycle. Suprasternal tug visible. Expiratory grunting audible without a stethoscope.",
+          "sys": "Respiratory",
+          "bad": true,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.retractions.why",
+          "why": null
+        },
+        {
+          "id": "nasalFlaring",
+          "label": "Nasal Flaring",
+          "finding": "Marked nasal flaring present with each inspiratory effort.",
+          "sys": "Respiratory",
+          "bad": true,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.nasalFlaring.why",
+          "why": null
+        },
+        {
+          "id": "skinColor",
+          "label": "Skin Color",
+          "finding": "Perioral cyanosis visible. Extremities cool and mottled to the mid-forearm bilaterally.",
+          "sys": "Integumentary",
+          "pos": "perioral, extremities",
+          "bad": true,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.skinColor.why",
+          "why": null
+        },
+        {
+          "id": "cardiacExam",
+          "label": "Heart Sounds",
+          "finding": "Tachycardic, regular rhythm. S1 and S2 present, no murmur appreciated. Peripheral pulses are palpable but thready in the distal extremities; central pulses are normal.",
+          "sys": "Cardiovascular",
+          "bad": false,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.cardiacExam.why",
+          "why": null
+        },
+        {
+          "id": "abdomen",
+          "label": "Abdomen",
+          "finding": "Abdomen soft, mildly distended from air swallowing. No hepatosplenomegaly. Liver edge palpable 1 cm below the right costal margin, consistent with diaphragmatic depression from hyperinflation.",
+          "sys": "GI/Hydration",
+          "bad": false,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.abdomen.why",
+          "why": null
+        },
+        {
+          "id": "hydrationStatus",
+          "label": "Hydration",
+          "finding": "Mucous membranes dry. Last wet diaper approximately 6 hours ago per mom. Anterior fontanelle flat but slightly sunken.",
+          "sys": "GI/Hydration",
+          "bad": true,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.hydrationStatus.why",
+          "why": null
+        },
+        {
+          "id": "accessLines",
+          "label": "IV Access",
+          "finding": "No IV or IO access in place. EMS placed a nasal cannula at 2 L/min; no other lines or devices.",
+          "sys": "Lines & devices",
+          "bad": false,
+          "cat": "clinical",
+          "_slotRef": "phase[0].signs.accessLines.why",
+          "why": null
+        }
+      ],
+      "labs": [
+        {
+          "id": "vbgPh",
+          "name": "pH (VBG)",
+          "value": "7.28",
+          "unit": "",
+          "ref": "7.31-7.41",
+          "bad": true,
+          "critical": true,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.vbgPh.why",
+          "why": null
+        },
+        {
+          "id": "vbgPco2",
+          "name": "pCO₂ (VBG)",
+          "value": "62",
+          "unit": "mmHg",
+          "ref": "41-51",
+          "bad": true,
+          "critical": true,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.vbgPco2.why",
+          "why": null
+        },
+        {
+          "id": "vbgHco3",
+          "name": "HCO₃ (VBG)",
+          "value": "28",
+          "unit": "mmol/L",
+          "ref": "18-26",
+          "bad": true,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.vbgHco3.why",
+          "why": null
+        },
+        {
+          "id": "glucose",
+          "name": "Glucose (POC)",
+          "value": "88",
+          "unit": "mg/dL",
+          "ref": "60-140",
+          "bad": false,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.glucose.why",
+          "why": null
+        },
+        {
+          "id": "rsv",
+          "name": "RSV Antigen",
+          "value": "Positive",
+          "unit": "",
+          "ref": "Negative",
+          "bad": true,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.rsv.why",
+          "why": null
+        },
+        {
+          "id": "wbc",
+          "name": "WBC",
+          "value": "9.8",
+          "unit": "×10³/µL",
+          "ref": "6.0-17.5",
+          "bad": false,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.wbc.why",
+          "why": null
+        },
+        {
+          "id": "sodium",
+          "name": "Sodium",
+          "value": "138",
+          "unit": "mmol/L",
+          "ref": "135-145",
+          "bad": false,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[0].labs.sodium.why",
+          "why": null
+        }
+      ],
+      "actions": {
+        "tools": {},
+        "meds": {}
+      }
+    },
+    {
+      "phaseIndex": 1,
+      "id": "intervene",
+      "stageType": "intervene",
+      "title": "Stabilize and Support",
+      "narrative": "Oliver is visibly tiring. His retractions haven't let up, his sat is still hovering at 90% on nasal cannula, and his grunting is more prominent. The VBG confirms he's retaining CO₂ — his pCO₂ is 62 and his pH is 7.28 with compensatory bicarb rise, a picture of respiratory acidosis from muscle fatigue and airway obstruction. He needs escalated respiratory support now before this turns into an arrest. You have IV access to establish and a team ready to move. Trachea is midline, chest rises symmetrically but shallowly, and there are no crackles suggesting pneumothorax.",
+      "vitals": [
+        {
+          "id": "hr",
+          "label": "Heart Rate",
+          "value": "192",
+          "unit": "bpm",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[1].vitals.hr.why",
+          "why": null
+        },
+        {
+          "id": "rr",
+          "label": "Resp Rate",
+          "value": "74",
+          "unit": "br/min",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[1].vitals.rr.why",
+          "why": null
+        },
+        {
+          "id": "bp",
+          "label": "Blood Pressure",
+          "value": "80/50",
+          "unit": "mmHg",
+          "bad": false,
+          "cat": "vital",
+          "_slotRef": "phase[1].vitals.bp.why",
+          "why": null
+        },
+        {
+          "id": "spo2",
+          "label": "SpO₂",
+          "value": "89",
+          "unit": "%",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[1].vitals.spo2.why",
+          "why": null
+        },
+        {
+          "id": "temp",
+          "label": "Temperature",
+          "value": "37.1",
+          "unit": "°C",
+          "bad": false,
+          "cat": "vital",
+          "_slotRef": "phase[1].vitals.temp.why",
+          "why": null
+        },
+        {
+          "id": "cap",
+          "label": "Cap Refill",
+          "value": "4 sec",
+          "unit": "",
+          "bad": true,
+          "cat": "vital",
+          "_slotRef": "phase[1].vitals.cap.why",
+          "why": null
+        }
+      ],
+      "signs": [
+        {
+          "id": "mentalStatus2",
+          "label": "Mental Status",
+          "finding": "More lethargic than on arrival. Opens eyes to stimulation only. Minimal cry to painful stimulus. GCS 10 (E2 V3 M5) — eyes open to pain, crying but weak, localizes to stimulus.",
+          "sys": "Neuro",
+          "bad": true,
+          "cat": "clinical",
+          "_slotRef": "phase[1].signs.mentalStatus2.why",
+          "why": null
+        },
+        {
+          "id": "breathSounds2",
+          "label": "Breath Sounds",
+          "finding": "Persistent diffuse crackles and expiratory wheeze bilaterally. Air entry now noticeably reduced at both bases. Trachea midline.",
+          "sys": "Respiratory",
+          "pos": "bilateral",
+          "bad": true,
+          "cat": "clinical",
+          "_slotRef": "phase[1].signs.breathSounds2.why",
+          "why": null
+        },
+        {
+          "id": "retractions2",
+          "label": "Work of Breathing",
+          "finding": "Severe retractions continue. Grunting now more prominent on expiration. Chest rise is shallow despite high respiratory rate — minute ventilation is ineffective.",
+          "sys": "Respiratory",
+          "bad": true,
+          "cat": "clinical",
+          "_slotRef": "phase[1].signs.retractions2.why",
+          "why": null
+        },
+        {
+          "id": "accessLines2",
+          "label": "IV Access",
+          "finding": "No IV or IO access established yet. Nasal cannula still in place at 2 L/min.",
+          "sys": "Lines & devices",
+          "bad": true,
+          "cat": "clinical",
+          "_slotRef": "phase[1].signs.accessLines2.why",
+          "why": null
+        }
+      ],
+      "labs": [
+        {
+          "id": "poc_lactate",
+          "name": "Lactate (POC)",
+          "value": "2.8",
+          "unit": "mmol/L",
+          "ref": "0.5-2.0",
+          "bad": true,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[1].labs.poc_lactate.why",
+          "why": null
+        },
+        {
+          "id": "chestXrayResult",
+          "name": "Chest X-Ray",
+          "value": "Hyperinflation, peribronchial thickening, patchy atelectasis bilateral bases. No pneumothorax. No consolidation.",
+          "unit": "",
+          "ref": "Clear lung fields",
+          "bad": true,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[1].labs.chestXrayResult.why",
+          "why": null
+        },
+        {
+          "id": "cmp_creatinine",
+          "name": "Creatinine",
+          "value": "0.28",
+          "unit": "mg/dL",
+          "ref": "0.1-0.4",
+          "bad": false,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[1].labs.cmp_creatinine.why",
+          "why": null
+        },
+        {
+          "id": "hgb",
+          "name": "Hemoglobin",
+          "value": "11.2",
+          "unit": "g/dL",
+          "ref": "9.5-13.5",
+          "bad": false,
+          "critical": false,
+          "cat": "lab",
+          "_slotRef": "phase[1].labs.hgb.why",
+          "why": null
+        }
+      ],
+      "actions": {
+        "tools": {
+          "vsMonitor": {
+            "id": "vsMonitor",
+            "label": "Connect to vital signs monitor",
+            "priority": "correct",
+            "_slotRef": "phase[1].actions.tools.vsMonitor.fb",
+            "fb": null
+          },
+          "hfnc": {
+            "id": "hfnc",
+            "label": "Initiate HFNC (flow 8 L/min, FiO₂ 60%)",
+            "priority": "tied-correct",
+            "_slotRef": "phase[1].actions.tools.hfnc.fb",
+            "fb": null
+          },
+          "ivKit": {
+            "id": "ivKit",
+            "label": "Establish peripheral IV access",
+            "priority": "correct",
+            "_slotRef": "phase[1].actions.tools.ivKit.fb",
+            "fb": null
+          },
+          "suction": {
+            "id": "suction",
+            "label": "Perform nasal suctioning",
+            "priority": "correct",
+            "_slotRef": "phase[1].actions.tools.suction.fb",
+            "fb": null
+          },
+          "intubationKit": {
+            "id": "intubationKit",
+            "label": "Prepare for immediate endotracheal intubation",
+            "priority": "distractor-clinical",
+            "_slotRef": "phase[1].actions.tools.intubationKit.fb",
+            "fb": null
+          },
+          "chestXray": {
+            "id": "chestXray",
+            "label": "Obtain chest X-ray",
+            "priority": "correct",
+            "_slotRef": "phase[1].actions.tools.chestXray.fb",
+            "fb": null
+          },
+          "needleDecomp": {
+            "id": "needleDecomp",
+            "label": "Perform needle decompression",
+            "priority": "distractor-misc",
+            "_slotRef": "phase[1].actions.tools.needleDecomp.fb",
+            "fb": null
+          },
+          "etco2": {
+            "id": "etco2",
+            "label": "Attach continuous end-tidal CO₂ monitoring",
+            "priority": "correct",
+            "_slotRef": "phase[1].actions.tools.etco2.fb",
+            "fb": null
+          }
+        },
+        "meds": {
+          "albuterol": {
+            "id": "albuterol",
+            "label": "Give albuterol nebulization (0.15 mg/kg = 1.1 mg)",
+            "priority": "distractor-pack",
+            "_slotRef": "phase[1].actions.meds.albuterol.fb",
+            "fb": null
+          },
+          "nsBolus": {
+            "id": "nsBolus",
+            "label": "Give NS 10 mL/kg IV bolus (75 mL)",
+            "priority": "tied-correct",
+            "_slotRef": "phase[1].actions.meds.nsBolus.fb",
+            "fb": null
+          },
+          "racemicEpi": {
+            "id": "racemicEpi",
+            "label": "Give racemic epinephrine nebulization",
+            "priority": "distractor-pack",
+            "_slotRef": "phase[1].actions.meds.racemicEpi.fb",
+            "fb": null
+          },
+          "dexamethasone": {
+            "id": "dexamethasone",
+            "label": "Give dexamethasone 0.6 mg/kg IV (4.5 mg)",
+            "priority": "distractor-clinical",
+            "_slotRef": "phase[1].actions.meds.dexamethasone.fb",
+            "fb": null
+          },
+          "ipratropium": {
+            "id": "ipratropium",
+            "label": "Give ipratropium bromide nebulization",
+            "priority": "distractor-pack",
+            "_slotRef": "phase[1].actions.meds.ipratropium.fb",
+            "fb": null
+          },
+          "dextroseBolus": {
+            "id": "dextroseBolus",
+            "label": "Give dextrose 10% 2 mL/kg IV (15 mL)",
+            "priority": "distractor-misc",
+            "_slotRef": "phase[1].actions.meds.dextroseBolus.fb",
+            "fb": null
+          },
+          "acetaminophen": {
+            "id": "acetaminophen",
+            "label": "Give acetaminophen 15 mg/kg PR (112 mg)",
+            "priority": "distractor-misc",
+            "_slotRef": "phase[1].actions.meds.acetaminophen.fb",
+            "fb": null
+          }
+        }
+      }
+    }
+  ],
+  "reassessment": {
+    "narrative": "Fifteen minutes after initiating HFNC at 8 L/min with 60% FiO₂ and completing a 10 mL/kg saline bolus, Oliver's numbers are starting to move in the right direction. His sat has climbed to 94% and his RR has come down to 58 — still elevated, but the retractions are visibly less severe and the grunting is quieter. He's more alert, tracking your penlight, and his mom says he's starting to look like himself again. His extremities are still cool but cap refill has shortened to 3 seconds at the fingertip.",
+    "vitals": {
+      "hr": "168",
+      "rr": "58",
+      "bp": "86/54",
+      "spo2": "94",
+      "temp": "37.1",
+      "cap": "3 sec"
+    },
+    "outcome": "transferred-icu",
+    "stabilizationSummary": "Oliver is responding to non-invasive respiratory support — HFNC has offloaded his work of breathing enough to prevent imminent intubation, and the fluid bolus has addressed his mild dehydration. He remains critically ill and needs PICU-level monitoring for potential escalation to CPAP or intubation, but he's bought some time. PICU team is at the bedside and accepting transfer."
+  },
+  "debrief": {
+    "summary": "Oliver presented in impending respiratory failure from severe RSV bronchiolitis. The combination of a rising pCO₂, a quietly deteriorating infant, and hypoxia despite low-flow O2 told you this was beyond standard nasal cannula territory. The key move was recognizing he needed high-flow nasal cannula early — before he exhausted himself into a respiratory arrest. Escalation to HFNC significantly reduced his work of breathing, and a modest fluid bolus addressed his dehydration without overloading his already-stressed lungs.",
+    "keyTeaching": [
+      "An infant who was crying and is now quiet is getting worse, not better — fatigue is the danger sign in severe bronchiolitis.",
+      "A pCO₂ above 50 mmHg in an infant with bronchiolitis signals respiratory failure and impending need for respiratory support escalation beyond simple supplemental oxygen.",
+      "HFNC is the evidence-based first escalation in severe bronchiolitis: it reduces work of breathing through PEEP effect, mucosal humidification, and washout of nasopharyngeal dead space.",
+      "Albuterol, ipratropium, and steroids are not indicated in bronchiolitis — trials consistently show no benefit and guidelines specifically recommend against their routine use.",
+      "Fluid management matters: sick infants can't feed effectively, and dehydration compounds respiratory stress — a cautious bolus and early IV maintenance fluids are part of supportive care."
+    ],
+    "physiologyDeepDive": [
+      {
+        "id": "bronchiolitis-airway-obstruction",
+        "title": "Why Small Airways Obstruct in RSV Bronchiolitis",
+        "_slotRef": "debrief.physiologyDeepDive.bronchiolitis-airway-obstruction.content",
+        "content": null
+      },
+      {
+        "id": "hfnc-mechanism",
+        "title": "How HFNC Helps: More Than Just Oxygen Delivery",
+        "_slotRef": "debrief.physiologyDeepDive.hfnc-mechanism.content",
+        "content": null
+      },
+      {
+        "id": "respiratory-acidosis-compensation",
+        "title": "Reading the VBG: Respiratory Acidosis with Metabolic Compensation",
+        "_slotRef": "debrief.physiologyDeepDive.respiratory-acidosis-compensation.content",
+        "content": null
+      },
+      {
+        "id": "albuterol-bronchiolitis-evidence",
+        "title": "Why Bronchodilators Don't Work in Bronchiolitis",
+        "_slotRef": "debrief.physiologyDeepDive.albuterol-bronchiolitis-evidence.content",
+        "content": null
+      }
+    ]
+  },
+  "visuals": [
+    "nasal cannula",
+    "flushed"
+  ]
+}

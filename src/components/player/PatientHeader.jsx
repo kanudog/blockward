@@ -7,6 +7,7 @@
 // in history prose), so the strip surfaces Age / Sex / Weight / CC.
 // If a name field is added later this component picks it up.
 import { useTokens } from "../theme/themeStore.js";
+import { sentenceCase } from "../../lib/scenarios/labels.js";
 
 export function PatientHeader(props){
   var t=useTokens();
@@ -16,7 +17,7 @@ export function PatientHeader(props){
   if(patient.ageLabel)fields.push({k:"Age",v:patient.ageLabel});
   if(patient.sex)fields.push({k:"Sex",v:patient.sex});
   if(patient.weightKg)fields.push({k:"Wt",v:patient.weightKg+" kg"});
-  if(patient.cc)fields.push({k:"CC",v:patient.cc});
+  if(patient.cc)fields.push({k:"CC",v:sentenceCase(patient.cc)});
   return(<div style={Object.assign({},t.tile("idle"),{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap",padding:"7px 11px",fontSize:11,color:t.COLOR.ink2,fontFamily:t.FONT.body})}>
     {name&&<span style={{fontWeight:700,color:t.COLOR.ink}}>{name}</span>}
     {fields.map(function(f,i){return(<span key={i} style={{display:"inline-flex",alignItems:"center",gap:3}}>

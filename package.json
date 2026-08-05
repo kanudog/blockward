@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "check:systems": "node scripts/check-body-systems.mjs",
     "check:verbosity": "node scripts/check-verbosity.mjs",
-    "check:accessories": "node scripts/check-accessories.mjs"
+    "check:accessories": "node scripts/check-accessories.mjs",
+    "audit": "node scripts/audit-coverage.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.577.0",

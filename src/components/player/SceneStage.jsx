@@ -47,7 +47,8 @@ export function SceneStage(props) {
       pose={p.pose} accessories={p.accessories} companion={p.companion}
       faceEyes={p.faceEyes} faceMouth={p.faceMouth}
       cycleRate={rate && rate > 0 ? rate : 28}
-      framing={props.framing} scene={t.SCENE} height={h}/>
+      framing={props.framing} scene={t.SCENE} height={h}
+      controls={props.controls !== undefined ? props.controls : !props.bare}/>
   </Suspense>);
   if (props.bare) return view;
   return (<div style={Object.assign({}, t.stage(), { padding: 8 }, props.style)}>{view}</div>);

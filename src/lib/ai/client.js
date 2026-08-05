@@ -16,8 +16,10 @@ var NAME_HINT_LETTERS="ABCDEFGHJKLMNPRSTVW"; // drop Q/X/Y/Z/I/O/U — thin West
 function randomNameHint(){
   var letter=NAME_HINT_LETTERS.charAt(Math.floor(Math.random()*NAME_HINT_LETTERS.length));
   var sex=Math.random()<0.5?"male":"female";
+  // No example surnames here. Listing them anchored the model hard — two
+  // consecutive cases came back "Sutton" because that was in the list.
   return "\n\nName hint: give this patient a traditional Western given name starting with the letter "+letter+
-    ", plus a common Western surname (e.g. Carter, Brooks, Whitfield, Bradley, Nolan, Sutton). "+
+    ", plus a common Western surname of your own choosing (vary it; do not reuse a surname you have used recently). "+
     "The given name must read unambiguously as the sex you emit, and must not be one you have used recently. "+
     "Sex hint: unless the user's brief states or clearly implies a sex, make this patient "+sex+" — the brief always wins over this hint. "+
     "Do not encode anything clinical in the name.";

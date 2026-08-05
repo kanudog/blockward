@@ -325,6 +325,7 @@ export function ScenarioPlayer(props){
         {showPlanCoach&&<div style={{marginBottom:14}}>
           <CoachBubble tail="bottom-left" title="How plans work"
             body={"Exploring is free — tap any option to read what it does. Nothing is graded while you look.\n\n- **Add to plan** collects the steps you'd actually take.\n- **Commit plan** locks it in — then the readings answer your plan on the monitor.\n- You need at least one step to commit, and you can remove steps any time before that."}
+            briefBody={"Tap any option to read it — that's free. **Add to plan** what you'd do, then **Commit plan**."}
             onDismiss={function(){dismissCoach("plan");setPlanHelp(false);}}/>
         </div>}
         <div className="bw-split">

@@ -40,6 +40,11 @@ var initialState = {
   coachSeen: {},
   // How many overlays are currently open (see pushModal/popModal).
   modalOpen: 0,
+  // Mechanism bullets fetched on demand when a learner taps "Explain more"
+  // (2026-07-30). Keyed by slot-ref string. inFlight guards double-fetch when
+  // the same card is opened twice quickly.
+  mechanismCache: {},
+  mechanismInFlight: {},
   hypotheses: {},
   examined: {},
   round2ErrorClass: null,
@@ -143,6 +148,9 @@ export var usePlayerStore = create(function(set, get) {
         // Phase-5.2.5: fresh per-scenario cache.
         deepDiveCache: {},
         deepDiveInFlight: {},
+        // 2026-07-30: on-demand mechanism is per-scenario too.
+        mechanismCache: {},
+        mechanismInFlight: {},
         // Phase 6.0: fresh per-scenario dispatcher state.
         dispatcherFiredSlots: {},
         dispatcherState: "idle",
@@ -225,6 +233,19 @@ export var usePlayerStore = create(function(set, get) {
     // boolean, so nested overlays (option card -> why modal) unwind correctly.
     pushModal: function() { set(function(s) { return { modalOpen: (s.modalOpen || 0) + 1 }; }); },
     popModal: function() { set(function(s) { return { modalOpen: Math.max(0, (s.modalOpen || 0) - 1) }; }); },
+    // Returns false if a fetch for this key is already running or already done.
+    beginMechanism: function(key) {
+      var s = get();
+      if (!key || s.mechanismCache[key] || s.mechanismInFlight[key]) return false;
+      set(function(st) { var n = Object.assign({}, st.mechanismInFlight); n[key] = true; return { mechanismInFlight: n }; });
+      return true;
+    },
+    setMechanism: function(key, text) {
+      set(function(st) { var n = Object.assign({}, st.mechanismCache); n[key] = text; return { mechanismCache: n }; });
+    },
+    endMechanism: function(key) {
+      set(function(st) { var n = Object.assign({}, st.mechanismInFlight); delete n[key]; return { mechanismInFlight: n }; });
+    },
     setHypothesis: function(phaseIdx, id) {
       set(function(s) { var n = Object.assign({}, s.hypotheses); n[phaseIdx] = id; return { hypotheses: n }; });
     },

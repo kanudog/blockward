@@ -5,7 +5,7 @@ import { ALL_TOOLS, ALL_MEDS, isCustomTool, isCustomMed } from "../../lib/scenar
 import { medColor, medType as lookupMedType } from "../../lib/scenarios/visualMeta.js";
 import { expandSingleMarkedItem } from "../../lib/ai/client.js";
 import { fetchSingleSlot } from "../../lib/ai/dispatcher.js";
-import { resolveSlotText, SYNTHESIZED_FB_FALLBACK } from "../../lib/scenarios/slotResolve.js";
+import { resolveSlotText, SYNTHESIZED_FB_FALLBACK, buildSlotRefString } from "../../lib/scenarios/slotResolve.js";
 import { useScenariosStore } from "../../stores/scenariosStore.js";
 import { ToolIcon, MedIcon } from "./icons.jsx";
 import { TextBlock } from "../shared/TextBlock.jsx";
@@ -119,6 +119,12 @@ export function ActionPanel(props){
       label:label,
       _slotRef:{kind:kind,phaseIdx:phaseIdx,indexOrId:pop.id}
     };
+  }
+  // The fb slot address for the open card, so "Explain more" can fetch this
+  // one item's mechanism on demand.
+  function popSlotRef(){
+    if(!pop)return null;
+    return buildSlotRefString({kind:pop.ty==="t"?"tool":"med",phaseIdx:phaseIdx,indexOrId:pop.id});
   }
   // Phase-5.3 sub-step E (Phase 6.0 rewire): synthesized-fallback fb fetch.
   useEffect(function(){
@@ -246,6 +252,7 @@ export function ActionPanel(props){
       {!coachSeen.options&&!optHelp&&coachSeen.plan&&<div style={{marginBottom:12}}>
         <CoachBubble title="Two different saves"
           body={"**Add to plan** — the steps you'd actually take now. Only these get answered by the readings when you commit. They do NOT go to your tray.\n\n**Mark for review** — a bookmark for later. It goes to your tray and returns in the debrief with a deeper read. It never affects the plan."}
+          briefBody={"**Add to plan** — what you'd do now.\n\n**Mark for review** — save it for the debrief."}
           dismissLabel="Got it"
           onDismiss={function(){dismissCoach("options");}}/>
       </div>}
@@ -279,9 +286,9 @@ export function ActionPanel(props){
                 <AlertTriangle size={16} color={t.COLOR.critical} style={{flexShrink:0}}/>
                 <span style={{fontSize:13,fontWeight:800,color:t.COLOR.critical,fontFamily:t.FONT.body}}>Not indicated right now</span>
               </div>
-              <ExplainBody raw={pop.info.fb} style={{fontSize:13,lineHeight:1.55}}/>
+              <ExplainBody raw={pop.info.fb} slotRef={popSlotRef()} style={{fontSize:13,lineHeight:1.55}}/>
             </div>):
-            (<ExplainBody raw={pop.info.fb} style={{fontSize:13,lineHeight:1.55}}/>)}
+            (<ExplainBody raw={pop.info.fb} slotRef={popSlotRef()} style={{fontSize:13,lineHeight:1.55}}/>)}
           </div>
           <div style={{padding:"10px 18px 14px",borderTop:"1px solid "+t.COLOR.hairline,flexShrink:0}}>
             {/* Owner direction 2026-07-29: this explainer used to render HERE, in

@@ -15,7 +15,7 @@
 //
 // Architecture: docs/phase-5-lazy-generation/08-dispatcher-architecture.md
 
-import { HAIKU_MODEL_ID, buildPerItemExplanationPrompt, buildDeepDivePrompt } from "./prompt.js";
+import { HAIKU_MODEL_ID, buildPerItemExplanationPrompt, buildDeepDivePrompt, buildMechanismPrompt } from "./prompt.js";
 import { buildPerItemUserMessage, buildDeepDiveUserMessage } from "./userMessages.js";
 import { parseDelimitedDeepDives } from "./client.js";
 import { collectAllNullSlots } from "../scenarios/explanationSlots.js";
@@ -32,6 +32,65 @@ export async function fetchSingleSlot(scenario, slotRefString, kind, signal) {
   if (!scenario || !slotRefString) return;
   var k = (kind === "deep-dive") ? "deep-dive" : "per-item";
   await fireSingleCall({ slotRefString: slotRefString, kind: k }, k, scenario, signal);
+}
+
+// fetchMechanism(scenario, slotRefString, signal) -> markdown bullets | null
+//
+// The depth layer, fetched only when a learner taps "Explain more" on one item.
+// Added 2026-07-30: the wave dispatcher pre-fills ~100 explanations per case and
+// a learner opens maybe 5-15, so writing receptor-level physiology up front for
+// all of them is the single largest source of waste. The slot fill now stops at
+// plain/detail/watch-for and this covers the rest, per item, on request.
+//
+// Cheap: its system prompt is ~2k chars against the per-item prompt's ~41k,
+// because it needs none of the type-specific or priority framing.
+//
+// Returns null on any failure — the caller keeps showing what it already has.
+export async function fetchMechanism(scenario, slotRefString, signal) {
+  if (!scenario || !slotRefString) return null;
+  var body = JSON.stringify({
+    model: HAIKU_MODEL_ID,
+    max_tokens: 1200,
+    mode: "explanation",
+    system: [{ type: "text", text: buildMechanismPrompt(), cache_control: { type: "ephemeral" } }],
+    messages: [{ role: "user", content: buildPerItemUserMessage(scenario, slotRefString) }]
+  });
+  var resp;
+  try {
+    resp = await fetch("/api/generate", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      signal: signal, body: body
+    });
+  } catch (e) {
+    if (e && e.name === "AbortError") throw e;
+    console.warn("[mechanism] " + slotRefString + " — network error: " + (e.message || e));
+    return null;
+  }
+  if (!resp.ok) {
+    console.warn("[mechanism] " + slotRefString + " — HTTP " + resp.status);
+    return null;
+  }
+  var data;
+  try { data = JSON.parse(await resp.text()); }
+  catch (e) {
+    if (e && e.name === "AbortError") throw e;
+    console.warn("[mechanism] " + slotRefString + " — unparseable response");
+    return null;
+  }
+  if (data.error) {
+    console.warn("[mechanism] " + slotRefString + " — API error: " + (data.error.message || "(no message)"));
+    return null;
+  }
+  var text = "";
+  (data.content || []).forEach(function (b) { if (b && b.type === "text" && b.text) text += b.text; });
+  var parsed = parseDelimitedDeepDives(text);
+  var keys = Object.keys(parsed);
+  var out = keys.length > 0 ? parsed[keys[0]] : null;
+  if (!out) {
+    console.warn("[mechanism] " + slotRefString + " — no ###ITEM block in response");
+    return null;
+  }
+  return out;
 }
 
 // Decide whether the dispatcher should run at all for this scenario.

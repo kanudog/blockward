@@ -35,6 +35,7 @@ export function ReviewTray() {
     ? (<div style={{ position: "fixed", right: 14, bottom: 64, zIndex: 900, maxWidth: 270 }}>
         <CoachBubble tail="bottom-right" title="This is your tray"
           body={"Anything you **mark for review** and every insight card you collect lands here automatically, and follows you to the debrief.\n\nA keepsake shelf — nothing in it is graded."}
+          briefBody={"Everything you save lands here and comes back in the debrief. Nothing here is graded."}
           onDismiss={function () { dismissCoach("tray"); }}/>
       </div>)
     : null;

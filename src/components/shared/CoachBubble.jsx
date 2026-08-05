@@ -3,10 +3,15 @@
 // "Got it" dismisses it for good (store.coachSeen), and a help affordance
 // can reopen it any time. It explains; it never gates.
 import { useTokens } from "../theme/themeStore.js";
+import { useVerbosity } from "../../lib/explain/verbosity.js";
 import { TextBlock } from "./TextBlock.jsx";
 
 export function CoachBubble(props) {
   var t = useTokens();
+  // Owner direction 2026-07-30: the onboarding copy is wordy too. At Brief the
+  // caller's short variant is used when it supplied one.
+  var level = useVerbosity();
+  var body = (level === "low" && props.briefBody) ? props.briefBody : props.body;
   var tail = props.tail || "bottom-left"; // "bottom-left" | "bottom-right" | "top-left" | "none"
   var tailBg = t.mode === "dark" ? "#262B30" : "#FFFFFF";
   var card = Object.assign({}, t.surface("pop"), {
@@ -23,7 +28,7 @@ export function CoachBubble(props) {
     <div style={Object.assign({}, t.label(), { color: t.COLOR.boldTerm })}>Your mentor</div>
     <div style={{ fontFamily: t.FONT.display, fontWeight: 600, fontSize: 14.5, color: t.COLOR.ink, marginTop: 3 }}>{props.title}</div>
     <div style={{ marginTop: 6 }}>
-      <TextBlock text={props.body} style={{ fontSize: 12.5, color: t.COLOR.ink2, lineHeight: 1.55 }}/>
+      <TextBlock text={body} style={{ fontSize: 12.5, color: t.COLOR.ink2, lineHeight: 1.55 }}/>
     </div>
     <button className="bw-tap" onClick={props.onDismiss}
       style={{ marginTop: 10, padding: "7px 16px", borderRadius: 999, fontSize: 12, fontWeight: 700, fontFamily: t.FONT.body, background: "rgba(" + t.ACCENT_RGB + ",0.12)", border: "1px solid rgba(" + t.ACCENT_RGB + ",0.45)", color: t.COLOR.boldTerm, cursor: "pointer" }}>

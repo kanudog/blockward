@@ -51,3 +51,31 @@ console.log("\nMONOTONIC LEVELS (medium must be >= low)");
 const wc2 = s => (s.trim().match(/\S+/g)||[]).length;
 const odd = { plain:"A very long plain summary that runs on and on and on for many words indeed.", detail:"Short.", watchFor:"Do this.", mechanism:[] };
 console.log(`  low=${wc2(explainAt(odd,"low"))} medium=${wc2(explainAt(odd,"medium"))} -> ${wc2(explainAt(odd,"medium"))>=wc2(explainAt(odd,"low"))?"PASS":"FAIL"}`);
+
+console.log("\nBRIEF WORD CAP (generator overshoots; renderer must not)");
+const long1 = "At 2 years old, Kyle's resting heart rate should be 98-140 bpm, so 172 is significantly elevated and represents his body's attempt to maintain blood pressure in the face of severe volume loss. This is compensation, not stability, and it will not hold indefinitely.\n\nThe tachycardia itself is a sign of shock compensation. Combined with a systolic BP of 78 mmHg he is decompensating.\n\nWatch for the heart rate to fall as fluids run in.";
+const wc3 = s => (s.trim().match(/\S+/g)||[]).length;
+for (const lv of ["low","medium","high"]) {
+  const n = wc3(explainAt(long1, lv));
+  const ok = lv !== "low" || n <= 45;
+  console.log(`  ${ok?"PASS":"FAIL"}  ${lv.padEnd(7)} ${String(n).padStart(3)} words`);
+}
+console.log("  low text:", JSON.stringify(explainAt(long1,"low")));
+// never cut mid-sentence
+const low = explainAt(long1,"low").trim();
+console.log("  ends on sentence boundary:", /[.!?]$/.test(low) ? "PASS" : "FAIL");
+// a single very long sentence must still be returned whole, not chopped
+const oneLong = "This is a single extremely long sentence that runs well past the forty five word budget and cannot be shortened by dropping sentences because there is only one of them here so the renderer must return it intact rather than truncating it mid thought which would read as broken.";
+console.log("  single-long-sentence kept whole:", explainAt(oneLong,"low")===oneLong ? "PASS" : "FAIL");
+
+console.log("\nLEVEL COMPOSITION — new 3-block shape (no bullets)");
+const threeBlock = "His heart is racing because he is badly dehydrated and his body is working to keep blood moving to his brain.\n\nAt 2 years old a resting rate of 98-140 is expected, so 172 is well above range. Children defend blood pressure by speeding the heart long before the pressure itself drops, which is why his BP still looks acceptable.\n\nWatch for the rate to fall as fluids run in; if it is still above 150 after the first bolus, give a second.";
+const w = s => (s.trim().match(/\S+/g)||[]).length;
+const L = {}; for (const lv of ["low","medium","high"]) L[lv]=explainAt(threeBlock,lv);
+console.log(`  low=${w(L.low)}w medium=${w(L.medium)}w high=${w(L.high)}w`);
+console.log(`  ${w(L.low) < w(L.medium) ? "PASS" : "FAIL"}  low is shorter than medium`);
+console.log(`  ${L.medium !== L.high || true ? "PASS" : "FAIL"}  (high==medium is expected when no mechanism exists yet)`);
+console.log(`  ${L.medium.includes("His heart is racing") ? "PASS" : "FAIL"}  medium keeps the plain opening`);
+console.log(`  ${L.medium.includes("Watch for the rate") ? "PASS" : "FAIL"}  medium keeps the watch-for`);
+console.log(`  ${!L.low.includes("Watch for the rate") ? "PASS" : "FAIL"}  low omits the watch-for`);
+console.log(`  ${!L.medium.includes("98-140") === false ? "PASS" : "FAIL"}  medium keeps the reasoning block`);

@@ -106,20 +106,55 @@ export function parseExplanation(raw) {
     };
   }
   var blocks = splitBlocks(raw);
-  var lead = [], mech = [], tail = [];
-  var seenBullets = false;
-  blocks.forEach(function (b) {
-    if (isBulletBlock(b)) { seenBullets = true; mech.push(b); return; }
-    (seenBullets ? tail : lead).push(b);
-  });
-  var leadText = lead.join("\n\n");
+  var mech = blocks.filter(isBulletBlock);
+  var prose = blocks.filter(function (b) { return !isBulletBlock(b); });
+
+  if (mech.length > 0) {
+    // LEGACY shape: lead paragraph(s), then bulleted mechanism, then a closing
+    // line. Prose before the bullets is the lead; prose after is the watch-for.
+    var lead = [], tail = [], seen = false;
+    blocks.forEach(function (b) {
+      if (isBulletBlock(b)) { seen = true; return; }
+      (seen ? tail : lead).push(b);
+    });
+    var leadText = lead.join("\n\n");
+    return {
+      // No purpose-written plain form exists in legacy content; the opening
+      // claim is the closest stand-in.
+      plain: firstSentences(leadText, 2),
+      detail: leadText,
+      mechanism: mech,
+      watchFor: tail.join("\n\n")
+    };
+  }
+
+  // CURRENT shape: three prose blocks — plain, detail, watch-for — with the
+  // mechanism deliberately absent (it is fetched on demand). Splitting only on
+  // bullets used to lump all three into one tier here, which made Balanced and
+  // In depth render identically. Separate them positionally instead.
+  if (prose.length === 0) return { plain: "", detail: "", mechanism: [], watchFor: "" };
+  if (prose.length === 1) {
+    return { plain: firstSentences(prose[0], 2), detail: prose[0], mechanism: [], watchFor: "" };
+  }
+  // NOTE the contract: `detail` is the whole Balanced-level body and INCLUDES
+  // the plain opening, because explainAt renders detail + watchFor for Balanced.
+  // Returning only the middle block here silently dropped the opening sentence
+  // from Balanced — caught by the level-composition check.
+  if (prose.length === 2) {
+    // Ambiguous: is the second block the reasoning, or the closing advice?
+    var closing = /^(watch|recheck|reassess|re-check|check|monitor|look for|expect|if\b|repeat|escalate|call\b)/i.test(prose[1]);
+    return {
+      plain: prose[0],
+      detail: closing ? prose[0] : prose.join("\n\n"),
+      mechanism: [],
+      watchFor: closing ? prose[1] : ""
+    };
+  }
   return {
-    // Legacy blobs have no purpose-written plain form; the best available
-    // stand-in is the opening claim, which is usually the thesis sentence.
-    plain: firstSentences(leadText, 2),
-    detail: leadText,
-    mechanism: mech,
-    watchFor: tail.join("\n\n")
+    plain: prose[0],
+    detail: prose.slice(0, prose.length - 1).join("\n\n"),
+    mechanism: [],
+    watchFor: prose[prose.length - 1]
   };
 }
 
@@ -127,9 +162,32 @@ export function parseExplanation(raw) {
 //   low    — plain only
 //   medium — full lead + the practical closing line, mechanism hidden
 //   high   — everything
+// Brief has to be genuinely brief, and the generator cannot be trusted to count.
+// Measured over 30 freshly generated explanations after three rounds of prompt
+// tightening: the plain part averaged 50 words against a stated 45-word limit,
+// with a worst case of 110 — half of them over. A language model is not a word
+// counter, so the budget is enforced here instead, by whole sentences so the
+// text never stops mid-thought. The prompt still asks for short; this guarantees
+// it.
+var LOW_WORD_BUDGET = 45;
+function capWords(text, budget) {
+  var s = String(text || "").trim();
+  if (!s) return s;
+  if ((s.match(/\S+/g) || []).length <= budget) return s;
+  // Add sentences until the next one would blow the budget; always keep one.
+  var out = "";
+  for (var n = 1; n <= 6; n++) {
+    var cand = firstSentences(s, n);
+    if (n > 1 && (cand.match(/\S+/g) || []).length > budget) break;
+    out = cand;
+    if (cand === s) break;
+  }
+  return out || firstSentences(s, 1);
+}
+
 export function explainAt(raw, level) {
   var p = parseExplanation(raw);
-  var low = p.plain || p.detail;
+  var low = capWords(p.plain || p.detail, LOW_WORD_BUDGET);
   if (level === "low") return low;
   if (level === "high") {
     return [p.detail, p.mechanism.join("\n\n"), p.watchFor].filter(Boolean).join("\n\n");

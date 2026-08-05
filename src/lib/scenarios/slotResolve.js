@@ -62,6 +62,30 @@ export function parseSlotRefString(str) {
   return null;
 }
 
+// The inverse of parseSlotRefString: {kind, phaseIdx, indexOrId} -> the string
+// form the dispatcher and the on-demand mechanism fetch take. Added 2026-07-30
+// so a component holding an item's _slotRef can request more depth for it.
+// Returns null for kinds that have no addressable slot (e.g. assessItem).
+var _KIND_PATH = {
+  vital: ["vitals", null, "why"],
+  sign: ["signs", null, "why"],
+  lab: ["labs", null, "why"],
+  tool: ["actions", "tools", "fb"],
+  med: ["actions", "meds", "fb"]
+};
+export function buildSlotRefString(slotRef) {
+  if (!slotRef || !slotRef.kind) return null;
+  var path = _KIND_PATH[slotRef.kind];
+  if (!path) return null;
+  var idx = slotRef.phaseIdx;
+  if (idx !== "curveball" && typeof idx !== "number") return null;
+  var id = slotRef.indexOrId;
+  // The id becomes a path segment, so it cannot contain a dot.
+  if (id === undefined || id === null || String(id).indexOf(".") >= 0) return null;
+  var mid = path[1] ? path[0] + "." + path[1] : path[0];
+  return "phase[" + idx + "]." + mid + "." + id + "." + path[2];
+}
+
 function _phaseFor(sc, slotRef) {
   if (!sc || !slotRef) return null;
   if (slotRef.phaseIdx === "curveball") return sc.curveball || null;

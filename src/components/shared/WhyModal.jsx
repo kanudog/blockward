@@ -5,6 +5,7 @@
 // Mark for Review sits on a solid amber-tinted surface in the sticky footer.
 import { Modal } from "./Modal.jsx";
 import { ExplainBody } from "./ExplainBody.jsx";
+import { buildSlotRefString } from "../../lib/scenarios/slotResolve.js";
 import { useTokens } from "../theme/themeStore.js";
 import { usePlayerStore } from "../../stores/playerStore.js";
 import { expandSingleMarkedItem } from "../../lib/ai/client.js";
@@ -48,7 +49,7 @@ export function WhyModal(props) {
     <p style={{ fontSize: 10, color: t.COLOR.ink3, marginTop: 6, marginBottom: 0, textAlign: "center", lineHeight: 1.4 }}>{marked ? "Waiting in your review tray — it deepens by the debrief." : "Save this to revisit at the end. Never graded."}</p>
   </div>) : null;
   return (<Modal open={open} onClose={onClose} title={title} kicker="Your mentor · why it matters" footer={footer}>
-    <ExplainBody raw={body}/>
+    <ExplainBody raw={body} slotRef={item&&item._slotRef?buildSlotRefString(item._slotRef):null}/>
   </Modal>);
 }
 
